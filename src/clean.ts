@@ -4,10 +4,11 @@ import { emptyDirSync } from 'fs-extra';
 
 
 export function clean(context?: BuildContext) {
+  context = generateContext(context);
+
   const logger = new Logger('clean');
 
   try {
-    context = generateContext(context);
     emptyDirSync(context.wwwDir);
     logger.finish();
 

@@ -10,8 +10,8 @@ import { sass } from './sass';
 
 
 export function build(context?: BuildContext) {
-  const logger = new Logger('build');
   context = generateContext(context);
+  const logger = new Logger('build');
 
   // sync clean up the www directory
   clean(context);

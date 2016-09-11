@@ -5,9 +5,10 @@ import { fillConfigDefaults, generateContext, Logger } from './util';
 
 
 export function ngc(context?: BuildContext) {
-  const logger = new Logger('ngc');
   context = generateContext(context);
   fillConfigDefaults(context, NGC_TASK_INFO);
+
+  const logger = new Logger('ngc');
 
   // first make a copy of src TS files
   // and copy them into the tmp directory

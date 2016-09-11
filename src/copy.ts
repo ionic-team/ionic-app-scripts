@@ -4,9 +4,10 @@ import { copy as fsCopy } from 'fs-extra';
 
 
 export function copy(context?: BuildContext) {
-  const logger = new Logger('copy');
   context = generateContext(context);
   fillConfigDefaults(context, COPY_TASK_INFO);
+
+  const logger = new Logger('copy');
 
   const promises: Promise<any>[] = [];
 

@@ -3,9 +3,10 @@ import { generateContext, fillConfigDefaults, Logger } from './util';
 
 
 export function uglifyjs(context?: BuildContext) {
-  const logger = new Logger('uglifyjs');
   context = generateContext(context);
   fillConfigDefaults(context, UGLIFY_TASK_INFO);
+
+  const logger = new Logger('uglifyjs');
 
 
 

@@ -7,9 +7,10 @@ import { writeFile } from 'fs';
 
 
 export function sass(context?: BuildContext) {
-  const logger = new Logger('sass');
   context = generateContext(context);
-  fillConfigDefaults(context, SASS_TASK_INFO)
+  fillConfigDefaults(context, SASS_TASK_INFO);
+
+  const logger = new Logger('sass');
 
   if (!context.moduleFiles) {
     // we haven't already gotten the moduleFiles in this process

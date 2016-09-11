@@ -4,8 +4,9 @@ import { join } from 'path';
 
 
 export function transpile(context: BuildContext) {
-  const logger = new Logger('transpile');
   context = generateContext(context);
+
+  const logger = new Logger('transpile');
 
   const promises = [
     transpileApp(context),

@@ -3,9 +3,10 @@ import { generateContext, fillConfigDefaults, Logger } from './util';
 
 
 export function cleancss(context?: BuildContext) {
-  const logger = new Logger('cleancss');
   context = generateContext(context);
   fillConfigDefaults(context, CLEANCSS_TASK_INFO);
+
+  const logger = new Logger('cleancss');
 
 
   return Promise.resolve().then(() => {

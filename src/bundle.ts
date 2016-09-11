@@ -7,8 +7,9 @@ const rollup = require('rollup').rollup;
 
 
 export function bundle(context?: BuildContext) {
-  const logger = new Logger('bundle');
   context = generateContext(context);
+
+  const logger = new Logger('bundle');
 
   // bundle polyfills, async
   // we do not need to wait on it's completion

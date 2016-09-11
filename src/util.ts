@@ -28,7 +28,7 @@ export function generateContext(context?: BuildContext): BuildContext {
   if (typeof context.isDebugMode !== 'boolean') {
     (<any>global).isDebugMode = context.isDebugMode = isDebugMode();
     if (context.isDebugMode) {
-      Logger.debug('Debugging enabled')
+      Logger.debug('Debugging enabled');
     }
   }
 
