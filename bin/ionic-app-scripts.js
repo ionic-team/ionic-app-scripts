@@ -5,12 +5,10 @@ if (process.argv.length > 2) {
   if (process.env.npm_config_argv) {
     try {
       var npmRunArgs = JSON.parse(process.env.npm_config_argv);
-      if (npmRunArgs && npmRunArgs.original) {
+      if (npmRunArgs && npmRunArgs.original && npmRunArgs.original.length > 2) {
         // add flags from original "npm run" command
-        for (var i = 0; i < npmRunArgs.original.length; i++) {
-          if (npmRunArgs.original[i].charAt(0) === '-') {
-            process.argv.push(npmRunArgs.original[i]);
-          }
+        for (var i = 2; i < npmRunArgs.original.length; i++) {
+          process.argv.push(npmRunArgs.original[i]);
         }
       }
     } catch (e) {
