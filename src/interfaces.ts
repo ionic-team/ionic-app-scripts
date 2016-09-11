@@ -15,7 +15,7 @@ export interface BuildContext {
   sassConfig?: SassConfig;
   uglifyjsConfig?: UglifyJsConfig;
 
-  runCompress?: boolean;
+  runCompress: boolean;
   moduleFiles?: string[];
   isDebugMode?: boolean;
 }
@@ -84,8 +84,9 @@ export interface SassConfig {
   data?: string;
   includePaths?: string[];
   excludeModules?: string[];
-  componentSassFiles?: string[];
-  directoryMaps?: string[];
+  includeFiles?: RegExp[];
+  excludeFiles?: RegExp[];
+  directoryMaps?: {[key: string]: string};
   sortComponentPathsFn?: (a: any, b: any) => number;
   sortComponentFilesFn?: (a: any, b: any) => number;
   variableSassFiles?: string[];

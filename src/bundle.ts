@@ -66,11 +66,14 @@ export function bundlePolyfills(context?: BuildContext) {
 
 export function getModulePathsCache(): string[] {
   // sync get the cached array of module paths (if they exist)
-  let cachedModulePaths: string[] = null;
+  let modulePaths: string[] = null;
   try {
-    cachedModulePaths = readJsonSync(getCachePath(), <any>{ throws: false });
-  } catch (e) {}
-  return cachedModulePaths;
+    modulePaths = readJsonSync(getCachePath(), <any>{ throws: false });
+    Logger.debug(`Cached module paths: ${modulePaths && modulePaths.length}, ${getCachePath()}`);
+  } catch (e) {
+    Logger.debug(`Cached module paths not found: ${getCachePath()}`);
+  }
+  return modulePaths;
 }
 
 
@@ -80,19 +83,20 @@ function setModulePathsCache(modulePaths: string[]) {
     if (err) {
       Logger.error(`Error writing module paths cache: ${err}`);
     }
-    Logger.debug(`ModulePathsCached: ${getCachePath()}`);
+    Logger.debug(`Cached module paths: ${modulePaths && modulePaths.length}, ${getCachePath()}`);
   });
 }
 
 
 function getCachePath(): string {
   // make a unique tmp directory for this project's module paths cache file
-  let cwd = process.cwd().replace(/-|:|\/|\\|\.|~|;|\s/g, '');
+  let cwd = process.cwd().replace(/-|:|\/|\\|\.|~|;|\s/g, '').toLowerCase();
   if (cwd.length > 40) {
     cwd = cwd.substr(cwd.length - 40);
   }
-  return join(tmpdir(), cwd, 'ionic-module-paths.json');
+  return join(tmpdir(), cwd, 'modulepaths.json');
 }
+
 
 const BUNDLE_APP_TASK_INFO: TaskInfo = {
   contextProperty: 'rollupConfig',
@@ -100,6 +104,7 @@ const BUNDLE_APP_TASK_INFO: TaskInfo = {
   shortArgOption: '-r',
   defaultConfigFilename: 'rollup.config'
 };
+
 
 const BUNDLE_POLYFILL_TASK_INFO: TaskInfo = {
   contextProperty: 'rollupPolyfillConfig',

@@ -43,11 +43,20 @@ module.exports = {
   ],
 
   /**
-   * "componentSassFiles" is a glob to search for sass
-   * files in the same directory as the component module.
+   * "includeFiles" is an array of regex patterns to search for
+   * sass files in the same directory as the component module.
    */
-  componentSassFiles: [
-    '*.scss'
+  includeFiles: [
+    /\.(scss)$/i
+  ],
+
+  /**
+   * "excludeFiles" is an array of regex patterns for files which
+   * should be excluded. If a file matches both include and exclude
+   * patterns, then the file it will be excluded.
+   */
+  excludeFiles: [
+    /*  /\.(wp).(scss)$/i  */
   ],
 
   /**
@@ -62,9 +71,12 @@ module.exports = {
   /**
    * Compiled modules may be within a different directory
    * than its source file and sibling component sass files.
+   * For example, NGC places it's files within the tmp directory
+   * but doesn't copy over its sass files. This is just useful
+   * to also check the source directory for sass files.
    */
   directoryMaps: {
-    '${TMP}': '{{SRC}}'
+    '{{TMP}}': '{{SRC}}'
   },
 
   /**
@@ -76,10 +88,7 @@ module.exports = {
   excludeModules: [
     '@angular',
     'core-js',
-    'html-webpack-plugin',
     'ionic-native',
-    'lodash',
-    'process',
     'rxjs',
     'rxjs-es',
     'zone.js'

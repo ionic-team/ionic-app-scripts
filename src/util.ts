@@ -10,7 +10,9 @@ import { join } from 'path';
  */
 export function generateContext(context?: BuildContext): BuildContext {
   if (!context) {
-    context = {};
+    context = {
+      runCompress: false
+    };
   }
 
   context.rootDir = context.rootDir || getArgValue('--rootDir', '-r', process.cwd());
@@ -83,6 +85,15 @@ export function assignDefaults(userConfig: any, defaultConfig: any) {
       }
     }
   }
+}
+
+
+export function replacePathVars(context: BuildContext, filePath: string) {
+  return filePath.replace('{{SRC}}', context.srcDir)
+                 .replace('{{WWW}}', context.wwwDir)
+                 .replace('{{TMP}}', context.tmpDir)
+                 .replace('{{ROOT}}', context.rootDir)
+                 .replace('{{BUILD}}', context.buildDir);
 }
 
 

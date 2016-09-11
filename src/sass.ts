@@ -1,9 +1,9 @@
 import { basename, dirname, join, sep } from 'path';
 import { BuildContext, TaskInfo } from './interfaces';
-import { fillConfigDefaults, generateContext, Logger } from './util';
+import { fillConfigDefaults, generateContext, Logger, replacePathVars } from './util';
 import { getModulePathsCache } from './bundle';
 import { SassConfig, SassResult, SassMap } from './interfaces';
-import { writeFile } from 'fs';
+import { readdirSync, writeFile } from 'fs';
 
 
 export function sass(context?: BuildContext) {
@@ -18,12 +18,35 @@ export function sass(context?: BuildContext) {
     context.moduleFiles = getModulePathsCache();
     if (!context.moduleFiles) {
       logger.fail('Cannot generate Sass files without first bundling JavaScript ' +
-                  'files in order to know all used modules. Please build and bundle the JS files first.');
+                  'files in order to know all used modules. Please build JS files first.');
       return Promise.reject('Missing module paths for sass build');
     }
   }
 
-  return generateSass(context.moduleFiles, context.sassConfig).then(() => {
+  // where the final css output file is saved
+  if (!context.sassConfig.outFile) {
+    context.sassConfig.outFile = join(context.buildDir, context.sassConfig.outputFilename);
+  }
+  Logger.debug(`outFile: ${context.sassConfig.outFile}`);
+
+  // import paths where the sass compiler will look for imports
+  context.sassConfig.includePaths.unshift(join(context.srcDir));
+  Logger.debug(`includePaths: ${context.sassConfig.includePaths}`);
+
+  // sass import sorting algorithms incase there was something to tweak
+  context.sassConfig.sortComponentPathsFn = (context.sassConfig.sortComponentPathsFn || defaultSortComponentPathsFn);
+  context.sassConfig.sortComponentFilesFn = (context.sassConfig.sortComponentFilesFn || defaultSortComponentFilesFn);
+
+  if (!context.sassConfig.file) {
+    // if the sass config was not given an input file, then
+    // we're going to dynamically generate the sass data by
+    // scanning through all the components included in the bundle
+    // and generate the sass on the fly
+    generateSassData(context);
+  }
+
+  // let's begin shall we...
+  return render(context.sassConfig).then(() => {
     return logger.finish();
   }).catch(reason => {
     return logger.fail(reason);
@@ -31,33 +54,7 @@ export function sass(context?: BuildContext) {
 }
 
 
-function generateSass(moduleFiles: string[], sassConfig?: SassConfig) {
-
-  if (!sassConfig.outFile) {
-
-  }
-
-  sassConfig.includePaths = sassConfig.includePaths || [];
-  sassConfig.includePaths.unshift(dirname(sassConfig.outFile));
-
-  sassConfig.excludeModules = (sassConfig.excludeModules || []).map(function(excludeModule) {
-    return sep + excludeModule;
-  });
-
-  sassConfig.sortComponentPathsFn = (sassConfig.sortComponentPathsFn || defaultSortComponentPathsFn);
-  sassConfig.sortComponentFilesFn = (sassConfig.sortComponentFilesFn || defaultSortComponentFilesFn);
-
-  sassConfig.componentSassFiles = (sassConfig.componentSassFiles || ['*.scss']);
-
-  if (!sassConfig.file) {
-    generateSassData(moduleFiles, sassConfig);
-  }
-
-  return render(sassConfig);
-}
-
-
-function generateSassData(moduleFiles: string[], sassConfig: SassConfig) {
+function generateSassData(context: BuildContext) {
   /**
    * 1) Import user sass variables first since user variables
    *    should have precedence over default library variables.
@@ -71,69 +68,109 @@ function generateSassData(moduleFiles: string[], sassConfig: SassConfig) {
    */
 
   const moduleDirectories: string[] = [];
-  moduleFiles.forEach(moduleFile => {
+  context.moduleFiles.forEach(moduleFile => {
     const moduleDirectory = dirname(moduleFile);
     if (moduleDirectories.indexOf(moduleDirectory) < 0) {
       moduleDirectories.push(moduleDirectory);
     }
   });
 
-  const userSassVariableFiles = getUserSassVariableFiles(sassConfig);
-  const componentSassFiles = getComponentSassFiles(moduleDirectories, sassConfig);
+  // gather a list of all the sass variable files that should be used
+  // these variable files will be the first imports
+  const userSassVariableFiles = context.sassConfig.variableSassFiles.map(f => {
+    return replacePathVars(context, f);
+  });
+
+  // gather a list of all the sass files that are next to components we're bundling
+  const componentSassFiles = getComponentSassFiles(moduleDirectories, context);
+
+  Logger.debug(`userSassVariableFiles: ${userSassVariableFiles.length}`);
+  Logger.debug(`componentSassFiles: ${componentSassFiles.length}`);
 
   const sassImports = userSassVariableFiles.concat(componentSassFiles).map(sassFile => '"' + sassFile + '"');
 
   if (sassImports.length) {
-    sassConfig.data = `@charset "UTF-8"; @import ${sassImports.join(',')};`;
+    context.sassConfig.data = `@charset "UTF-8"; @import ${sassImports.join(',')};`;
   }
 }
 
 
-function getUserSassVariableFiles(opts: SassConfig) {
-  // user variable files should be the very first imports
-  if (Array.isArray(opts.variableSassFiles)) {
-    return opts.variableSassFiles;
-  }
-  return [];
-}
-
-
-function getComponentSassFiles(moduleDirectories: string[], sassConfig: SassConfig) {
-  const glob = require('glob-all');
-
-  const componentSassFiles: string[] = [];
-  const componentDirectories = getComponentDirectories(moduleDirectories, sassConfig);
+function getComponentSassFiles(moduleDirectories: string[], context: BuildContext) {
+  const collectedSassFiles: string[] = [];
+  const componentDirectories = getComponentDirectories(moduleDirectories, context.sassConfig);
 
   // sort all components with the library components being first
-  // and user components coming lass, so it's easier for user css
+  // and user components coming last, so it's easier for user css
   // to override library css with the same specificity
-  const sortedComponentPaths = componentDirectories.sort(sassConfig.sortComponentPathsFn);
+  const sortedComponentPaths = componentDirectories.sort(context.sassConfig.sortComponentPathsFn);
 
   sortedComponentPaths.forEach(componentPath => {
-    let componentFiles: string[] = glob.sync(sassConfig.componentSassFiles, {
-      cwd: componentPath
-    });
-
-    if (!componentFiles.length && componentPath.indexOf(sep + 'node_modules') === -1) {
-      // if we didn't find anything, see if this module is mapped to another directory
-      for (const k in sassConfig.directoryMaps) {
-        componentPath = componentPath.replace(sep + k + sep, sep + sassConfig.directoryMaps[k] + sep);
-        componentFiles = glob.sync(sassConfig.componentSassFiles, {
-          cwd: componentPath
-        });
-      }
-    }
-
-    if (componentFiles.length) {
-      componentFiles = componentFiles.sort(sassConfig.sortComponentFilesFn);
-
-      componentFiles.forEach(componentFile => {
-        componentSassFiles.push(join(componentPath, componentFile));
-      });
-    }
+    addComponentSassFiles(componentPath, collectedSassFiles, context);
   });
 
-  return componentSassFiles;
+  return collectedSassFiles;
+}
+
+
+function addComponentSassFiles(componentPath: string, collectedSassFiles: string[], context: BuildContext) {
+  let siblingFiles = getSiblingSassFiles(componentPath, context);
+
+  if (!siblingFiles.length && componentPath.indexOf(sep + 'node_modules') === -1) {
+    Logger.debug(`No sass files found in: ${componentPath}`);
+
+    // if we didn't find anything, see if this module is mapped to another directory
+    for (const k in context.sassConfig.directoryMaps) {
+      if (context.sassConfig.directoryMaps.hasOwnProperty(k)) {
+        var actualDirectory = replacePathVars(context, k);
+        var mappedDirectory = replacePathVars(context, context.sassConfig.directoryMaps[k]);
+
+        componentPath = componentPath.replace(actualDirectory, mappedDirectory);
+
+        Logger.debug(`Map and check sass files in: ${componentPath}`);
+
+        siblingFiles = getSiblingSassFiles(componentPath, context);
+        if (siblingFiles.length) {
+          break;
+        }
+      }
+    }
+  }
+
+  if (siblingFiles.length) {
+    siblingFiles = siblingFiles.sort(context.sassConfig.sortComponentFilesFn);
+
+    siblingFiles.forEach(componentFile => {
+      collectedSassFiles.push(componentFile);
+      Logger.debug(`Included: ${componentFile}`);
+    });
+  }
+}
+
+
+function getSiblingSassFiles(componentPath: string, context: BuildContext) {
+  return readdirSync(componentPath).filter(f => {
+    return isValidSassFile(f, context.sassConfig);
+  }).map(f => {
+    return join(componentPath, f);
+  });
+}
+
+
+function isValidSassFile(filename: string, sassConfig: SassConfig) {
+  for (var i = 0; i < sassConfig.includeFiles.length; i++) {
+    if (sassConfig.includeFiles[i].test(filename)) {
+      // filename passes the test to be included
+      for (var j = 0; j < sassConfig.excludeFiles.length; j++) {
+        if (sassConfig.excludeFiles[j].test(filename)) {
+          // however, it also passed the test that it should be excluded
+          Logger.debug(`Excluded: ${filename}`);
+          return false;
+        }
+      }
+      return true;
+    }
+  }
+  return false;
 }
 
 
@@ -201,6 +238,7 @@ function renderSassSuccess(sassResult: SassResult, sassConfig: SassConfig): Prom
           apMapResult = JSON.parse(postCssResult.map.toString()).mappings;
         }
 
+        Logger.debug(`PostCss and Autoprefixer completed`);
         return writeOutput(sassConfig, postCssResult.css, apMapResult);
       });
   }
@@ -259,27 +297,32 @@ function generateSourceMaps(sassResult: SassResult, sassConfig: SassConfig) {
 function writeOutput(sassConfig: SassConfig, cssOutput: string, mappingsOutput: string) {
   return new Promise((resolve, reject) => {
 
-    writeFile(sassConfig.outFile, cssOutput, (fsWriteErr: any) => {
-      if (fsWriteErr) {
-        reject(`Error writing css file, ${sassConfig.outFile}: ${fsWriteErr}`);
-        return;
+    writeFile(sassConfig.outFile, cssOutput, (cssWriteErr: any) => {
+      if (cssWriteErr) {
+        reject(`Error writing css file, ${sassConfig.outFile}: ${cssWriteErr}`);
+
+      } else {
+        Logger.debug(`Saved CSS: ${sassConfig.outFile}`);
+
+        if (mappingsOutput) {
+          // save the css map file too
+          // this save completes async and does not hold up the resolve
+          const sourceMapPath = join(dirname(sassConfig.outFile), basename(sassConfig.outFile) + '.map');
+
+          writeFile(sourceMapPath, mappingsOutput, (mapWriteErr: any) => {
+            if (mapWriteErr) {
+              Logger.error(`Error writing css map file, ${sourceMapPath}: ${mapWriteErr}`);
+
+            } else {
+              Logger.debug(`Saved CSS Map: ${sourceMapPath}`);
+            }
+          });
+        }
+
+        // css file all saved
+        // note that we're not waiting on the css map to finish saving
+        resolve();
       }
-
-      if (mappingsOutput) {
-        const sourceMapPath = join(dirname(sassConfig.outFile), basename(sassConfig.outFile) + '.map');
-
-        writeFile(sourceMapPath, mappingsOutput, (fsWriteErr: any) => {
-          if (fsWriteErr) {
-            reject(`Error writing css map file, ${sourceMapPath}: ${fsWriteErr}`);
-            return;
-          }
-
-          resolve();
-        });
-        return;
-      }
-
-      resolve();
     });
   });
 }

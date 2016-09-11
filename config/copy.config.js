@@ -1,4 +1,13 @@
 
+/**
+ * Possible path variable:
+ * {{ROOT}}
+ * {{SRC}}
+ * {{TMP}}
+ * {{WWW}}
+ * {{BUILD}}
+ */
+
 module.exports = {
   include: [
     {

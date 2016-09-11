@@ -22,9 +22,12 @@
   },
   "main": "dist/index.js",
   "dependencies": {
+    "autoprefixer": "6.4.1",
     "clean-css": "3.4.19",
     "cross-spawn": "4.0.0",
     "fs-extra": "0.30.0",
+    "node-sass": "3.9.3",
+    "postcss": "5.2.0",
     "rollup": "0.34.13",
     "rollup-plugin-commonjs": "4.1.0",
     "rollup-plugin-node-resolve": "2.0.0",

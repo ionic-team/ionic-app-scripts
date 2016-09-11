@@ -1,5 +1,5 @@
 import { BuildContext, TaskInfo } from './interfaces';
-import { fillConfigDefaults, generateContext, Logger } from './util';
+import { fillConfigDefaults, generateContext, Logger, replacePathVars } from './util';
 import { copy as fsCopy } from 'fs-extra';
 
 
@@ -46,10 +46,6 @@ function copyFiles(context: BuildContext, src: string, dest: string, filter?: an
   });
 }
 
-function replacePathVars(context: BuildContext, filePath: string) {
-  return filePath.replace('{{SRC}}', context.srcDir)
-                 .replace('{{WWW}}', context.wwwDir);
-}
 
 const COPY_TASK_INFO: TaskInfo = {
   contextProperty: 'copyConfig',
