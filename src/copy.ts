@@ -46,8 +46,8 @@ function copyFiles(context: BuildContext, src: string, dest: string, filter?: an
 }
 
 function replacePathVars(context: BuildContext, filePath: string) {
-  return filePath.replace('${SRC}', context.srcDir)
-                 .replace('${WWW}', context.wwwDir);
+  return filePath.replace('{{SRC}}', context.srcDir)
+                 .replace('{{WWW}}', context.wwwDir);
 }
 
 const COPY_TASK_INFO: TaskInfo = {

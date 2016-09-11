@@ -25,10 +25,6 @@ export function generateContext(context?: BuildContext): BuildContext {
 
   context.buildDir = context.buildDir || getArgValue('--buildDir', null, join(context.wwwDir, BUILD_DIR));
 
-  if (typeof context.runCompress !== 'boolean') {
-    context.runCompress = false;
-  }
-
   return context;
 }
 

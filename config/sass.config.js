@@ -56,7 +56,7 @@ module.exports = {
    * to be imported so their values override default variables.
    */
   variableSassFiles: [
-    '${SRC}/theme/variables.scss'
+    '{{SRC}}/theme/variables.scss'
   ],
 
   /**
@@ -64,7 +64,7 @@ module.exports = {
    * than its source file and sibling component sass files.
    */
   directoryMaps: {
-    '${TMP}': '${SRC}'
+    '${TMP}': '{{SRC}}'
   },
 
   /**
