@@ -9,7 +9,8 @@ export { ngc } from './ngc';
 export { sass } from './sass';
 export { transpile } from './transpile';
 export { uglifyjs } from './uglifyjs';
-export { generateContext, getArgConfigFile, getArgValue, Logger } from './util';
+export { watch } from './watch';
+export { generateContext, Logger } from './util';
 export * from './plugins/rollupNG2';
 
 

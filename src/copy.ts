@@ -51,5 +51,6 @@ const COPY_TASK_INFO: TaskInfo = {
   contextProperty: 'copyConfig',
   fullArgConfig: '--copy',
   shortArgConfig: '-c',
+  envConfig: 'ionic_copy',
   defaultConfigFilename: 'copy.config'
 };

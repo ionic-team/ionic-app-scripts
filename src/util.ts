@@ -4,9 +4,16 @@ import { join } from 'path';
 
 /**
  * Create a context object which is used by all the build tasks.
- * If config data wasn't already provided in the context, then
- * try to get the data from the command line arguments. Use the
- * defaults when no config data was provided.
+ * Filling the config data uses the following hierarchy, which will
+ * keep going down the list until it, or if it, finds data.
+ *
+ * 1) Get from the passed in context variable
+ * 2) Get from the config file set using the command-line args
+ * 3) Get from npm package.json config
+ * 4) Get environment variables
+ *
+ * Lastly, Ionic's default configs will always fill in any data
+ * which is missing from the user's data.
  */
 export function generateContext(context?: BuildContext): BuildContext {
   if (!context) {
@@ -15,47 +22,48 @@ export function generateContext(context?: BuildContext): BuildContext {
     };
   }
 
-  context.rootDir = context.rootDir || getArgValue('--rootDir', '-r', process.cwd());
+  context.rootDir = context.rootDir || getConfigValueDefaults('--rootDir', '-r', 'ionic_root_dir', process.cwd());
 
-  context.tmpDir = context.tmpDir || getArgValue('--tmpDir', null, join(context.rootDir, TMP_DIR));
+  context.tmpDir = context.tmpDir || getConfigValueDefaults('--tmpDir', null, 'ionic_tmp_dir', join(context.rootDir, TMP_DIR));
 
-  context.configDir = context.configDir || getArgValue('--configDir', null, join(context.rootDir, CONFIG_DIR));
+  context.configDir = context.configDir || getConfigValueDefaults('--configDir', null, 'ionic_config_dir', join(context.rootDir, CONFIG_DIR));
 
-  context.srcDir = context.srcDir || getArgValue('--srcDir', null, join(context.rootDir, SRC_DIR));
+  context.srcDir = context.srcDir || getConfigValueDefaults('--srcDir', null, 'ionic_src_dir', join(context.rootDir, SRC_DIR));
 
-  context.wwwDir = context.wwwDir || getArgValue('--wwwDir', null, join(context.rootDir, WWW_DIR));
+  context.wwwDir = context.wwwDir || getConfigValueDefaults('--wwwDir', null, 'ionic_www_dir', join(context.rootDir, WWW_DIR));
 
-  context.buildDir = context.buildDir || getArgValue('--buildDir', null, join(context.wwwDir, BUILD_DIR));
+  context.buildDir = context.buildDir || getConfigValueDefaults('--buildDir', null, 'ionic_build_dir', join(context.wwwDir, BUILD_DIR));
 
-  if (typeof context.isDebugMode !== 'boolean') {
-    (<any>global).isDebugMode = context.isDebugMode = isDebugMode();
-    if (context.isDebugMode) {
-      Logger.debug('Debugging enabled');
-    }
-  }
+  checkDebugMode();
 
   return context;
 }
 
-export function fillConfigDefaults(context: BuildContext, taskConfig: TaskInfo): any {
-  const defaultConfig = require(join('..', 'config', taskConfig.defaultConfigFilename));
 
-  if (!(<any>context)[taskConfig.contextProperty]) {
-    (<any>context)[taskConfig.contextProperty] = getArgConfigFile(taskConfig.fullArgConfig, taskConfig.shortArgConfig) || {};
+export function fillConfigDefaults(context: BuildContext, task: TaskInfo): any {
+  // if the context property wasn't already set, then see if a config file
+  // was been supplied by the user as an arg or env variable
+  if (!(<any>context)[task.contextProperty]) {
+    (<any>context)[task.contextProperty] = getConfigFileData(task.fullArgConfig, task.shortArgConfig, task.envConfig, null) || {};
   }
 
-  assignDefaults((<any>context)[taskConfig.contextProperty], defaultConfig);
+  const defaultConfig = require(join('..', 'config', task.defaultConfigFilename));
+
+  // always assign any default values which were not already supplied by the user
+  assignDefaults((<any>context)[task.contextProperty], defaultConfig);
 }
 
 
-export function getArgConfigFile(fullName: string, shortName?: string): any {
-  const configFile = getArgValue(fullName, shortName, null);
+export function getConfigFileData(fullName: string, shortName: string, envVarName: string, defaultValue: string): any {
+  // see if the user supplied a value for where to look up their config file
+  const configFilePath = getConfigValueDefaults(fullName, shortName, envVarName, null);
 
-  if (configFile) {
+  if (configFilePath) {
     try {
-      return require(configFile);
+      return require(configFilePath);
     } catch (e) {
-      Logger.error(`Config "${configFile}" not found. Using defaults instead.`);
+      Logger.error(`Config file "${configFilePath}" not found. Using defaults instead.`);
+      Logger.error(e);
     }
   }
 
@@ -63,7 +71,43 @@ export function getArgConfigFile(fullName: string, shortName?: string): any {
 }
 
 
-export function getArgValue(fullName: string, shortName: string, defaultValue: string): string {
+export function getConfigValueDefaults(argFullName: string, argShortName: string, envVarName: string, defaultValue: string) {
+  // first see if the value was set in the command-line args
+  const argValue = getArgValue(argFullName, argShortName);
+  if (argValue) {
+    return argValue;
+  }
+
+  // next see if it was set in the environment variables
+  // which also checks if it was set in the npm package.json config
+  const envVar = getEnvVariable(envVarName);
+  if (envVar) {
+    return envVar;
+  }
+
+  // return the default if nothing above was found
+  return defaultValue;
+}
+
+
+export function getEnvVariable(envVarName: string): string {
+  // see if it was set in npm package.json config
+  // which ends up as an env variable prefixed with "npm_package_config_"
+  envVarName = 'npm_package_config_' + envVarName;
+  if (process.env[envVarName] !== undefined) {
+    return process.env[envVarName];
+  }
+
+  // next see if it was just set as an environment variables
+  if (process.env[envVarName] !== undefined) {
+    return process.env[envVarName];
+  }
+
+  return null;
+}
+
+
+export function getArgValue(fullName: string, shortName: string): string {
   for (var i = 2; i < argvLen; i++) {
     var arg = argv[i];
     if (arg === fullName || (shortName && arg === shortName)) {
@@ -73,7 +117,7 @@ export function getArgValue(fullName: string, shortName: string, defaultValue: s
       }
     }
   }
-  return defaultValue;
+  return null;
 }
 
 
@@ -97,8 +141,23 @@ export function replacePathVars(context: BuildContext, filePath: string) {
 }
 
 
+let checkedDebug = false;
+export function checkDebugMode() {
+  if (!checkedDebug) {
+    if (argv.some(a => a === '--debug') || getEnvVariable('ionic_debug_mode') === 'true') {
+      process.env.ionic_debug_mode = 'true';
+    }
+
+    if (isDebugMode()) {
+      Logger.debug('Debugging enabled');
+    }
+    checkedDebug = true;
+  }
+}
+
+
 export function isDebugMode() {
-  return !!argv.find(a => a === '--debug' || a === '-d');
+  return (process.env.ionic_debug_mode === 'true');
 }
 
 
@@ -150,7 +209,7 @@ export class Logger {
   }
 
   static debug(...msg: string[]) {
-    if ((<any>global).isDebugMode) {
+    if (isDebugMode()) {
       print('log', msg.join(' '), ' DEBUG! ');
     }
   }

@@ -168,5 +168,6 @@ const NGC_TASK_INFO: TaskInfo = {
   contextProperty: 'ngcConfig',
   fullArgConfig: '--ngc',
   shortArgConfig: '-n',
+  envConfig: 'ionic_ngc',
   defaultConfigFilename: 'ngc.config'
 };

@@ -26,7 +26,7 @@ export function bundle(context?: BuildContext) {
 
 export function bundleApp(context?: BuildContext): Promise<any> {
   context = generateContext(context);
-  fillConfigDefaults(context, BUNDLE_APP_TASK_INFO);
+  fillConfigDefaults(context, ROLLUP_TASK_INFO);
 
   if (!context.rollupConfig.dest) {
     context.rollupConfig.dest = join(context.buildDir, 'main.es6.js');
@@ -51,7 +51,7 @@ export function bundleApp(context?: BuildContext): Promise<any> {
 
 export function bundlePolyfills(context?: BuildContext) {
   context = generateContext(context);
-  fillConfigDefaults(context, BUNDLE_POLYFILL_TASK_INFO);
+  fillConfigDefaults(context, ROLLUP_POLYFILL_TASK_INFO);
 
   if (!context.rollupPolyfillConfig.dest) {
     context.rollupPolyfillConfig.dest = join(context.buildDir, 'polyfills.es6.js');
@@ -98,17 +98,19 @@ function getCachePath(): string {
 }
 
 
-const BUNDLE_APP_TASK_INFO: TaskInfo = {
+const ROLLUP_TASK_INFO: TaskInfo = {
   contextProperty: 'rollupConfig',
   fullArgConfig: '--rollup',
   shortArgConfig: '-r',
+  envConfig: 'ionic_rollup',
   defaultConfigFilename: 'rollup.config'
 };
 
 
-const BUNDLE_POLYFILL_TASK_INFO: TaskInfo = {
+const ROLLUP_POLYFILL_TASK_INFO: TaskInfo = {
   contextProperty: 'rollupPolyfillConfig',
   fullArgConfig: '--rollupPolyfill',
   shortArgConfig: '-p',
+  envConfig: 'ionic_rollup_polyfill',
   defaultConfigFilename: 'rollup.polyfill.config'
 };

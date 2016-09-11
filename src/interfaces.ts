@@ -18,7 +18,6 @@ export interface BuildContext {
 
   runCompress: boolean;
   moduleFiles?: string[];
-  isDebugMode?: boolean;
 }
 
 
@@ -121,5 +120,6 @@ export interface TaskInfo {
   contextProperty: string;
   fullArgConfig: string;
   shortArgConfig: string;
+  envConfig: string;
   defaultConfigFilename: string;
 }
