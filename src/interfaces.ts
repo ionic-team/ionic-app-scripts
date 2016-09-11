@@ -78,6 +78,7 @@ export interface TsConfig {
 
 
 export interface SassConfig {
+  // https://www.npmjs.com/package/node-sass
   outputFilename?: string;
   outFile?: string;
   file?: string;

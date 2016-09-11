@@ -1,26 +1,29 @@
 
+// https://www.npmjs.com/package/node-sass
+
 module.exports = {
 
   /**
-   * "outputFilename" is the filename of the saved CSS file
+   * outputFilename: The filename of the saved CSS file
    * from the sass build. The directory which it is saved in
    * is set within the "buildDir" config options.
    */
   outputFilename: 'main.css',
 
   /**
-   * "sourceMap" if a source map should be built or not.
+   * sourceMap: If source map should be built or not.
    */
   sourceMap: true,
 
   /**
-   * "outputStyle" how node-sass should output the css file.
+   * outputStyle: How node-sass should output the css file.
    */
   outputStyle: 'expanded',
 
   /**
-   * "autoprefixer" is the config options for autoprefixer.
-   * Excluding this config will skip using autoprefixer.
+   * autoprefixer: The config options for autoprefixer.
+   * Excluding this config will skip applying autoprefixer.
+   * https://www.npmjs.com/package/autoprefixer
    */
   autoprefixer: {
     browsers: [
@@ -34,7 +37,7 @@ module.exports = {
   },
 
   /**
-   * "includePaths" is used by node-sass for additional
+   * includePaths: Used by node-sass for additional
    * paths to search for sass imports by just name.
    */
   includePaths: [
@@ -43,24 +46,26 @@ module.exports = {
   ],
 
   /**
-   * "includeFiles" is an array of regex patterns to search for
+   * includeFiles: An array of regex patterns to search for
    * sass files in the same directory as the component module.
+   * If a file matches both include and exclude patterns, then
+   * the file will be excluded.
    */
   includeFiles: [
     /\.(scss)$/i
   ],
 
   /**
-   * "excludeFiles" is an array of regex patterns for files which
+   * excludeFiles: An array of regex patterns for files which
    * should be excluded. If a file matches both include and exclude
-   * patterns, then the file it will be excluded.
+   * patterns, then the file will be excluded.
    */
   excludeFiles: [
     /*  /\.(wp).(scss)$/i  */
   ],
 
   /**
-   * "variableSassFiles" lists out the files which include
+   * variableSassFiles: Lists out the files which include
    * only sass variables. These variables are the first sass files
    * to be imported so their values override default variables.
    */
@@ -69,18 +74,18 @@ module.exports = {
   ],
 
   /**
-   * Compiled modules may be within a different directory
-   * than its source file and sibling component sass files.
-   * For example, NGC places it's files within the tmp directory
-   * but doesn't copy over its sass files. This is just useful
-   * to also check the source directory for sass files.
+   * directoryMaps: Compiled JS modules may be within a different
+   * directory than its source file and sibling component sass files.
+   * For example, NGC places it's files within the .tmp directory
+   * but doesn't copy over its sass files. This is useful so sass
+   * also checks the JavaScript's source directory for sass files.
    */
   directoryMaps: {
     '{{TMP}}': '{{SRC}}'
   },
 
   /**
-   * "excludeModules" is used just as a way to skip over
+   * excludeModules: Used just as a way to skip over
    * modules which we know wouldn't have any sass to be
    * bundled. "excludeModules" isn't necessary, but is a
    * good way to speed up build times by skipping modules.

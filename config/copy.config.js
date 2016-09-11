@@ -1,6 +1,9 @@
 
+// https://www.npmjs.com/package/fs-extra
+
 /**
- * Possible path variable:
+ * Path variable templates can be used to dynamically
+ * replace the paths. Possible path variable templates:
  * {{ROOT}}
  * {{SRC}}
  * {{TMP}}
