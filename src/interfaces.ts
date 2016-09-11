@@ -7,7 +7,7 @@ export interface BuildContext {
   buildDir?: string;
   configDir?: string;
 
-  rollupAppConfig?: RollupConfig;
+  rollupConfig?: RollupConfig;
   rollupPolyfillConfig?: RollupConfig;
   cleancssConfig?: CleanCssConfig;
   copyConfig?: CopyConfig;

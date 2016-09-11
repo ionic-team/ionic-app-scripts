@@ -27,12 +27,12 @@ export function bundleApp(context?: BuildContext): Promise<any> {
   context = generateContext(context);
   fillConfigDefaults(context, BUNDLE_APP_TASK_INFO);
 
-  if (!context.rollupAppConfig.dest) {
-    context.rollupAppConfig.dest = join(context.buildDir, 'main.es6.js');
+  if (!context.rollupConfig.dest) {
+    context.rollupConfig.dest = join(context.buildDir, 'main.es6.js');
   }
 
   // bundle the app then create create css
-  return rollup(context.rollupAppConfig).then((bundle: RollupBundle) => {
+  return rollup(context.rollupConfig).then((bundle: RollupBundle) => {
 
     // set the module files used in this bundle
     // this reference can be used elsewhere in the build (sass)
@@ -43,7 +43,7 @@ export function bundleApp(context?: BuildContext): Promise<any> {
     setModulePathsCache(context.moduleFiles);
 
     // write the bundle
-    return bundle.write(context.rollupAppConfig);
+    return bundle.write(context.rollupConfig);
   });
 }
 
@@ -76,7 +76,9 @@ export function getModulePathsCache(): string[] {
 function setModulePathsCache(modulePaths: string[]) {
   // async save the module paths for later lookup
   outputJson(getCachePath(), modulePaths, (err) => {
-    Logger.error(`Error writing module paths cache: ${err}`);
+    if (err) {
+      Logger.error(`Error writing module paths cache: ${err}`);
+    }
   });
 }
 
@@ -91,10 +93,10 @@ function getCachePath(): string {
 }
 
 const BUNDLE_APP_TASK_INFO: TaskInfo = {
-  contextProperty: 'rollupAppConfig',
-  fullArgOption: '--rollupApp',
-  shortArgOption: '-b',
-  defaultConfigFilename: 'rollup.app.config'
+  contextProperty: 'rollupConfig',
+  fullArgOption: '--rollup',
+  shortArgOption: '-r',
+  defaultConfigFilename: 'rollup.config'
 };
 
 const BUNDLE_POLYFILL_TASK_INFO: TaskInfo = {
