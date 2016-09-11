@@ -18,7 +18,7 @@ export function cleancss(context?: BuildContext) {
 
 const CLEANCSS_TASK_INFO: TaskInfo = {
   contextProperty: 'cleancssConfig',
-  fullArgOption: '--cleancss',
-  shortArgOption: '-e',
+  fullArgConfig: '--cleancss',
+  shortArgConfig: '-e',
   defaultConfigFilename: 'cleancss.config'
 };

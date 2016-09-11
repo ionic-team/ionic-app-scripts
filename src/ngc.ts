@@ -166,7 +166,7 @@ const TS_CONFIG_FILE = 'tsconfig.json';
 
 const NGC_TASK_INFO: TaskInfo = {
   contextProperty: 'ngcConfig',
-  fullArgOption: '--ngc',
-  shortArgOption: '-n',
+  fullArgConfig: '--ngc',
+  shortArgConfig: '-n',
   defaultConfigFilename: 'ngc.config'
 };

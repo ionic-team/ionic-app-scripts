@@ -14,10 +14,34 @@ export interface BuildContext {
   ngcConfig?: NgcConfig;
   sassConfig?: SassConfig;
   uglifyjsConfig?: UglifyJsConfig;
+  watchConfig?: WatchConfig;
 
   runCompress: boolean;
   moduleFiles?: string[];
   isDebugMode?: boolean;
+}
+
+
+export interface CleanCssConfig {
+  // https://www.npmjs.com/package/clean-css
+}
+
+
+export interface CopyConfig {
+  include: CopyOptions[];
+}
+
+
+export interface CopyOptions {
+  // https://www.npmjs.com/package/fs-extra
+  src: string;
+  dest: string;
+  filter: any;
+}
+
+
+export interface NgcConfig {
+  include: string[];
 }
 
 
@@ -32,48 +56,9 @@ export interface RollupConfig {
 
 
 export interface RollupBundle {
+  // https://github.com/rollup/rollup/wiki/JavaScript-API
   write: Function;
   modules: { id: string }[];
-}
-
-
-export interface NgcConfig {
-  include: string[];
-}
-
-
-export interface CopyOptions {
-  // https://www.npmjs.com/package/fs-extra
-  src: string;
-  dest: string;
-  filter: any;
-}
-
-
-export interface CopyConfig {
-  include: CopyOptions[];
-}
-
-
-export interface UglifyJsConfig {
-  // https://www.npmjs.com/package/uglify-js
-}
-
-
-export interface CleanCssConfig {
-  // https://www.npmjs.com/package/clean-css
-}
-
-
-export interface TsConfig {
-  // https://www.typescriptlang.org/docs/handbook/compiler-options.html
-  compilerOptions: {
-    module: string;
-    removeComments: boolean;
-    outDir: string;
-    target: string;
-  };
-  include: string[];
 }
 
 
@@ -110,9 +95,31 @@ export interface SassMap {
 }
 
 
+export interface UglifyJsConfig {
+  // https://www.npmjs.com/package/uglify-js
+}
+
+
+export interface WatchConfig {
+
+}
+
+
+export interface TsConfig {
+  // https://www.typescriptlang.org/docs/handbook/compiler-options.html
+  compilerOptions: {
+    module: string;
+    removeComments: boolean;
+    outDir: string;
+    target: string;
+  };
+  include: string[];
+}
+
+
 export interface TaskInfo {
   contextProperty: string;
-  fullArgOption: string;
-  shortArgOption: string;
+  fullArgConfig: string;
+  shortArgConfig: string;
   defaultConfigFilename: string;
 }

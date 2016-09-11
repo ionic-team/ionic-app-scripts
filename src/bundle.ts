@@ -100,15 +100,15 @@ function getCachePath(): string {
 
 const BUNDLE_APP_TASK_INFO: TaskInfo = {
   contextProperty: 'rollupConfig',
-  fullArgOption: '--rollup',
-  shortArgOption: '-r',
+  fullArgConfig: '--rollup',
+  shortArgConfig: '-r',
   defaultConfigFilename: 'rollup.config'
 };
 
 
 const BUNDLE_POLYFILL_TASK_INFO: TaskInfo = {
   contextProperty: 'rollupPolyfillConfig',
-  fullArgOption: '--rollupPolyfill',
-  shortArgOption: '-p',
+  fullArgConfig: '--rollupPolyfill',
+  shortArgConfig: '-p',
   defaultConfigFilename: 'rollup.polyfill.config'
 };

@@ -371,7 +371,7 @@ function defaultSortComponentFilesFn(a: any, b: any): number {
 
 const SASS_TASK_INFO: TaskInfo = {
   contextProperty: 'sassConfig',
-  fullArgOption: '--sass',
-  shortArgOption: '-s',
+  fullArgConfig: '--sass',
+  shortArgConfig: '-s',
   defaultConfigFilename: 'sass.config'
 };

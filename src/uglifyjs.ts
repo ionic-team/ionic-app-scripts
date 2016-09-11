@@ -19,7 +19,7 @@ export function uglifyjs(context?: BuildContext) {
 
 const UGLIFY_TASK_INFO: TaskInfo = {
   contextProperty: 'uglifyjsConfig',
-  fullArgOption: '--uglifyjs',
-  shortArgOption: '-u',
+  fullArgConfig: '--uglifyjs',
+  shortArgConfig: '-u',
   defaultConfigFilename: 'uglifyjs.config'
 };

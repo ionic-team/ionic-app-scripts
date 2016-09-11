@@ -41,7 +41,7 @@ export function fillConfigDefaults(context: BuildContext, taskConfig: TaskInfo):
   const defaultConfig = require(join('..', 'config', taskConfig.defaultConfigFilename));
 
   if (!(<any>context)[taskConfig.contextProperty]) {
-    (<any>context)[taskConfig.contextProperty] = getArgConfigFile(taskConfig.fullArgOption, taskConfig.shortArgOption) || {};
+    (<any>context)[taskConfig.contextProperty] = getArgConfigFile(taskConfig.fullArgConfig, taskConfig.shortArgConfig) || {};
   }
 
   assignDefaults((<any>context)[taskConfig.contextProperty], defaultConfig);

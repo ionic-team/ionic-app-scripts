@@ -49,7 +49,7 @@ function copyFiles(context: BuildContext, src: string, dest: string, filter?: an
 
 const COPY_TASK_INFO: TaskInfo = {
   contextProperty: 'copyConfig',
-  fullArgOption: '--copy',
-  shortArgOption: '-c',
+  fullArgConfig: '--copy',
+  shortArgConfig: '-c',
   defaultConfigFilename: 'copy.config'
 };
