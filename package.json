@@ -1,0 +1,48 @@
+{
+  "name": "@ionic/app-scripts",
+  "version": "0.0.1",
+  "description": "Scripts for Ionic Projects",
+  "homepage": "http//ionicframework.com/",
+  "author": "Ionic Team <hi@ionic.io> (http://ionic.io)",
+  "license": "MIT",
+  "files": [
+    "bin/",
+    "config/",
+    "dist/",
+    "LICENSE",
+    "README.md"
+  ],
+  "bin": {
+    "ionic-app-scripts": "./bin/ionic-app-scripts.js"
+  },
+  "scripts": {
+    "build": "npm run clean && tsc",
+    "clean": "rm -rf ./dist",
+    "prepublish": "npm run build"
+  },
+  "main": "dist/index.js",
+  "dependencies": {
+    "clean-css": "3.4.19",
+    "cross-spawn": "4.0.0",
+    "fs-extra": "0.30.0",
+    "rollup": "0.34.13",
+    "rollup-plugin-commonjs": "4.1.0",
+    "rollup-plugin-node-resolve": "2.0.0",
+    "uglify-js": "2.7.3"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "0.0.31",
+    "@types/node": "6.0.38",
+    "@types/uglify-js": "2.0.27",
+    "tslint": "^3.15.1",
+    "tslint-ionic-rules": "0.0.5",
+    "typescript": "2.0.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/driftyco/ionic-app-scripts.git"
+  },
+  "bugs": {
+    "url": "https://github.com/driftyco/ionic-app-scripts/issues"
+  }
+}
