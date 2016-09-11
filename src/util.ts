@@ -25,6 +25,13 @@ export function generateContext(context?: BuildContext): BuildContext {
 
   context.buildDir = context.buildDir || getArgValue('--buildDir', null, join(context.wwwDir, BUILD_DIR));
 
+  if (typeof context.isDebugMode !== 'boolean') {
+    (<any>global).isDebugMode = context.isDebugMode = isDebugMode();
+    if (context.isDebugMode) {
+      Logger.debug('Debugging enabled')
+    }
+  }
+
   return context;
 }
 
@@ -78,6 +85,12 @@ export function assignDefaults(userConfig: any, defaultConfig: any) {
   }
 }
 
+
+export function isDebugMode() {
+  return !!argv.find(a => a === '--debug' || a === '-d');
+}
+
+
 export class Logger {
   private start: number;
   private scope: string;
@@ -114,7 +127,7 @@ export class Logger {
   }
 
   static info(...msg: string[]) {
-    print('log', msg.join(' '));
+    print('info', msg.join(' '));
   }
 
   static warn(...msg: string[]) {
@@ -125,12 +138,20 @@ export class Logger {
     print('error', msg.join(' '));
   }
 
+  static debug(...msg: string[]) {
+    if ((<any>global).isDebugMode) {
+      print('log', msg.join(' '), ' DEBUG! ');
+    }
+  }
+
 }
 
-function print(type: string, msg: string) {
+function print(type: string, msg: string, prefix?: string) {
   const date = new Date();
-  const timestamp = ('0' + date.getHours()).slice(-2) + ':' + ('0' + date.getMinutes()).slice(-2) + ':' + ('0' + date.getSeconds()).slice(-2);
-  (<any>console)[type](`[${timestamp}]  ${msg}`);
+  if (!prefix) {
+    prefix = ('0' + date.getHours()).slice(-2) + ':' + ('0' + date.getMinutes()).slice(-2) + ':' + ('0' + date.getSeconds()).slice(-2);
+  }
+  (<any>console)[type](`[${prefix}]  ${msg}`);
 }
 
 

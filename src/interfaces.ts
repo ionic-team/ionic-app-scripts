@@ -17,6 +17,7 @@ export interface BuildContext {
 
   runCompress?: boolean;
   moduleFiles?: string[];
+  isDebugMode?: boolean;
 }
 
 

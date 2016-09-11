@@ -79,6 +79,7 @@ function setModulePathsCache(modulePaths: string[]) {
     if (err) {
       Logger.error(`Error writing module paths cache: ${err}`);
     }
+    Logger.debug(`ModulePathsCached: ${getCachePath()}`);
   });
 }
 
