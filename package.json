@@ -18,7 +18,8 @@
   "scripts": {
     "build": "npm run clean && tsc",
     "clean": "rm -rf ./dist",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "watch": "npm run clean && tsc --watch"
   },
   "main": "dist/index.js",
   "dependencies": {
