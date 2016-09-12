@@ -30,6 +30,12 @@ Instead of depending on external task runners, Ionic App Scripts now prefers bei
   },
 ```
 
+To run the `build` script found in the `package.json` `scripts` property, execute:
+
+```
+npm run build
+```
+
 
 ## Custom Config Files
 
@@ -48,7 +54,7 @@ Within the `package.json` file, NPM also provides a handy [config](https://docs.
 
 ### Command-line Flags
 
-Remember how we're actually calling `ionic-app-scripts` from the `scripts` property of project's `package.json` file? Well we can also add command-line flags to each script, or make new scripts with these custom flags. For example:
+Remember how we're actually running `ionic-app-scripts` from the `scripts` property of project's `package.json` file? Well we can also add command-line flags to each script, or make new scripts with these custom flags. For example:
 
 ```
   "scripts": {
@@ -60,25 +66,25 @@ Remember how we're actually calling `ionic-app-scripts` from the `scripts` prope
 
 ### Overriding Config Files
 
-| Config File | NPM Config Property | Cmd-line Flag    |
-|-------------|---------------------|------------------|
-| CleanCss    | ionic_cleancss      | --cleancss or -e |
-| Copy        | ionic_copy          | --copy or -y     |
-| NGC         | ionic_ngc           | --ngc or -n      |
-| Rollup      | ionic_rollup        | --rollup or -r   |
-| Sass        | ionic_sass          | --sass or -s     |
-| UglifyJS    | ionic_uglifyjs      | --uglifyjs or -u |
+| Config File | NPM Config Property | Cmd-line Flag        |
+|-------------|---------------------|----------------------|
+| CleanCss    | `ionic_cleancss`    | `--cleancss` or `-e` |
+| Copy        | `ionic_copy`        | `--copy` or `-y`     |
+| NGC         | `ionic_ngc`         | `--ngc` or `-n`      |
+| Rollup      | `ionic_rollup`      | `--rollup` or `-r`   |
+| Sass        | `ionic_sass`        | `--sass` or `-s`     |
+| UglifyJS    | `ionic_uglifyjs`    | `--uglifyjs` or `-u` |
 
 
 ### Overriding Config Values
 
 | Config Values   | NPM Config Property | Cmd-line Flag | Defaults        |
 |-----------------|---------------------|---------------|-----------------|
-| root directory  | ionic_root_dir      | --rootDir     | `process.cwd()` |
-| tmp directory   | ionic_tmp_dir       | --tmpDir      | `.tmp`          |
-| src directory   | ionic_src_dir       | --srcDir      | `src`           |
-| www directory   | ionic_www_dir       | --wwwDir      | `www`           |
-| build directory | ionic_build_dir     | --buildDir    | `build`         |
+| root directory  | `ionic_root_dir`    | `--rootDir`   | `process.cwd()` |
+| tmp directory   | `ionic_tmp_dir`     | `--tmpDir`    | `.tmp`          |
+| src directory   | `ionic_src_dir`     | `--srcDir`    | `src`           |
+| www directory   | `ionic_www_dir`     | `--wwwDir`    | `www`           |
+| build directory | `ionic_build_dir`   | `--buildDir`  | `build`         |
 
 
 ## The Stack
