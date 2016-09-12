@@ -39,7 +39,7 @@ npm run build
 
 ## Custom Config Files
 
-In most cases, the defaults which Ionic provides covers the scenarios required by developers. However, Ionic App Scripts also comes with multiple ways to configure and override the defaults for each of the various tasks. Note that Ionic will also apply its defaults for any property that was not provided by custom configurations.
+In many cases, the defaults which Ionic provides covers most of the scenarios required by developers. However, Ionic App Scripts does provide multiple ways to configure and override the defaults for each of the various tasks. Note that Ionic will always apply its defaults for any property that was not provided by custom configurations.
 
 ### NPM Config
 
@@ -61,6 +61,12 @@ Remember how we're actually running `ionic-app-scripts` from the `scripts` prope
     "build": "ionic-app-scripts build --rollup ./config/rollup.config.js",
     "compress": "ionic-app-scripts compress --cleancss ./config/cleancss.config.js",
   },
+```
+
+The same command-line flags can be also applied to `npm run` commands too, such as:
+
+```
+npm run build --rollup ./config/rollup.config.js
 ```
 
 
