@@ -20,7 +20,7 @@ Just the bullet list above is a little overwhelming, and each task requires quit
 
 ### NPM Scripts
 
-Rather than depending on external task runners, Ionic App Scripts now prefers being executed from [NPM scripts](https://docs.npmjs.com/misc/scripts). Ionic's NPM scripts come preconfigured within the project's `package.json` file. For example, this is the default setup for npm scripts within each starters:
+Instead of depending on external task runners, Ionic App Scripts now prefers being executed from [NPM scripts](https://docs.npmjs.com/misc/scripts). Ionic's NPM scripts come preconfigured within the project's `package.json` file. For example, this is the default setup for npm scripts within each starters:
 
 ```
   "scripts": {
@@ -56,6 +56,29 @@ Remember how we're actually calling `ionic-app-scripts` from the `scripts` prope
     "compress": "ionic-app-scripts compress --cleancss ./config/cleancss.config.js",
   },
 ```
+
+
+### Overriding Config Files
+
+| Config File | NPM Config Property | Cmd-line Flag    |
+|-------------|---------------------|------------------|
+| CleanCss    | ionic_cleancss      | --cleancss or -e |
+| Copy        | ionic_copy          | --copy or -y     |
+| NGC         | ionic_ngc           | --ngc or -n      |
+| Rollup      | ionic_rollup        | --rollup or -r   |
+| Sass        | ionic_sass          | --sass or -s     |
+| UglifyJS    | ionic_uglifyjs      | --uglifyjs or -u |
+
+
+### Overriding Config Values
+
+| Config Values   | NPM Config Property | Cmd-line Flag | Defaults        |
+|-----------------|---------------------|---------------|-----------------|
+| root directory  | ionic_root_dir      | --rootDir     | `process.cwd()` |
+| tmp directory   | ionic_tmp_dir       | --tmpDir      | `.tmp`          |
+| src directory   | ionic_src_dir       | --srcDir      | `src`           |
+| www directory   | ionic_www_dir       | --wwwDir      | `www`           |
+| build directory | ionic_build_dir     | --buildDir    | `build`         |
 
 
 ## The Stack

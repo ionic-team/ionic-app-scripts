@@ -50,7 +50,7 @@ function copyFiles(context: BuildContext, src: string, dest: string, filter?: an
 const COPY_TASK_INFO: TaskInfo = {
   contextProperty: 'copyConfig',
   fullArgConfig: '--copy',
-  shortArgConfig: '-c',
+  shortArgConfig: '-y',
   envConfig: 'ionic_copy',
   defaultConfigFilename: 'copy.config'
 };

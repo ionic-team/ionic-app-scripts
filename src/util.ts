@@ -22,7 +22,7 @@ export function generateContext(context?: BuildContext): BuildContext {
     };
   }
 
-  context.rootDir = context.rootDir || getConfigValueDefaults('--rootDir', '-r', 'ionic_root_dir', process.cwd());
+  context.rootDir = context.rootDir || getConfigValueDefaults('--rootDir', null, 'ionic_root_dir', process.cwd());
 
   context.tmpDir = context.tmpDir || getConfigValueDefaults('--tmpDir', null, 'ionic_tmp_dir', join(context.rootDir, TMP_DIR));
 
