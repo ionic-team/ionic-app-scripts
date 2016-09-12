@@ -44,6 +44,8 @@ npm run build
 
 In many cases, the defaults which Ionic provides covers most of the scenarios required by developers. However, Ionic App Scripts does provide multiple ways to configure and override the defaults for each of the various tasks. Note that Ionic will always apply its defaults for any property that was not provided by custom configurations.
 
+[Default Config Files](https://github.com/driftyco/ionic-app-scripts/tree/master/config)
+
 ### NPM Config
 
 Within the `package.json` file, NPM also provides a handy [config](https://docs.npmjs.com/misc/config#per-package-config-settings) property. Below is an example of setting a custom config file using the `config` property in a project's `package.json`.
@@ -98,10 +100,11 @@ npm run build --rollup ./config/rollup.config.js
 
 ## The Stack
 
-- TypeScript Compiler
-- Angular Compiler (NGC)
-- Rollup Module Bundler
-- Component Sass
-- Autoprefixer
-- UglifyJS
-- CleanCss
+- [TypeScript Compiler](https://www.typescriptlang.org/)
+- [Angular Compiler (NGC)](https://github.com/angular/angular/tree/master/modules/%40angular/compiler-cli)
+- [Rollup Module Bundler](http://rollupjs.org/)
+- Ionic Component Sass
+- [Node Sass](https://www.npmjs.com/package/node-sass)
+- [Autoprefixer](https://github.com/postcss/autoprefixer)
+- [UglifyJS](http://lisperator.net/uglifyjs/)
+- [CleanCss](https://github.com/jakubpawlowicz/clean-css)
