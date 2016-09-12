@@ -5,7 +5,6 @@ export interface BuildContext {
   srcDir?: string;
   wwwDir?: string;
   buildDir?: string;
-  configDir?: string;
 
   rollupConfig?: RollupConfig;
   rollupPolyfillConfig?: RollupConfig;

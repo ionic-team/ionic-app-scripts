@@ -26,8 +26,6 @@ export function generateContext(context?: BuildContext): BuildContext {
 
   context.tmpDir = context.tmpDir || getConfigValueDefaults('--tmpDir', null, 'ionic_tmp_dir', join(context.rootDir, TMP_DIR));
 
-  context.configDir = context.configDir || getConfigValueDefaults('--configDir', null, 'ionic_config_dir', join(context.rootDir, CONFIG_DIR));
-
   context.srcDir = context.srcDir || getConfigValueDefaults('--srcDir', null, 'ionic_src_dir', join(context.rootDir, SRC_DIR));
 
   context.wwwDir = context.wwwDir || getConfigValueDefaults('--wwwDir', null, 'ionic_www_dir', join(context.rootDir, WWW_DIR));
@@ -229,7 +227,6 @@ const argv = process.argv;
 const argvLen = argv.length;
 
 const BUILD_DIR = 'build';
-const CONFIG_DIR = 'config';
 const SRC_DIR = 'src';
 const TMP_DIR = '.tmp';
 const WWW_DIR = 'www';
