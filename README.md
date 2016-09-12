@@ -12,8 +12,11 @@ Out of the box, Ionic starters have been preconfigured with great defaults for b
 - Bundling modules for faster runtime execution
 - Treeshaking unused components and code
 - Generating CSS from bundled component Sass files
+- Autoprefixing vendor CSS prefixes
 - Minifying JavaScript files
 - Compressing CSS files
+- Copying `src` static assets to `www`
+- Watching source files for live-reloading
 
 Just the bullet list above is a little overwhelming, and each task requires quite a bit of development time just to get started. Ionic App Script's goal is to make it easier to complete common tasks so developers can focus on building their app, rather than building build scripts.
 
@@ -47,8 +50,8 @@ Within the `package.json` file, NPM also provides a handy [config](https://docs.
 
 ```
   "config": {
-    "ionic_rollup" : "./config/rollup.config.js",
-    "ionic_cleancss" : "./config/cleancss.config.js"
+    "ionic_rollup": "./config/rollup.config.js",
+    "ionic_cleancss": "./config/cleancss.config.js"
   },
 ```
 
@@ -99,5 +102,6 @@ npm run build --rollup ./config/rollup.config.js
 - Angular Compiler (NGC)
 - Rollup Module Bundler
 - Component Sass
+- Autoprefixer
 - UglifyJS
 - CleanCss
