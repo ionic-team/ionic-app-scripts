@@ -10,6 +10,7 @@ export interface BuildContext {
   rollupPolyfillConfig?: RollupConfig;
   cleancssConfig?: CleanCssConfig;
   copyConfig?: CopyConfig;
+  generatorConfig?: GeneratorConfig;
   ngcConfig?: NgcConfig;
   sassConfig?: SassConfig;
   uglifyjsConfig?: UglifyJsConfig;
@@ -35,6 +36,11 @@ export interface CopyOptions {
   src: string;
   dest: string;
   filter: any;
+}
+
+
+export interface GeneratorConfig {
+  templatesDir: string;
 }
 
 

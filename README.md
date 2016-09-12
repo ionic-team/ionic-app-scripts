@@ -77,14 +77,15 @@ npm run build --rollup ./config/rollup.config.js
 
 ### Overriding Config Files
 
-| Config File | NPM Config Property | Cmd-line Flag        |
-|-------------|---------------------|----------------------|
-| CleanCss    | `ionic_cleancss`    | `--cleancss` or `-e` |
-| Copy        | `ionic_copy`        | `--copy` or `-y`     |
-| NGC         | `ionic_ngc`         | `--ngc` or `-n`      |
-| Rollup      | `ionic_rollup`      | `--rollup` or `-r`   |
-| Sass        | `ionic_sass`        | `--sass` or `-s`     |
-| UglifyJS    | `ionic_uglifyjs`    | `--uglifyjs` or `-u` |
+| Config File | NPM Config Property | Cmd-line Flag         |
+|-------------|---------------------|-----------------------|
+| CleanCss    | `ionic_cleancss`    | `--cleancss` or `-e`  |
+| Copy        | `ionic_copy`        | `--copy` or `-y`      |
+| Generator   | `ionic_generator`   | `--generator` or `-g` |
+| NGC         | `ionic_ngc`         | `--ngc` or `-n`       |
+| Rollup      | `ionic_rollup`      | `--rollup` or `-r`    |
+| Sass        | `ionic_sass`        | `--sass` or `-s`      |
+| UglifyJS    | `ionic_uglifyjs`    | `--uglifyjs` or `-u`  |
 
 
 ### Overriding Config Values

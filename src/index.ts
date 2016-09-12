@@ -5,6 +5,7 @@ export { clean } from './clean';
 export { cleancss } from './cleancss';
 export { copy } from './copy';
 export { compress } from './compress';
+export { generator } from './generator';
 export { ngc } from './ngc';
 export { sass } from './sass';
 export { transpile } from './transpile';
