@@ -1,5 +1,5 @@
 
-export { build } from './build';
+export { build, rebuild, runCmds } from './build';
 export { bundle } from './bundle';
 export { clean } from './clean';
 export { cleancss } from './cleancss';

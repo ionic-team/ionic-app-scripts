@@ -16,8 +16,20 @@ export interface BuildContext {
   uglifyjsConfig?: UglifyJsConfig;
   watchConfig?: WatchConfig;
 
-  runCompress: boolean;
   moduleFiles?: string[];
+}
+
+
+export interface BuildOptions {
+  runCompress?: boolean;
+}
+
+
+export interface BuildCommand {
+  sync?: Function;
+  async?: Function;
+  asyncPromise?: Promise<any>;
+  awaitPreviousAsyncs?: boolean;
 }
 
 
@@ -105,7 +117,22 @@ export interface UglifyJsConfig {
 
 
 export interface WatchConfig {
+  watchers: Watcher[];
+}
 
+
+export interface Watcher {
+  // https://www.npmjs.com/package/chokidar
+  paths: string[];
+  options: {
+    ignored?: string;
+    ignoreInitial?: boolean;
+    followSymlinks?: boolean;
+    cwd?: string;
+  };
+  callback: {
+    (event: string, path: string, context: BuildContext): void;
+  };
 }
 
 

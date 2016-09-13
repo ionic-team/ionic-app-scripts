@@ -1,6 +1,6 @@
 import { basename, join } from 'path';
 import { BuildContext, TaskInfo, TsConfig } from './interfaces';
-import { copy as fsCopy, emptyDirSync, outputJsonSync, readJsonSync, statSync } from 'fs-extra';
+import { accessSync, copy as fsCopy, emptyDirSync, outputJsonSync, readJsonSync, statSync } from 'fs-extra';
 import { fillConfigDefaults, generateContext, Logger } from './util';
 
 
@@ -31,11 +31,19 @@ function runNgc(context: BuildContext) {
     // and save the modified copy into the tmp directory
     createTmpTsConfig(context);
 
+    const ngcCmd = join(context.rootDir, 'node_modules', '.bin', 'ngc');
+
+    try {
+      accessSync(ngcCmd);
+    } catch (e) {
+      reject(`Unable to find NGC: "${ngcCmd}": ${e}`);
+      return;
+    }
+
     // let's kick off the actual ngc command on our copied TS files
     // use the user's ngc in their node_modules to ensure ngc
     // versioned and working along with the user's ng2 version
     const spawn = require('cross-spawn');
-    const ngcCmd = join(context.rootDir, 'node_modules', '.bin', 'ngc');
     const ngcCmdArgs = [
       '--project', getTmpTsConfigPath(context)
     ];
@@ -60,7 +68,6 @@ function runNgc(context: BuildContext) {
         resolve();
       }
     });
-
   });
 }
 

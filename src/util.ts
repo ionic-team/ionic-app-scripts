@@ -17,9 +17,7 @@ import { join } from 'path';
  */
 export function generateContext(context?: BuildContext): BuildContext {
   if (!context) {
-    context = {
-      runCompress: false
-    };
+    context = {};
   }
 
   context.rootDir = context.rootDir || getConfigValueDefaults('--rootDir', null, 'ionic_root_dir', process.cwd());

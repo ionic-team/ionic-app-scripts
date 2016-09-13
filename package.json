@@ -24,6 +24,7 @@
   "main": "dist/index.js",
   "dependencies": {
     "autoprefixer": "6.4.1",
+    "chokidar": "1.6.0",
     "clean-css": "3.4.19",
     "cross-spawn": "4.0.0",
     "fs-extra": "0.30.0",

@@ -1,21 +1,51 @@
 import { BuildContext, TaskInfo } from './interfaces';
-import { generateContext, fillConfigDefaults, Logger } from './util';
+import { build } from './build';
+import { generateContext, fillConfigDefaults, Logger, replacePathVars } from './util';
 
 
 export function watch(context?: BuildContext) {
   context = generateContext(context);
   fillConfigDefaults(context, WATCH_TASK_INFO);
 
-  const logger = new Logger('watch');
+  new Logger('watch');
 
+  build(context).then(() => {
+    // https://github.com/paulmillr/chokidar
+    const chokidar = require('chokidar');
 
+    context.watchConfig.watchers.forEach(watcher => {
+      if (watcher.callback && watcher.paths) {
+        const options = watcher.options || {};
+        if (!options.cwd) {
+          options.cwd = context.rootDir;
+        }
+        if (typeof options.ignoreInitial !== 'boolean') {
+          options.ignoreInitial = true;
+        }
+        const paths = cleanPaths(context, watcher.paths);
+        const chokidarWatcher = chokidar.watch(paths, options);
 
-  return Promise.resolve().then(() => {
-    return logger.finish();
-  }).catch(reason => {
-    return logger.fail(reason);
+        chokidarWatcher.on('all', (event: string, path: string) => {
+          watcher.callback(event, path, context);
+        });
+      }
+    });
+
+    Logger.info('watching files ...');
   });
 }
+
+
+function cleanPaths(context: BuildContext, paths: any): any {
+  if (Array.isArray(paths)) {
+    return paths.map(p => replacePathVars(context, p));
+  }
+  if (typeof paths === 'string') {
+    return replacePathVars(context, paths);
+  }
+  return paths;
+}
+
 
 const WATCH_TASK_INFO: TaskInfo = {
   contextProperty: 'watchConfig',
