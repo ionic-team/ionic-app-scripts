@@ -138,6 +138,10 @@ function filterCopyFiles(filePath: any, hoop: any) {
           shouldInclude = true;
         }
       }
+
+      if (filePath.substr(filePath.length - 5) === '.html') {
+          shouldInclude = true;
+      }
     }
 
   } catch (e) {}
