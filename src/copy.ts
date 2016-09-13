@@ -1,23 +1,14 @@
-import { BuildContext, TaskInfo } from './interfaces';
-import { fillConfigDefaults, generateContext, Logger, replacePathVars } from './util';
+import { BuildContext, fillConfigDefaults, generateContext, Logger, replacePathVars, TaskInfo } from './util';
 import { copy as fsCopy } from 'fs-extra';
 
 
-export function copy(context?: BuildContext) {
+export function copy(context?: BuildContext, copyConfig?: CopyConfig) {
   context = generateContext(context);
-  fillConfigDefaults(context, COPY_TASK_INFO);
+  copyConfig = fillConfigDefaults(context, copyConfig, COPY_TASK_INFO);
 
   const logger = new Logger('copy');
 
-  const promises: Promise<any>[] = [];
-
-  context.copyConfig.include.forEach(copyOptions => {
-    promises.push(
-      copyFiles(context, copyOptions.src, copyOptions.dest, copyOptions.filter)
-    );
-  });
-
-  return Promise.all(promises).then(() => {
+  return copyFiles(context, copyConfig).then(() => {
     return logger.finish();
   }).catch(reason => {
     return logger.fail(reason);
@@ -25,7 +16,26 @@ export function copy(context?: BuildContext) {
 }
 
 
-function copyFiles(context: BuildContext, src: string, dest: string, filter?: any) {
+export function copyUpdate(event: string, path: string, context: BuildContext) {
+  const copyConfig = fillConfigDefaults(context, {}, COPY_TASK_INFO);
+  return copyFiles(context, copyConfig);
+}
+
+
+function copyFiles(context: BuildContext, copyConfig: CopyConfig) {
+  const promises: Promise<any>[] = [];
+
+  copyConfig.include.forEach(copyOptions => {
+    promises.push(
+      copySrcToDest(context, copyOptions.src, copyOptions.dest, copyOptions.filter)
+    );
+  });
+
+  return Promise.all(promises);
+}
+
+
+function copySrcToDest(context: BuildContext, src: string, dest: string, filter?: any) {
   src = replacePathVars(context, src);
   dest = replacePathVars(context, dest);
   const opts = {
@@ -54,3 +64,15 @@ const COPY_TASK_INFO: TaskInfo = {
   envConfig: 'ionic_copy',
   defaultConfigFilename: 'copy.config'
 };
+
+export interface CopyConfig {
+  include: CopyOptions[];
+}
+
+
+export interface CopyOptions {
+  // https://www.npmjs.com/package/fs-extra
+  src: string;
+  dest: string;
+  filter: any;
+}

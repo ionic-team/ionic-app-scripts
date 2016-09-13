@@ -1,10 +1,9 @@
-import { BuildContext, TaskInfo } from './interfaces';
-import { generateContext, fillConfigDefaults, Logger } from './util';
+import { BuildContext, generateContext, fillConfigDefaults, Logger, TaskInfo } from './util';
 
 
-export function cleancss(context?: BuildContext) {
+export function cleancss(context?: BuildContext, cleanCssConfig?: CleanCssConfig) {
   context = generateContext(context);
-  fillConfigDefaults(context, CLEANCSS_TASK_INFO);
+  cleanCssConfig = fillConfigDefaults(context, cleanCssConfig, CLEANCSS_TASK_INFO);
 
   const logger = new Logger('cleancss');
 
@@ -23,3 +22,8 @@ const CLEANCSS_TASK_INFO: TaskInfo = {
   envConfig: 'ionic_cleancss',
   defaultConfigFilename: 'cleancss.config'
 };
+
+
+export interface CleanCssConfig {
+  // https://www.npmjs.com/package/clean-css
+}

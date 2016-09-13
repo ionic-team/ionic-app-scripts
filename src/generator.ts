@@ -1,15 +1,14 @@
-import { BuildContext, TaskInfo } from './interfaces';
-import { generateContext, fillConfigDefaults, Logger } from './util';
+import { BuildContext, generateContext, fillConfigDefaults, Logger, TaskInfo } from './util';
 
 
-export function generator(context?: BuildContext) {
+export function generator(context?: BuildContext, generatorConfig?: GeneratorConfig) {
   context = generateContext(context);
-  fillConfigDefaults(context, GENERATOR_TASK_INFO);
+  generatorConfig = fillConfigDefaults(context, generatorConfig, GENERATOR_TASK_INFO);
 
   const logger = new Logger('generator');
 
 
-  console.log('templatesDir', context.generatorConfig.templatesDir)
+  console.log('templatesDir', generatorConfig.templatesDir);
 
 
   return Promise.resolve().then(() => {
@@ -19,6 +18,7 @@ export function generator(context?: BuildContext) {
   });
 }
 
+
 const GENERATOR_TASK_INFO: TaskInfo = {
   contextProperty: 'generatorConfig',
   fullArgConfig: '--generator',
@@ -26,3 +26,8 @@ const GENERATOR_TASK_INFO: TaskInfo = {
   envConfig: 'ionic_generator',
   defaultConfigFilename: 'generator.config'
 };
+
+
+export interface GeneratorConfig {
+  templatesDir: string;
+}

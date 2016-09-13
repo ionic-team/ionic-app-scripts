@@ -1,19 +1,13 @@
-import { BuildContext } from './interfaces';
-import { generateContext, Logger } from './util';
+import { BuildContext, generateContext, Logger } from './util';
 import { join } from 'path';
 
 
-export function transpile(context: BuildContext) {
+export function transpile(context?: BuildContext) {
   context = generateContext(context);
 
   const logger = new Logger('transpile');
 
-  const promises = [
-    transpileApp(context),
-    transpilePolyfills(context)
-  ];
-
-  return Promise.all(promises).then(() => {
+  return transpileApp(context).then(() => {
     return logger.finish();
   }).catch(reason => {
     return logger.fail(reason);
@@ -21,17 +15,14 @@ export function transpile(context: BuildContext) {
 }
 
 
-export function transpileApp(context: BuildContext) {
-  const srcFile = join(context.buildDir, 'main.es6.js');
-  const destFile = join(context.buildDir, 'main.js');
-
-  return transpile6To5(context, srcFile, destFile);
+export function transpileUpdate(event: string, path: string, context: BuildContext) {
+  return transpile(context);
 }
 
 
-export function transpilePolyfills(context: BuildContext) {
-  const srcFile = join(context.buildDir, 'polyfills.es6.js');
-  const destFile = join(context.buildDir, 'polyfills.js');
+export function transpileApp(context: BuildContext) {
+  const srcFile = join(context.buildDir, 'main.es6.js');
+  const destFile = join(context.buildDir, 'main.js');
 
   return transpile6To5(context, srcFile, destFile);
 }

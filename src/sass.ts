@@ -1,14 +1,12 @@
 import { basename, dirname, join, sep } from 'path';
-import { BuildContext, TaskInfo } from './interfaces';
-import { fillConfigDefaults, generateContext, Logger, replacePathVars } from './util';
+import { BuildContext, fillConfigDefaults, generateContext, Logger, replacePathVars, TaskInfo } from './util';
 import { getModulePathsCache } from './bundle';
-import { SassConfig, SassResult, SassMap } from './interfaces';
 import { readdirSync, writeFile } from 'fs';
 
 
-export function sass(context?: BuildContext) {
+export function sass(context?: BuildContext, sassConfig?: SassConfig) {
   context = generateContext(context);
-  fillConfigDefaults(context, SASS_TASK_INFO);
+  sassConfig = fillConfigDefaults(context, sassConfig, SASS_TASK_INFO);
 
   const logger = new Logger('sass');
 
@@ -24,29 +22,29 @@ export function sass(context?: BuildContext) {
   }
 
   // where the final css output file is saved
-  if (!context.sassConfig.outFile) {
-    context.sassConfig.outFile = join(context.buildDir, context.sassConfig.outputFilename);
+  if (!sassConfig.outFile) {
+    sassConfig.outFile = join(context.buildDir, sassConfig.outputFilename);
   }
-  Logger.debug(`outFile: ${context.sassConfig.outFile}`);
+  Logger.debug(`outFile: ${sassConfig.outFile}`);
 
   // import paths where the sass compiler will look for imports
-  context.sassConfig.includePaths.unshift(join(context.srcDir));
-  Logger.debug(`includePaths: ${context.sassConfig.includePaths}`);
+  sassConfig.includePaths.unshift(join(context.srcDir));
+  Logger.debug(`includePaths: ${sassConfig.includePaths}`);
 
   // sass import sorting algorithms incase there was something to tweak
-  context.sassConfig.sortComponentPathsFn = (context.sassConfig.sortComponentPathsFn || defaultSortComponentPathsFn);
-  context.sassConfig.sortComponentFilesFn = (context.sassConfig.sortComponentFilesFn || defaultSortComponentFilesFn);
+  sassConfig.sortComponentPathsFn = (sassConfig.sortComponentPathsFn || defaultSortComponentPathsFn);
+  sassConfig.sortComponentFilesFn = (sassConfig.sortComponentFilesFn || defaultSortComponentFilesFn);
 
-  if (!context.sassConfig.file) {
+  if (!sassConfig.file) {
     // if the sass config was not given an input file, then
     // we're going to dynamically generate the sass data by
     // scanning through all the components included in the bundle
     // and generate the sass on the fly
-    generateSassData(context);
+    generateSassData(context, sassConfig);
   }
 
   // let's begin shall we...
-  return render(context.sassConfig).then(() => {
+  return render(sassConfig).then(() => {
     return logger.finish();
   }).catch(reason => {
     return logger.fail(reason);
@@ -54,7 +52,12 @@ export function sass(context?: BuildContext) {
 }
 
 
-function generateSassData(context: BuildContext) {
+export function sassUpdate(event: string, path: string, context: BuildContext) {
+  return sass(context);
+}
+
+
+function generateSassData(context: BuildContext, sassConfig: SassConfig) {
   /**
    * 1) Import user sass variables first since user variables
    *    should have precedence over default library variables.
@@ -77,12 +80,12 @@ function generateSassData(context: BuildContext) {
 
   // gather a list of all the sass variable files that should be used
   // these variable files will be the first imports
-  const userSassVariableFiles = context.sassConfig.variableSassFiles.map(f => {
+  const userSassVariableFiles = sassConfig.variableSassFiles.map(f => {
     return replacePathVars(context, f);
   });
 
   // gather a list of all the sass files that are next to components we're bundling
-  const componentSassFiles = getComponentSassFiles(moduleDirectories, context);
+  const componentSassFiles = getComponentSassFiles(moduleDirectories, context, sassConfig);
 
   Logger.debug(`userSassVariableFiles: ${userSassVariableFiles.length}`);
   Logger.debug(`componentSassFiles: ${componentSassFiles.length}`);
@@ -90,45 +93,45 @@ function generateSassData(context: BuildContext) {
   const sassImports = userSassVariableFiles.concat(componentSassFiles).map(sassFile => '"' + sassFile + '"');
 
   if (sassImports.length) {
-    context.sassConfig.data = `@charset "UTF-8"; @import ${sassImports.join(',')};`;
+    sassConfig.data = `@charset "UTF-8"; @import ${sassImports.join(',')};`;
   }
 }
 
 
-function getComponentSassFiles(moduleDirectories: string[], context: BuildContext) {
+function getComponentSassFiles(moduleDirectories: string[], context: BuildContext, sassConfig: SassConfig) {
   const collectedSassFiles: string[] = [];
-  const componentDirectories = getComponentDirectories(moduleDirectories, context.sassConfig);
+  const componentDirectories = getComponentDirectories(moduleDirectories, sassConfig);
 
   // sort all components with the library components being first
   // and user components coming last, so it's easier for user css
   // to override library css with the same specificity
-  const sortedComponentPaths = componentDirectories.sort(context.sassConfig.sortComponentPathsFn);
+  const sortedComponentPaths = componentDirectories.sort(sassConfig.sortComponentPathsFn);
 
   sortedComponentPaths.forEach(componentPath => {
-    addComponentSassFiles(componentPath, collectedSassFiles, context);
+    addComponentSassFiles(componentPath, collectedSassFiles, context, sassConfig);
   });
 
   return collectedSassFiles;
 }
 
 
-function addComponentSassFiles(componentPath: string, collectedSassFiles: string[], context: BuildContext) {
-  let siblingFiles = getSiblingSassFiles(componentPath, context);
+function addComponentSassFiles(componentPath: string, collectedSassFiles: string[], context: BuildContext, sassConfig: SassConfig) {
+  let siblingFiles = getSiblingSassFiles(componentPath, sassConfig);
 
   if (!siblingFiles.length && componentPath.indexOf(sep + 'node_modules') === -1) {
     Logger.debug(`No sass files found in: ${componentPath}`);
 
     // if we didn't find anything, see if this module is mapped to another directory
-    for (const k in context.sassConfig.directoryMaps) {
-      if (context.sassConfig.directoryMaps.hasOwnProperty(k)) {
+    for (const k in sassConfig.directoryMaps) {
+      if (sassConfig.directoryMaps.hasOwnProperty(k)) {
         var actualDirectory = replacePathVars(context, k);
-        var mappedDirectory = replacePathVars(context, context.sassConfig.directoryMaps[k]);
+        var mappedDirectory = replacePathVars(context, sassConfig.directoryMaps[k]);
 
         componentPath = componentPath.replace(actualDirectory, mappedDirectory);
 
         Logger.debug(`Map and check sass files in: ${componentPath}`);
 
-        siblingFiles = getSiblingSassFiles(componentPath, context);
+        siblingFiles = getSiblingSassFiles(componentPath, sassConfig);
         if (siblingFiles.length) {
           break;
         }
@@ -137,7 +140,7 @@ function addComponentSassFiles(componentPath: string, collectedSassFiles: string
   }
 
   if (siblingFiles.length) {
-    siblingFiles = siblingFiles.sort(context.sassConfig.sortComponentFilesFn);
+    siblingFiles = siblingFiles.sort(sassConfig.sortComponentFilesFn);
 
     siblingFiles.forEach(componentFile => {
       collectedSassFiles.push(componentFile);
@@ -147,9 +150,9 @@ function addComponentSassFiles(componentPath: string, collectedSassFiles: string
 }
 
 
-function getSiblingSassFiles(componentPath: string, context: BuildContext) {
+function getSiblingSassFiles(componentPath: string, sassConfig: SassConfig) {
   return readdirSync(componentPath).filter(f => {
-    return isValidSassFile(f, context.sassConfig);
+    return isValidSassFile(f, sassConfig);
   }).map(f => {
     return join(componentPath, f);
   });
@@ -376,3 +379,36 @@ const SASS_TASK_INFO: TaskInfo = {
   envConfig: 'ionic_sass',
   defaultConfigFilename: 'sass.config'
 };
+
+
+export interface SassConfig {
+  // https://www.npmjs.com/package/node-sass
+  outputFilename?: string;
+  outFile?: string;
+  file?: string;
+  data?: string;
+  includePaths?: string[];
+  excludeModules?: string[];
+  includeFiles?: RegExp[];
+  excludeFiles?: RegExp[];
+  directoryMaps?: {[key: string]: string};
+  sortComponentPathsFn?: (a: any, b: any) => number;
+  sortComponentFilesFn?: (a: any, b: any) => number;
+  variableSassFiles?: string[];
+  autoprefixer?: any;
+  sourceMap?: string;
+  omitSourceMapUrl?: boolean;
+  sourceMapContents?: boolean;
+}
+
+
+export interface SassResult {
+  css: string;
+  map: SassMap;
+}
+
+
+export interface SassMap {
+  file: string;
+  sources: any[];
+}

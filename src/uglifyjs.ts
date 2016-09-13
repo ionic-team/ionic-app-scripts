@@ -1,10 +1,9 @@
-import { BuildContext, TaskInfo } from './interfaces';
-import { generateContext, fillConfigDefaults, Logger } from './util';
+import { BuildContext, generateContext, fillConfigDefaults, Logger, TaskInfo } from './util';
 
 
-export function uglifyjs(context?: BuildContext) {
+export function uglifyjs(context?: BuildContext, uglifyJsConfig?: UglifyJsConfig) {
   context = generateContext(context);
-  fillConfigDefaults(context, UGLIFY_TASK_INFO);
+  uglifyJsConfig = fillConfigDefaults(context, uglifyJsConfig, UGLIFY_TASK_INFO);
 
   const logger = new Logger('uglifyjs');
 
@@ -17,6 +16,7 @@ export function uglifyjs(context?: BuildContext) {
   });
 }
 
+
 const UGLIFY_TASK_INFO: TaskInfo = {
   contextProperty: 'uglifyjsConfig',
   fullArgConfig: '--uglifyjs',
@@ -24,3 +24,8 @@ const UGLIFY_TASK_INFO: TaskInfo = {
   envConfig: 'ionic_uglifyjs',
   defaultConfigFilename: 'uglifyjs.config'
 };
+
+
+export interface UglifyJsConfig {
+  // https://www.npmjs.com/package/uglify-js
+}

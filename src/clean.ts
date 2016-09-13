@@ -1,5 +1,4 @@
-import { BuildContext } from './interfaces';
-import { generateContext, Logger } from './util';
+import { BuildContext, generateContext, Logger } from './util';
 import { emptyDirSync } from 'fs-extra';
 
 

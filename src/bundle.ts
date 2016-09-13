@@ -1,19 +1,14 @@
-import { BuildContext, RollupBundle, TaskInfo } from './interfaces';
-import { fillConfigDefaults, generateContext, Logger } from './util';
+import { BuildContext, fillConfigDefaults, generateContext, Logger, TaskInfo } from './util';
 import { join } from 'path';
 import { outputJson, readJsonSync } from 'fs-extra';
 import { tmpdir } from 'os';
 const rollup = require('rollup').rollup;
 
 
-export function bundle(context?: BuildContext) {
+export function bundle(context?: BuildContext, rollupConfig?: RollupConfig) {
   context = generateContext(context);
 
   const logger = new Logger('bundle');
-
-  // bundle polyfills, async
-  // we do not need to wait on it's completion
-  bundlePolyfills(context);
 
   // bundle the app then create create css
   return bundleApp(context).then(() => {
@@ -24,16 +19,21 @@ export function bundle(context?: BuildContext) {
 }
 
 
-export function bundleApp(context?: BuildContext): Promise<any> {
-  context = generateContext(context);
-  fillConfigDefaults(context, ROLLUP_TASK_INFO);
+export function bundleUpdate(event: string, path: string, context: BuildContext) {
+  return bundleApp(context);
+}
 
-  if (!context.rollupConfig.dest) {
-    context.rollupConfig.dest = join(context.buildDir, 'main.es6.js');
+
+export function bundleApp(context?: BuildContext, rollupConfig?: RollupConfig): Promise<any> {
+  context = generateContext(context);
+  rollupConfig = fillConfigDefaults(context, rollupConfig, ROLLUP_TASK_INFO);
+
+  if (!rollupConfig.dest) {
+    rollupConfig.dest = join(context.buildDir, 'main.es6.js');
   }
 
   // bundle the app then create create css
-  return rollup(context.rollupConfig).then((bundle: RollupBundle) => {
+  return rollup(rollupConfig).then((bundle: RollupBundle) => {
 
     // set the module files used in this bundle
     // this reference can be used elsewhere in the build (sass)
@@ -44,22 +44,7 @@ export function bundleApp(context?: BuildContext): Promise<any> {
     setModulePathsCache(context.moduleFiles);
 
     // write the bundle
-    return bundle.write(context.rollupConfig);
-  });
-}
-
-
-export function bundlePolyfills(context?: BuildContext) {
-  context = generateContext(context);
-  fillConfigDefaults(context, ROLLUP_POLYFILL_TASK_INFO);
-
-  if (!context.rollupPolyfillConfig.dest) {
-    context.rollupPolyfillConfig.dest = join(context.buildDir, 'polyfills.es6.js');
-  }
-
-  // bundle polyfills, async
-  return rollup(context.rollupPolyfillConfig).then((bundle: RollupBundle) => {
-    return bundle.write(context.rollupPolyfillConfig);
+    return bundle.write(rollupConfig);
   });
 }
 
@@ -107,10 +92,18 @@ const ROLLUP_TASK_INFO: TaskInfo = {
 };
 
 
-const ROLLUP_POLYFILL_TASK_INFO: TaskInfo = {
-  contextProperty: 'rollupPolyfillConfig',
-  fullArgConfig: '--rollupPolyfill',
-  shortArgConfig: '-p',
-  envConfig: 'ionic_rollup_polyfill',
-  defaultConfigFilename: 'rollup.polyfill.config'
-};
+export interface RollupConfig {
+  // https://github.com/rollup/rollup/wiki/JavaScript-API
+  entry?: string;
+  sourceMap?: boolean;
+  plugins?: any[];
+  format?: string;
+  dest?: string;
+}
+
+
+export interface RollupBundle {
+  // https://github.com/rollup/rollup/wiki/JavaScript-API
+  write: Function;
+  modules: { id: string }[];
+}

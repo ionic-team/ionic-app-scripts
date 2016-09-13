@@ -1,6 +1,6 @@
-var copy = require('../dist/copy').copy;
-var rebuild = require('../dist/build').rebuild;
-var sass = require('../dist/sass').sass;
+var buildUpdate = require('../dist/build').buildUpdate;
+var copyUpdate = require('../dist/copy').copyUpdate;
+var sassUpdate = require('../dist/sass').sassUpdate;
 
 
 // https://www.npmjs.com/package/chokidar
@@ -15,28 +15,23 @@ module.exports = {
         '{{SRC}}/**/*.ts'
       ],
       options: { ignored: /([\/\\]\.)|(index.html$)/ },
-      callback: function(event, path, context) {
-        rebuild(context);
-      }
-    },
-
-    {
-      paths: '{{SRC}}/**/*.scss',
-      options: { ignored: /[\/\\]\./ },
-      callback: function(event, path, context) {
-        sass(context);
-      }
+      callback: buildUpdate
     },
 
     {
       paths: [
-        '{{SRC}}/assets/*',
-        '{{SRC}}/index.html'
+        '{{SRC}}/**/*.scss'
       ],
       options: { ignored: /[\/\\]\./ },
-      callback: function(event, path, context) {
-        copy(context);
-      }
+      callback: sassUpdate
+    },
+
+    {
+      paths: [
+        '{{SRC}}/assets'
+      ],
+      options: { ignored: /[\/\\]\./ },
+      callback: copyUpdate
     },
 
   ]

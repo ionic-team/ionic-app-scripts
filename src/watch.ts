@@ -1,11 +1,10 @@
-import { BuildContext, TaskInfo } from './interfaces';
 import { build } from './build';
-import { generateContext, fillConfigDefaults, Logger, replacePathVars } from './util';
+import { BuildContext, generateContext, fillConfigDefaults, Logger, replacePathVars, TaskInfo } from './util';
 
 
-export function watch(context?: BuildContext) {
+export function watch(context?: BuildContext, watchConfig?: WatchConfig) {
   context = generateContext(context);
-  fillConfigDefaults(context, WATCH_TASK_INFO);
+  watchConfig = fillConfigDefaults(context, watchConfig, WATCH_TASK_INFO);
 
   new Logger('watch');
 
@@ -13,7 +12,7 @@ export function watch(context?: BuildContext) {
     // https://github.com/paulmillr/chokidar
     const chokidar = require('chokidar');
 
-    context.watchConfig.watchers.forEach(watcher => {
+    watchConfig.watchers.forEach(watcher => {
       if (watcher.callback && watcher.paths) {
         const options = watcher.options || {};
         if (!options.cwd) {
@@ -54,3 +53,23 @@ const WATCH_TASK_INFO: TaskInfo = {
   envConfig: 'ionic_watch',
   defaultConfigFilename: 'watch.config'
 };
+
+
+export interface WatchConfig {
+  watchers: Watcher[];
+}
+
+
+export interface Watcher {
+  // https://www.npmjs.com/package/chokidar
+  paths: string[];
+  options: {
+    ignored?: string;
+    ignoreInitial?: boolean;
+    followSymlinks?: boolean;
+    cwd?: string;
+  };
+  callback: {
+    (event: string, path: string, context: BuildContext): void;
+  };
+}

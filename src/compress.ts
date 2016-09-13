@@ -1,6 +1,5 @@
-import { BuildContext } from './interfaces';
 import { cleancss } from './cleancss';
-import { generateContext, Logger } from './util';
+import { BuildContext, generateContext, Logger } from './util';
 import { uglifyjs } from './uglifyjs';
 
 

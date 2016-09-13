@@ -1,4 +1,3 @@
-import { BuildContext, TaskInfo } from './interfaces';
 import { join } from 'path';
 
 
@@ -36,9 +35,10 @@ export function generateContext(context?: BuildContext): BuildContext {
 }
 
 
-export function fillConfigDefaults(context: BuildContext, task: TaskInfo): any {
+export function fillConfigDefaults(context: BuildContext, config: any, task: TaskInfo): any {
   // if the context property wasn't already set, then see if a config file
   // was been supplied by the user as an arg or env variable
+  (<any>context)[task.contextProperty] = config;
   if (!(<any>context)[task.contextProperty]) {
     (<any>context)[task.contextProperty] = getConfigFileData(task.fullArgConfig, task.shortArgConfig, task.envConfig, null) || {};
   }
@@ -47,10 +47,12 @@ export function fillConfigDefaults(context: BuildContext, task: TaskInfo): any {
 
   // always assign any default values which were not already supplied by the user
   assignDefaults((<any>context)[task.contextProperty], defaultConfig);
+
+  return (<any>context)[task.contextProperty];
 }
 
 
-export function getConfigFileData(fullName: string, shortName: string, envVarName: string, defaultValue: string): any {
+function getConfigFileData(fullName: string, shortName: string, envVarName: string, defaultValue: string): any {
   // see if the user supplied a value for where to look up their config file
   const configFilePath = getConfigValueDefaults(fullName, shortName, envVarName, null);
 
@@ -67,7 +69,7 @@ export function getConfigFileData(fullName: string, shortName: string, envVarNam
 }
 
 
-export function getConfigValueDefaults(argFullName: string, argShortName: string, envVarName: string, defaultValue: string) {
+function getConfigValueDefaults(argFullName: string, argShortName: string, envVarName: string, defaultValue: string) {
   // first see if the value was set in the command-line args
   const argValue = getArgValue(argFullName, argShortName);
   if (argValue) {
@@ -86,7 +88,7 @@ export function getConfigValueDefaults(argFullName: string, argShortName: string
 }
 
 
-export function getEnvVariable(envVarName: string): string {
+function getEnvVariable(envVarName: string): string {
   // see if it was set in npm package.json config
   // which ends up as an env variable prefixed with "npm_package_config_"
   envVarName = 'npm_package_config_' + envVarName;
@@ -103,7 +105,7 @@ export function getEnvVariable(envVarName: string): string {
 }
 
 
-export function getArgValue(fullName: string, shortName: string): string {
+function getArgValue(fullName: string, shortName: string): string {
   for (var i = 2; i < argvLen; i++) {
     var arg = argv[i];
     if (arg === fullName || (shortName && arg === shortName)) {
@@ -117,7 +119,7 @@ export function getArgValue(fullName: string, shortName: string): string {
 }
 
 
-export function assignDefaults(userConfig: any, defaultConfig: any) {
+function assignDefaults(userConfig: any, defaultConfig: any) {
   if (userConfig && defaultConfig) {
     for (var key in defaultConfig) {
       if (!Object.prototype.hasOwnProperty.call(userConfig, key)) {
@@ -138,7 +140,7 @@ export function replacePathVars(context: BuildContext, filePath: string) {
 
 
 let checkedDebug = false;
-export function checkDebugMode() {
+function checkDebugMode() {
   if (!checkedDebug) {
     if (argv.some(a => a === '--debug') || getEnvVariable('ionic_debug_mode') === 'true') {
       process.env.ionic_debug_mode = 'true';
@@ -152,7 +154,7 @@ export function checkDebugMode() {
 }
 
 
-export function isDebugMode() {
+function isDebugMode() {
   return (process.env.ionic_debug_mode === 'true');
 }
 
@@ -228,3 +230,27 @@ const BUILD_DIR = 'build';
 const SRC_DIR = 'src';
 const TMP_DIR = '.tmp';
 const WWW_DIR = 'www';
+
+
+export interface BuildContext {
+  rootDir?: string;
+  tmpDir?: string;
+  srcDir?: string;
+  wwwDir?: string;
+  buildDir?: string;
+  moduleFiles?: string[];
+}
+
+
+export interface BuildOptions {
+  runCompress?: boolean;
+}
+
+
+export interface TaskInfo {
+  contextProperty: string;
+  fullArgConfig: string;
+  shortArgConfig: string;
+  envConfig: string;
+  defaultConfigFilename: string;
+}
