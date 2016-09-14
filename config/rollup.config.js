@@ -23,6 +23,11 @@ module.exports = {
   format: 'iife',
 
   /**
+   * dest: the output filename for the bundle in the buildDir
+   */
+  dest: 'main.es6.js',
+
+  /**
    * plugins: Array of plugin objects, or a single plugin object.
    * See https://github.com/rollup/rollup/wiki/Plugins for more info.
    */

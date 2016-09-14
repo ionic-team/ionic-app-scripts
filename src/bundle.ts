@@ -28,9 +28,7 @@ export function bundleApp(context?: BuildContext, rollupConfig?: RollupConfig): 
   context = generateContext(context);
   rollupConfig = fillConfigDefaults(context, rollupConfig, ROLLUP_TASK_INFO);
 
-  if (!rollupConfig.dest) {
-    rollupConfig.dest = join(context.buildDir, 'main.es6.js');
-  }
+  rollupConfig.dest = join(context.buildDir, rollupConfig.dest);
 
   // bundle the app then create create css
   return rollup(rollupConfig).then((bundle: RollupBundle) => {

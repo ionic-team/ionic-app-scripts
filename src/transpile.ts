@@ -1,4 +1,4 @@
-import { BuildContext, generateContext, Logger } from './util';
+import { BuildContext, fillConfigDefaults, generateContext, Logger, TaskInfo } from './util';
 import { join } from 'path';
 
 
@@ -19,10 +19,10 @@ export function transpileUpdate(event: string, path: string, context: BuildConte
   return transpile(context);
 }
 
-
-export function transpileApp(context: BuildContext) {
-  const srcFile = join(context.buildDir, 'main.es6.js');
-  const destFile = join(context.buildDir, 'main.js');
+export function transpileApp(context: BuildContext, transpileConfig?: TranspileConfig) {
+  transpileConfig = fillConfigDefaults(context, transpileConfig, TRANSPILE_TASK_INFO);
+  const srcFile = join(context.buildDir, transpileConfig.source);
+  const destFile = join(context.buildDir, transpileConfig.destFileName);
 
   return transpile6To5(context, srcFile, destFile);
 }
@@ -37,6 +37,7 @@ export function transpile6To5(context: BuildContext, srcFile: string, destFile: 
       '--out', destFile,
       '--target', 'es5',
       '--allowJs',
+      '--sourceMap',
       srcFile
     ];
     let hadAnError = false;
@@ -61,5 +62,17 @@ export function transpile6To5(context: BuildContext, srcFile: string, destFile: 
     });
 
   });
-
 }
+
+export interface TranspileConfig {
+  source: string;
+  destFileName: string;
+}
+
+const TRANSPILE_TASK_INFO: TaskInfo = {
+  contextProperty: 'tscConfig',
+  fullArgConfig: '--tsc',
+  shortArgConfig: '-tsc',
+  envConfig: 'ionic_transpile',
+  defaultConfigFilename: 'transpile.config'
+};
