@@ -46,7 +46,8 @@ function copySrcToDest(context: BuildContext, src: string, dest: string, filter?
     fsCopy(src, dest, opts, (err) => {
       if (err) {
         const msg = `Error copying "${src}" to "${dest}": ${err}`;
-        if (msg.indexOf('ENOENT') < 0) {
+
+        if (msg.indexOf('ENOENT') < 0 && msg.indexOf('EEXIST') < 0) {
           reject(`Error copying "${src}" to "${dest}": ${err}`);
           return;
         }

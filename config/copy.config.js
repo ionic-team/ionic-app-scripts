@@ -15,5 +15,9 @@ module.exports = {
       src: 'node_modules/ionic-angular/polyfills/polyfills.js',
       dest: 'www/build/polyfills.js'
     },
+    {
+      src: 'node_modules/ionicons/dist/fonts/',
+      dest: 'www/assets/fonts/'
+    },
   ]
 };
