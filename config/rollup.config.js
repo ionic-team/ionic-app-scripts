@@ -9,7 +9,7 @@ module.exports = {
    * be included, along with the minimum necessary code
    * from its dependencies
    */
-  entry: '.tmp/app/main.js',
+  entry: '.tmp/app/main.prod.js',
 
   /**
    * sourceMap: If true, a separate sourcemap file will
