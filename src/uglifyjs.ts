@@ -1,7 +1,6 @@
-import { writeFileSync } from 'fs';
 import { join } from 'path';
 import * as uglify from 'uglify-js';
-import { BuildContext, generateContext, fillConfigDefaults, Logger, TaskInfo } from './util';
+import { BuildContext, generateContext, fillConfigDefaults, Logger, TaskInfo, writeFileAsync } from './util';
 
 export function uglifyjs(context?: BuildContext, uglifyJsConfig?: UglifyJsConfig) {
   context = generateContext(context);
@@ -24,9 +23,10 @@ function runUglify(context: BuildContext, uglifyJsConfig: UglifyJsConfig): Promi
     uglifyJsConfig.destFileName = join(context.buildDir, uglifyJsConfig.destFileName);
     const minifiedOutputPath = join(context.buildDir, uglifyJsConfig.outSourceMap);
     const minifyOutput: uglify.MinifyOutput = runUglifyInternal(uglifyJsConfig);
-    writeFileSync(uglifyJsConfig.destFileName, minifyOutput.code);
-    writeFileSync(minifiedOutputPath, minifyOutput.map);
-    return Promise.resolve();
+    let writeFilePromises: Promise<any>[] = [];
+    writeFilePromises.push(writeFileAsync(uglifyJsConfig.destFileName, minifyOutput.code));
+    writeFilePromises.push(writeFileAsync(minifiedOutputPath, minifyOutput.map));
+    return Promise.all(writeFilePromises);
   } catch (ex) {
     return Promise.reject(ex);
   }

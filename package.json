@@ -36,6 +36,7 @@
     "uglify-js": "2.7.3"
   },
   "devDependencies": {
+    "@types/clean-css": "3.4.29",
     "@types/fs-extra": "0.0.31",
     "@types/node": "6.0.38",
     "@types/uglify-js": "2.0.27",

@@ -1,5 +1,5 @@
 import { join } from 'path';
-
+import { readFile, writeFile } from 'fs';
 
 /**
  * Create a context object which is used by all the build tasks.
@@ -136,6 +136,30 @@ export function replacePathVars(context: BuildContext, filePath: string) {
                  .replace('{{TMP}}', context.tmpDir)
                  .replace('{{ROOT}}', context.rootDir)
                  .replace('{{BUILD}}', context.buildDir);
+}
+
+export function writeFileAsync(filePath: string, content: string): Promise<any> {
+  return new Promise( (resolve, reject) => {
+    writeFile(filePath, content, function(err) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+}
+
+export function readFileAsync(filePath: string): Promise<string> {
+  return new Promise( (resolve, reject) => {
+    readFile(filePath, function(err, buffer) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(buffer.toString());
+      }
+    });
+  });
 }
 
 
