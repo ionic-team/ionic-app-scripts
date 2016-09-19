@@ -1,36 +1,41 @@
 import { build } from './build';
-import { BuildContext, generateContext, fillConfigDefaults, Logger, replacePathVars, TaskInfo } from './util';
+import { BuildContext, generateContext, hasArg, fillConfigDefaults, Logger, replacePathVars, TaskInfo } from './util';
+import { join } from 'path';
 
 
 export function watch(context?: BuildContext, watchConfig?: WatchConfig) {
   context = generateContext(context);
   watchConfig = fillConfigDefaults(context, watchConfig, WATCH_TASK_INFO);
 
-  new Logger('watch');
+  const logger = new Logger('watch');
 
   build(context).then(() => {
-    // https://github.com/paulmillr/chokidar
-    const chokidar = require('chokidar');
+    startWatchers(context, watchConfig);
+    logger.ready();
+  });
+}
 
-    watchConfig.watchers.forEach(watcher => {
-      if (watcher.callback && watcher.paths) {
-        const options = watcher.options || {};
-        if (!options.cwd) {
-          options.cwd = context.rootDir;
-        }
-        if (typeof options.ignoreInitial !== 'boolean') {
-          options.ignoreInitial = true;
-        }
-        const paths = cleanPaths(context, watcher.paths);
-        const chokidarWatcher = chokidar.watch(paths, options);
 
-        chokidarWatcher.on('all', (event: string, path: string) => {
-          watcher.callback(event, path, context);
-        });
+export function startWatchers(context: BuildContext, watchConfig: WatchConfig) {
+  // https://github.com/paulmillr/chokidar
+  const chokidar = require('chokidar');
+
+  watchConfig.watchers.forEach(watcher => {
+    if (watcher.callback && watcher.paths) {
+      const options = watcher.options || {};
+      if (!options.cwd) {
+        options.cwd = context.rootDir;
       }
-    });
+      if (typeof options.ignoreInitial !== 'boolean') {
+        options.ignoreInitial = true;
+      }
+      const paths = cleanPaths(context, watcher.paths);
+      const chokidarWatcher = chokidar.watch(paths, options);
 
-    Logger.info('watching files ...');
+      chokidarWatcher.on('all', (event: string, path: string) => {
+        watcher.callback(event, path, context);
+      });
+    }
   });
 }
 
