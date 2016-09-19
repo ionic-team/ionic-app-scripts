@@ -1,4 +1,4 @@
-import { BuildContext, BuildOptions, generateContext, Logger } from './util';
+import { BuildContext, BuildOptions, generateContext, generateBuildOptions, Logger } from './util';
 import { bundle, bundleUpdate } from './bundle';
 import { clean } from './clean';
 import { compress } from './compress';
@@ -8,8 +8,9 @@ import { sass, sassUpdate } from './sass';
 import { transpile, transpileUpdate } from './transpile';
 
 
-export function build(context?: BuildContext, options: BuildOptions = {}) {
+export function build(context?: BuildContext, options?: BuildOptions) {
   context = generateContext(context);
+  options = generateBuildOptions(options);
   const logger = new Logger('build');
 
   clean();

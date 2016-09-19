@@ -35,6 +35,27 @@ export function generateContext(context?: BuildContext): BuildContext {
 }
 
 
+export function generateBuildOptions(options?: BuildOptions): BuildOptions {
+  if (!options) {
+    options = {};
+  }
+
+  if (typeof options.isProd !== 'boolean') {
+    options.isProd = (argv.some(a => a === '--prod') || argv.some(a => a === '-p') || getEnvVariable('ionic_prod') === 'true');
+  }
+
+  if (options.isProd) {
+    Logger.info('Production build');
+  }
+
+  if (typeof options.runCompress !== 'boolean') {
+    options.runCompress = options.isProd;
+  }
+
+  return options;
+}
+
+
 export function fillConfigDefaults(context: BuildContext, config: any, task: TaskInfo): any {
   // if the context property wasn't already set, then see if a config file
   // was been supplied by the user as an arg or env variable
@@ -267,6 +288,7 @@ export interface BuildContext {
 
 
 export interface BuildOptions {
+  isProd?: boolean;
   runCompress?: boolean;
 }
 
