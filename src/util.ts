@@ -19,15 +19,15 @@ export function generateContext(context?: BuildContext): BuildContext {
     context = {};
   }
 
-  context.rootDir = context.rootDir || getConfigValueDefaults('--rootDir', null, 'ionic_root_dir', process.cwd());
+  context.rootDir = context.rootDir || getConfigValueDefaults('--rootDir', null, 'ionic_root_dir', process.cwd(), context);
 
-  context.tmpDir = context.tmpDir || getConfigValueDefaults('--tmpDir', null, 'ionic_tmp_dir', join(context.rootDir, TMP_DIR));
+  context.tmpDir = context.tmpDir || getConfigValueDefaults('--tmpDir', null, 'ionic_tmp_dir', join(context.rootDir, TMP_DIR), context);
 
-  context.srcDir = context.srcDir || getConfigValueDefaults('--srcDir', null, 'ionic_src_dir', join(context.rootDir, SRC_DIR));
+  context.srcDir = context.srcDir || getConfigValueDefaults('--srcDir', null, 'ionic_src_dir', join(context.rootDir, SRC_DIR), context);
 
-  context.wwwDir = context.wwwDir || getConfigValueDefaults('--wwwDir', null, 'ionic_www_dir', join(context.rootDir, WWW_DIR));
+  context.wwwDir = context.wwwDir || getConfigValueDefaults('--wwwDir', null, 'ionic_www_dir', join(context.rootDir, WWW_DIR), context);
 
-  context.buildDir = context.buildDir || getConfigValueDefaults('--buildDir', null, 'ionic_build_dir', join(context.wwwDir, BUILD_DIR));
+  context.buildDir = context.buildDir || getConfigValueDefaults('--buildDir', null, 'ionic_build_dir', join(context.wwwDir, BUILD_DIR), context);
 
   checkDebugMode();
 
@@ -61,7 +61,7 @@ export function fillConfigDefaults(context: BuildContext, config: any, task: Tas
   // was supplied by the user as an arg or env variable
   (<any>context)[task.contextProperty] = config;
   if (!(<any>context)[task.contextProperty]) {
-    (<any>context)[task.contextProperty] = getConfigFileData(task.fullArgConfig, task.shortArgConfig, task.envConfig, null) || {};
+    (<any>context)[task.contextProperty] = getConfigFileData(task.fullArgConfig, task.shortArgConfig, task.envConfig, null, context) || {};
   }
 
   const defaultConfig = require(join('..', 'config', task.defaultConfigFilename));
@@ -73,9 +73,9 @@ export function fillConfigDefaults(context: BuildContext, config: any, task: Tas
 }
 
 
-function getConfigFileData(fullName: string, shortName: string, envVarName: string, defaultValue: string): any {
+function getConfigFileData(fullName: string, shortName: string, envVarName: string, defaultValue: string, context: BuildContext): any {
   // see if the user supplied a value for where to look up their config file
-  const configFilePath = getConfigValueDefaults(fullName, shortName, envVarName, null);
+  const configFilePath = getConfigValueDefaults(fullName, shortName, envVarName, null, context);
 
   if (configFilePath) {
     try {
@@ -90,18 +90,18 @@ function getConfigFileData(fullName: string, shortName: string, envVarName: stri
 }
 
 
-function getConfigValueDefaults(argFullName: string, argShortName: string, envVarName: string, defaultValue: string) {
+function getConfigValueDefaults(argFullName: string, argShortName: string, envVarName: string, defaultValue: string, context: BuildContext) {
   // first see if the value was set in the command-line args
   const argValue = getArgValue(argFullName, argShortName);
   if (argValue) {
-    return argValue;
+    return join(context.rootDir, argValue);
   }
 
   // next see if it was set in the environment variables
   // which also checks if it was set in the npm package.json config
   const envVar = getEnvVariable(envVarName);
   if (envVar) {
-    return envVar;
+    return join(context.rootDir, envVar);
   }
 
   // return the default if nothing above was found
