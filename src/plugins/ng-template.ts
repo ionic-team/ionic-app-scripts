@@ -8,7 +8,6 @@ export function ngTemplate(options: NgTemplateOptions = {}) {
   options.exclude = options.exclude || [
     'node_modules/@angular/**',
     'node_modules/ionic-angular/**',
-    'node_modules/rxjs-es/**',
     'node_modules/rxjs/**'
   ];
 
@@ -43,7 +42,6 @@ export function ngTemplate(options: NgTemplateOptions = {}) {
         }
 
         if (didRewrite) {
-          // console.log(source);
           return source;
         }
       }

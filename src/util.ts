@@ -1,5 +1,5 @@
 import { join } from 'path';
-import { readFile, writeFile } from 'fs';
+import { accessSync, readFile, writeFile } from 'fs-extra';
 
 /**
  * Create a context object which is used by all the build tasks.
@@ -29,6 +29,10 @@ export function generateContext(context?: BuildContext): BuildContext {
 
   context.buildDir = context.buildDir || getConfigValueDefaults('--buildDir', null, 'ionic_build_dir', join(context.wwwDir, BUILD_DIR), context);
 
+  context.mainEntryDev = join('app', 'main.dev.ts');
+
+  context.mainEntryProd = join('app', 'main.prod.ts');
+
   checkDebugMode();
 
   return context;
@@ -48,8 +52,8 @@ export function generateBuildOptions(options?: BuildOptions): BuildOptions {
     Logger.info('Production build');
   }
 
-  if (typeof options.runCompress !== 'boolean') {
-    options.runCompress = options.isProd;
+  if (typeof options.isWatch !== 'boolean') {
+    options.isWatch = hasArg('--watch', '-w');
   }
 
   return options;
@@ -189,6 +193,19 @@ export function readFileAsync(filePath: string): Promise<string> {
 }
 
 
+export function getNodeBinExecutable(context: BuildContext, cmd: string) {
+  let cmdPath = join(context.rootDir, 'node_modules', '.bin', cmd);
+
+  try {
+    accessSync(cmdPath);
+  } catch (e) {
+    cmdPath = null;
+  }
+
+  return cmdPath;
+}
+
+
 let checkedDebug = false;
 function checkDebugMode() {
   if (!checkedDebug) {
@@ -296,13 +313,15 @@ export interface BuildContext {
   srcDir?: string;
   wwwDir?: string;
   buildDir?: string;
+  mainEntryDev?: string;
+  mainEntryProd?: string;
   moduleFiles?: string[];
 }
 
 
 export interface BuildOptions {
   isProd?: boolean;
-  runCompress?: boolean;
+  isWatch?: boolean;
 }
 
 

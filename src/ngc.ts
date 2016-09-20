@@ -1,6 +1,7 @@
 import { basename, join } from 'path';
-import { accessSync, copy as fsCopy, emptyDirSync, outputJsonSync, readJsonSync, statSync } from 'fs-extra';
-import { BuildContext, TaskInfo, fillConfigDefaults, generateContext, Logger } from './util';
+import { BuildContext, TaskInfo, fillConfigDefaults, generateContext, getNodeBinExecutable, Logger } from './util';
+import { copy as fsCopy, emptyDirSync, outputJsonSync, statSync } from 'fs-extra';
+import { getSrcTsConfig } from './tsc';
 
 
 export function ngc(context?: BuildContext, ngcConfig?: NgcConfig) {
@@ -36,12 +37,9 @@ function runNgc(context: BuildContext, ngcConfig: NgcConfig) {
     // and save the modified copy into the tmp directory
     createTmpTsConfig(context, ngcConfig);
 
-    const ngcCmd = join(context.rootDir, 'node_modules', '.bin', 'ngc');
-
-    try {
-      accessSync(ngcCmd);
-    } catch (e) {
-      reject(`Unable to find NGC: "${ngcCmd}": ${e}`);
+    const ngcCmd = getNodeBinExecutable(context, 'ngc');
+    if (!ngcCmd) {
+      reject(`Unable to find Angular Compiler "ngc" command: ${ngcCmd}`);
       return;
     }
 
@@ -55,18 +53,18 @@ function runNgc(context: BuildContext, ngcConfig: NgcConfig) {
     let hadAnError = false;
 
     // would love to not use spawn here but import and run ngc directly
-    const ls = spawn(ngcCmd, ngcCmdArgs);
+    const cp = spawn(ngcCmd, ngcCmdArgs);
 
-    ls.stdout.on('data', (data: string) => {
+    cp.stdout.on('data', (data: string) => {
       Logger.info(data);
     });
 
-    ls.stderr.on('data', (data: string) => {
+    cp.stderr.on('data', (data: string) => {
       Logger.error(`ngc error: ${data}`);
       hadAnError = true;
     });
 
-    ls.on('close', (code: string) => {
+    cp.on('close', (code: string) => {
       if (hadAnError) {
         reject(`NGC encountered an error`);
       } else {
@@ -88,11 +86,10 @@ function createTmpTsConfig(context: BuildContext, ngcConfig: NgcConfig) {
   // downstream, we have a dependency on es5 code and
   // es2015 modules, so force them
   tsConfig.compilerOptions.module = 'es2015';
-  tsConfig.compilerOptions.target = 'es2015';
-  tsConfig.compilerOptions.removeComments = true;
+  tsConfig.compilerOptions.target = 'es5';
 
   // force where to look for ts files
-  tsConfig.include = ngcConfig.include;
+  tsConfig.files = ngcConfig.include;
 
   // save the modified copy into the tmp directory
   outputJsonSync(getTmpTsConfigPath(context), tsConfig);
@@ -149,36 +146,12 @@ function filterCopyFiles(filePath: any, hoop: any) {
   return shouldInclude;
 }
 
-
-function getSrcTsConfig(context: BuildContext): TsConfig {
-  let srcTsConfig: TsConfig = null;
-  const srcTsConfigPath = join(context.rootDir, TS_CONFIG_FILE);
-
-  try {
-    srcTsConfig = readJsonSync(srcTsConfigPath);
-  } catch (e) {
-    throw new Error(`Error reading tsconfig file "${srcTsConfigPath}", ${e}`);
-  }
-
-  if (!srcTsConfig) {
-    throw new Error(`Invalid tsconfig file "${srcTsConfigPath}"`);
-  }
-
-  if (!srcTsConfig.compilerOptions) {
-    throw new Error('TSConfig is missing necessary compiler options');
-  }
-
-  return srcTsConfig;
-}
-
-
-function getTmpTsConfigPath(context: BuildContext) {
-  return join(context.tmpDir, TS_CONFIG_FILE);
+export function getTmpTsConfigPath(context: BuildContext) {
+  return join(context.tmpDir, 'tsconfig.json');
 }
 
 
 const EXCLUDE_DIRS = ['assets', 'theme'];
-const TS_CONFIG_FILE = 'tsconfig.json';
 
 
 const NGC_TASK_INFO: TaskInfo = {
@@ -191,17 +164,5 @@ const NGC_TASK_INFO: TaskInfo = {
 
 
 export interface NgcConfig {
-  include: string[];
-}
-
-
-export interface TsConfig {
-  // https://www.typescriptlang.org/docs/handbook/compiler-options.html
-  compilerOptions: {
-    module: string;
-    removeComments: boolean;
-    outDir: string;
-    target: string;
-  };
   include: string[];
 }

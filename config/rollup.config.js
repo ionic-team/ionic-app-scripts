@@ -26,7 +26,7 @@ module.exports = {
   /**
    * dest: the output filename for the bundle in the buildDir
    */
-  dest: 'main.es6.js',
+  dest: 'main.js',
 
   /**
    * plugins: Array of plugin objects, or a single plugin object.

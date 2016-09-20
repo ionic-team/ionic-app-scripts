@@ -5,7 +5,7 @@ import { compress } from './compress';
 import { copy } from './copy';
 import { ngc, ngcUpdate } from './ngc';
 import { sass, sassUpdate } from './sass';
-import { transpile, transpileUpdate } from './transpile';
+import { tsc } from './tsc';
 
 
 export function build(context: BuildContext, options: BuildOptions) {
@@ -13,25 +13,25 @@ export function build(context: BuildContext, options: BuildOptions) {
   options = generateBuildOptions(options);
   const logger = new Logger('build');
 
+  // sync empty the www directory
   clean();
+
+  // async copy files (no need to wait on completion)
   copy();
 
-  return buildCompiler(context, options).then(() => {
-    return Promise.all([
-      sass(context),
-      transpile(context)
-    ]);
+  const promises: Promise<any>[] = [];
 
-  }).then(() => {
-    if (options.runCompress) {
-      return compress(context);
+  if (options.isProd) {
+    // production build
+    promises.push(buildProd(context, options));
 
-    } else {
-      return Promise.resolve();
-    }
+  } else {
+    // dev build
+    promises.push(buildDev(context, options));
+  }
 
-  }).then(() => {
-    // congrats, we did it!
+  return Promise.all(promises).then(() => {
+    // congrats, we did it!  (•_•) / ( •_•)>⌐■-■ / (⌐■_■)
     return logger.finish();
 
   }).catch(err => {
@@ -40,15 +40,27 @@ export function build(context: BuildContext, options: BuildOptions) {
 }
 
 
-export function buildCompiler(context: BuildContext, options: BuildOptions) {
-  // Only run the ngc compiler if this is a production build
-  if (options.isProd === true) {
-    return ngc(context).then(() => {
-      return bundle(context, options);
-    });
-  }
+export function buildProd(context: BuildContext, options: BuildOptions) {
+  return ngc(context).then(() => {
+    return bundle(context, options);
 
-  return bundle(context, options);
+  }).then(() => {
+    return sass(context);
+
+  }).then(() => {
+    return compress(context);
+  });
+}
+
+
+export function buildDev(context: BuildContext, options: BuildOptions) {
+  return tsc(context, options).then(() => {
+    return bundle(context, options);
+
+  }).then(() => {
+    return sass(context);
+
+  });
 }
 
 
@@ -59,10 +71,7 @@ export function buildUpdate(event: string, path: string, context: BuildContext) 
     return bundleUpdate(event, path, context);
 
   }).then(() => {
-    return Promise.all([
-      sassUpdate(event, path, context),
-      transpileUpdate(event, path, context)
-    ]);
+    return sassUpdate(event, path, context);
 
   }).then(() => {
     // congrats, we did it!
