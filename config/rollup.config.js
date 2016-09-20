@@ -1,4 +1,3 @@
-const rollupNG2 = require('../dist/plugins/rollupNG2').rollupNG2;
 const ngTemplate = require('../dist/plugins/ng-template').ngTemplate;
 const nodeResolve = require('rollup-plugin-node-resolve');
 
@@ -34,7 +33,6 @@ module.exports = {
    */
   plugins: [
     ngTemplate(),
-    rollupNG2(),
     nodeResolve({
       module: true,
       jsnext: true,
