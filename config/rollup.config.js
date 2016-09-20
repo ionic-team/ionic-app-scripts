@@ -1,5 +1,6 @@
-const ngTemplate = require('../dist/plugins/ng-template').ngTemplate;
-const nodeResolve = require('rollup-plugin-node-resolve');
+var ngTemplate = require('../dist/plugins/ng-template').ngTemplate;
+var nodeResolve = require('rollup-plugin-node-resolve');
+var commonjs = require('rollup-plugin-commonjs');
 
 // https://github.com/rollup/rollup/wiki/JavaScript-API
 
@@ -33,6 +34,7 @@ module.exports = {
    */
   plugins: [
     ngTemplate(),
+    commonjs(),
     nodeResolve({
       module: true,
       jsnext: true,

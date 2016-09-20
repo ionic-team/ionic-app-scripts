@@ -31,7 +31,7 @@
     "node-sass": "3.9.3",
     "postcss": "5.2.0",
     "rollup": "0.34.13",
-    "rollup-plugin-commonjs": "4.1.0",
+    "rollup-plugin-commonjs": "5.0.4",
     "rollup-plugin-node-resolve": "2.0.0",
     "rollup-pluginutils": "1.5.2",
     "uglify-js": "2.7.3"
