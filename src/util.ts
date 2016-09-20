@@ -41,7 +41,7 @@ export function generateBuildOptions(options?: BuildOptions): BuildOptions {
   }
 
   if (typeof options.isProd !== 'boolean') {
-    options.isProd = (argv.some(a => a === '--prod') || argv.some(a => a === '-p') || getEnvVariable('ionic_prod') === 'true');
+    options.isProd = hasArg('--prod', '-p') || (getEnvVariable('ionic_prod') === 'true');
   }
 
   if (options.isProd) {
@@ -140,6 +140,11 @@ function getArgValue(fullName: string, shortName: string): string {
 }
 
 
+export function hasArg(fullName: string, shortName: string = null): boolean {
+  return (argv.some(a => a === fullName) || (shortName !== null && argv.some(a => a === shortName)));
+}
+
+
 function assignDefaults(userConfig: any, defaultConfig: any) {
   if (userConfig && defaultConfig) {
     for (var key in defaultConfig) {
@@ -187,7 +192,7 @@ export function readFileAsync(filePath: string): Promise<string> {
 let checkedDebug = false;
 function checkDebugMode() {
   if (!checkedDebug) {
-    if (argv.some(a => a === '--debug') || getEnvVariable('ionic_debug_mode') === 'true') {
+    if (hasArg('--debug') || getEnvVariable('ionic_debug_mode') === 'true') {
       process.env.ionic_debug_mode = 'true';
     }
 
@@ -214,7 +219,15 @@ export class Logger {
     Logger.info(`${scope} started ...`);
   }
 
+  ready() {
+    return this.completed('ready');
+  }
+
   finish() {
+    return this.completed('finished');
+  }
+
+  private completed(msg: string) {
     let duration = Date.now() - this.start;
     let time: string;
 
@@ -230,7 +243,7 @@ export class Logger {
       }
     }
 
-    Logger.info(`${this.scope} finished ${time}`);
+    Logger.info(`${this.scope} ${msg} ${time}`);
     return true;
   }
 
