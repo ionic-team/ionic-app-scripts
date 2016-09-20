@@ -1,17 +1,17 @@
-import { BuildContext, fillConfigDefaults, generateContext, Logger, TaskInfo } from './util';
+import { BuildContext, BuildOptions, fillConfigDefaults, generateContext, Logger, TaskInfo } from './util';
 import { join } from 'path';
 import { outputJson, readJsonSync } from 'fs-extra';
 import { tmpdir } from 'os';
 const rollup = require('rollup').rollup;
 
 
-export function bundle(context?: BuildContext, rollupConfig?: RollupConfig) {
+export function bundle(context?: BuildContext, options?: BuildOptions, rollupConfig?: RollupConfig) {
   context = generateContext(context);
 
   const logger = new Logger('bundle');
 
   // bundle the app then create create css
-  return bundleApp(context).then(() => {
+  return bundleApp(context, options, rollupConfig).then(() => {
     return logger.finish();
   }).catch(reason => {
     return logger.fail(reason);
@@ -24,8 +24,13 @@ export function bundleUpdate(event: string, path: string, context: BuildContext)
 }
 
 
-export function bundleApp(context?: BuildContext, rollupConfig?: RollupConfig): Promise<any> {
+export function bundleApp(context?: BuildContext, options?: BuildOptions, rollupConfig?: RollupConfig): Promise<any> {
   context = generateContext(context);
+
+  if (options.isProd === true) {
+    ROLLUP_TASK_INFO.defaultConfigFilename = 'rollup.prod.config';
+  }
+
   rollupConfig = fillConfigDefaults(context, rollupConfig, ROLLUP_TASK_INFO);
 
   rollupConfig.dest = join(context.buildDir, rollupConfig.dest);

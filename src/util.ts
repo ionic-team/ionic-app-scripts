@@ -58,7 +58,7 @@ export function generateBuildOptions(options?: BuildOptions): BuildOptions {
 
 export function fillConfigDefaults(context: BuildContext, config: any, task: TaskInfo): any {
   // if the context property wasn't already set, then see if a config file
-  // was been supplied by the user as an arg or env variable
+  // was supplied by the user as an arg or env variable
   (<any>context)[task.contextProperty] = config;
   if (!(<any>context)[task.contextProperty]) {
     (<any>context)[task.contextProperty] = getConfigFileData(task.fullArgConfig, task.shortArgConfig, task.envConfig, null) || {};

@@ -1,14 +1,14 @@
 import { build } from './build';
-import { BuildContext, generateContext, fillConfigDefaults, Logger, replacePathVars, TaskInfo } from './util';
+import { BuildContext, BuildOptions, generateContext, fillConfigDefaults, Logger, replacePathVars, TaskInfo } from './util';
 
 
-export function watch(context?: BuildContext, watchConfig?: WatchConfig) {
+export function watch(context?: BuildContext, watchConfig?: WatchConfig, options?: BuildOptions) {
   context = generateContext(context);
   watchConfig = fillConfigDefaults(context, watchConfig, WATCH_TASK_INFO);
 
   new Logger('watch');
 
-  build(context).then(() => {
+  build(context, options).then(() => {
     // https://github.com/paulmillr/chokidar
     const chokidar = require('chokidar');
 

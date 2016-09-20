@@ -6,7 +6,7 @@ module.exports = {
   /**
    * sourceFile: The javascript file to minify
    */
-  sourceFile: 'main.prod.js',
+  sourceFile: 'main.js',
 
   /**
    * destFileName: file name for the minified js in the build dir
@@ -16,7 +16,7 @@ module.exports = {
   /**
    * inSourceMap: file name for the input source map
    */
-  inSourceMap: 'main.prod.js.map',
+  inSourceMap: 'main.js.map',
 
   /**
    * outSourceMap: file name for the output source map

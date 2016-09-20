@@ -7,5 +7,5 @@ module.exports = {
   /**
    * dest: the filename of the es5 bundle in the buildDir
    */
-  destFileName: 'main.prod.js'
+  destFileName: 'main.js'
 };

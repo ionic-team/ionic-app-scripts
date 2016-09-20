@@ -8,7 +8,7 @@ import { sass, sassUpdate } from './sass';
 import { transpile, transpileUpdate } from './transpile';
 
 
-export function build(context?: BuildContext, options?: BuildOptions) {
+export function build(context: BuildContext, options: BuildOptions) {
   context = generateContext(context);
   options = generateBuildOptions(options);
   const logger = new Logger('build');
@@ -16,10 +16,7 @@ export function build(context?: BuildContext, options?: BuildOptions) {
   clean();
   copy();
 
-  return ngc(context).then(() => {
-    return bundle(context);
-
-  }).then(() => {
+  return buildCompiler(context, options).then(() => {
     return Promise.all([
       sass(context),
       transpile(context)
@@ -40,6 +37,18 @@ export function build(context?: BuildContext, options?: BuildOptions) {
   }).catch(err => {
     return logger.fail('Build failed' + (err.message ? ': ' + err.message : ''));
   });
+}
+
+
+export function buildCompiler(context: BuildContext, options: BuildOptions) {
+  // Only run the ngc compiler if this is a production build
+  if (options.isProd === true) {
+    return ngc(context).then(() => {
+      return bundle(context, options);
+    });
+  }
+
+  return bundle(context, options);
 }
 
 
