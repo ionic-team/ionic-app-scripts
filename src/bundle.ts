@@ -1,4 +1,4 @@
-import { BuildContext, BuildOptions, fillConfigDefaults, generateContext, Logger, TaskInfo } from './util';
+import { BuildContext, BuildOptions, fillConfigDefaults, generateContext, generateBuildOptions, Logger, TaskInfo } from './util';
 import { join } from 'path';
 import { outputJson, readJsonSync } from 'fs-extra';
 import { tmpdir } from 'os';
@@ -26,8 +26,9 @@ export function bundleUpdate(event: string, path: string, context: BuildContext)
 
 export function bundleApp(context?: BuildContext, options?: BuildOptions, rollupConfig?: RollupConfig): Promise<any> {
   context = generateContext(context);
+  options = generateBuildOptions(options);
 
-  if (options.isProd === true) {
+  if (options.isProd) {
     ROLLUP_TASK_INFO.defaultConfigFilename = 'rollup.prod.config';
   }
 

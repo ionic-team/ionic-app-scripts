@@ -1,4 +1,5 @@
 const rollupNG2 = require('../dist/plugins/rollupNG2').rollupNG2;
+const ngTemplate = require('../dist/plugins/ng-template').ngTemplate;
 const nodeResolve = require('rollup-plugin-node-resolve');
 
 // https://github.com/rollup/rollup/wiki/JavaScript-API
@@ -9,7 +10,7 @@ module.exports = {
    * be included, along with the minimum necessary code
    * from its dependencies
    */
-  entry: '.tmp/app/main.dev.js',
+  entry: './.tmp/app/main.dev.js',
 
   /**
    * sourceMap: If true, a separate sourcemap file will
@@ -32,6 +33,7 @@ module.exports = {
    * See https://github.com/rollup/rollup/wiki/Plugins for more info.
    */
   plugins: [
+    ngTemplate(),
     rollupNG2(),
     nodeResolve({
       module: true,
