@@ -39,6 +39,7 @@ module.exports = {
       module: true,
       jsnext: true,
       main: true,
+      browser: true,
       extensions: ['.js']
     })
   ]
