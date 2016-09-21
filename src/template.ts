@@ -81,7 +81,7 @@ function inlineSourceWithTemplate(options: NgTemplateOptions, componentDir: stri
     }
 
     let htmlContent = readFileSync(htmlPath).toString();
-    htmlContent = htmlContent.replace(/\n/g, '\\n');
+    htmlContent = htmlContent.replace(/\r|\n/g, '\\n');
     htmlContent = htmlContent.replace(/\'/g, '\\\'');
 
     rtn = `template: '${htmlContent}'`;
@@ -94,9 +94,9 @@ function inlineSourceWithTemplate(options: NgTemplateOptions, componentDir: stri
 }
 
 
-var COMPONENT_REGEX = /Component\s*?\(\s*?({([\s\S]*?)}\s*?)\)/m;
-var TEMPLATE_URL_REGEX = /templateUrl\s*:(.*)/;
-var HTML_PATH_URL_REGEX = /(['"])((?:[^\\]\\\1|.)*?)\1/g;
+const COMPONENT_REGEX = /Component\s*?\(\s*?({([\s\S]*?)}\s*?)\)/m;
+const TEMPLATE_URL_REGEX = /templateUrl\s*:(.*)/;
+const HTML_PATH_URL_REGEX = /(['"])((?:[^\\]\\\1|.)*?)\1/g;
 
 
 export interface NgTemplateOptions {
