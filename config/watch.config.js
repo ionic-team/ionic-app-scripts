@@ -1,4 +1,5 @@
 var buildUpdate = require('../dist/build').buildUpdate;
+var templateUpdate = require('../dist/template').templateUpdate;
 var copyUpdate = require('../dist/copy').copyUpdate;
 var sassUpdate = require('../dist/sass').sassUpdate;
 
@@ -11,11 +12,17 @@ module.exports = {
 
     {
       paths: [
-        '{{SRC}}/**/*.html',
         '{{TMP}}/**/*.js'
       ],
-      options: { ignored: /(index.html$)/ },
       callback: buildUpdate
+    },
+
+    {
+      paths: [
+        '{{SRC}}/**/*.html'
+      ],
+      options: { ignored: /(index.html$)/ },
+      callback: templateUpdate
     },
 
     {

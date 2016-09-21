@@ -2,16 +2,15 @@ import { BuildContext, BuildOptions, fillConfigDefaults, generateContext, genera
 import { join } from 'path';
 import { outputJson, readJsonSync } from 'fs-extra';
 import { tmpdir } from 'os';
-const rollup = require('rollup').rollup;
 
 
-export function bundle(context?: BuildContext, options?: BuildOptions, rollupConfig?: RollupConfig) {
+export function bundle(context?: BuildContext, options?: BuildOptions, rollupConfig?: RollupConfig, useCache = true) {
   context = generateContext(context);
 
   const logger = new Logger('bundle');
 
   // bundle the app then create create css
-  return bundleApp(context, options, rollupConfig).then(() => {
+  return bundleApp(context, options, rollupConfig, useCache).then(() => {
     return logger.finish();
   }).catch(reason => {
     return logger.fail(reason);
@@ -19,12 +18,12 @@ export function bundle(context?: BuildContext, options?: BuildOptions, rollupCon
 }
 
 
-export function bundleUpdate(event: string, path: string, context: BuildContext) {
-  return bundleApp(context);
+export function bundleUpdate(event: string, path: string, context: BuildContext, useCache = true) {
+  return bundleApp(context, null, null, useCache);
 }
 
 
-export function bundleApp(context?: BuildContext, options?: BuildOptions, rollupConfig?: RollupConfig): Promise<any> {
+function bundleApp(context: BuildContext, options: BuildOptions, rollupConfig: RollupConfig, useCache: boolean): Promise<any> {
   context = generateContext(context);
   options = generateBuildOptions(options);
 
@@ -36,10 +35,13 @@ export function bundleApp(context?: BuildContext, options?: BuildOptions, rollup
 
   rollupConfig.dest = join(context.buildDir, rollupConfig.dest);
 
-  // tell rollup to use a previous bundle as its starting point
-  rollupConfig.cache = bundleCache;
+  if (useCache) {
+    // tell rollup to use a previous bundle as its starting point
+    rollupConfig.cache = bundleCache;
+  }
 
   // bundle the app then create create css
+  const rollup = require('rollup').rollup;
   return rollup(rollupConfig).then((bundle: RollupBundle) => {
 
     // set the module files used in this bundle
@@ -62,11 +64,12 @@ export function bundleApp(context?: BuildContext, options?: BuildOptions, rollup
 export function getModulePathsCache(): string[] {
   // sync get the cached array of module paths (if they exist)
   let modulePaths: string[] = null;
+  const modulesCachePath = getModulesPathsCachePath();
   try {
-    modulePaths = readJsonSync(getCachePath(), <any>{ throws: false });
-    Logger.debug(`Cached module paths: ${modulePaths && modulePaths.length}, ${getCachePath()}`);
+    modulePaths = readJsonSync(modulesCachePath, <any>{ throws: false });
+    Logger.debug(`Cached module paths: ${modulePaths && modulePaths.length}, ${modulesCachePath}`);
   } catch (e) {
-    Logger.debug(`Cached module paths not found: ${getCachePath()}`);
+    Logger.debug(`Cached module paths not found: ${modulesCachePath}`);
   }
   return modulePaths;
 }
@@ -74,16 +77,17 @@ export function getModulePathsCache(): string[] {
 
 function setModulePathsCache(modulePaths: string[]) {
   // async save the module paths for later lookup
-  outputJson(getCachePath(), modulePaths, (err) => {
+  const modulesCachePath = getModulesPathsCachePath();
+  outputJson(modulesCachePath, modulePaths, (err) => {
     if (err) {
       Logger.error(`Error writing module paths cache: ${err}`);
     }
-    Logger.debug(`Cached module paths: ${modulePaths && modulePaths.length}, ${getCachePath()}`);
+    Logger.debug(`Cached module paths: ${modulePaths && modulePaths.length}, ${modulesCachePath}`);
   });
 }
 
 
-function getCachePath(): string {
+function getModulesPathsCachePath(): string {
   // make a unique tmp directory for this project's module paths cache file
   let cwd = process.cwd().replace(/-|:|\/|\\|\.|~|;|\s/g, '').toLowerCase();
   if (cwd.length > 40) {
@@ -91,6 +95,7 @@ function getCachePath(): string {
   }
   return join(tmpdir(), cwd, 'modulepaths.json');
 }
+
 
 // used to track the cache for subsequent bundles
 let bundleCache: RollupBundle = null;
