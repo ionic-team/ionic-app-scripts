@@ -40,6 +40,10 @@ function bundleApp(context: BuildContext, options: BuildOptions, rollupConfig: R
     rollupConfig.cache = bundleCache;
   }
 
+  if (!rollupConfig.onwarn) {
+    rollupConfig.onwarn = onWarningMessage;
+  }
+
   // bundle the app then create create css
   const rollup = require('rollup').rollup;
   return rollup(rollupConfig).then((bundle: RollupBundle) => {
@@ -101,6 +105,24 @@ function getModulesPathsCachePath(): string {
 let bundleCache: RollupBundle = null;
 
 
+function onWarningMessage(msg: string) {
+  if (msg in WARNS) {
+    return;
+  }
+  WARNS[msg] = true;
+
+  const shouldPrint = WARN_INGORES.some(warnIgnore => msg.indexOf(warnIgnore) < 0);
+  if (shouldPrint) {
+    Logger.warn(`rollup: ${msg}`);
+  }
+}
+
+const WARN_INGORES = [
+  'keyword is equivalent to'
+];
+
+const WARNS: {[key: string]: boolean} = {};
+
 const ROLLUP_TASK_INFO: TaskInfo = {
   contextProperty: 'rollupConfig',
   fullArgConfig: '--rollup',
@@ -118,6 +140,7 @@ export interface RollupConfig {
   format?: string;
   dest?: string;
   cache?: RollupBundle;
+  onwarn?: Function;
 }
 
 
