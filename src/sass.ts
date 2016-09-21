@@ -4,7 +4,7 @@ import { getModulePathsCache } from './bundle';
 import { readdirSync, writeFile } from 'fs';
 
 
-export function sass(context?: BuildContext, sassConfig?: SassConfig) {
+export function sass(context?: BuildContext, sassConfig?: SassConfig, useCache = false) {
   context = generateContext(context);
   sassConfig = fillConfigDefaults(context, sassConfig, SASS_TASK_INFO);
 
@@ -44,7 +44,7 @@ export function sass(context?: BuildContext, sassConfig?: SassConfig) {
   }
 
   // let's begin shall we...
-  return render(sassConfig).then(() => {
+  return render(sassConfig, useCache).then(() => {
     return logger.finish();
   }).catch(reason => {
     return logger.fail(reason);
@@ -52,8 +52,8 @@ export function sass(context?: BuildContext, sassConfig?: SassConfig) {
 }
 
 
-export function sassUpdate(event: string, path: string, context: BuildContext) {
-  return sass(context);
+export function sassUpdate(event: string, path: string, context: BuildContext, useCache = false) {
+  return sass(context, null, useCache);
 }
 
 
@@ -191,16 +191,26 @@ function getComponentDirectories(moduleDirectories: string[], sassConfig: SassCo
 }
 
 
-function render(sassConfig: SassConfig) {
-  const nodeSass = require('node-sass');
-
-  if (sassConfig.sourceMap) {
-    sassConfig.sourceMap = basename(sassConfig.outFile);
-    sassConfig.omitSourceMapUrl = true;
-    sassConfig.sourceMapContents = true;
-  }
-
+function render(sassConfig: SassConfig, useCache: boolean) {
   return new Promise((resolve, reject) => {
+
+    if (useCache && lastRenderKey !== null) {
+      // if the sass data imports are same, don't bother
+      const renderKey = getRenderCacheKey(sassConfig);
+      if (renderKey === lastRenderKey) {
+        resolve();
+        return;
+      }
+    }
+
+    if (sassConfig.sourceMap) {
+      sassConfig.sourceMap = basename(sassConfig.outFile);
+      sassConfig.omitSourceMapUrl = true;
+      sassConfig.sourceMapContents = true;
+    }
+
+    const nodeSass = require('node-sass');
+
     nodeSass.render(sassConfig, (renderErr: any, sassResult: SassResult) => {
       if (renderErr) {
         // sass render error!
@@ -210,9 +220,12 @@ function render(sassConfig: SassConfig) {
       } else {
         // sass render success!
         renderSassSuccess(sassResult, sassConfig).then(() => {
-          return resolve();
+          lastRenderKey = getRenderCacheKey(sassConfig);
+
+          resolve();
+
         }).catch(reason => {
-          return reject(reason);
+          reject(reason);
         });
       }
     });
@@ -371,6 +384,18 @@ function defaultSortComponentFilesFn(a: any, b: any): number {
 
   return (a > b) ? 1 : -1;
 }
+
+
+function getRenderCacheKey(sassConfig: SassConfig) {
+  return [
+    sassConfig.data,
+    sassConfig.file,
+  ].join('|');
+}
+
+
+let lastRenderKey: string = null;
+
 
 const SASS_TASK_INFO: TaskInfo = {
   contextProperty: 'sassConfig',

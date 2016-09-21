@@ -68,7 +68,7 @@ export function buildUpdate(event: string, path: string, context: BuildContext) 
   const logger = new Logger('buildUpdate');
 
   return bundleUpdate(event, path, context).then(() => {
-    return sassUpdate(event, path, context);
+    return sassUpdate(event, path, context, true);
 
   }).then(() => {
     // congrats, we did it!
