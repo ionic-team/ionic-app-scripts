@@ -36,6 +36,9 @@ export function bundleApp(context?: BuildContext, options?: BuildOptions, rollup
 
   rollupConfig.dest = join(context.buildDir, rollupConfig.dest);
 
+  // tell rollup to use a previous bundle as its starting point
+  rollupConfig.cache = bundleCache;
+
   // bundle the app then create create css
   return rollup(rollupConfig).then((bundle: RollupBundle) => {
 
@@ -46,6 +49,9 @@ export function bundleApp(context?: BuildContext, options?: BuildOptions, rollup
     // async cache all the module paths so we don't need
     // to always bundle to know which modules are used
     setModulePathsCache(context.moduleFiles);
+
+    // Cache our bundle for later use
+    bundleCache = bundle;
 
     // write the bundle
     return bundle.write(rollupConfig);
@@ -86,6 +92,9 @@ function getCachePath(): string {
   return join(tmpdir(), cwd, 'modulepaths.json');
 }
 
+// used to track the cache for subsequent bundles
+let bundleCache: RollupBundle = null;
+
 
 const ROLLUP_TASK_INFO: TaskInfo = {
   contextProperty: 'rollupConfig',
@@ -103,6 +112,7 @@ export interface RollupConfig {
   plugins?: any[];
   format?: string;
   dest?: string;
+  cache?: RollupBundle;
 }
 
 
