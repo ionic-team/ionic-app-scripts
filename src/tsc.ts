@@ -7,7 +7,7 @@ export function tsc(context?: BuildContext, options?: BuildOptions) {
   context = generateContext(context);
   options = generateBuildOptions(options);
 
-  const logger = new Logger('typescript' + (options.isWatch ? ' watch' : ''));
+  const logger = new Logger('typescript compiler');
 
   return runTsc(context, options).then(() => {
     if (options.isWatch) {
