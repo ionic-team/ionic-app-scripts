@@ -1,4 +1,4 @@
-import { buildDev } from './build';
+import { build } from './build';
 import { BuildContext, BuildOptions, generateBuildOptions, generateContext, fillConfigDefaults, Logger, replacePathVars, TaskInfo } from './util';
 
 
@@ -7,11 +7,12 @@ export function watch(context?: BuildContext, options?: BuildOptions, watchConfi
   options = generateBuildOptions(options);
   watchConfig = fillConfigDefaults(context, watchConfig, WATCH_TASK_INFO);
 
+  options.isProd = false;
   options.isWatch = true;
 
   const logger = new Logger('watch');
 
-  buildDev(context, options).then(() => {
+  build(context, options).then(() => {
     startWatchers(context, watchConfig);
     logger.ready();
   });

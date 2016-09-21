@@ -9,8 +9,9 @@ Out of the box, Ionic starters have been preconfigured with great defaults for b
 
 - Transpiling source code to ES5 JavaScript
 - Ahead of Time (AoT) template compiling
+- Just in Time (JiT) template compiling
 - Bundling modules for faster runtime execution
-- Treeshaking unused components and code
+- Treeshaking unused components and dead-code removal
 - Generating CSS from bundled component Sass files
 - Autoprefixing vendor CSS prefixes
 - Minifying JavaScript files
@@ -18,7 +19,7 @@ Out of the box, Ionic starters have been preconfigured with great defaults for b
 - Copying `src` static assets to `www`
 - Watching source files for live-reloading
 
-Just the bullet list above is a little overwhelming, and each task requires quite a bit of development time just to get started. Ionic App Script's goal is to make it easier to complete common tasks so developers can focus on building their app, rather than building build scripts.
+Just the bullet list above is a little overwhelming, and each task requires quite a bit of development time just to get started. Ionic App Script's intention is to make it easier to complete common tasks so developers can focus on building their app, rather than building build scripts. Note that the Ionic Framework's source is made up of modules and can be packaged by any bundler or build process. However, this project's goal is provide simple scripts to make building Ionic apps easier, while also allowing developers to further configure their build process.
 
 
 ### NPM Scripts
@@ -28,7 +29,6 @@ Instead of depending on external task runners, Ionic App Scripts now prefers bei
 ```
   "scripts": {
     "build": "ionic-app-scripts build",
-    "minify": "ionic-app-scripts minify",
     "watch": "ionic-app-scripts watch"
   },
 ```
@@ -97,6 +97,32 @@ npm run build --rollup ./config/rollup.config.js
 | src directory   | `ionic_src_dir`     | `--srcDir`    | `src`           |
 | www directory   | `ionic_www_dir`     | `--wwwDir`    | `www`           |
 | build directory | `ionic_build_dir`   | `--buildDir`  | `build`         |
+
+
+## All Available Tasks
+
+These tasks are available within `ionic-app-scripts` and can be added to NPM scripts or any Node command.
+
+| Task     | Description                                                                                         |
+|----------|-----------------------------------------------------------------------------------------------------|
+| build    | Full production build. Use `--dev` flag for dev build.                                              |
+| bundle   | Bundle JS modules.                                                                                  |
+| clean    | Empty the `www` directory.                                                                          |
+| cleancss | Compress the output CSS with [CleanCss](https://github.com/jakubpawlowicz/clean-css)                |
+| copy     | Run the copy tasks, which by defaults copies the `src/assets/` and `src/index.html` files to `www`. |
+| minify   | Minifies the output JS bundle and compresses the compiled CSS.                                      |
+| ngc      | Runs just the `ngc` portion of the production build.                                                |
+| sass     | Sass compilation of used modules. Bundling must have as least ran once before Sass compilation.     |
+| tsc      | Runs just the `tsc` portion of the dev build.                                                       |
+| watch    | Runs watch for dev builds.                                                                          |
+
+Example NPM Script:
+
+```
+  "scripts": {
+    "minify": "ionic-app-scripts minify"
+  },
+```
 
 
 ## The Stack

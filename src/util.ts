@@ -45,11 +45,7 @@ export function generateBuildOptions(options?: BuildOptions): BuildOptions {
   }
 
   if (typeof options.isProd !== 'boolean') {
-    options.isProd = hasArg('--prod', '-p') || (getEnvVariable('ionic_prod') === 'true');
-  }
-
-  if (options.isProd) {
-    Logger.info('Production build');
+    options.isProd = !(hasArg('--dev', '-d') || (getEnvVariable('ionic_dev') === 'true'));
   }
 
   if (typeof options.isWatch !== 'boolean') {

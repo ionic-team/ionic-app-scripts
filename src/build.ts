@@ -11,7 +11,8 @@ import { tsc } from './tsc';
 export function build(context: BuildContext, options: BuildOptions) {
   context = generateContext(context);
   options = generateBuildOptions(options);
-  const logger = new Logger('build');
+
+  const logger = new Logger('build ' + (options.isProd ? 'prod' : 'dev'));
 
   const promises: Promise<any>[] = [];
 
@@ -34,7 +35,7 @@ export function build(context: BuildContext, options: BuildOptions) {
 }
 
 
-export function buildProd(context: BuildContext, options: BuildOptions) {
+function buildProd(context: BuildContext, options: BuildOptions) {
   // sync empty the www directory
   clean();
 
@@ -58,7 +59,7 @@ export function buildProd(context: BuildContext, options: BuildOptions) {
 }
 
 
-export function buildDev(context: BuildContext, options: BuildOptions) {
+function buildDev(context: BuildContext, options: BuildOptions) {
   // sync empty the www directory
   clean();
 
