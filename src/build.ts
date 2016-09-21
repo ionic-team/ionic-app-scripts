@@ -1,7 +1,7 @@
 import { BuildContext, BuildOptions, generateContext, generateBuildOptions, Logger } from './util';
 import { bundle, bundleUpdate } from './bundle';
 import { clean } from './clean';
-import { compress } from './compress';
+import { minify } from './minify';
 import { copy } from './copy';
 import { ngc } from './ngc';
 import { sass, sassUpdate } from './sass';
@@ -49,7 +49,7 @@ export function buildProd(context: BuildContext, options: BuildOptions) {
     return sass(context);
 
   }).then(() => {
-    return compress(context);
+    return minify(context);
 
   }).then(() => {
     // ensure the copy task has fully completed before resolving

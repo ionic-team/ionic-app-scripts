@@ -3,7 +3,7 @@ export { bundle, bundleUpdate } from './bundle';
 export { clean } from './clean';
 export { cleancss } from './cleancss';
 export { copy, copyUpdate } from './copy';
-export { compress } from './compress';
+export { minify } from './minify';
 export { generator } from './generator';
 export { ngc, ngcUpdate } from './ngc';
 export { sass, sassUpdate } from './sass';

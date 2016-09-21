@@ -28,7 +28,7 @@ Instead of depending on external task runners, Ionic App Scripts now prefers bei
 ```
   "scripts": {
     "build": "ionic-app-scripts build",
-    "compress": "ionic-app-scripts compress",
+    "minify": "ionic-app-scripts minify",
     "watch": "ionic-app-scripts watch"
   },
 ```
@@ -64,7 +64,7 @@ Remember how we're actually running `ionic-app-scripts` from the `scripts` prope
 ```
   "scripts": {
     "build": "ionic-app-scripts build --rollup ./config/rollup.config.js",
-    "compress": "ionic-app-scripts compress --cleancss ./config/cleancss.config.js",
+    "minify": "ionic-app-scripts minify --cleancss ./config/cleancss.config.js",
   },
 ```
 
