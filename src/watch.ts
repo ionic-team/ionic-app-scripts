@@ -1,14 +1,17 @@
-import { build } from './build';
-import { BuildContext, BuildOptions, generateContext, fillConfigDefaults, Logger, replacePathVars, TaskInfo } from './util';
+import { buildDev } from './build';
+import { BuildContext, BuildOptions, generateBuildOptions, generateContext, fillConfigDefaults, Logger, replacePathVars, TaskInfo } from './util';
 
 
-export function watch(context?: BuildContext, watchConfig?: WatchConfig, options?: BuildOptions) {
+export function watch(context?: BuildContext, options?: BuildOptions, watchConfig?: WatchConfig) {
   context = generateContext(context);
+  options = generateBuildOptions(options);
   watchConfig = fillConfigDefaults(context, watchConfig, WATCH_TASK_INFO);
+
+  options.isWatch = true;
 
   const logger = new Logger('watch');
 
-  build(context, options).then(() => {
+  buildDev(context, options).then(() => {
     startWatchers(context, watchConfig);
     logger.ready();
   });

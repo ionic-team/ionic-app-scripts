@@ -14,7 +14,7 @@ module.exports = {
         '{{SRC}}/**/*.html',
         '{{TMP}}/**/*.js'
       ],
-      options: { ignored: /([\/\\]\.)|(index.html$)/ },
+      options: { ignored: /(index.html$)/ },
       callback: buildUpdate
     },
 

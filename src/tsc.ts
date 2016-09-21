@@ -54,15 +54,26 @@ function runTsc(context: BuildContext, options: BuildOptions) {
     // would love to not use spawn here but import and run ngc directly
     const spawn = require('cross-spawn');
     const cp = spawn(tscCmd, tscCmdArgs);
+    let watchLogger: Logger;
 
     cp.on('error', (err: string) => {
       reject(`tsc error: ${err}`);
     });
 
     cp.stdout.on('data', (data: string) => {
+      data = data.toString();
+
       if (options.isWatch) {
-        if (data.toString().toLowerCase().indexOf('compilation complete') > -1) {
-          Logger.info('typescript compilation complete');
+        if (hasWords(data, 'starting', 'compilation')) {
+          watchLogger = new Logger('typescript compilation');
+          return;
+
+        } else if (hasWords(data, 'compilation', 'complete')) {
+          if (watchLogger) {
+            watchLogger.finish();
+            watchLogger = null;
+          }
+
           resolve();
           return;
         }
@@ -80,6 +91,16 @@ function runTsc(context: BuildContext, options: BuildOptions) {
     });
 
   });
+}
+
+function hasWords(data: string, ...words: string[]) {
+  data = data.toString().toLowerCase();
+  for (var i = 0; i < words.length; i++) {
+    if (data.indexOf(words[i]) < 0) {
+      return false;
+    }
+  }
+  return true;
 }
 
 function createTmpTsConfig(context: BuildContext, files: string[]) {
