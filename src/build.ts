@@ -3,7 +3,7 @@ import { bundle, bundleUpdate } from './bundle';
 import { clean } from './clean';
 import { compress } from './compress';
 import { copy } from './copy';
-import { ngc, ngcUpdate } from './ngc';
+import { ngc } from './ngc';
 import { sass, sassUpdate } from './sass';
 import { tsc } from './tsc';
 
@@ -12,12 +12,6 @@ export function build(context: BuildContext, options: BuildOptions) {
   context = generateContext(context);
   options = generateBuildOptions(options);
   const logger = new Logger('build');
-
-  // sync empty the www directory
-  clean();
-
-  // async copy files (no need to wait on completion)
-  copy();
 
   const promises: Promise<any>[] = [];
 
@@ -41,6 +35,13 @@ export function build(context: BuildContext, options: BuildOptions) {
 
 
 export function buildProd(context: BuildContext, options: BuildOptions) {
+  // sync empty the www directory
+  clean();
+
+  // async copy files
+  // this can happen all while tsc/bundle/sass is running
+  const copyPromise = copy();
+
   return ngc(context).then(() => {
     return bundle(context, options);
 
@@ -49,17 +50,31 @@ export function buildProd(context: BuildContext, options: BuildOptions) {
 
   }).then(() => {
     return compress(context);
+
+  }).then(() => {
+    // ensure the copy task has fully completed before resolving
+    return Promise.all([copyPromise]);
   });
 }
 
 
 export function buildDev(context: BuildContext, options: BuildOptions) {
+  // sync empty the www directory
+  clean();
+
+  // async copy files
+  // this can happen all while tsc/bundle/sass is running
+  const copyPromise = copy();
+
   return tsc(context, options).then(() => {
     return bundle(context, options);
 
   }).then(() => {
     return sass(context);
 
+  }).then(() => {
+    // ensure the copy task has fully completed before resolving
+    return Promise.all([copyPromise]);
   });
 }
 
