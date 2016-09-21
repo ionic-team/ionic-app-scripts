@@ -203,9 +203,10 @@ function render(sassConfig: SassConfig, useCache: boolean) {
       }
     }
 
+    sassConfig.omitSourceMapUrl = true;
+
     if (sassConfig.sourceMap) {
       sassConfig.sourceMap = basename(sassConfig.outFile);
-      sassConfig.omitSourceMapUrl = true;
       sassConfig.sourceMapContents = true;
     }
 
@@ -239,18 +240,26 @@ function renderSassSuccess(sassResult: SassResult, sassConfig: SassConfig): Prom
     const postcss = require('postcss');
     const autoprefixer = require('autoprefixer');
 
-    return postcss([autoprefixer(sassConfig.autoprefixer)])
-      .process(sassResult.css, {
-        to: basename(sassConfig.outFile),
-        map: { inline: false }
+    let autoPrefixerMapOptions: any = false;
+    if (sassConfig.sourceMap) {
+      autoPrefixerMapOptions = {
+        inline: false
+      };
+    }
 
-      }).then((postCssResult: any) => {
+    const postcssOptions: any = {
+      to: basename(sassConfig.outFile),
+      map: autoPrefixerMapOptions
+    };
+
+    return postcss([autoprefixer(sassConfig.autoprefixer)])
+      .process(sassResult.css, postcssOptions).then((postCssResult: any) => {
         postCssResult.warnings().forEach((warn: any) => {
           Logger.warn(warn.toString());
         });
 
         let apMapResult: string = null;
-        if (postCssResult.map) {
+        if (sassConfig.sourceMap && postCssResult.map) {
           apMapResult = JSON.parse(postCssResult.map.toString()).mappings;
         }
 

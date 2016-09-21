@@ -13,7 +13,7 @@ module.exports = {
   /**
    * sourceMap: If source map should be built or not.
    */
-  sourceMap: true,
+  sourceMap: false,
 
   /**
    * outputStyle: How node-sass should output the css file.

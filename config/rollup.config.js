@@ -16,7 +16,7 @@ module.exports = {
    * sourceMap: If true, a separate sourcemap file will
    * be created.
    */
-  sourceMap: true,
+  sourceMap: false,
 
   /**
    * format: The format of the generated bundle

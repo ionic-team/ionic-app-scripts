@@ -19,7 +19,9 @@ Out of the box, Ionic starters have been preconfigured with great defaults for b
 - Copying `src` static assets to `www`
 - Watching source files for live-reloading
 
-Just the bullet list above is a little overwhelming, and each task requires quite a bit of development time just to get started. Ionic App Script's intention is to make it easier to complete common tasks so developers can focus on building their app, rather than building build scripts. Note that the Ionic Framework's source is made up of modules and can be packaged by any bundler or build process. However, this project's goal is provide simple scripts to make building Ionic apps easier, while also allowing developers to further configure their build process.
+Just the bullet list above is a little overwhelming, and each task requires quite a bit of development time just to get started. Ionic App Script's intention is to make it easier to complete common tasks so developers can focus on building their app, rather than building build scripts.
+
+Note that the Ionic Framework's source is made up of modules and can be packaged by any bundler or build process. However, this project's goal is provide simple scripts to make building Ionic apps easier, while also allowing developers to further configure their build process.
 
 
 ### NPM Scripts
