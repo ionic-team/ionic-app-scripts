@@ -12,7 +12,7 @@ module.exports = {
     {
       paths: [
         '{{SRC}}/**/*.html',
-        '{{SRC}}/**/*.ts'
+        '{{TMP}}/**/*.js'
       ],
       options: { ignored: /([\/\\]\.)|(index.html$)/ },
       callback: buildUpdate

@@ -67,10 +67,7 @@ export function buildDev(context: BuildContext, options: BuildOptions) {
 export function buildUpdate(event: string, path: string, context: BuildContext) {
   const logger = new Logger('buildUpdate');
 
-  return ngcUpdate(event, path, context).then(() => {
-    return bundleUpdate(event, path, context);
-
-  }).then(() => {
+  return bundleUpdate(event, path, context).then(() => {
     return sassUpdate(event, path, context);
 
   }).then(() => {
