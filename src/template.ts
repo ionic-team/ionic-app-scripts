@@ -1,4 +1,4 @@
-import { BuildContext, Logger, touchFileAsync } from './util';
+import { BuildContext, Logger } from './util';
 import { bundleUpdate } from './bundle';
 import { join, parse, sep } from 'path';
 import { readFileSync } from 'fs';
