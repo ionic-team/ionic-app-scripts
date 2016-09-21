@@ -14,8 +14,13 @@ export function cleancss(context?: BuildContext, cleanCssConfig?: CleanCssConfig
 
   return readFileAsync(sourceFile).then((fileContent: string) => {
     return runCleanCss(fileContent);
+
   }).then((output) => {
     return writeFileAsync(destFileName, output.styles);
+
+  }).then(() => {
+    return logger.finish();
+
   }).catch(reason => {
     return logger.fail(reason);
   });

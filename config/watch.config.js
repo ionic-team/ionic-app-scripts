@@ -22,7 +22,6 @@ module.exports = {
       paths: [
         '{{SRC}}/**/*.scss'
       ],
-      options: { ignored: /[\/\\]\./ },
       callback: sassUpdate
     },
 
@@ -30,7 +29,6 @@ module.exports = {
       paths: [
         '{{SRC}}/assets'
       ],
-      options: { ignored: /[\/\\]\./ },
       callback: copyUpdate
     },
 

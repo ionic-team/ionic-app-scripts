@@ -15,7 +15,7 @@ module.exports = {
   /**
    * destFileName: the file name for the generated minified file
    */
-  destFileName: 'main.min.css',
+  destFileName: 'main.css',
 
   /**
    * destSourceMapName: the file name for the generated source map
