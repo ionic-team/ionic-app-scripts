@@ -1,16 +1,16 @@
-import { BuildContext, Logger } from './util';
+import { BuildContext, BuildOptions, Logger } from './util';
 import { bundleUpdate } from './bundle';
 import { join, parse, sep } from 'path';
 import { readFileSync } from 'fs';
 import { sassUpdate } from './sass';
 
 
-export function templateUpdate(event: string, path: string, context: BuildContext) {
+export function templateUpdate(event: string, path: string, context: BuildContext, options: BuildOptions) {
   path = join(context.rootDir, path);
 
   const logger = new Logger('templateUpdate');
 
-  return runTemplateChange(event, path, context).then(() => {
+  return runTemplateUpdate(event, path, context, options).then(() => {
     // congrats, we did it!
     return logger.finish();
 
@@ -20,10 +20,10 @@ export function templateUpdate(event: string, path: string, context: BuildContex
 }
 
 
-function runTemplateChange(event: string, path: string, context: BuildContext) {
+function runTemplateUpdate(event: string, path: string, context: BuildContext, options: BuildOptions) {
   // not sure how it changed, just do a full rebuild without the bundle cache
-  return bundleUpdate(event, path, context, false).then(() => {
-    return sassUpdate(event, path, context, true);
+  return bundleUpdate(event, path, context, options, false).then(() => {
+    return sassUpdate(event, path, context, options, true);
   });
 }
 

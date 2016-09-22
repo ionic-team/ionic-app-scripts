@@ -1,11 +1,12 @@
 import { basename, dirname, join, sep } from 'path';
-import { BuildContext, fillConfigDefaults, generateContext, Logger, replacePathVars, TaskInfo } from './util';
+import { BuildContext, BuildOptions, fillConfigDefaults, generateContext, generateBuildOptions, Logger, replacePathVars, TaskInfo } from './util';
 import { getModulePathsCache } from './bundle';
 import { readdirSync, writeFile } from 'fs';
 
 
-export function sass(context?: BuildContext, sassConfig?: SassConfig, useCache = false) {
+export function sass(context?: BuildContext, options?: BuildOptions, sassConfig?: SassConfig, useCache = false) {
   context = generateContext(context);
+  options = generateBuildOptions(options);
   sassConfig = fillConfigDefaults(context, sassConfig, SASS_TASK_INFO);
 
   const logger = new Logger('sass');
@@ -40,7 +41,7 @@ export function sass(context?: BuildContext, sassConfig?: SassConfig, useCache =
     // we're going to dynamically generate the sass data by
     // scanning through all the components included in the bundle
     // and generate the sass on the fly
-    generateSassData(context, sassConfig);
+    generateSassData(context, options, sassConfig);
   }
 
   // let's begin shall we...
@@ -52,12 +53,13 @@ export function sass(context?: BuildContext, sassConfig?: SassConfig, useCache =
 }
 
 
-export function sassUpdate(event: string, path: string, context: BuildContext, useCache = false) {
-  return sass(context, null, useCache);
+export function sassUpdate(event: string, path: string, context: BuildContext, options: BuildOptions, useCache: boolean = true) {
+  const sassConfig = fillConfigDefaults(context, {}, SASS_TASK_INFO);
+  return sass(context, options, sassConfig, useCache);
 }
 
 
-function generateSassData(context: BuildContext, sassConfig: SassConfig) {
+function generateSassData(context: BuildContext, options: BuildOptions, sassConfig: SassConfig) {
   /**
    * 1) Import user sass variables first since user variables
    *    should have precedence over default library variables.

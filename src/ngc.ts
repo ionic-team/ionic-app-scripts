@@ -1,11 +1,12 @@
 import { basename, join } from 'path';
-import { BuildContext, TaskInfo, fillConfigDefaults, generateContext, getNodeBinExecutable, Logger } from './util';
+import { BuildContext, BuildOptions, TaskInfo, fillConfigDefaults, generateContext, generateBuildOptions, getNodeBinExecutable, Logger } from './util';
 import { copy as fsCopy, emptyDirSync, outputJsonSync, statSync } from 'fs-extra';
 import { getSrcTsConfig } from './tsc';
 
 
-export function ngc(context?: BuildContext, ngcConfig?: NgcConfig) {
+export function ngc(context?: BuildContext, options?: BuildOptions, ngcConfig?: NgcConfig) {
   context = generateContext(context);
+  options = generateBuildOptions(options);
   ngcConfig = fillConfigDefaults(context, ngcConfig, NGC_TASK_INFO);
 
   const logger = new Logger('ngc');
@@ -15,7 +16,7 @@ export function ngc(context?: BuildContext, ngcConfig?: NgcConfig) {
   return copySrcTsToTmpDir(context).then(() => {
     // ts files have finishe being copied to the tmp directory
     // now compile the copied TS files with NGC
-    return runNgc(context, ngcConfig);
+    return runNgc(context, options, ngcConfig);
 
   }).then(() => {
     return logger.finish();
@@ -25,13 +26,13 @@ export function ngc(context?: BuildContext, ngcConfig?: NgcConfig) {
 }
 
 
-export function ngcUpdate(event: string, path: string, context: BuildContext) {
+export function ngcUpdate(event: string, path: string, context: BuildContext, options: BuildOptions) {
   const ngcConfig = fillConfigDefaults(context, {}, NGC_TASK_INFO);
-  return runNgc(context, ngcConfig);
+  return runNgc(context, options, ngcConfig);
 }
 
 
-function runNgc(context: BuildContext, ngcConfig: NgcConfig) {
+function runNgc(context: BuildContext, options: BuildOptions, ngcConfig: NgcConfig) {
   return new Promise((resolve, reject) => {
     // make a copy of the users src tsconfig file
     // and save the modified copy into the tmp directory

@@ -6,11 +6,13 @@ import { tmpdir } from 'os';
 
 export function bundle(context?: BuildContext, options?: BuildOptions, rollupConfig?: RollupConfig, useCache = true) {
   context = generateContext(context);
+  options = generateBuildOptions(options);
+  rollupConfig = fillConfigDefaults(context, rollupConfig, ROLLUP_TASK_INFO);
 
   const logger = new Logger('bundle');
 
   // bundle the app then create create css
-  return bundleApp(context, options, rollupConfig, useCache).then(() => {
+  return runBundle(context, options, rollupConfig, useCache).then(() => {
     return logger.finish();
   }).catch(reason => {
     return logger.fail(reason);
@@ -18,20 +20,16 @@ export function bundle(context?: BuildContext, options?: BuildOptions, rollupCon
 }
 
 
-export function bundleUpdate(event: string, path: string, context: BuildContext, useCache = true) {
-  return bundleApp(context, null, null, useCache);
+export function bundleUpdate(event: string, path: string, context: BuildContext, options: BuildOptions, useCache: boolean = true) {
+  const rollupConfig = fillConfigDefaults(context, {}, ROLLUP_TASK_INFO);
+  return runBundle(context, options, rollupConfig, useCache);
 }
 
 
-function bundleApp(context: BuildContext, options: BuildOptions, rollupConfig: RollupConfig, useCache: boolean): Promise<any> {
-  context = generateContext(context);
-  options = generateBuildOptions(options);
-
+function runBundle(context: BuildContext, options: BuildOptions, rollupConfig: RollupConfig, useCache: boolean): Promise<any> {
   if (options.isProd) {
     ROLLUP_TASK_INFO.defaultConfigFilename = 'rollup.prod.config';
   }
-
-  rollupConfig = fillConfigDefaults(context, rollupConfig, ROLLUP_TASK_INFO);
 
   rollupConfig.dest = join(context.buildDir, rollupConfig.dest);
 
@@ -41,7 +39,7 @@ function bundleApp(context: BuildContext, options: BuildOptions, rollupConfig: R
   }
 
   if (!rollupConfig.onwarn) {
-    rollupConfig.onwarn = onWarningMessage;
+    rollupConfig.onwarn = createOnWarnFn();
   }
 
   // bundle the app then create create css
@@ -105,23 +103,25 @@ function getModulesPathsCachePath(): string {
 let bundleCache: RollupBundle = null;
 
 
-function onWarningMessage(msg: string) {
-  if (msg in WARNS) {
-    return;
-  }
-  WARNS[msg] = true;
+function createOnWarnFn() {
+  const previousWarns: {[key: string]: boolean} = {};
 
-  const shouldPrint = WARN_INGORES.some(warnIgnore => msg.indexOf(warnIgnore) < 0);
-  if (shouldPrint) {
-    Logger.warn(`rollup: ${msg}`);
-  }
+  return function onWarningMessage(msg: string) {
+    if (msg in previousWarns) {
+      return;
+    }
+    previousWarns[msg] = true;
+
+    if (IGNORE_WARNS.some(warnIgnore => msg.indexOf(warnIgnore) < 0)) {
+      Logger.warn(`rollup: ${msg}`);
+    }
+  };
 }
 
-const WARN_INGORES = [
+const IGNORE_WARNS = [
   'keyword is equivalent to'
 ];
 
-const WARNS: {[key: string]: boolean} = {};
 
 const ROLLUP_TASK_INFO: TaskInfo = {
   contextProperty: 'rollupConfig',

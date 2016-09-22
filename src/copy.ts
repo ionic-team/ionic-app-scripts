@@ -1,4 +1,4 @@
-import { BuildContext, fillConfigDefaults, generateContext, Logger, replacePathVars, TaskInfo } from './util';
+import { BuildContext, BuildOptions, fillConfigDefaults, generateContext, Logger, replacePathVars, TaskInfo } from './util';
 import { copy as fsCopy } from 'fs-extra';
 
 
@@ -16,7 +16,7 @@ export function copy(context?: BuildContext, copyConfig?: CopyConfig) {
 }
 
 
-export function copyUpdate(event: string, path: string, context: BuildContext) {
+export function copyUpdate(event: string, path: string, context: BuildContext, options: BuildOptions) {
   const copyConfig = fillConfigDefaults(context, {}, COPY_TASK_INFO);
   return copyFiles(context, copyConfig);
 }

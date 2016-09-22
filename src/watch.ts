@@ -13,13 +13,13 @@ export function watch(context?: BuildContext, options?: BuildOptions, watchConfi
   const logger = new Logger('watch');
 
   build(context, options).then(() => {
-    startWatchers(context, watchConfig);
+    startWatchers(context, options, watchConfig);
     logger.ready();
   });
 }
 
 
-export function startWatchers(context: BuildContext, watchConfig: WatchConfig) {
+export function startWatchers(context: BuildContext, options: BuildOptions, watchConfig: WatchConfig) {
   // https://github.com/paulmillr/chokidar
   const chokidar = require('chokidar');
 
@@ -36,7 +36,7 @@ export function startWatchers(context: BuildContext, watchConfig: WatchConfig) {
       const chokidarWatcher = chokidar.watch(paths, options);
 
       chokidarWatcher.on('all', (event: string, path: string) => {
-        watcher.callback(event, path, context);
+        watcher.callback(event, path, context, options);
       });
     }
   });
@@ -78,6 +78,6 @@ export interface Watcher {
     cwd?: string;
   };
   callback: {
-    (event: string, path: string, context: BuildContext): void;
+    (event: string, path: string, context: BuildContext, options: BuildOptions): void;
   };
 }

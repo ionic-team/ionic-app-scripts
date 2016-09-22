@@ -80,11 +80,11 @@ function buildDev(context: BuildContext, options: BuildOptions) {
 }
 
 
-export function buildUpdate(event: string, path: string, context: BuildContext) {
+export function buildUpdate(event: string, path: string, context: BuildContext, options: BuildOptions) {
   const logger = new Logger('buildUpdate');
 
-  return bundleUpdate(event, path, context).then(() => {
-    return sassUpdate(event, path, context, true);
+  return bundleUpdate(event, path, context, options, true).then(() => {
+    return sassUpdate(event, path, context, options, true);
 
   }).then(() => {
     // congrats, we did it!
