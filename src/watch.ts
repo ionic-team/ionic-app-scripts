@@ -7,6 +7,7 @@ export function watch(context?: BuildContext, options?: BuildOptions, watchConfi
   options = generateBuildOptions(options);
   watchConfig = fillConfigDefaults(context, watchConfig, WATCH_TASK_INFO);
 
+  // force watch options
   options.isProd = false;
   options.isWatch = true;
 
@@ -25,17 +26,21 @@ export function startWatchers(context: BuildContext, options: BuildOptions, watc
 
   watchConfig.watchers.forEach(watcher => {
     if (watcher.callback && watcher.paths) {
-      const options = watcher.options || {};
-      if (!options.cwd) {
-        options.cwd = context.rootDir;
+      const watcherOptions = watcher.options || {};
+      if (!watcherOptions.cwd) {
+        watcherOptions.cwd = context.rootDir;
       }
-      if (typeof options.ignoreInitial !== 'boolean') {
-        options.ignoreInitial = true;
+      if (typeof watcherOptions.ignoreInitial !== 'boolean') {
+        watcherOptions.ignoreInitial = true;
       }
       const paths = cleanPaths(context, watcher.paths);
-      const chokidarWatcher = chokidar.watch(paths, options);
+      const chokidarWatcher = chokidar.watch(paths, watcherOptions);
 
       chokidarWatcher.on('all', (event: string, path: string) => {
+        // reset build options each time incase some process changes them
+        options.isProd = false;
+        options.isWatch = true;
+
         watcher.callback(event, path, context, options);
       });
     }
