@@ -11,7 +11,7 @@ export function watch(context?: BuildContext, options?: BuildOptions, watchConfi
   options.isProd = false;
   options.isWatch = true;
 
-  const logger = new Logger(`watch ${(options.isProd ? 'prod' : 'dev')}`);
+  const logger = new Logger('watch');
 
   build(context, options).then(() => {
     startWatchers(context, options, watchConfig);
