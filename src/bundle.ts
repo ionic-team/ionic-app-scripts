@@ -112,14 +112,15 @@ function createOnWarnFn() {
     }
     previousWarns[msg] = true;
 
-    if (IGNORE_WARNS.some(warnIgnore => msg.indexOf(warnIgnore) < 0)) {
+    if (!(IGNORE_WARNS.some(warnIgnore => msg.indexOf(warnIgnore) > -1))) {
       Logger.warn(`rollup: ${msg}`);
     }
   };
 }
 
 const IGNORE_WARNS = [
-  'keyword is equivalent to'
+  'keyword is equivalent to',
+  'plugin (\'ng-template\') was used to transform files'
 ];
 
 
