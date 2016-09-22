@@ -11,7 +11,7 @@ export function watch(context?: BuildContext, options?: BuildOptions, watchConfi
   options.isProd = false;
   options.isWatch = true;
 
-  const logger = new Logger('watch');
+  const logger = new Logger(`watch ${(options.isProd ? 'prod' : 'dev')}`);
 
   build(context, options).then(() => {
     startWatchers(context, options, watchConfig);
@@ -37,10 +37,6 @@ export function startWatchers(context: BuildContext, options: BuildOptions, watc
       const chokidarWatcher = chokidar.watch(paths, watcherOptions);
 
       chokidarWatcher.on('all', (event: string, path: string) => {
-        // reset build options each time incase some process changes them
-        options.isProd = false;
-        options.isWatch = true;
-
         watcher.callback(event, path, context, options);
       });
     }

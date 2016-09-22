@@ -7,9 +7,8 @@ import { tmpdir } from 'os';
 export function bundle(context?: BuildContext, options?: BuildOptions, rollupConfig?: RollupConfig, useCache = true) {
   context = generateContext(context);
   options = generateBuildOptions(options);
-  rollupConfig = fillConfigDefaults(context, rollupConfig, ROLLUP_TASK_INFO);
 
-  const logger = new Logger('bundle');
+  const logger = new Logger(`bundle ${(options.isProd ? 'prod' : 'dev')}`);
 
   // bundle the app then create create css
   return runBundle(context, options, rollupConfig, useCache).then(() => {
@@ -21,15 +20,21 @@ export function bundle(context?: BuildContext, options?: BuildOptions, rollupCon
 
 
 export function bundleUpdate(event: string, path: string, context: BuildContext, options: BuildOptions, useCache: boolean = true) {
-  const rollupConfig = fillConfigDefaults(context, {}, ROLLUP_TASK_INFO);
-  return runBundle(context, options, rollupConfig, useCache);
+  const logger = new Logger(`bundle ${(options.isProd ? 'prod' : 'dev')} update`);
+
+  return runBundle(context, options, null, useCache).then(() => {
+    return logger.finish();
+
+  }).catch(err => {
+    return logger.fail(err);
+  });
 }
 
 
 function runBundle(context: BuildContext, options: BuildOptions, rollupConfig: RollupConfig, useCache: boolean): Promise<any> {
-  if (options.isProd) {
-    ROLLUP_TASK_INFO.defaultConfigFilename = 'rollup.prod.config';
-  }
+  const taskInfo = (options.isProd) ? ROLLUP_PROD_TASK_INFO : ROLLUP_TASK_INFO;
+
+  rollupConfig = fillConfigDefaults(context, rollupConfig, taskInfo);
 
   rollupConfig.dest = join(context.buildDir, rollupConfig.dest);
 
@@ -130,6 +135,15 @@ const ROLLUP_TASK_INFO: TaskInfo = {
   shortArgConfig: '-r',
   envConfig: 'ionic_rollup',
   defaultConfigFilename: 'rollup.config'
+};
+
+
+const ROLLUP_PROD_TASK_INFO: TaskInfo = {
+  contextProperty: 'rollupConfig',
+  fullArgConfig: '--rollup',
+  shortArgConfig: '-r',
+  envConfig: 'ionic_rollup',
+  defaultConfigFilename: 'rollup.prod.config'
 };
 
 

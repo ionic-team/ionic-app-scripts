@@ -12,7 +12,7 @@ export function build(context: BuildContext, options: BuildOptions) {
   context = generateContext(context);
   options = generateBuildOptions(options);
 
-  const logger = new Logger('build ' + (options.isProd ? 'prod' : 'dev'));
+  const logger = new Logger(`build ${(options.isProd ? 'prod' : 'dev')}`);
 
   const promises: Promise<any>[] = [];
 
@@ -43,7 +43,7 @@ function buildProd(context: BuildContext, options: BuildOptions) {
   // this can happen all while tsc/bundle/sass is running
   const copyPromise = copy();
 
-  return ngc(context).then(() => {
+  return ngc(context, options).then(() => {
     return bundle(context, options);
 
   }).then(() => {
@@ -81,16 +81,7 @@ function buildDev(context: BuildContext, options: BuildOptions) {
 
 
 export function buildUpdate(event: string, path: string, context: BuildContext, options: BuildOptions) {
-  const logger = new Logger('buildUpdate');
-
   return bundleUpdate(event, path, context, options, true).then(() => {
     return sassUpdate(event, path, context, options, true);
-
-  }).then(() => {
-    // congrats, we did it!
-    return logger.finish();
-
-  }).catch(err => {
-    return logger.fail('buildUpdate failed' + (err.message ? ': ' + err.message : ''));
   });
 }
