@@ -1,6 +1,6 @@
 {
   "name": "@ionic/app-scripts",
-  "version": "0.0.19",
+  "version": "0.0.21",
   "description": "Scripts for Ionic Projects",
   "homepage": "http//ionicframework.com/",
   "author": "Ionic Team <hi@ionic.io> (http://ionic.io)",
@@ -34,6 +34,8 @@
     "rollup-plugin-commonjs": "5.0.4",
     "rollup-plugin-node-resolve": "2.0.0",
     "rollup-pluginutils": "1.5.2",
+    "tslint": "3.15.1",
+    "tslint-eslint-rules": "1.5.0",
     "uglify-js": "2.7.3"
   },
   "devDependencies": {
@@ -41,8 +43,6 @@
     "@types/fs-extra": "0.0.31",
     "@types/node": "6.0.38",
     "@types/uglify-js": "2.0.27",
-    "tslint": "^3.15.1",
-    "tslint-ionic-rules": "0.0.5",
     "typescript": "2.0.2"
   },
   "repository": {

@@ -90,7 +90,7 @@ function getConfigFileData(fullName: string, shortName: string, envVarName: stri
 }
 
 
-function getConfigValueDefaults(argFullName: string, argShortName: string, envVarName: string, defaultValue: string, context: BuildContext) {
+export function getConfigValueDefaults(argFullName: string, argShortName: string, envVarName: string, defaultValue: string, context: BuildContext) {
   // first see if the value was set in the command-line args
   const argValue = getArgValue(argFullName, argShortName);
   if (argValue) {

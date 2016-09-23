@@ -17,6 +17,7 @@ Out of the box, Ionic starters have been preconfigured with great defaults for b
 - Minifying JavaScript files
 - Compressing CSS files
 - Copying `src` static assets to `www`
+- Linting source files
 - Watching source files for live-reloading
 
 Just the bullet list above is a little overwhelming, and each task requires quite a bit of development time just to get started. Ionic App Script's intention is to make it easier to complete common tasks so developers can focus on building their app, rather than building build scripts.
@@ -87,6 +88,7 @@ npm run build --rollup ./config/rollup.config.js
 | NGC         | `ionic_ngc`         | `--ngc` or `-n`       |
 | Rollup      | `ionic_rollup`      | `--rollup` or `-r`    |
 | Sass        | `ionic_sass`        | `--sass` or `-s`      |
+| TSLint      | `ionic_tslint`      | `--tslint` or `-l`    |
 | UglifyJS    | `ionic_uglifyjs`    | `--uglifyjs` or `-u`  |
 
 
@@ -105,18 +107,19 @@ npm run build --rollup ./config/rollup.config.js
 
 These tasks are available within `ionic-app-scripts` and can be added to NPM scripts or any Node command.
 
-| Task     | Description                                                                                         |
-|----------|-----------------------------------------------------------------------------------------------------|
-| build    | Full production build. Use `--dev` flag for dev build.                                              |
-| bundle   | Bundle JS modules.                                                                                  |
-| clean    | Empty the `www` directory.                                                                          |
-| cleancss | Compress the output CSS with [CleanCss](https://github.com/jakubpawlowicz/clean-css)                |
-| copy     | Run the copy tasks, which by defaults copies the `src/assets/` and `src/index.html` files to `www`. |
-| minify   | Minifies the output JS bundle and compresses the compiled CSS.                                      |
-| ngc      | Runs just the `ngc` portion of the production build.                                                |
-| sass     | Sass compilation of used modules. Bundling must have as least ran once before Sass compilation.     |
-| tsc      | Runs just the `tsc` portion of the dev build.                                                       |
-| watch    | Runs watch for dev builds.                                                                          |
+| Task       | Description                                                                                         |
+|------------|-----------------------------------------------------------------------------------------------------|
+| `build`    | Full production build. Use `--dev` flag for dev build.                                              |
+| `bundle`   | Bundle JS modules.                                                                                  |
+| `clean`    | Empty the `www` directory.                                                                          |
+| `cleancss` | Compress the output CSS with [CleanCss](https://github.com/jakubpawlowicz/clean-css)                |
+| `copy`     | Run the copy tasks, which by defaults copies the `src/assets/` and `src/index.html` files to `www`. |
+| `lint`     | Run the linter against the source `.ts` files, using the `tslint.json` config file at the root.     |
+| `minify`   | Minifies the output JS bundle and compresses the compiled CSS.                                      |
+| `ngc`      | Runs just the `ngc` portion of the production build.                                                |
+| `sass`     | Sass compilation of used modules. Bundling must have as least ran once before Sass compilation.     |
+| `tsc`      | Runs just the `tsc` portion of the dev build.                                                       |
+| `watch`    | Runs watch for dev builds.                                                                          |
 
 Example NPM Script:
 
@@ -137,3 +140,4 @@ Example NPM Script:
 - [Autoprefixer](https://github.com/postcss/autoprefixer)
 - [UglifyJS](http://lisperator.net/uglifyjs/)
 - [CleanCss](https://github.com/jakubpawlowicz/clean-css)
+- [TSLint](http://palantir.github.io/tslint/)

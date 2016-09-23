@@ -3,6 +3,7 @@ import { bundle, bundleUpdate } from './bundle';
 import { clean } from './clean';
 import { minify } from './minify';
 import { copy } from './copy';
+import { lint } from './lint';
 import { ngc } from './ngc';
 import { sass, sassUpdate } from './sass';
 import { tsc } from './tsc';
@@ -39,9 +40,10 @@ function buildProd(context: BuildContext, options: BuildOptions) {
   // sync empty the www directory
   clean();
 
-  // async copy files
-  // this can happen all while tsc/bundle/sass is running
+  // async tasks
+  // these can happen all while other tasks are running
   const copyPromise = copy();
+  const lintPromise = lint();
 
   return ngc(context, options).then(() => {
     return bundle(context, options);
@@ -53,8 +55,11 @@ function buildProd(context: BuildContext, options: BuildOptions) {
     return minify(context);
 
   }).then(() => {
-    // ensure the copy task has fully completed before resolving
-    return Promise.all([copyPromise]);
+    // ensure the async tasks have fully completed before resolving
+    return Promise.all([
+      copyPromise,
+      lintPromise
+    ]);
   });
 }
 
@@ -63,9 +68,10 @@ function buildDev(context: BuildContext, options: BuildOptions) {
   // sync empty the www directory
   clean();
 
-  // async copy files
-  // this can happen all while tsc/bundle/sass is running
+  // async tasks
+  // these can happen all while other tasks are running
   const copyPromise = copy();
+  const lintPromise = lint();
 
   return tsc(context, options).then(() => {
     return bundle(context, options);
@@ -74,8 +80,11 @@ function buildDev(context: BuildContext, options: BuildOptions) {
     return sass(context);
 
   }).then(() => {
-    // ensure the copy task has fully completed before resolving
-    return Promise.all([copyPromise]);
+    // ensure the async tasks have fully completed before resolving
+    return Promise.all([
+      copyPromise,
+      lintPromise
+    ]);
   });
 }
 
