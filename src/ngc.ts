@@ -1,5 +1,5 @@
 import { basename, join } from 'path';
-import { BuildContext, BuildOptions, TaskInfo, fillConfigDefaults, generateContext, generateBuildOptions, getNodeBinExecutable, Logger } from './util';
+import { BuildContext, BuildOptions, TaskInfo, fillConfigDefaults, generateContext, generateBuildOptions, getNodeBinExecutable, isTsFilename, Logger } from './util';
 import { copy as fsCopy, emptyDirSync, outputJsonSync, statSync } from 'fs-extra';
 import { getSrcTsConfig } from './tsc';
 
@@ -131,14 +131,12 @@ function filterCopyFiles(filePath: any, hoop: any) {
       shouldInclude = (EXCLUDE_DIRS.indexOf(basename(filePath)) < 0);
 
     } else {
-      if (filePath.substr(filePath.length - 3) === '.ts') {
-        if (filePath.substr(filePath.length - 5) !== '.d.ts') {
-          shouldInclude = true;
-        }
+      if (isTsFilename(filePath)) {
+        shouldInclude = true;
       }
 
       if (filePath.substr(filePath.length - 5) === '.html') {
-          shouldInclude = true;
+        shouldInclude = true;
       }
     }
 

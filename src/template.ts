@@ -1,7 +1,7 @@
-import { BuildContext, BuildOptions, Logger } from './util';
-import { bundleUpdate } from './bundle';
-import { join, parse, sep } from 'path';
-import { readFileSync } from 'fs';
+import { BuildContext, BuildOptions, Logger, isTsFilename } from './util';
+import { bundleUpdate, clearCachedModule } from './bundle';
+import { dirname, join, parse, basename, sep } from 'path';
+import { readFileSync, readdirSync } from 'fs';
 import { sassUpdate } from './sass';
 
 
@@ -21,10 +21,67 @@ export function templateUpdate(event: string, path: string, context: BuildContex
 
 
 function runTemplateUpdate(event: string, path: string, context: BuildContext, options: BuildOptions) {
+  if (event === 'change') {
+    // just a change event, see if this html file has a component in the same directory
+    // doing this to prevent an unnecessary TS compile and bundling without cache if it was just a HTML change
+    const componentFile = getSourceComponentFile(path, context);
+    if (clearCachedModule(componentFile)) {
+      // we successfully found the compiled JS file and cleared it from the bundle cache
+      return bundleUpdate(event, path, context, options, true);
+    }
+  }
+
   // not sure how it changed, just do a full rebuild without the bundle cache
   return bundleUpdate(event, path, context, options, false).then(() => {
     return sassUpdate(event, path, context, options, true);
   });
+}
+
+
+function getSourceComponentFile(htmlFilePath: string, context: BuildContext) {
+  let rtn: string = null;
+
+  try {
+    const changedHtmlFile = basename(htmlFilePath);
+    const componentDir = dirname(htmlFilePath);
+    const filePaths = readdirSync(componentDir);
+    let match: any;
+
+    for (var i = 0; i < filePaths.length; i++) {
+      var filePath = filePaths[i];
+      if (isTsFilename(filePath)) {
+        // found a .ts file in this same directory
+        // open it up and see if it's a component
+        // and see if it has a template url with the same filename
+        var tsComponentFile = join(componentDir, filePath);
+        var source = readFileSync(join(componentDir, filePath)).toString();
+
+        if ((match = COMPONENT_REGEX.exec(source)) !== null) {
+
+          if ((match = TEMPLATE_URL_REGEX.exec(match[0])) !== null) {
+
+            var componentHtmlFile = basename(match[1].replace(/\'|\"|\`/g, '').trim());
+            if (changedHtmlFile === componentHtmlFile) {
+              rtn = getCompiledJsFile(tsComponentFile, context);
+              break;
+            }
+
+          }
+        }
+      }
+    }
+
+  } catch (e) {
+    Logger.error(e);
+  }
+
+  return rtn;
+}
+
+
+function getCompiledJsFile(tsComponentFile: string, context: BuildContext) {
+  let jsCompiledFile = tsComponentFile.replace(context.srcDir, context.tmpDir);
+  return jsCompiledFile.substr(0, jsCompiledFile.length - 2) + 'js';
 }
 
 

@@ -107,6 +107,20 @@ function getModulesPathsCachePath(): string {
 // used to track the cache for subsequent bundles
 let bundleCache: RollupBundle = null;
 
+export function clearCachedModule(id: string) {
+  if (bundleCache) {
+    const cachedModule = bundleCache.modules.find(m => m.id === id);
+    if (cachedModule) {
+      const index = bundleCache.modules.indexOf(cachedModule);
+      if (index > -1) {
+        bundleCache.modules.splice(index, 1);
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 
 function createOnWarnFn() {
   const previousWarns: {[key: string]: boolean} = {};
