@@ -232,6 +232,11 @@ export class Logger {
   private scope: string;
 
   constructor(scope: string) {
+    if (!printedAppScriptsVersion) {
+      printedAppScriptsVersion = true;
+      Logger.info(`ionic-app-scripts ${getAppScriptsVersion()}`);
+    }
+
     this.start = Date.now();
     this.scope = scope;
     Logger.info(`${scope} started ...`);
@@ -296,6 +301,16 @@ function print(type: string, msg: string, prefix?: string) {
     prefix = ('0' + date.getHours()).slice(-2) + ':' + ('0' + date.getMinutes()).slice(-2) + ':' + ('0' + date.getSeconds()).slice(-2);
   }
   (<any>console)[type](`[${prefix}]  ${msg}`);
+}
+
+let printedAppScriptsVersion = false;
+function getAppScriptsVersion() {
+  let rtn = '';
+  try {
+    const packageJson = require(join(__dirname, '..', 'package.json'));
+    rtn = packageJson.version;
+  } catch (e) {}
+  return rtn;
 }
 
 

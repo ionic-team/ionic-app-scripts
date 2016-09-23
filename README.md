@@ -1,6 +1,6 @@
 # Ionic App Scripts
 
-Helper scripts to get Ionic apps up and running quickly (minus the config overload).
+Helper scripts to get [Ionic apps](http://ionicframework.com/) up and running quickly (minus the config overload).
 
 
 ### Config Defaults
@@ -22,7 +22,7 @@ Out of the box, Ionic starters have been preconfigured with great defaults for b
 
 Just the bullet list above is a little overwhelming, and each task requires quite a bit of development time just to get started. Ionic App Script's intention is to make it easier to complete common tasks so developers can focus on building their app, rather than building build scripts.
 
-Note that the Ionic Framework's source is made up of modules and can be packaged by any bundler or build process. However, this project's goal is provide simple scripts to make building Ionic apps easier, while also allowing developers to further configure their build process.
+Note that the [Ionic Framework's](https://github.com/driftyco/ionic) source is made up of modules and can be packaged by any bundler or build process. However, this project's goal is provide simple scripts to make building Ionic apps easier, while also allowing developers to further configure their build process.
 
 
 ### NPM Scripts
@@ -132,6 +132,7 @@ Example NPM Script:
 
 ## The Stack
 
+- [Ionic Framework](http://ionicframework.com/)
 - [TypeScript Compiler](https://www.typescriptlang.org/)
 - [Angular Compiler (NGC)](https://github.com/angular/angular/tree/master/modules/%40angular/compiler-cli)
 - [Rollup Module Bundler](http://rollupjs.org/)
