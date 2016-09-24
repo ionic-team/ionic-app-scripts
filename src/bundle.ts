@@ -1,5 +1,5 @@
 import { BuildContext, BuildOptions, fillConfigDefaults, generateContext, generateBuildOptions, Logger, TaskInfo } from './util';
-import { join } from 'path';
+import { join, isAbsolute } from 'path';
 import { outputJson, readJsonSync } from 'fs-extra';
 import { tmpdir } from 'os';
 
@@ -36,7 +36,9 @@ function runBundle(context: BuildContext, options: BuildOptions, rollupConfig: R
 
   rollupConfig = fillConfigDefaults(context, rollupConfig, taskInfo);
 
-  rollupConfig.dest = join(context.buildDir, rollupConfig.dest);
+  if (!isAbsolute(rollupConfig.dest)) {
+    rollupConfig.dest = join(context.buildDir, rollupConfig.dest);
+  }
 
   if (useCache) {
     // tell rollup to use a previous bundle as its starting point
