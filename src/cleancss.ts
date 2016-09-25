@@ -43,7 +43,6 @@ function runCleanCss(fileContent: string): Promise<cleanCss.Output> {
 }
 
 const CLEANCSS_TASK_INFO: TaskInfo = {
-  contextProperty: 'cleancssConfig',
   fullArgConfig: '--cleancss',
   shortArgConfig: '-e',
   envConfig: 'ionic_cleancss',

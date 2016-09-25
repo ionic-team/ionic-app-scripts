@@ -59,7 +59,6 @@ function copySrcToDest(context: BuildContext, src: string, dest: string, filter?
 
 
 const COPY_TASK_INFO: TaskInfo = {
-  contextProperty: 'copyConfig',
   fullArgConfig: '--copy',
   shortArgConfig: '-y',
   envConfig: 'ionic_copy',

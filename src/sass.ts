@@ -409,7 +409,6 @@ let lastRenderKey: string = null;
 
 
 const SASS_TASK_INFO: TaskInfo = {
-  contextProperty: 'sassConfig',
   fullArgConfig: '--sass',
   shortArgConfig: '-s',
   envConfig: 'ionic_sass',

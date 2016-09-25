@@ -20,7 +20,6 @@ export function generator(context?: BuildContext, generatorConfig?: GeneratorCon
 
 
 const GENERATOR_TASK_INFO: TaskInfo = {
-  contextProperty: 'generatorConfig',
   fullArgConfig: '--generator',
   shortArgConfig: '-g',
   envConfig: 'ionic_generator',

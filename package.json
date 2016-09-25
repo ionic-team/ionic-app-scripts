@@ -19,6 +19,7 @@
     "build": "npm run clean && tsc",
     "clean": "rm -rf ./dist",
     "prepublish": "npm run build",
+    "test": "node node_modules/.bin/jasmine JASMINE_CONFIG_PATH=src/spec/jasmine.config.json || true",
     "watch": "npm run clean && tsc --watch"
   },
   "main": "dist/index.js",
@@ -41,8 +42,10 @@
   "devDependencies": {
     "@types/clean-css": "3.4.29",
     "@types/fs-extra": "0.0.31",
+    "@types/jasmine": "2.2.33",
     "@types/node": "6.0.38",
     "@types/uglify-js": "2.0.27",
+    "jasmine": "^2.5.2",
     "typescript": "2.0.2"
   },
   "repository": {

@@ -19,7 +19,7 @@ export function generateContext(context?: BuildContext): BuildContext {
     context = {};
   }
 
-  context.rootDir = context.rootDir || getConfigValueDefaults('--rootDir', null, 'ionic_root_dir', process.cwd(), context);
+  context.rootDir = context.rootDir || getConfigValueDefaults('--rootDir', null, 'ionic_root_dir', processCwd, context);
 
   context.tmpDir = context.tmpDir || getConfigValueDefaults('--tmpDir', null, 'ionic_tmp_dir', join(context.rootDir, TMP_DIR), context);
 
@@ -59,17 +59,16 @@ export function generateBuildOptions(options?: BuildOptions): BuildOptions {
 export function fillConfigDefaults(context: BuildContext, config: any, task: TaskInfo): any {
   // if the context property wasn't already set, then see if a config file
   // was supplied by the user as an arg or env variable
-  (<any>context)[task.contextProperty] = config;
-  if (!(<any>context)[task.contextProperty]) {
-    (<any>context)[task.contextProperty] = getConfigFileData(task.fullArgConfig, task.shortArgConfig, task.envConfig, null, context) || {};
+  if (!config) {
+    config = getConfigFileData(task.fullArgConfig, task.shortArgConfig, task.envConfig, null, context) || {};
   }
 
   const defaultConfig = require(join('..', 'config', task.defaultConfigFilename));
 
   // always assign any default values which were not already supplied by the user
-  assignDefaults((<any>context)[task.contextProperty], defaultConfig);
+  assignDefaults(config, defaultConfig);
 
-  return (<any>context)[task.contextProperty];
+  return config;
 }
 
 
@@ -112,14 +111,15 @@ export function getConfigValueDefaults(argFullName: string, argShortName: string
 function getEnvVariable(envVarName: string): string {
   // see if it was set in npm package.json config
   // which ends up as an env variable prefixed with "npm_package_config_"
-  envVarName = 'npm_package_config_' + envVarName;
-  if (process.env[envVarName] !== undefined) {
-    return process.env[envVarName];
+  let val = processEnv['npm_package_config_' + envVarName];
+  if (val !== undefined) {
+    return val;
   }
 
   // next see if it was just set as an environment variables
-  if (process.env[envVarName] !== undefined) {
-    return process.env[envVarName];
+  val = processEnv[envVarName];
+  if (val !== undefined) {
+    return val;
   }
 
   return null;
@@ -127,10 +127,10 @@ function getEnvVariable(envVarName: string): string {
 
 
 function getArgValue(fullName: string, shortName: string): string {
-  for (var i = 2; i < argvLen; i++) {
-    var arg = argv[i];
+  for (var i = 2; i < processArgv.length; i++) {
+    var arg = processArgv[i];
     if (arg === fullName || (shortName && arg === shortName)) {
-      var val = argv[i + 1];
+      var val = processArgv[i + 1];
       if (val !== undefined && val !== '') {
         return val;
       }
@@ -141,7 +141,7 @@ function getArgValue(fullName: string, shortName: string): string {
 
 
 export function hasArg(fullName: string, shortName: string = null): boolean {
-  return (argv.some(a => a === fullName) || (shortName !== null && argv.some(a => a === shortName)));
+  return (processArgv.some(a => a === fullName) || (shortName !== null && processArgv.some(a => a === shortName)));
 }
 
 
@@ -211,7 +211,7 @@ let checkedDebug = false;
 function checkDebugMode() {
   if (!checkedDebug) {
     if (hasArg('--debug') || getEnvVariable('ionic_debug_mode') === 'true') {
-      process.env.ionic_debug_mode = 'true';
+      processEnv.ionic_debug_mode = 'true';
     }
 
     if (isDebugMode()) {
@@ -223,7 +223,7 @@ function checkDebugMode() {
 
 
 function isDebugMode() {
-  return (process.env.ionic_debug_mode === 'true');
+  return (processEnv.ionic_debug_mode === 'true');
 }
 
 
@@ -314,8 +314,31 @@ function getAppScriptsVersion() {
 }
 
 
-const argv = process.argv;
-const argvLen = argv.length;
+let processArgv: string[];
+export function setProcessArgs(argv: string[]) {
+  processArgv = argv;
+}
+setProcessArgs(process.argv);
+
+export function addArgv(value: string) {
+  processArgv.push(value);
+}
+
+let processEnv: any;
+export function setProcessEnv(env: any) {
+  processEnv = env;
+}
+setProcessEnv(process.env);
+
+export function setEnvVar(key: string, value: any) {
+  processEnv[key] = value;
+}
+
+let processCwd: string;
+export function setCwd(cwd: string) {
+  processCwd = cwd;
+}
+setCwd(process.cwd());
 
 const BUILD_DIR = 'build';
 const SRC_DIR = 'src';
@@ -342,7 +365,6 @@ export interface BuildOptions {
 
 
 export interface TaskInfo {
-  contextProperty: string;
   fullArgConfig: string;
   shortArgConfig: string;
   envConfig: string;

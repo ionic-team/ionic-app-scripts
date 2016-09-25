@@ -87,7 +87,7 @@ function getCompiledJsFile(tsComponentFile: string, context: BuildContext) {
 
 export function inlineTemplate(options: NgTemplateOptions, source: string, sourcePath: string) {
   const componentDir = parse(sourcePath).dir;
-  let match: any;
+  let match: RegExpExecArray;
   let rewrite: string;
   let didRewrite = false;
   let sourceScan = source;

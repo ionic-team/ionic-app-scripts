@@ -56,7 +56,6 @@ function cleanPaths(context: BuildContext, paths: any): any {
 
 
 const WATCH_TASK_INFO: TaskInfo = {
-  contextProperty: 'watchConfig',
   fullArgConfig: '--watch',
   shortArgConfig: '-w',
   envConfig: 'ionic_watch',

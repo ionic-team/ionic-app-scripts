@@ -24,7 +24,6 @@ export function isClosureSupported(context: BuildContext) {
 
 
 const CLOSURE_TASK_INFO: TaskInfo = {
-  contextProperty: 'closureConfig',
   fullArgConfig: '--closure',
   shortArgConfig: '-l',
   envConfig: 'ionic_closure',

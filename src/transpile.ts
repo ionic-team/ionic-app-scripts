@@ -70,7 +70,6 @@ export interface TranspileConfig {
 }
 
 const TRANSPILE_TASK_INFO: TaskInfo = {
-  contextProperty: 'tscConfig',
   fullArgConfig: '--tsc',
   shortArgConfig: '-tsc',
   envConfig: 'ionic_transpile',

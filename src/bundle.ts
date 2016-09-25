@@ -144,7 +144,6 @@ const IGNORE_WARNS = [
 
 
 const ROLLUP_TASK_INFO: TaskInfo = {
-  contextProperty: 'rollupConfig',
   fullArgConfig: '--rollup',
   shortArgConfig: '-r',
   envConfig: 'ionic_rollup',
@@ -153,7 +152,6 @@ const ROLLUP_TASK_INFO: TaskInfo = {
 
 
 const ROLLUP_PROD_TASK_INFO: TaskInfo = {
-  contextProperty: 'rollupConfig',
   fullArgConfig: '--rollup',
   shortArgConfig: '-r',
   envConfig: 'ionic_rollup',

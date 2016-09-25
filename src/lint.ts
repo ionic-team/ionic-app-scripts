@@ -76,7 +76,6 @@ function runTsLint(context: BuildContext, tsConfigPath: string) {
 
 
 const TSCONFIG_TASK_INFO: TaskInfo = {
-  contextProperty: 'tslintConfig',
   fullArgConfig: '--tslint',
   shortArgConfig: '-l',
   envConfig: 'ionic_tslint',
