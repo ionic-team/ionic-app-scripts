@@ -31,7 +31,7 @@ export function build(context: BuildContext, options: BuildOptions) {
     return logger.finish();
 
   }).catch(err => {
-    return logger.fail('Build failed' + (err.message ? ': ' + err.message : ''));
+    return logger.fail(err, 'Build failed' + (err.message ? ': ' + err.message : ''));
   });
 }
 

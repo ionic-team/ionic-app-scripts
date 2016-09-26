@@ -270,8 +270,15 @@ export class Logger {
     return true;
   }
 
-  fail(msg: string) {
-    Logger.info(`${this.scope} failed:  ${msg}`);
+  fail(exception: Error, msg?: string) {
+    if (msg) {
+      Logger.error(`${this.scope} failed:  ${msg}`);
+    }
+
+    if (exception) {
+      Logger.error(exception.stack);
+    }
+
     return false;
   }
 

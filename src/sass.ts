@@ -16,7 +16,7 @@ export function sass(context?: BuildContext, options?: BuildOptions, sassConfig?
     // see if we have it cached
     context.moduleFiles = getModulePathsCache();
     if (!context.moduleFiles) {
-      logger.fail('Cannot generate Sass files without first bundling JavaScript ' +
+      logger.fail(null, 'Cannot generate Sass files without first bundling JavaScript ' +
                   'files in order to know all used modules. Please build JS files first.');
       return Promise.reject('Missing module paths for sass build');
     }
