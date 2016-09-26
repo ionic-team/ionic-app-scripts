@@ -46,7 +46,7 @@
     "@types/node": "6.0.38",
     "@types/uglify-js": "2.0.27",
     "jasmine": "^2.5.2",
-    "typescript": "2.0.2"
+    "typescript": "^2.0.3"
   },
   "repository": {
     "type": "git",
