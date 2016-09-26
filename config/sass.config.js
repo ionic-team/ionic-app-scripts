@@ -92,7 +92,6 @@ module.exports = {
    */
   excludeModules: [
     '@angular',
-    '@ionic/storage',
     'commonjs-proxy',
     'core-js',
     'ionic-native',
