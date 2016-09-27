@@ -1,6 +1,6 @@
 {
   "name": "@ionic/app-scripts",
-  "version": "0.0.22",
+  "version": "0.0.23",
   "description": "Scripts for Ionic Projects",
   "homepage": "http//ionicframework.com/",
   "author": "Ionic Team <hi@ionic.io> (http://ionic.io)",
@@ -46,6 +46,8 @@
     "@types/node": "6.0.38",
     "@types/uglify-js": "2.0.27",
     "jasmine": "^2.5.2",
+    "tslint": "3.15.1",
+    "tslint-ionic-rules": "0.0.5",
     "typescript": "^2.0.3"
   },
   "repository": {

@@ -38,8 +38,10 @@ function runTsc(context: BuildContext, options: BuildOptions) {
     const files: string[] = [];
     if (options.isProd) {
       files.push(join(context.srcDir, context.mainEntryProd));
+      files.push(join(context.srcDir, '**', '*.d.ts'));
     } else {
       files.push(join(context.srcDir, context.mainEntryDev));
+      files.push(join(context.srcDir, '**', '*.d.ts'));
     }
 
     const tmpTsConfigPath = createTmpTsConfig(context, files);
@@ -111,10 +113,10 @@ function createTmpTsConfig(context: BuildContext, files: string[]) {
   tsConfig.compilerOptions.outDir = context.tmpDir;
 
   // force what files to include
-  if (Array.isArray(tsConfig.files)) {
-    tsConfig.files = tsConfig.files.concat(files);
+  if (Array.isArray(tsConfig.include)) {
+    tsConfig.include = tsConfig.include.concat(files);
   } else {
-    tsConfig.files = files;
+    tsConfig.include = files;
   }
 
   const tmpTsConfigPath = getTmpTsConfigPath(context);
@@ -161,7 +163,7 @@ export interface TsConfig {
     outDir: string;
     target: string;
   };
-  files: string[];
+  include: string[];
   exclude: string[];
 }
 

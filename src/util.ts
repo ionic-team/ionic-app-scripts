@@ -203,7 +203,7 @@ export function getNodeBinExecutable(context: BuildContext, cmd: string) {
 
 
 export function isTsFilename(filename: string) {
-  return (filename.length > 3) && (filename.substr(filename.length - 3) === '.ts') && (filename.substr(filename.length - 5) !== '.d.ts');
+  return (filename.length > 3) && (filename.substr(filename.length - 3) === '.ts');
 }
 
 
