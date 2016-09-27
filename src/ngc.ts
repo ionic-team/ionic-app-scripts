@@ -90,7 +90,7 @@ function createTmpTsConfig(context: BuildContext, ngcConfig: NgcConfig) {
   tsConfig.compilerOptions.target = 'es5';
 
   // force where to look for ts files
-  tsConfig.files = ngcConfig.include;
+  tsConfig.include = ngcConfig.include;
 
   // save the modified copy into the tmp directory
   outputJsonSync(getTmpTsConfigPath(context), tsConfig);
