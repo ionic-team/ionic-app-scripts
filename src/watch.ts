@@ -26,6 +26,8 @@ export function startWatchers(context: BuildContext, options: BuildOptions, watc
 
   watchConfig.watchers.forEach(watcher => {
     if (watcher.callback && watcher.paths) {
+      let taskPromise = Promise.resolve();
+      let nextTask = null;
       const watcherOptions = watcher.options || {};
       if (!watcherOptions.cwd) {
         watcherOptions.cwd = context.rootDir;
@@ -37,7 +39,11 @@ export function startWatchers(context: BuildContext, options: BuildOptions, watc
       const chokidarWatcher = chokidar.watch(paths, watcherOptions);
 
       chokidarWatcher.on('all', (event: string, path: string) => {
-        watcher.callback(event, path, context, options);
+        nextTask = watcher.callback.bind(null, event, path, context, options);
+        taskPromise.then(function() {
+          taskPromise = nextTask();
+          nextTask = null;
+        });
       });
     }
   });
