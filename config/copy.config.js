@@ -12,6 +12,10 @@ module.exports = {
       dest: 'www/index.html'
     },
     {
+      src: 'src/service-worker.js',
+      dest: 'www/service-worker.js'
+    },
+    {
       src: 'node_modules/ionic-angular/polyfills/polyfills.js',
       dest: 'www/build/polyfills.js'
     },
