@@ -276,7 +276,12 @@ export class Logger {
     }
 
     if (exception) {
-      Logger.error(exception.stack);
+      if (typeof exception === 'string') {
+        Logger.error(exception);
+      } 
+      if (exception.stack) {
+        Logger.error(exception.stack);
+      }
     }
 
     return false;
