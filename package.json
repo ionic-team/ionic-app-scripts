@@ -31,7 +31,7 @@
     "fs-extra": "0.30.0",
     "node-sass": "3.9.3",
     "postcss": "5.2.0",
-    "rollup": "0.36.0",
+    "rollup": "0.36.1",
     "rollup-plugin-commonjs": "5.0.4",
     "rollup-plugin-node-resolve": "2.0.0",
     "rollup-pluginutils": "1.5.2",
