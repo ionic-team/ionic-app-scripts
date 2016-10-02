@@ -1,5 +1,5 @@
 import { build } from './build';
-import { BuildContext, BuildOptions, generateBuildOptions, generateContext, fillConfigDefaults, Logger, replacePathVars, TaskInfo } from './util';
+import { BuildContext, BuildOptions, generateBuildOptions, generateContext, fillConfigDefaults, Logger, replacePathVars, setIonicEnvironment, TaskInfo } from './util';
 
 
 export function watch(context?: BuildContext, options?: BuildOptions, watchConfig?: WatchConfig) {
@@ -39,6 +39,7 @@ export function startWatchers(context: BuildContext, options: BuildOptions, watc
       const chokidarWatcher = chokidar.watch(paths, watcherOptions);
 
       chokidarWatcher.on('all', (event: string, path: string) => {
+        setIonicEnvironment(options.isProd);
         nextTask = watcher.callback.bind(null, event, path, context, options);
         taskPromise.then(function() {
           taskPromise = nextTask();

@@ -32,9 +32,7 @@ export function bundleUpdate(event: string, path: string, context: BuildContext,
 
 
 function runBundle(context: BuildContext, options: BuildOptions, rollupConfig: RollupConfig, useCache: boolean): Promise<any> {
-  const taskInfo = (options.isProd) ? ROLLUP_PROD_TASK_INFO : ROLLUP_TASK_INFO;
-
-  rollupConfig = fillConfigDefaults(context, rollupConfig, taskInfo);
+  rollupConfig = fillConfigDefaults(context, rollupConfig, ROLLUP_TASK_INFO);
 
   if (!isAbsolute(rollupConfig.dest)) {
     rollupConfig.dest = join(context.buildDir, rollupConfig.dest);
@@ -150,14 +148,6 @@ const ROLLUP_TASK_INFO: TaskInfo = {
   shortArgConfig: '-r',
   envConfig: 'ionic_rollup',
   defaultConfigFilename: 'rollup.config'
-};
-
-
-const ROLLUP_PROD_TASK_INFO: TaskInfo = {
-  fullArgConfig: '--rollup',
-  shortArgConfig: '-r',
-  envConfig: 'ionic_rollup',
-  defaultConfigFilename: 'rollup.prod.config'
 };
 
 

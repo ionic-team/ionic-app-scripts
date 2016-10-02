@@ -103,6 +103,13 @@ npm run build --rollup ./config/rollup.config.js
 | build directory | `ionic_build_dir`   | `--buildDir`  | `build`         |
 
 
+### Ionic Environment Variable
+
+The `process.env.IONIC_ENV` environment variable can be used to test whether it is a `prod` or `dev` build, which automatically gets set by any command. By default the `build` task is `prod`, and the `watch` task is `dev`. Note that `ionic serve` uses the `watch` task. Additionally, using the `--dev` command line flag will force the build to use `dev`.
+
+Please take a look at the bottom of the [default Rollup config file](https://github.com/driftyco/ionic-app-scripts/blob/master/config/rollup.config.js) to see how the `IONIC_ENV` environment variable is being used to conditionally change config values for production builds.
+
+
 ## All Available Tasks
 
 These tasks are available within `ionic-app-scripts` and can be added to NPM scripts or any Node command.

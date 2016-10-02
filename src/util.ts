@@ -48,11 +48,18 @@ export function generateBuildOptions(options?: BuildOptions): BuildOptions {
     options.isProd = !(hasArg('--dev', '-d') || (getEnvVariable('ionic_dev') === 'true'));
   }
 
+  setIonicEnvironment(options.isProd);
+
   if (typeof options.isWatch !== 'boolean') {
     options.isWatch = hasArg('--watch', '-w');
   }
 
   return options;
+}
+
+
+export function setIonicEnvironment(isProd: boolean) {
+  processEnv.IONIC_ENV = (isProd ? 'prod' : 'dev');
 }
 
 

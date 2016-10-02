@@ -4,7 +4,7 @@ var commonjs = require('rollup-plugin-commonjs');
 
 // https://github.com/rollup/rollup/wiki/JavaScript-API
 
-module.exports = {
+var rollupConfig = {
   /**
    * entry: The bundle's starting point. This file will
    * be included, along with the minimum necessary code
@@ -45,3 +45,12 @@ module.exports = {
   ]
 
 };
+
+
+if (process.env.IONIC_ENV == 'prod') {
+  // production mode
+  rollupConfig.entry = '.tmp/app/main.prod.js';
+}
+
+
+module.exports = rollupConfig;
