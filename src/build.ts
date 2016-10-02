@@ -38,12 +38,12 @@ export function build(context: BuildContext, options: BuildOptions) {
 
 function buildProd(context: BuildContext, options: BuildOptions) {
   // sync empty the www directory
-  clean();
+  clean(context);
 
   // async tasks
   // these can happen all while other tasks are running
-  const copyPromise = copy();
-  const lintPromise = lint();
+  const copyPromise = copy(context);
+  const lintPromise = lint(context);
 
   return ngc(context, options).then(() => {
     return bundle(context, options);
@@ -66,12 +66,12 @@ function buildProd(context: BuildContext, options: BuildOptions) {
 
 function buildDev(context: BuildContext, options: BuildOptions) {
   // sync empty the www directory
-  clean();
+  clean(context);
 
   // async tasks
   // these can happen all while other tasks are running
-  const copyPromise = copy();
-  const lintPromise = lint();
+  const copyPromise = copy(context);
+  const lintPromise = lint(context);
 
   return tsc(context, options).then(() => {
     return bundle(context, options);
