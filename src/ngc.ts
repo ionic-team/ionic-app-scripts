@@ -27,6 +27,8 @@ export function ngc(context?: BuildContext, options?: BuildOptions, ngcConfig?: 
 
 
 export function ngcUpdate(event: string, path: string, context: BuildContext, options: BuildOptions) {
+  Logger.debug(`ngcUpdate, event: ${event}, path: ${path}`);
+
   const ngcConfig = fillConfigDefaults(context, {}, NGC_TASK_INFO);
   return runNgc(context, options, ngcConfig);
 }
@@ -110,6 +112,8 @@ function copySrcTsToTmpDir(context: BuildContext) {
     const copyOpts: any = {
       filter: filterCopyFiles
     };
+
+    Logger.debug(`copySrcTsToTmpDir, src: ${context.srcDir}, src: ${context.tmpDir}`);
 
     fsCopy(context.srcDir, context.tmpDir, copyOpts, (err) => {
       if (err) {

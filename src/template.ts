@@ -21,6 +21,8 @@ export function templateUpdate(event: string, path: string, context: BuildContex
 
 
 function runTemplateUpdate(event: string, path: string, context: BuildContext, options: BuildOptions) {
+  Logger.debug(`templateUpdate, event: ${event}, path: ${path}`);
+
   if (event === 'change') {
     // just a change event, see if this html file has a component in the same directory
     // doing this to prevent an unnecessary TS compile and bundling without cache if it was just a HTML change

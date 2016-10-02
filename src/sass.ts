@@ -26,11 +26,11 @@ export function sass(context?: BuildContext, options?: BuildOptions, sassConfig?
   if (!sassConfig.outFile) {
     sassConfig.outFile = join(context.buildDir, sassConfig.outputFilename);
   }
-  Logger.debug(`outFile: ${sassConfig.outFile}`);
+  Logger.debug(`sass outFile: ${sassConfig.outFile}`);
 
   // import paths where the sass compiler will look for imports
   sassConfig.includePaths.unshift(join(context.srcDir));
-  Logger.debug(`includePaths: ${sassConfig.includePaths}`);
+  Logger.debug(`sass includePaths: ${sassConfig.includePaths}`);
 
   // sass import sorting algorithms incase there was something to tweak
   sassConfig.sortComponentPathsFn = (sassConfig.sortComponentPathsFn || defaultSortComponentPathsFn);
@@ -54,6 +54,8 @@ export function sass(context?: BuildContext, options?: BuildOptions, sassConfig?
 
 
 export function sassUpdate(event: string, path: string, context: BuildContext, options: BuildOptions, useCache: boolean = false) {
+  Logger.debug(`sassUpdate, event: ${event}, path: ${path}`);
+
   const sassConfig = fillConfigDefaults(context, {}, SASS_TASK_INFO);
   return sass(context, options, sassConfig, useCache);
 }
@@ -80,6 +82,8 @@ function generateSassData(context: BuildContext, options: BuildOptions, sassConf
     }
   });
 
+  Logger.debug(`sass moduleDirectories: ${moduleDirectories.length}`);
+
   // gather a list of all the sass variable files that should be used
   // these variable files will be the first imports
   const userSassVariableFiles = sassConfig.variableSassFiles.map(f => {
@@ -89,8 +93,8 @@ function generateSassData(context: BuildContext, options: BuildOptions, sassConf
   // gather a list of all the sass files that are next to components we're bundling
   const componentSassFiles = getComponentSassFiles(moduleDirectories, context, sassConfig);
 
-  Logger.debug(`userSassVariableFiles: ${userSassVariableFiles.length}`);
-  Logger.debug(`componentSassFiles: ${componentSassFiles.length}`);
+  Logger.debug(`sass userSassVariableFiles: ${userSassVariableFiles.length}`);
+  Logger.debug(`sass componentSassFiles: ${componentSassFiles.length}`);
 
   const sassImports = userSassVariableFiles.concat(componentSassFiles).map(sassFile => '"' + sassFile.replace(/\\/g, '\\\\') + '"');
 
@@ -121,7 +125,6 @@ function addComponentSassFiles(componentPath: string, collectedSassFiles: string
   let siblingFiles = getSiblingSassFiles(componentPath, sassConfig);
 
   if (!siblingFiles.length && componentPath.indexOf(sep + 'node_modules') === -1) {
-    Logger.debug(`No sass files found in: ${componentPath}`);
 
     // if we didn't find anything, see if this module is mapped to another directory
     for (const k in sassConfig.directoryMaps) {
@@ -130,8 +133,6 @@ function addComponentSassFiles(componentPath: string, collectedSassFiles: string
         var mappedDirectory = replacePathVars(context, sassConfig.directoryMaps[k]);
 
         componentPath = componentPath.replace(actualDirectory, mappedDirectory);
-
-        Logger.debug(`Map and check sass files in: ${componentPath}`);
 
         siblingFiles = getSiblingSassFiles(componentPath, sassConfig);
         if (siblingFiles.length) {
@@ -146,7 +147,6 @@ function addComponentSassFiles(componentPath: string, collectedSassFiles: string
 
     siblingFiles.forEach(componentFile => {
       collectedSassFiles.push(componentFile);
-      Logger.debug(`Included: ${componentFile}`);
     });
   }
 }
@@ -168,7 +168,7 @@ function isValidSassFile(filename: string, sassConfig: SassConfig) {
       for (var j = 0; j < sassConfig.excludeFiles.length; j++) {
         if (sassConfig.excludeFiles[j].test(filename)) {
           // however, it also passed the test that it should be excluded
-          Logger.debug(`Excluded: ${filename}`);
+          Logger.debug(`sass excluded: ${filename}`);
           return false;
         }
       }
@@ -254,6 +254,8 @@ function renderSassSuccess(sassResult: SassResult, sassConfig: SassConfig): Prom
       map: autoPrefixerMapOptions
     };
 
+    Logger.debug(`sass, start postcss/autoprefixer`);
+
     return postcss([autoprefixer(sassConfig.autoprefixer)])
       .process(sassResult.css, postcssOptions).then((postCssResult: any) => {
         postCssResult.warnings().forEach((warn: any) => {
@@ -262,10 +264,11 @@ function renderSassSuccess(sassResult: SassResult, sassConfig: SassConfig): Prom
 
         let apMapResult: string = null;
         if (sassConfig.sourceMap && postCssResult.map) {
+          Logger.debug(`sass, parse postCssResult.map`);
           apMapResult = JSON.parse(postCssResult.map.toString()).mappings;
         }
 
-        Logger.debug(`PostCss and Autoprefixer completed`);
+        Logger.debug(`sass: postcss/autoprefixer completed`);
         return writeOutput(sassConfig, postCssResult.css, apMapResult);
       });
   }
@@ -287,6 +290,8 @@ function generateSourceMaps(sassResult: SassResult, sassConfig: SassConfig) {
 
   // build Source Maps!
   if (sassResult.map) {
+    Logger.debug(`sass, generateSourceMaps`);
+
     // transform map into JSON
     const sassMap: SassMap = JSON.parse(sassResult.map.toString());
 
@@ -324,24 +329,28 @@ function generateSourceMaps(sassResult: SassResult, sassConfig: SassConfig) {
 function writeOutput(sassConfig: SassConfig, cssOutput: string, mappingsOutput: string) {
   return new Promise((resolve, reject) => {
 
+    Logger.debug(`sass start write output: ${sassConfig.outFile}`);
+
     writeFile(sassConfig.outFile, cssOutput, (cssWriteErr: any) => {
       if (cssWriteErr) {
         reject(`Error writing css file, ${sassConfig.outFile}: ${cssWriteErr}`);
 
       } else {
-        Logger.debug(`Saved CSS: ${sassConfig.outFile}`);
+        Logger.debug(`sass saved output: ${sassConfig.outFile}`);
 
         if (mappingsOutput) {
           // save the css map file too
           // this save completes async and does not hold up the resolve
           const sourceMapPath = join(dirname(sassConfig.outFile), basename(sassConfig.outFile) + '.map');
 
+          Logger.debug(`sass start write css map: ${sourceMapPath}`);
+
           writeFile(sourceMapPath, mappingsOutput, (mapWriteErr: any) => {
             if (mapWriteErr) {
               Logger.error(`Error writing css map file, ${sourceMapPath}: ${mapWriteErr}`);
 
             } else {
-              Logger.debug(`Saved CSS Map: ${sourceMapPath}`);
+              Logger.debug(`sass saved css map: ${sourceMapPath}`);
             }
           });
         }

@@ -8,6 +8,8 @@ export function clean(context?: BuildContext) {
   const logger = new Logger('clean');
 
   try {
+    Logger.debug(`clean ${context.wwwDir}`);
+
     emptyDirSync(context.wwwDir);
     logger.finish();
 

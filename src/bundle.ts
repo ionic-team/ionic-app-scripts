@@ -22,6 +22,8 @@ export function bundle(context?: BuildContext, options?: BuildOptions, rollupCon
 export function bundleUpdate(event: string, path: string, context: BuildContext, options: BuildOptions, useCache: boolean = true) {
   const logger = new Logger(`bundle ${(options.isProd ? 'prod' : 'dev')} update`);
 
+  Logger.debug(`bundleUpdate, event: ${event}, path: ${path}`);
+
   return runBundle(context, options, null, useCache).then(() => {
     return logger.finish();
 
@@ -47,9 +49,13 @@ function runBundle(context: BuildContext, options: BuildOptions, rollupConfig: R
     rollupConfig.onwarn = createOnWarnFn();
   }
 
+  Logger.debug(`entry: ${rollupConfig.entry}, dest: ${rollupConfig.dest}, cache: ${rollupConfig.cache}, format: ${rollupConfig.format}`);
+
   // bundle the app then create create css
   const rollup = require('rollup').rollup;
   return rollup(rollupConfig).then((bundle: RollupBundle) => {
+
+    Logger.debug(`bundle.modules: ${bundle.modules.length}`);
 
     // set the module files used in this bundle
     // this reference can be used elsewhere in the build (sass)
@@ -85,11 +91,13 @@ export function getModulePathsCache(): string[] {
 function setModulePathsCache(modulePaths: string[]) {
   // async save the module paths for later lookup
   const modulesCachePath = getModulesPathsCachePath();
+
+  Logger.debug(`Cached module paths: ${modulePaths && modulePaths.length}, ${modulesCachePath}`);
+
   outputJson(modulesCachePath, modulePaths, (err) => {
     if (err) {
       Logger.error(`Error writing module paths cache: ${err}`);
     }
-    Logger.debug(`Cached module paths: ${modulePaths && modulePaths.length}, ${modulesCachePath}`);
   });
 }
 
@@ -114,10 +122,12 @@ export function clearCachedModule(id: string) {
       const index = bundleCache.modules.indexOf(cachedModule);
       if (index > -1) {
         bundleCache.modules.splice(index, 1);
+        Logger.debug(`clearCachedModule: ${id}`);
         return true;
       }
     }
   }
+  Logger.debug(`clearCachedModule: no existing bundleCache to clear`);
   return false;
 }
 

@@ -23,6 +23,7 @@ function runTsc(context: BuildContext, options: BuildOptions) {
 
     // ensure the tmp directory is ready to go
     try {
+      Logger.debug(`emptyDirSync: ${context.tmpDir}`);
       emptyDirSync(context.tmpDir);
     } catch (e) {
       reject(`tmpDir error: ${e}`);
@@ -65,6 +66,8 @@ function runTsc(context: BuildContext, options: BuildOptions) {
     cp.stdout.on('data', (data: string) => {
       data = data.toString();
 
+      Logger.debug(`tsc data: ${data}`);
+
       if (options.isWatch) {
         if (hasWords(data, 'starting', 'compilation')) {
           watchLogger = new Logger('typescript compilation');
@@ -88,6 +91,7 @@ function runTsc(context: BuildContext, options: BuildOptions) {
     });
 
     cp.on('close', (data: string) => {
+      Logger.debug(`tsc, close: ${data}, unlink: ${tmpTsConfigPath}`);
       unlink(tmpTsConfigPath);
       resolve();
     });
@@ -120,6 +124,8 @@ function createTmpTsConfig(context: BuildContext, files: string[]) {
   }
 
   const tmpTsConfigPath = getTmpTsConfigPath(context);
+
+  Logger.debug(`tsc outputJsonSync: ${tmpTsConfigPath}`);
 
   // save the modified copy into the tmp directory
   outputJsonSync(tmpTsConfigPath, tsConfig);

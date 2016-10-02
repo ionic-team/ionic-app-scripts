@@ -14,6 +14,8 @@ export function lint(context?: BuildContext, tsConfigPath?: string) {
                                                         defaultTsLintPath,
                                                         context);
 
+  Logger.debug(`tslint config: ${tsConfigPath}`);
+
   return new Promise((resolve, reject) => {
     access(tsConfigPath, (err) => {
       if (err) {

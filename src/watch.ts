@@ -40,10 +40,15 @@ export function startWatchers(context: BuildContext, options: BuildOptions, watc
 
       chokidarWatcher.on('all', (event: string, path: string) => {
         setIonicEnvironment(options.isProd);
+
+        Logger.debug(`watch callback start, id: ${watchCount}, isProd: ${options.isProd}, event: ${event}, path: ${path}`);
+
         nextTask = watcher.callback.bind(null, event, path, context, options);
-        taskPromise.then(function() {
+        taskPromise.then(() => {
+          Logger.debug(`watch callback complete, id: ${watchCount}, isProd: ${options.isProd}, event: ${event}, path: ${path}`);
           taskPromise = nextTask();
           nextTask = null;
+          watchCount++;
         });
       });
     }
@@ -88,3 +93,5 @@ export interface Watcher {
     (event: string, path: string, context: BuildContext, options: BuildOptions): void;
   };
 }
+
+let watchCount = 0;

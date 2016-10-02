@@ -8,7 +8,7 @@ export function copy(context?: BuildContext, copyConfig?: CopyConfig) {
 
   const logger = new Logger('copy');
 
-  return copyFiles(context, copyConfig).then(() => {
+  return runCopy(context, copyConfig).then(() => {
     return logger.finish();
   }).catch(reason => {
     return logger.fail(reason);
@@ -17,12 +17,14 @@ export function copy(context?: BuildContext, copyConfig?: CopyConfig) {
 
 
 export function copyUpdate(event: string, path: string, context: BuildContext, options: BuildOptions) {
+  Logger.debug(`copyUpdate, event: ${event}, path: ${path}`);
+
   const copyConfig = fillConfigDefaults(context, {}, COPY_TASK_INFO);
-  return copyFiles(context, copyConfig);
+  return runCopy(context, copyConfig);
 }
 
 
-function copyFiles(context: BuildContext, copyConfig: CopyConfig) {
+function runCopy(context: BuildContext, copyConfig: CopyConfig) {
   const promises: Promise<any>[] = [];
 
   copyConfig.include.forEach(copyOptions => {

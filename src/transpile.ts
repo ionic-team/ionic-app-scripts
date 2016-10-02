@@ -16,6 +16,8 @@ export function transpile(context?: BuildContext) {
 
 
 export function transpileUpdate(event: string, path: string, context: BuildContext) {
+  Logger.debug(`transpileUpdate, event: ${event}, path: ${path}`);
+
   return transpile(context);
 }
 

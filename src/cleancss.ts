@@ -13,9 +13,11 @@ export function cleancss(context?: BuildContext, cleanCssConfig?: CleanCssConfig
   const destFileName = join(context.buildDir, cleanCssConfig.destFileName);
 
   return readFileAsync(sourceFile).then((fileContent: string) => {
+    Logger.debug(`cleancss read: ${sourceFile}`);
     return runCleanCss(fileContent);
 
   }).then((output) => {
+    Logger.debug(`cleancss write: ${destFileName}`);
     return writeFileAsync(destFileName, output.styles);
 
   }).then(() => {
