@@ -13,7 +13,7 @@ export function watch(context?: BuildContext, options?: BuildOptions, watchConfi
 
   const logger = new Logger('watch');
 
-  build(context, options).then(() => {
+  return build(context, options).then(() => {
     startWatchers(context, options, watchConfig);
     logger.ready();
   });

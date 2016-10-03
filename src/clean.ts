@@ -15,5 +15,6 @@ export function clean(context?: BuildContext) {
 
   } catch (e) {
     logger.fail(e, `Error cleaning ${context.wwwDir}, ${e}`);
+    throw e;
   }
 }

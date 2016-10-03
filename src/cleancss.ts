@@ -23,8 +23,9 @@ export function cleancss(context?: BuildContext, cleanCssConfig?: CleanCssConfig
   }).then(() => {
     return logger.finish();
 
-  }).catch(reason => {
-    return logger.fail(reason);
+  }).catch((err: Error) => {
+    logger.fail(err, err.message);
+    return Promise.reject(err);
   });
 }
 

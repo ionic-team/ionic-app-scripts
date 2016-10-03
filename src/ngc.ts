@@ -20,8 +20,9 @@ export function ngc(context?: BuildContext, options?: BuildOptions, ngcConfig?: 
 
   }).then(() => {
     return logger.finish();
-  }).catch(reason => {
-    return logger.fail(reason);
+  }).catch((err: Error) => {
+    logger.fail(err, err.message);
+    return Promise.reject(err);
   });
 }
 
@@ -42,7 +43,7 @@ function runNgc(context: BuildContext, options: BuildOptions, ngcConfig: NgcConf
 
     const ngcCmd = getNodeBinExecutable(context, 'ngc');
     if (!ngcCmd) {
-      reject(`Unable to find Angular Compiler "ngc" command: ${ngcCmd}`);
+      reject(new Error(`Unable to find Angular Compiler "ngc" command: ${ngcCmd}`));
       return;
     }
 
@@ -69,7 +70,7 @@ function runNgc(context: BuildContext, options: BuildOptions, ngcConfig: NgcConf
 
     cp.on('close', (code: string) => {
       if (hadAnError) {
-        reject(`NGC encountered an error`);
+        reject(new Error(`NGC encountered an error`));
       } else {
         resolve();
       }

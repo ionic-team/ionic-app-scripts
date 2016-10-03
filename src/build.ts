@@ -29,9 +29,9 @@ export function build(context: BuildContext, options: BuildOptions) {
   return Promise.all(promises).then(() => {
     // congrats, we did it!  (•_•) / ( •_•)>⌐■-■ / (⌐■_■)
     return logger.finish();
-
-  }).catch(err => {
-    return logger.fail(err, 'Build failed' + (err.message ? ': ' + err.message : ''));
+  }).catch((err: Error) => {
+    logger.fail(err, err.message);
+    return Promise.reject(err);
   });
 }
 

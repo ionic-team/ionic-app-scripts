@@ -11,8 +11,9 @@ export function closure(context?: BuildContext, closureConfig?: ClosureConfig) {
     Logger.warn('Closer Compiler unsupported at this time.');
     return logger.finish();
 
-  }).catch(reason => {
-    return logger.fail(reason);
+  }).catch((err: Error) => {
+    logger.fail(err, err.message);
+    return Promise.reject(err);
   });
 }
 

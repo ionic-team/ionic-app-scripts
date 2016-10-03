@@ -14,6 +14,9 @@ export function tsc(context?: BuildContext, options?: BuildOptions) {
       return logger.ready();
     }
     return logger.finish();
+  }).catch((err: Error) => {
+    logger.fail(err, err.message);
+    return Promise.reject(err);
   });
 }
 
@@ -26,13 +29,13 @@ function runTsc(context: BuildContext, options: BuildOptions) {
       Logger.debug(`emptyDirSync: ${context.tmpDir}`);
       emptyDirSync(context.tmpDir);
     } catch (e) {
-      reject(`tmpDir error: ${e}`);
+      reject(new Error(`tmpDir error: ${e}`));
       return false;
     }
 
     const tscCmd = getNodeBinExecutable(context, 'tsc');
     if (!tscCmd) {
-      reject(`Unable to find typescript "tsc" command: ${tscCmd}`);
+      reject(new Error(`Unable to find typescript "tsc" command: ${tscCmd}`));
       return false;
     }
 
@@ -45,11 +48,12 @@ function runTsc(context: BuildContext, options: BuildOptions) {
       files.push(join(context.srcDir, '**', '*.d.ts'));
     }
 
-    const tmpTsConfigPath = createTmpTsConfig(context, files);
+    const tmpTsConfigPath = createTmpTsConfig(context, files, true);
 
     const tscCmdArgs: string[] = [
       '--project', tmpTsConfigPath
     ];
+
     if (options.isWatch) {
       tscCmdArgs.push('--watch');
     }
@@ -58,9 +62,16 @@ function runTsc(context: BuildContext, options: BuildOptions) {
     const spawn = require('cross-spawn');
     const cp = spawn(tscCmd, tscCmdArgs);
     let watchLogger: Logger;
+    let promiseResolvedOrRejected = false;
 
     cp.on('error', (err: string) => {
-      reject(`tsc error: ${err}`);
+      const error = new Error(`tsc error: ${err}`);
+      if (! promiseResolvedOrRejected) {
+        promiseResolvedOrRejected = true;
+        reject(error);
+      } else {
+        watchLogger.fail(error, error.message);
+      }
     });
 
     cp.stdout.on('data', (data: string) => {
@@ -69,21 +80,33 @@ function runTsc(context: BuildContext, options: BuildOptions) {
       Logger.debug(`tsc data: ${data}`);
 
       if (options.isWatch) {
-        if (hasWords(data, 'starting', 'compilation')) {
+        if ( hasWords(data, 'error')) {
+          const error = new Error(data);
+          if (! promiseResolvedOrRejected) {
+            promiseResolvedOrRejected = true;
+            reject(error);
+          } else {
+            if (watchLogger) {
+              watchLogger.fail(error, error.message);
+              watchLogger = null;
+            }
+          }
+          return;
+        } else if (hasWords(data, 'starting', 'compilation')) {
           watchLogger = new Logger('typescript compilation');
           return;
-
         } else if (hasWords(data, 'compilation', 'complete')) {
           if (watchLogger) {
             watchLogger.finish();
             watchLogger = null;
           }
 
-          resolve();
-          return;
+          if (! promiseResolvedOrRejected) {
+            promiseResolvedOrRejected = true;
+            resolve();
+          }
         }
       }
-      Logger.info(data);
     });
 
     cp.stderr.on('data', (data: string) => {
@@ -99,6 +122,8 @@ function runTsc(context: BuildContext, options: BuildOptions) {
   });
 }
 
+
+
 function hasWords(data: string, ...words: string[]) {
   data = data.toString().toLowerCase();
   for (var i = 0; i < words.length; i++) {
@@ -109,12 +134,15 @@ function hasWords(data: string, ...words: string[]) {
   return true;
 }
 
-function createTmpTsConfig(context: BuildContext, files: string[]) {
+function createTmpTsConfig(context: BuildContext, files: string[], isWatch: boolean) {
   // create the tsconfig from the original src
   const tsConfig = getSrcTsConfig(context);
 
   // compile to a tmp directory
   tsConfig.compilerOptions.outDir = context.tmpDir;
+
+  // if it's a watch, don't emit on error
+  tsConfig.compilerOptions.noEmitOnError = isWatch;
 
   // force what files to include
   if (Array.isArray(tsConfig.include)) {
@@ -165,8 +193,9 @@ export interface TsConfig {
   // https://www.typescriptlang.org/docs/handbook/compiler-options.html
   compilerOptions: {
     module: string;
-    removeComments: boolean;
+    noEmitOnError: boolean;
     outDir: string;
+    removeComments: boolean;
     target: string;
   };
   include: string[];

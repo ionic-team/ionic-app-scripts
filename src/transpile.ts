@@ -9,8 +9,9 @@ export function transpile(context?: BuildContext) {
 
   return transpileApp(context).then(() => {
     return logger.finish();
-  }).catch(reason => {
-    return logger.fail(reason);
+  }).catch((err: Error) => {
+    logger.fail(err, err.message);
+    return Promise.reject(err);
   });
 }
 
@@ -57,7 +58,7 @@ export function transpile6To5(context: BuildContext, srcFile: string, destFile: 
 
     ls.on('close', (code: string) => {
       if (hadAnError) {
-        reject(`Transpiling from ES6 to ES5 encountered an error`);
+        reject(new Error(`Transpiling from ES6 to ES5 encountered an error`));
       } else {
         resolve();
       }

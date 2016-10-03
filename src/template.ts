@@ -14,8 +14,9 @@ export function templateUpdate(event: string, path: string, context: BuildContex
     // congrats, we did it!
     return logger.finish();
 
-  }).catch(err => {
-    return logger.fail(err, 'templateUpdate failed' + (err.message ? ': ' + err.message : ''));
+  }).catch((err: Error) => {
+    logger.fail(err, 'templateUpdate failed' + (err.message ? ': ' + err.message : ''));
+    return Promise.reject(err);
   });
 }
 

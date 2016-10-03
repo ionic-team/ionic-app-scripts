@@ -16,7 +16,10 @@ export * from './util';
 
 export function run(task: string) {
   try {
-    require(`../dist/${task}`)[task]();
+    require(`../dist/${task}`)[task]().catch((e: Error) => {
+      console.error(`Error running ionic app script "${task}": ${e}`);
+      process.exit(1);
+    });
   } catch (e) {
     console.error(`Error running ionic app script "${task}": ${e}`);
     process.exit(1);

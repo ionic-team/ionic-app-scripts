@@ -13,8 +13,9 @@ export function bundle(context?: BuildContext, options?: BuildOptions, rollupCon
   // bundle the app then create create css
   return runBundle(context, options, rollupConfig, useCache).then(() => {
     return logger.finish();
-  }).catch(reason => {
-    return logger.fail(reason);
+  }).catch((err: Error) => {
+    logger.fail(err, err.message);
+    return Promise.reject(err);
   });
 }
 
@@ -27,8 +28,9 @@ export function bundleUpdate(event: string, path: string, context: BuildContext,
   return runBundle(context, options, null, useCache).then(() => {
     return logger.finish();
 
-  }).catch(err => {
-    return logger.fail(err);
+  }).catch((err: Error) => {
+    logger.fail(err, err.message);
+    return Promise.reject(err);
   });
 }
 

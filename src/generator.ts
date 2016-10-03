@@ -13,8 +13,9 @@ export function generator(context?: BuildContext, generatorConfig?: GeneratorCon
 
   return Promise.resolve().then(() => {
     return logger.finish();
-  }).catch(reason => {
-    return logger.fail(reason);
+  }).catch((err: Error) => {
+    logger.fail(err, err.message);
+    return Promise.reject(err);
   });
 }
 

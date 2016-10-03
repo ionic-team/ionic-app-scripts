@@ -10,8 +10,9 @@ export function uglifyjs(context?: BuildContext, uglifyJsConfig?: UglifyJsConfig
 
   return runUglify(context, uglifyJsConfig).then(() => {
     return logger.finish();
-  }).catch(reason => {
-    return logger.fail(reason);
+  }).catch((err: Error) => {
+    logger.fail(err, err.message);
+    return Promise.reject(err);
   });
 }
 

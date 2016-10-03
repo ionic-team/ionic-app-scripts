@@ -18,7 +18,7 @@ export function sass(context?: BuildContext, options?: BuildOptions, sassConfig?
     if (!context.moduleFiles) {
       logger.fail(null, 'Cannot generate Sass files without first bundling JavaScript ' +
                   'files in order to know all used modules. Please build JS files first.');
-      return Promise.reject('Missing module paths for sass build');
+      return Promise.reject(new Error('Missing module paths for sass build'));
     }
   }
 
@@ -47,8 +47,9 @@ export function sass(context?: BuildContext, options?: BuildOptions, sassConfig?
   // let's begin shall we...
   return render(sassConfig, useCache).then(() => {
     return logger.finish();
-  }).catch(reason => {
-    return logger.fail(reason);
+  }).catch((err: Error) => {
+    logger.fail(err, err.message);
+    return Promise.reject(err);
   });
 }
 
@@ -218,7 +219,7 @@ function render(sassConfig: SassConfig, useCache: boolean) {
       if (renderErr) {
         // sass render error!
         Logger.error(`Sass Error: line: ${renderErr.line}, column: ${renderErr.column}\n${renderErr.message}`);
-        reject('Sass compile error');
+        reject(new Error('Sass compile error'));
 
       } else {
         // sass render success!
@@ -333,7 +334,7 @@ function writeOutput(sassConfig: SassConfig, cssOutput: string, mappingsOutput: 
 
     writeFile(sassConfig.outFile, cssOutput, (cssWriteErr: any) => {
       if (cssWriteErr) {
-        reject(`Error writing css file, ${sassConfig.outFile}: ${cssWriteErr}`);
+        reject(new Error(`Error writing css file, ${sassConfig.outFile}: ${cssWriteErr}`));
 
       } else {
         Logger.debug(`sass saved output: ${sassConfig.outFile}`);

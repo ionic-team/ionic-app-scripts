@@ -31,8 +31,11 @@ export function lint(context?: BuildContext, tsConfigPath?: string) {
       runTsLint(context, tsConfigPath).then(() => {
         resolve(logger.finish());
 
-      }).catch(reason => {
-        reject(logger.fail(reason));
+      }).catch((err: Error) => {
+        logger.fail(err, err.message);
+        // tslint should not break the build by default
+        // so just resolve
+        resolve();
       });
 
     });
@@ -44,7 +47,7 @@ function runTsLint(context: BuildContext, tsConfigPath: string) {
   return new Promise((resolve, reject) => {
     const cmd = getNodeBinExecutable(context, 'tslint');
     if (!cmd) {
-      reject(`Unable to find "tslint" command: ${cmd}`);
+      reject(new Error(`Unable to find "tslint" command: ${cmd}`));
       return false;
     }
 
@@ -59,7 +62,7 @@ function runTsLint(context: BuildContext, tsConfigPath: string) {
     const cp = spawn(cmd, args);
 
     cp.on('error', (err: string) => {
-      reject(`tslint error: ${err}`);
+      reject(new Error(`tslint error: ${err}`));
     });
 
     cp.stdout.on('data', (data: string) => {

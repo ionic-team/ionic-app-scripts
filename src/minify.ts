@@ -25,7 +25,8 @@ export function minify(context?: BuildContext) {
 
   return Promise.all(promises).then(() => {
     return logger.finish();
-  }).catch(reason => {
-    return logger.fail(reason);
+  }).catch((err: Error) => {
+    logger.fail(err, err.message);
+    return Promise.reject(err);
   });
 }

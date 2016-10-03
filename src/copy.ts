@@ -10,8 +10,9 @@ export function copy(context?: BuildContext, copyConfig?: CopyConfig) {
 
   return runCopy(context, copyConfig).then(() => {
     return logger.finish();
-  }).catch(reason => {
-    return logger.fail(reason);
+  }).catch((err: Error) => {
+    logger.fail(err, err.message);
+    return Promise.reject(err);
   });
 }
 
@@ -50,7 +51,7 @@ function copySrcToDest(context: BuildContext, src: string, dest: string, filter?
         const msg = `Error copying "${src}" to "${dest}": ${err}`;
 
         if (msg.indexOf('ENOENT') < 0 && msg.indexOf('EEXIST') < 0) {
-          reject(`Error copying "${src}" to "${dest}": ${err}`);
+          reject(new Error(`Error copying "${src}" to "${dest}": ${err}`));
           return;
         }
       }
