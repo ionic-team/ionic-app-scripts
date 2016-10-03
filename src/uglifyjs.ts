@@ -11,7 +11,7 @@ export function uglifyjs(context?: BuildContext, uglifyJsConfig?: UglifyJsConfig
   return runUglify(context, uglifyJsConfig).then(() => {
     return logger.finish();
   }).catch((err: Error) => {
-    logger.fail(err, err.message);
+    logger.fail(err);
     return Promise.reject(err);
   });
 }

@@ -15,7 +15,10 @@ export function watch(context?: BuildContext, options?: BuildOptions, watchConfi
 
   return build(context, options).then(() => {
     startWatchers(context, options, watchConfig);
-    logger.ready();
+    return logger.ready();
+
+  }).catch((err: Error) => {
+    return logger.fail(err);
   });
 }
 
@@ -46,6 +49,13 @@ export function startWatchers(context: BuildContext, options: BuildOptions, watc
         nextTask = watcher.callback.bind(null, event, path, context, options);
         taskPromise.then(() => {
           Logger.debug(`watch callback complete, id: ${watchCount}, isProd: ${options.isProd}, event: ${event}, path: ${path}`);
+          taskPromise = nextTask();
+          nextTask = null;
+          watchCount++;
+
+        }).catch(err => {
+          Logger.debug(`watch callback error, id: ${watchCount}, isProd: ${options.isProd}, event: ${event}, path: ${path}`);
+          Logger.debug(`${err}`);
           taskPromise = nextTask();
           nextTask = null;
           watchCount++;

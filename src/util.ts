@@ -278,9 +278,9 @@ export class Logger {
     return true;
   }
 
-  fail(exception: Error, msg?: string) {
+  fail(err: Error, msg: string = null, printExceptionStack = true) {
     let printMessage = true;
-    if (exception && (exception as any).hasBeenHandled === true) {
+    if (err && (err as any).hasBeenHandled === true) {
       // the exception has been handled, so don't print the message
       printMessage = false;
     }
@@ -290,18 +290,21 @@ export class Logger {
         Logger.error(`${this.scope} failed:  ${msg}`);
       }
 
-      if (exception) {
-        if (typeof exception === 'string') {
-          Logger.error(exception);
+      if (err) {
+        if (err.message) {
+          Logger.error(`${this.scope} failed:  ${err.message}`);
         }
-        if (exception.stack) {
-          Logger.error(exception.stack);
+        if (typeof err === 'string') {
+          Logger.error(err);
+        }
+        if (printExceptionStack && err.stack) {
+          Logger.error(err.stack);
         }
       }
     }
 
-    if (exception) {
-      (exception as any).hasBeenHandled = true;
+    if (err) {
+      (err as any).hasBeenHandled = true;
     }
 
     return false;

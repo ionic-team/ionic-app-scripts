@@ -21,7 +21,7 @@ export function ngc(context?: BuildContext, options?: BuildOptions, ngcConfig?: 
   }).then(() => {
     return logger.finish();
   }).catch((err: Error) => {
-    logger.fail(err, err.message);
+    logger.fail(err);
     return Promise.reject(err);
   });
 }

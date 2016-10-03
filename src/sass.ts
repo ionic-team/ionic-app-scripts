@@ -47,8 +47,9 @@ export function sass(context?: BuildContext, options?: BuildOptions, sassConfig?
   // let's begin shall we...
   return render(sassConfig, useCache).then(() => {
     return logger.finish();
+
   }).catch((err: Error) => {
-    logger.fail(err, err.message);
+    logger.fail(err, null, false);
     return Promise.reject(err);
   });
 }
@@ -218,7 +219,12 @@ function render(sassConfig: SassConfig, useCache: boolean) {
     nodeSass.render(sassConfig, (renderErr: any, sassResult: SassResult) => {
       if (renderErr) {
         // sass render error!
-        Logger.error(`Sass Error: line: ${renderErr.line}, column: ${renderErr.column}\n${renderErr.message}`);
+        if (renderErr.line) {
+          Logger.error(`Sass Error: line: ${renderErr.line}, column: ${renderErr.column}\n${renderErr.message}`);
+        } else {
+          Logger.error(`Sass Error: ${renderErr}`);
+        }
+
         reject(new Error('Sass compile error'));
 
       } else {

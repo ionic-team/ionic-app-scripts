@@ -15,7 +15,7 @@ export function tsc(context?: BuildContext, options?: BuildOptions) {
     }
     return logger.finish();
   }).catch((err: Error) => {
-    logger.fail(err, err.message);
+    logger.fail(err);
     return Promise.reject(err);
   });
 }
@@ -70,7 +70,7 @@ function runTsc(context: BuildContext, options: BuildOptions) {
         promiseResolvedOrRejected = true;
         reject(error);
       } else {
-        watchLogger.fail(error, error.message);
+        watchLogger.fail(error);
       }
     });
 

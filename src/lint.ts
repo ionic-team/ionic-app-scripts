@@ -32,7 +32,7 @@ export function lint(context?: BuildContext, tsConfigPath?: string) {
         resolve(logger.finish());
 
       }).catch((err: Error) => {
-        logger.fail(err, err.message);
+        logger.fail(err);
         // tslint should not break the build by default
         // so just resolve
         resolve();

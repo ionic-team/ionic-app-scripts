@@ -10,7 +10,7 @@ export function transpile(context?: BuildContext) {
   return transpileApp(context).then(() => {
     return logger.finish();
   }).catch((err: Error) => {
-    logger.fail(err, err.message);
+    logger.fail(err);
     return Promise.reject(err);
   });
 }

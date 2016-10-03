@@ -12,7 +12,7 @@ export function closure(context?: BuildContext, closureConfig?: ClosureConfig) {
     return logger.finish();
 
   }).catch((err: Error) => {
-    logger.fail(err, err.message);
+    logger.fail(err);
     return Promise.reject(err);
   });
 }

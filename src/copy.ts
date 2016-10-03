@@ -11,7 +11,7 @@ export function copy(context?: BuildContext, copyConfig?: CopyConfig) {
   return runCopy(context, copyConfig).then(() => {
     return logger.finish();
   }).catch((err: Error) => {
-    logger.fail(err, err.message);
+    logger.fail(err);
     return Promise.reject(err);
   });
 }
