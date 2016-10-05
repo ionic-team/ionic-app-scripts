@@ -5,6 +5,7 @@ import { endsWith } from './util/helpers';
 import { Logger } from './util/logger';
 import { readFileSync, readdirSync } from 'fs';
 import { sassUpdate } from './sass';
+import * as MagicString from 'magic-string';
 
 
 export function templateUpdate(event: string, path: string, context: BuildContext, options: BuildOptions) {
@@ -47,7 +48,7 @@ function getSourceComponentFile(htmlFilePath: string, context: BuildContext) {
   let rtn: string = null;
 
   try {
-    const changedHtmlFile = basename(htmlFilePath);
+    const changedHtmlFilename = basename(htmlFilePath);
     const componentDir = dirname(htmlFilePath);
     const filePaths = readdirSync(componentDir);
     let match: any;
@@ -61,16 +62,12 @@ function getSourceComponentFile(htmlFilePath: string, context: BuildContext) {
         var tsComponentFile = join(componentDir, filePath);
         var source = readFileSync(join(componentDir, filePath)).toString();
 
-        if ((match = COMPONENT_REGEX.exec(source)) !== null) {
-
-          if ((match = TEMPLATE_URL_REGEX.exec(match[0])) !== null) {
-
-            var componentHtmlFile = basename(match[1].replace(/\'|\"|\`/g, '').trim());
-            if (changedHtmlFile === componentHtmlFile) {
-              rtn = tsComponentFile;
-              break;
-            }
-
+        if (match = COMPONENT_REGEX.exec(source)) {
+          var templateUrl = match[4];
+          var componentHtmlFilename = basename(templateUrl.trim());
+          if (changedHtmlFilename === componentHtmlFilename) {
+            rtn = tsComponentFile;
+            break;
           }
         }
       }
@@ -84,66 +81,93 @@ function getSourceComponentFile(htmlFilePath: string, context: BuildContext) {
 }
 
 
-export function inlineTemplate(sourceText: string, sourcePath: string) {
+export function inlineTemplate(sourceText: string, sourcePath: string): InlineTemplateOutput {
+  const magicString = new MagicString(sourceText);
   const componentDir = parse(sourcePath).dir;
   let match: RegExpExecArray;
-  let rewrite: string;
-  let didRewrite = false;
-  let sourceScan = sourceText;
+  let hasReplacements = false;
+  let start: number;
+  let end: number;
+  let templateUrl: string;
+  let replacement: string;
+  let lastStart = -1;
 
-  while ((match = COMPONENT_REGEX.exec(sourceScan)) !== null) {
-    rewrite = match[0].replace(TEMPLATE_URL_REGEX, (m: any, urlValue: string) => {
-      if (urlValue.indexOf('\'') > -1 || urlValue.indexOf('"') > -1 || urlValue.indexOf('`') > -1) {
-        didRewrite = true;
-        return replaceTemplate(componentDir, urlValue);
-      }
-      return urlValue;
-    });
+  while (match = COMPONENT_REGEX.exec(magicString.toString())) {
+    start = match.index;
+    if (start === lastStart) {
+      // panic! we don't want to melt any machines if there's a bug
+      Logger.debug(`Error matching component: ${match[0]}`);
+      return null;
+    }
+    lastStart = start;
 
-    if (didRewrite) {
-      sourceText = sourceText.replace(match[0], rewrite);
+    end = start + match[0].length;
+    templateUrl = match[4].trim();
+    if (templateUrl === '') {
+      Logger.error(`Error @Component templateUrl missing in: "${sourcePath}"`);
+      return null;
     }
 
-    sourceScan = sourceScan.substring(match.index + match[0].length);
+    replacement = updateTemplate(componentDir, templateUrl, match);
+    if (replacement) {
+      magicString.overwrite(start, end, replacement);
+      hasReplacements = true;
+    }
   }
 
-  return sourceText;
+  if (hasReplacements) {
+    return {
+      code: magicString.toString(),
+      map: magicString.generateMap({
+        source: sourcePath,
+        hires: false
+      })
+    };
+  }
+
+  return null;
 }
 
 
-function replaceTemplate(componentDir: string, urlValue: string): string {
-  return urlValue.replace(HTML_PATH_URL_REGEX, (match: any, quote: string, filePath: string) => {
-    return inlineSourceWithTemplate(componentDir, filePath);
-  });
+function updateTemplate(componentDir: string, templateUrl: string, match: RegExpMatchArray): string {
+  const templateContent = getTemplateContent(componentDir, templateUrl);
+  if (!templateContent) {
+    return null;
+  }
+  return replaceTemplateUrl(match, templateContent);
 }
 
 
-function inlineSourceWithTemplate(componentDir: string, filePath: string) {
-  let rtn = `templateUrl: '${filePath}'`;
+export function replaceTemplateUrl(match: RegExpMatchArray, templateContent: string): string {
+  // turn the template into one line and espcape single quotes
+  templateContent = templateContent.replace(/\r|\n/g, '\\n');
+  templateContent = templateContent.replace(/\'/g, '\\\'');
+
+  const orgComponent = match[0];
+  const orgTemplateProperty = match[2];
+  const newTemplateProperty = `template: '${templateContent}' /* ion-inline-template */`;
+
+  return orgComponent.replace(orgTemplateProperty, newTemplateProperty);
+}
+
+
+function getTemplateContent(componentDir: string, templateUrl: string) {
+  let rtn: string = null;
 
   try {
-    let htmlContent = readFileSync(join(componentDir, filePath), 'utf-8');
-    htmlContent = htmlContent.replace(/\r|\n/g, '\\n');
-    htmlContent = htmlContent.replace(/\'/g, '\\\'');
-
-    rtn = `template: '${htmlContent}'`;
-
+    rtn = readFileSync(join(componentDir, templateUrl), 'utf-8');
   } catch (e) {
-    console.error(`Error reading template file, "${filePath}": ${e}`);
+    Logger.error(`Error reading template file, "${templateUrl}": ${e}`);
   }
 
   return rtn;
 }
 
 
-const COMPONENT_REGEX = /Component\s*?\(\s*?({([\s\S]*?)}\s*?)\)/m;
-const TEMPLATE_URL_REGEX = /templateUrl\s*:(.*)/;
-const HTML_PATH_URL_REGEX = /(['"])((?:[^\\]\\\1|.)*?)\1/g;
+export const COMPONENT_REGEX = /@Component\s*?\(\s*?({(\s*templateUrl\s*:\s*(['"`])(.*?)(['"`])\s*?)}\s*?)\)/m;
 
 
-export interface NgTemplateOptions {
-  include?: string[];
-  exclude?: string[];
-  directoryMaps?: {[key: string]: string};
-  componentDir?: string;
+export interface InlineTemplateOutput {
+  code: string;
+  map: any;
 }

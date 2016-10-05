@@ -3,22 +3,24 @@
 // MIT Licenced
 
 import { helperFns, helpersId } from '../util/typescript-helpers';
-import { getCompilerOptions, resolveId, transpile, IonCompilerPluginOptions } from '../transpile';
-import { inlineTemplate } from '../template';
+import { getCompilerOptions, resolveId, transpile } from '../transpile';
+import { getUseSourceMapSetting } from '../util/config';
+import * as pluginutils from 'rollup-pluginutils';
 
 
-export default function ionCompiler(options?: IonCompilerPluginOptions) {
+export default function ionCompiler(options?: IonCompilerOptions) {
   options = options || {};
-
-  const pluginutils = require('rollup-pluginutils');
 
   const filter = pluginutils.createFilter(
     options.include || ['*.ts+(|x)', '**/*.ts+(|x)'],
     options.exclude || ['*.d.ts', '**/*.d.ts']);
 
   const compilerOptions = getCompilerOptions();
+  compilerOptions.sourceMap = getUseSourceMapSetting();
 
   return {
+    name: 'ion-compiler',
+
     resolveId(importee: string, importer: string) {
       return resolveId(importee, importer, compilerOptions);
     },
@@ -31,13 +33,14 @@ export default function ionCompiler(options?: IonCompilerPluginOptions) {
 
     transform(sourceText: string, sourcePath: string): any {
       if (filter(sourcePath)) {
-        // inline templates
-        sourceText = inlineTemplate(sourceText, sourcePath);
-
-        // transpile typescirpt
         return transpile(sourceText, sourcePath, compilerOptions, true);
       }
     }
   };
 }
 
+
+export interface IonCompilerOptions {
+  include?: string[];
+  exclude?: string[];
+}

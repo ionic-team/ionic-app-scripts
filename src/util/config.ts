@@ -196,8 +196,18 @@ export function setIonicEnvironment(isProd: boolean) {
 }
 
 
+export function setSourceMapVar(useSourceMap: boolean) {
+  setProcessEnvVar(ENV_VAR_SOURCE_MAP, (!!useSourceMap).toString());
+}
+
+
 export function getRootDir() {
   return getProcessEnvVar(ENV_VAR_ROOT_DIR);
+}
+
+
+export function getUseSourceMapSetting() {
+  return getProcessEnvVar(ENV_VAR_SOURCE_MAP) === 'true';
 }
 
 
@@ -252,3 +262,4 @@ const ENV_VAR_TMP_DIR = 'ionic_tmp_dir';
 const ENV_VAR_SRC_DIR = 'ionic_src_dir';
 const ENV_VAR_WWW_DIR = 'ionic_www_dir';
 const ENV_VAR_BUILD_DIR = 'ionic_build_dir';
+const ENV_VAR_SOURCE_MAP = 'ionic_source_map';

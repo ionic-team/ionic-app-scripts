@@ -2,6 +2,7 @@ import { build } from './build';
 import { BuildContext, BuildOptions, TaskInfo } from './util/interfaces';
 import { fillConfigDefaults, generateBuildOptions, generateContext, replacePathVars, setIonicEnvironment } from './util/config';
 import { Logger } from './util/logger';
+import * as chokidar from 'chokidar';
 
 
 export function watch(context?: BuildContext, options?: BuildOptions, watchConfig?: WatchConfig) {
@@ -27,7 +28,6 @@ export function watch(context?: BuildContext, options?: BuildOptions, watchConfi
 
 export function startWatchers(context: BuildContext, options: BuildOptions, watchConfig: WatchConfig) {
   // https://github.com/paulmillr/chokidar
-  const chokidar = require('chokidar');
 
   watchConfig.watchers.forEach(watcher => {
     if (watcher.callback && watcher.paths) {

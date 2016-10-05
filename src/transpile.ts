@@ -173,13 +173,6 @@ const resolveHost: any = {
 };
 
 
-export interface IonCompilerPluginOptions {
-  include?: string[];
-  exclude?: string[];
-  module?: string;
-}
-
-
 export interface TransformedOutput {
   code: string;
   map: any;

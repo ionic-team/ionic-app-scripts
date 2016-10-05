@@ -1,7 +1,8 @@
 import { BuildContext, BuildOptions, TaskInfo } from './util/interfaces';
 import { endsWith } from './util/helpers';
-import { fillConfigDefaults, generateContext, generateBuildOptions, replacePathVars } from './util/config';
+import { fillConfigDefaults, generateContext, generateBuildOptions, replacePathVars, setSourceMapVar } from './util/config';
 import ionCompiler from './plugins/ion-compiler';
+import inlineTemplate from './plugins/ion-inline-template';
 import { join, isAbsolute } from 'path';
 import { Logger } from './util/logger';
 import { outputJson, readJsonSync } from 'fs-extra';
@@ -42,6 +43,8 @@ export function bundleUpdate(event: string, path: string, context: BuildContext,
 function runBundle(context: BuildContext, options: BuildOptions, rollupConfig: RollupConfig, useCache: boolean): Promise<any> {
   rollupConfig = fillConfigDefaults(context, rollupConfig, ROLLUP_TASK_INFO);
 
+  setSourceMapVar(rollupConfig.sourceMap);
+
   if (!isAbsolute(rollupConfig.dest)) {
     // user can pass in absolute paths
     // otherwise save it in the build directory
@@ -53,11 +56,13 @@ function runBundle(context: BuildContext, options: BuildOptions, rollupConfig: R
   rollupConfig.dest = replacePathVars(context, rollupConfig.dest);
 
   if (!options.isProd) {
-    // dev mode should auto add the ion-compiler plugin
-    // this will do template inlining and transpile TS
     // ngc does full production builds itself and the bundler
-    // will already receive transpiled and AoT templates
-    rollupConfig.plugins.unshift(ionCompiler());
+    // will already have receive transpiled and AoT templates
+
+    // dev mode auto-adds the ion-inline-template and
+    // ion-compiler plugins, which will inline templates
+    // and transpile source typescript code to JS before bundling
+    rollupConfig.plugins.unshift(inlineTemplate(), ionCompiler());
   }
 
   if (useCache) {

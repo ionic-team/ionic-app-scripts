@@ -2,6 +2,8 @@
 // https://github.com/rollup/rollup-plugin-typescript
 // MIT Licenced
 
+import * as tippex from 'tippex';
+
 
 // The injected id for helpers. Intentially invalid to prevent helpers being included in source maps.
 export const helpersId = '\0typescript-helpers';
@@ -53,7 +55,6 @@ export function __awaiter(thisArg, _arguments, P, generator) {
 }
 `;
 
-const tippex = require('tippex');
 
 // Hack around TypeScript's broken handling of `export class` with
 // ES6 modules and ES5 script target.

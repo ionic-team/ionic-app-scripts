@@ -1,9 +1,12 @@
 import { basename, dirname, join, sep } from 'path';
 import { BuildContext, BuildOptions, TaskInfo } from './util/interfaces';
+import { ensureDirSync, readdirSync, writeFile } from 'fs-extra';
 import { fillConfigDefaults, generateContext, generateBuildOptions, replacePathVars } from './util/config';
 import { getModulePathsCache } from './bundle';
 import { Logger } from './util/logger';
-import { readdirSync, writeFile } from 'fs';
+import * as nodeSass from 'node-sass';
+import * as postcss from 'postcss';
+import * as autoprefixer from 'autoprefixer';
 
 
 export function sass(context?: BuildContext, options?: BuildOptions, sassConfig?: SassConfig, useCache = false) {
@@ -216,8 +219,6 @@ function render(sassConfig: SassConfig, useCache: boolean) {
       sassConfig.sourceMapContents = true;
     }
 
-    const nodeSass = require('node-sass');
-
     nodeSass.render(sassConfig, (renderErr: any, sassResult: SassResult) => {
       if (renderErr) {
         // sass render error!
@@ -248,8 +249,6 @@ function render(sassConfig: SassConfig, useCache: boolean) {
 function renderSassSuccess(sassResult: SassResult, sassConfig: SassConfig): Promise<any> {
   if (sassConfig.autoprefixer) {
     // with autoprefixer
-    const postcss = require('postcss');
-    const autoprefixer = require('autoprefixer');
 
     let autoPrefixerMapOptions: any = false;
     if (sassConfig.sourceMap) {
@@ -340,6 +339,9 @@ function writeOutput(sassConfig: SassConfig, cssOutput: string, mappingsOutput: 
 
     Logger.debug(`sass start write output: ${sassConfig.outFile}`);
 
+    const buildDir = dirname(sassConfig.outFile);
+    ensureDirSync(buildDir);
+
     writeFile(sassConfig.outFile, cssOutput, (cssWriteErr: any) => {
       if (cssWriteErr) {
         reject(new Error(`Error writing css file, ${sassConfig.outFile}: ${cssWriteErr}`));
@@ -350,7 +352,7 @@ function writeOutput(sassConfig: SassConfig, cssOutput: string, mappingsOutput: 
         if (mappingsOutput) {
           // save the css map file too
           // this save completes async and does not hold up the resolve
-          const sourceMapPath = join(dirname(sassConfig.outFile), basename(sassConfig.outFile) + '.map');
+          const sourceMapPath = join(buildDir, basename(sassConfig.outFile) + '.map');
 
           Logger.debug(`sass start write css map: ${sourceMapPath}`);
 
