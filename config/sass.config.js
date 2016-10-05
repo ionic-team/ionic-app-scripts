@@ -70,7 +70,7 @@ module.exports = {
    * to be imported so their values override default variables.
    */
   variableSassFiles: [
-    '{{SRC}}/theme/variables.scss'
+    'src/theme/variables.scss'
   ],
 
   /**
@@ -96,7 +96,6 @@ module.exports = {
     'core-js',
     'ionic-native',
     'rxjs',
-    'rxjs-es',
     'zone.js'
   ]
 

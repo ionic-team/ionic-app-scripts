@@ -98,7 +98,6 @@ npm run build --rollup ./config/rollup.config.js
 |-----------------|---------------------|---------------|-----------------|
 | root directory  | `ionic_root_dir`    | `--rootDir`   | `process.cwd()` |
 | tmp directory   | `ionic_tmp_dir`     | `--tmpDir`    | `.tmp`          |
-| src directory   | `ionic_src_dir`     | `--srcDir`    | `src`           |
 | www directory   | `ionic_www_dir`     | `--wwwDir`    | `www`           |
 | build directory | `ionic_build_dir`   | `--buildDir`  | `build`         |
 

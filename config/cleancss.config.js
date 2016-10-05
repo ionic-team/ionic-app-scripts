@@ -8,17 +8,8 @@ module.exports = {
   sourceFileName: 'main.css',
 
   /**
-   * sourceSourceMapName: the file name of the source map for the css file
-   */
-  // sourceSourceMapName: 'main.css.map',
-
-  /**
    * destFileName: the file name for the generated minified file
    */
-  destFileName: 'main.css',
+  destFileName: 'main.css'
 
-  /**
-   * destSourceMapName: the file name for the generated source map
-   */
-  // destSourceMapName: 'main.min.css.map'
 };
