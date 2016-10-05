@@ -10,7 +10,9 @@ export { sass, sassUpdate } from './sass';
 export { transpile } from './transpile';
 export { uglifyjs } from './uglifyjs';
 export { watch } from './watch';
-export * from './util';
+export * from './util/config';
+export * from './util/helpers';
+export * from './util/interfaces';
 
 
 export function run(task: string) {

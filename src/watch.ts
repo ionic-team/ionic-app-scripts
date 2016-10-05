@@ -1,5 +1,7 @@
 import { build } from './build';
-import { BuildContext, BuildOptions, generateBuildOptions, generateContext, fillConfigDefaults, Logger, replacePathVars, setIonicEnvironment, TaskInfo } from './util';
+import { BuildContext, BuildOptions, TaskInfo } from './util/interfaces';
+import { fillConfigDefaults, generateBuildOptions, generateContext, replacePathVars, setIonicEnvironment } from './util/config';
+import { Logger } from './util/logger';
 
 
 export function watch(context?: BuildContext, options?: BuildOptions, watchConfig?: WatchConfig) {

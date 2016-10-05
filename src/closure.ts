@@ -1,4 +1,6 @@
-import { BuildContext, generateContext, fillConfigDefaults, Logger, TaskInfo } from './util';
+import { BuildContext, TaskInfo } from './util/interfaces';
+import { generateContext, fillConfigDefaults } from './util/config';
+import { Logger } from './util/logger';
 
 
 export function closure(context?: BuildContext, closureConfig?: ClosureConfig) {

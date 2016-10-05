@@ -1,5 +1,7 @@
-import { BuildContext, BuildOptions, fillConfigDefaults, generateContext, Logger, replacePathVars, TaskInfo } from './util';
+import { BuildContext, BuildOptions, TaskInfo } from './util/interfaces';
+import { fillConfigDefaults, generateContext, replacePathVars } from './util/config';
 import { copy as fsCopy } from 'fs-extra';
+import { Logger } from './util/logger';
 
 
 export function copy(context?: BuildContext, copyConfig?: CopyConfig) {
@@ -10,6 +12,7 @@ export function copy(context?: BuildContext, copyConfig?: CopyConfig) {
 
   return runCopy(context, copyConfig).then(() => {
     return logger.finish();
+
   }).catch((err: Error) => {
     logger.fail(err);
     return Promise.reject(err);

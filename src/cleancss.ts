@@ -1,7 +1,10 @@
 import { join } from 'path';
-
-import { BuildContext, generateContext, fillConfigDefaults, Logger, readFileAsync, TaskInfo, writeFileAsync } from './util';
+import { BuildContext, TaskInfo } from './util/interfaces';
+import { generateContext, fillConfigDefaults } from './util/config';
+import { Logger } from './util/logger';
+import { readFileAsync, writeFileAsync } from './util/helpers';
 import * as cleanCss from 'clean-css';
+
 
 export function cleancss(context?: BuildContext, cleanCssConfig?: CleanCssConfig) {
   context = generateContext(context);
@@ -24,7 +27,7 @@ export function cleancss(context?: BuildContext, cleanCssConfig?: CleanCssConfig
     return logger.finish();
 
   }).catch((err: Error) => {
-    logger.fail(err, err.message);
+    logger.fail(err);
     return Promise.reject(err);
   });
 }

@@ -1,6 +1,8 @@
 import { basename, dirname, join, sep } from 'path';
-import { BuildContext, BuildOptions, fillConfigDefaults, generateContext, generateBuildOptions, Logger, replacePathVars, TaskInfo } from './util';
+import { BuildContext, BuildOptions, TaskInfo } from './util/interfaces';
+import { fillConfigDefaults, generateContext, generateBuildOptions, replacePathVars } from './util/config';
 import { getModulePathsCache } from './bundle';
+import { Logger } from './util/logger';
 import { readdirSync, writeFile } from 'fs';
 
 

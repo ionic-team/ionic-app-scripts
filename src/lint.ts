@@ -1,6 +1,8 @@
-import { BuildContext, generateContext, getConfigValueDefaults, getNodeBinExecutable, Logger, TaskInfo } from './util';
-import { join } from 'path';
 import { access } from 'fs';
+import { BuildContext, TaskInfo } from './util/interfaces';
+import { generateContext, getConfigValueDefaults, getNodeBinExecutable } from './util/config';
+import { join } from 'path';
+import { Logger } from './util/logger';
 
 
 export function lint(context?: BuildContext, tsConfigPath?: string) {

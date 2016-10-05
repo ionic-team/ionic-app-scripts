@@ -1,6 +1,8 @@
+import { BuildContext } from './util/interfaces';
 import { cleancss } from './cleancss';
 import { closure, isClosureSupported } from './closure';
-import { BuildContext, generateContext, Logger } from './util';
+import { generateContext } from './util/config';
+import { Logger } from './util/logger';
 import { uglifyjs } from './uglifyjs';
 
 
@@ -25,6 +27,7 @@ export function minify(context?: BuildContext) {
 
   return Promise.all(promises).then(() => {
     return logger.finish();
+
   }).catch((err: Error) => {
     logger.fail(err);
     return Promise.reject(err);

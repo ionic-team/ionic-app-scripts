@@ -1,5 +1,7 @@
-import { BuildContext, generateContext, generateBuildOptions, getConfigValueDefaults, fillConfigDefaults } from '../util';
-import { addArgv, setEnvVar, setProcessArgs, setProcessEnv, setCwd } from '../util';
+import { BuildContext } from '../util/interfaces';
+import { generateContext, generateBuildOptions, getConfigValueDefaults, fillConfigDefaults } from '../util/config';
+import { addArgv, setProcessEnvVar, setProcessArgs, setProcessEnv, setCwd } from '../util/config';
+
 
 describe('util', () => {
 
@@ -43,8 +45,8 @@ describe('util', () => {
       addArgv('fullArgValue');
       addArgv('-s');
       addArgv('shortArgValue');
-      setEnvVar('npm_package_config_envVar', 'myNPMConfigVal');
-      setEnvVar('envVar', 'myProcessEnvVar');
+      setProcessEnvVar('npm_package_config_envVar', 'myNPMConfigVal');
+      setProcessEnvVar('envVar', 'myProcessEnvVar');
       const val = getConfigValueDefaults('--full', '-s', 'envVar', 'defaultValue', context);
       expect(val).toEqual('fullArgValue');
     });
@@ -52,21 +54,21 @@ describe('util', () => {
     it('should get arg short value', () => {
       addArgv('-s');
       addArgv('shortArgValue');
-      setEnvVar('npm_package_config_envVar', 'myNPMConfigVal');
-      setEnvVar('envVar', 'myProcessEnvVar');
+      setProcessEnvVar('npm_package_config_envVar', 'myNPMConfigVal');
+      setProcessEnvVar('envVar', 'myProcessEnvVar');
       const val = getConfigValueDefaults('--full', '-s', 'envVar', 'defaultValue', context);
       expect(val).toEqual('shortArgValue');
     });
 
     it('should get npm config value', () => {
-      setEnvVar('npm_package_config_envVar', 'myNPMConfigVal');
-      setEnvVar('envVar', 'myProcessEnvVar');
+      setProcessEnvVar('npm_package_config_envVar', 'myNPMConfigVal');
+      setProcessEnvVar('envVar', 'myProcessEnvVar');
       const val = getConfigValueDefaults('--full', '-s', 'envVar', 'defaultValue', context);
       expect(val).toEqual('myNPMConfigVal');
     });
 
     it('should get envVar value', () => {
-      setEnvVar('envVar', 'myProcessEnvVar');
+      setProcessEnvVar('envVar', 'myProcessEnvVar');
       const val = getConfigValueDefaults('--full', '-s', 'envVar', 'defaultValue', context);
       expect(val).toEqual('myProcessEnvVar');
     });
