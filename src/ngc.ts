@@ -1,7 +1,10 @@
 import { basename, join } from 'path';
-import { BuildContext, BuildOptions, TaskInfo, fillConfigDefaults, generateContext, generateBuildOptions, getNodeBinExecutable, isTsFilename, Logger } from './util';
+import { BuildContext, BuildOptions, TaskInfo } from './util/interfaces';
 import { copy as fsCopy, emptyDirSync, outputJsonSync, statSync } from 'fs-extra';
-import { getSrcTsConfig } from './tsc';
+import { fillConfigDefaults, generateContext, generateBuildOptions, getNodeBinExecutable } from './util/config';
+import { endsWith } from './util/helpers';
+import { Logger } from './util/logger';
+import { getTsConfig } from './transpile';
 
 
 export function ngc(context?: BuildContext, options?: BuildOptions, ngcConfig?: NgcConfig) {
@@ -20,6 +23,7 @@ export function ngc(context?: BuildContext, options?: BuildOptions, ngcConfig?: 
 
   }).then(() => {
     return logger.finish();
+
   }).catch((err: Error) => {
     logger.fail(err);
     return Promise.reject(err);
@@ -43,7 +47,7 @@ function runNgc(context: BuildContext, options: BuildOptions, ngcConfig: NgcConf
 
     const ngcCmd = getNodeBinExecutable(context, 'ngc');
     if (!ngcCmd) {
-      reject(new Error(`Unable to find Angular Compiler "ngc" command: ${ngcCmd}`));
+      reject(new Error(`Unable to find Angular Compiler "ngc" command: ${ngcCmd}. Please ensure @angular/compiler-cli has been installed with NPM.`));
       return;
     }
 
@@ -64,7 +68,7 @@ function runNgc(context: BuildContext, options: BuildOptions, ngcConfig: NgcConf
     });
 
     cp.stderr.on('data', (data: string) => {
-      Logger.error(`ngc error: ${data}`);
+      Logger.error(`ngc: ${data}`);
       hadAnError = true;
     });
 
@@ -81,16 +85,11 @@ function runNgc(context: BuildContext, options: BuildOptions, ngcConfig: NgcConf
 
 function createTmpTsConfig(context: BuildContext, ngcConfig: NgcConfig) {
   // create the tsconfig from the original src
-  const tsConfig = getSrcTsConfig(context);
+  const tsConfig = getTsConfig();
 
   // delete outDir if it's set since we only want
   // to compile to the same directory we're in
   delete tsConfig.compilerOptions.outDir;
-
-  // downstream, we have a dependency on es5 code and
-  // es2015 modules, so force them
-  tsConfig.compilerOptions.module = 'es2015';
-  tsConfig.compilerOptions.target = 'es5';
 
   // force where to look for ts files
   tsConfig.include = ngcConfig.include;
@@ -136,19 +135,13 @@ function filterCopyFiles(filePath: any, hoop: any) {
       shouldInclude = (EXCLUDE_DIRS.indexOf(basename(filePath)) < 0);
 
     } else {
-      if (isTsFilename(filePath)) {
-        shouldInclude = true;
-      }
-
-      if (filePath.substr(filePath.length - 5) === '.html') {
-        shouldInclude = true;
-      }
+      shouldInclude = (endsWith(filePath, '.ts') || endsWith(filePath, '.html'));
     }
-
   } catch (e) {}
 
   return shouldInclude;
 }
+
 
 export function getTmpTsConfigPath(context: BuildContext) {
   return join(context.tmpDir, 'tsconfig.json');

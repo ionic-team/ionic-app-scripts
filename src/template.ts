@@ -1,6 +1,8 @@
-import { BuildContext, BuildOptions, Logger, isTsFilename } from './util';
+import { BuildContext, BuildOptions } from './util/interfaces';
 import { bundleUpdate, clearCachedModule } from './bundle';
-import { dirname, join, parse, basename, sep } from 'path';
+import { dirname, join, parse, basename } from 'path';
+import { endsWith } from './util/helpers';
+import { Logger } from './util/logger';
 import { readFileSync, readdirSync } from 'fs';
 import { sassUpdate } from './sass';
 
@@ -15,7 +17,7 @@ export function templateUpdate(event: string, path: string, context: BuildContex
     return logger.finish();
 
   }).catch((err: Error) => {
-    logger.fail(err, 'templateUpdate failed' + (err.message ? ': ' + err.message : ''));
+    logger.fail(err);
     return Promise.reject(err);
   });
 }
@@ -52,7 +54,7 @@ function getSourceComponentFile(htmlFilePath: string, context: BuildContext) {
 
     for (var i = 0; i < filePaths.length; i++) {
       var filePath = filePaths[i];
-      if (isTsFilename(filePath)) {
+      if (endsWith(filePath, '.ts') && !endsWith(filePath, '.d.ts')) {
         // found a .ts file in this same directory
         // open it up and see if it's a component
         // and see if it has a template url with the same filename
@@ -65,7 +67,7 @@ function getSourceComponentFile(htmlFilePath: string, context: BuildContext) {
 
             var componentHtmlFile = basename(match[1].replace(/\'|\"|\`/g, '').trim());
             if (changedHtmlFile === componentHtmlFile) {
-              rtn = getCompiledJsFile(tsComponentFile, context);
+              rtn = tsComponentFile;
               break;
             }
 
@@ -82,65 +84,45 @@ function getSourceComponentFile(htmlFilePath: string, context: BuildContext) {
 }
 
 
-function getCompiledJsFile(tsComponentFile: string, context: BuildContext) {
-  let jsCompiledFile = tsComponentFile.replace(context.srcDir, context.tmpDir);
-  return jsCompiledFile.substr(0, jsCompiledFile.length - 2) + 'js';
-}
-
-
-export function inlineTemplate(options: NgTemplateOptions, source: string, sourcePath: string) {
+export function inlineTemplate(sourceText: string, sourcePath: string) {
   const componentDir = parse(sourcePath).dir;
   let match: RegExpExecArray;
   let rewrite: string;
   let didRewrite = false;
-  let sourceScan = source;
-
-  options.directoryMaps = options.directoryMaps || {
-    '.tmp': 'src'
-  };
+  let sourceScan = sourceText;
 
   while ((match = COMPONENT_REGEX.exec(sourceScan)) !== null) {
     rewrite = match[0].replace(TEMPLATE_URL_REGEX, (m: any, urlValue: string) => {
       if (urlValue.indexOf('\'') > -1 || urlValue.indexOf('"') > -1 || urlValue.indexOf('`') > -1) {
         didRewrite = true;
-        return replaceTemplate(options, componentDir, urlValue);
+        return replaceTemplate(componentDir, urlValue);
       }
       return urlValue;
     });
 
     if (didRewrite) {
-      source = source.replace(match[0], rewrite);
+      sourceText = sourceText.replace(match[0], rewrite);
     }
 
     sourceScan = sourceScan.substring(match.index + match[0].length);
   }
 
-  if (didRewrite) {
-    return source;
-  }
-
-  return null;
+  return sourceText;
 }
 
 
-function replaceTemplate(options: NgTemplateOptions, componentDir: string, urlValue: string): string {
+function replaceTemplate(componentDir: string, urlValue: string): string {
   return urlValue.replace(HTML_PATH_URL_REGEX, (match: any, quote: string, filePath: string) => {
-    return inlineSourceWithTemplate(options, componentDir, filePath);
+    return inlineSourceWithTemplate(componentDir, filePath);
   });
 }
 
 
-function inlineSourceWithTemplate(options: NgTemplateOptions, componentDir: string, filePath: string) {
+function inlineSourceWithTemplate(componentDir: string, filePath: string) {
   let rtn = `templateUrl: '${filePath}'`;
 
   try {
-    let htmlPath = join(componentDir, filePath);
-
-    for (var k in options.directoryMaps) {
-      htmlPath = htmlPath.replace(sep + k + sep, sep + options.directoryMaps[k] + sep);
-    }
-
-    let htmlContent = readFileSync(htmlPath).toString();
+    let htmlContent = readFileSync(join(componentDir, filePath), 'utf-8');
     htmlContent = htmlContent.replace(/\r|\n/g, '\\n');
     htmlContent = htmlContent.replace(/\'/g, '\\\'');
 

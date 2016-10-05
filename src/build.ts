@@ -1,12 +1,13 @@
-import { BuildContext, BuildOptions, generateContext, generateBuildOptions, Logger } from './util';
+import { BuildContext, BuildOptions } from './util/interfaces';
+import { generateContext, generateBuildOptions } from './util/config';
 import { bundle, bundleUpdate } from './bundle';
 import { clean } from './clean';
 import { minify } from './minify';
 import { copy } from './copy';
 import { lint } from './lint';
+import { Logger } from './util/logger';
 import { ngc } from './ngc';
 import { sass, sassUpdate } from './sass';
-import { tsc } from './tsc';
 
 
 export function build(context: BuildContext, options: BuildOptions) {
@@ -74,10 +75,7 @@ function buildDev(context: BuildContext, options: BuildOptions) {
   const copyPromise = copy(context);
   const lintPromise = lint(context);
 
-  return tsc(context, options).then(() => {
-    return bundle(context, options);
-
-  }).then(() => {
+  return bundle(context, options).then(() => {
     return sass(context);
 
   }).then(() => {

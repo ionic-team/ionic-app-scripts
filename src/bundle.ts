@@ -1,5 +1,9 @@
-import { BuildContext, BuildOptions, fillConfigDefaults, generateContext, generateBuildOptions, Logger, TaskInfo } from './util';
+import { BuildContext, BuildOptions, TaskInfo } from './util/interfaces';
+import { endsWith } from './util/helpers';
+import { fillConfigDefaults, generateContext, generateBuildOptions, replacePathVars } from './util/config';
+import ionCompiler from './plugins/ion-compiler';
 import { join, isAbsolute } from 'path';
+import { Logger } from './util/logger';
 import { outputJson, readJsonSync } from 'fs-extra';
 import { tmpdir } from 'os';
 
@@ -14,7 +18,7 @@ export function bundle(context?: BuildContext, options?: BuildOptions, rollupCon
   return runBundle(context, options, rollupConfig, useCache).then(() => {
     return logger.finish();
   }).catch((err: Error) => {
-    logger.fail(err, err.message);
+    logger.fail(err);
     return Promise.reject(err);
   });
 }
@@ -29,7 +33,7 @@ export function bundleUpdate(event: string, path: string, context: BuildContext,
     return logger.finish();
 
   }).catch((err: Error) => {
-    logger.fail(err, err.message);
+    logger.fail(err);
     return Promise.reject(err);
   });
 }
@@ -39,7 +43,21 @@ function runBundle(context: BuildContext, options: BuildOptions, rollupConfig: R
   rollupConfig = fillConfigDefaults(context, rollupConfig, ROLLUP_TASK_INFO);
 
   if (!isAbsolute(rollupConfig.dest)) {
+    // user can pass in absolute paths
+    // otherwise save it in the build directory
     rollupConfig.dest = join(context.buildDir, rollupConfig.dest);
+  }
+
+  // replace any path vars like {{TMP}} with the real path
+  rollupConfig.entry = replacePathVars(context, rollupConfig.entry);
+  rollupConfig.dest = replacePathVars(context, rollupConfig.dest);
+
+  if (!options.isProd) {
+    // dev mode should auto add the ion-compiler plugin
+    // this will do template inlining and transpile TS
+    // ngc does full production builds itself and the bundler
+    // will already receive transpiled and AoT templates
+    rollupConfig.plugins.unshift(ionCompiler());
   }
 
   if (useCache) {
@@ -48,10 +66,13 @@ function runBundle(context: BuildContext, options: BuildOptions, rollupConfig: R
   }
 
   if (!rollupConfig.onwarn) {
+    // use our own logger if one wasn't already provided
     rollupConfig.onwarn = createOnWarnFn();
   }
 
   Logger.debug(`entry: ${rollupConfig.entry}, dest: ${rollupConfig.dest}, cache: ${rollupConfig.cache}, format: ${rollupConfig.format}`);
+
+  checkDeprecations(options, rollupConfig);
 
   // bundle the app then create create css
   const rollup = require('rollup').rollup;
@@ -67,12 +88,33 @@ function runBundle(context: BuildContext, options: BuildOptions, rollupConfig: R
     // to always bundle to know which modules are used
     setModulePathsCache(context.moduleFiles);
 
-    // Cache our bundle for later use
+    // cache our bundle for later use
     bundleCache = bundle;
+
+    // clean up any references
+    rollupConfig.cache = rollupConfig.onwarn = rollupConfig.plugins = null;
 
     // write the bundle
     return bundle.write(rollupConfig);
+
+  }).catch((err: any) => {
+    // ensure references are cleared up when there's an error
+    bundleCache = rollupConfig.cache = rollupConfig.onwarn = rollupConfig.plugins = null;
+    return Promise.reject(err);
   });
+}
+
+
+function checkDeprecations(options: BuildOptions, rollupConfig: RollupConfig) {
+  if (!options.isProd) {
+    if (rollupConfig.entry.indexOf('.tmp') > -1 || endsWith(rollupConfig.entry, '.js')) {
+      // warning added 2016-10-05, v0.0.29
+      throw new Error('\nDev builds no longer use the ".tmp" directory. Please update your rollup config\'s\n' +
+                      'entry to use your "src" directory\'s "main.dev.ts" TypeScript file.\n' +
+                      'For example, the entry for dev builds should be: "src/app/main.dev.ts"');
+
+    }
+  }
 }
 
 
@@ -150,8 +192,7 @@ function createOnWarnFn() {
 }
 
 const IGNORE_WARNS = [
-  'keyword is equivalent to',
-  'plugin (\'ng-template\') was used to transform files'
+  'keyword is equivalent to'
 ];
 
 

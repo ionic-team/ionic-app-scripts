@@ -1,9 +1,9 @@
-var ngTemplate = require('../dist/plugins/ng-template').ngTemplate;
 var nodeResolve = require('rollup-plugin-node-resolve');
 var commonjs = require('rollup-plugin-commonjs');
 var globals = require('rollup-plugin-node-globals');
 var builtins = require('rollup-plugin-node-builtins');
 var json = require('rollup-plugin-json');
+
 
 // https://github.com/rollup/rollup/wiki/JavaScript-API
 
@@ -13,7 +13,7 @@ var rollupConfig = {
    * be included, along with the minimum necessary code
    * from its dependencies
    */
-  entry: './.tmp/app/main.dev.js',
+  entry: 'src/app/main.dev.ts',
 
   /**
    * sourceMap: If true, a separate sourcemap file will
@@ -36,7 +36,6 @@ var rollupConfig = {
    * See https://github.com/rollup/rollup/wiki/Plugins for more info.
    */
   plugins: [
-    ngTemplate(),
     builtins(),
     commonjs(),
     nodeResolve({
@@ -55,7 +54,7 @@ var rollupConfig = {
 
 if (process.env.IONIC_ENV == 'prod') {
   // production mode
-  rollupConfig.entry = '.tmp/app/main.prod.js';
+  rollupConfig.entry = '{{TMP}}/app/main.prod.ts';
   rollupConfig.sourceMap = false;
 }
 

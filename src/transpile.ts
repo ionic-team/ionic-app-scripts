@@ -1,80 +1,205 @@
-import { BuildContext, fillConfigDefaults, generateContext, Logger, TaskInfo } from './util';
+// Ported from 'rollup-plugin-typescript':
+// https://github.com/rollup/rollup-plugin-typescript
+// MIT Licenced
+
+import { endsWith, objectAssign } from './util/helpers';
+import { fixExportClass, helpersId, helperImports } from './util/typescript-helpers';
+import { getRootDir } from './util/config';
 import { join } from 'path';
+import { Logger } from './util/logger';
+import { readFileSync, statSync } from 'fs';
+import * as ts from 'typescript';
 
 
-export function transpile(context?: BuildContext) {
-  context = generateContext(context);
+export function transpile(sourceText: string, sourcePath: string, compilerOptions: ts.CompilerOptions, reportDiagnostics: boolean): TransformedOutput {
+  Logger.debug(`transpile: ${sourcePath}`);
 
-  const logger = new Logger('transpile');
+  if (sourceText.indexOf(ION_COMPILER_COMMENT) > -1) {
+    Logger.debug(`file already transpiled: ${sourcePath}`);
+    return null;
+  }
 
-  return transpileApp(context).then(() => {
-    return logger.finish();
-  }).catch((err: Error) => {
-    logger.fail(err);
-    return Promise.reject(err);
+  const transformed = ts.transpileModule(
+    fixExportClass(sourceText, sourcePath),
+    {
+      fileName: sourcePath,
+      reportDiagnostics: reportDiagnostics,
+      compilerOptions
+    }
+  );
+
+  // All errors except `Cannot compile modules into 'es6' when targeting 'ES5' or lower.`
+  const diagnostics = transformed.diagnostics ? transformed.diagnostics.filter(diagnostic => diagnostic.code !== 1204) : [];
+
+  let fatalError = false;
+
+  diagnostics.forEach(diagnostic => {
+    const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
+
+    if (diagnostic.file) {
+      const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
+      Logger.error(`${diagnostic.file.fileName}(${line + 1},${character + 1}): error TS${diagnostic.code}: ${message}` );
+
+    } else {
+      Logger.error(`Error: ${message}` );
+    }
+
+    if (diagnostic.category === ts.DiagnosticCategory.Error) {
+      fatalError = true;
+    }
   });
+
+  if (fatalError) {
+    throw new Error(`There were TypeScript errors transpiling`);
+  }
+
+  return {
+    // always append an import for the helpers
+    code: ION_COMPILER_COMMENT + '\n' +
+          transformed.outputText + '\n' +
+          helperImports,
+
+    // rollup expects `map` to be an object so we must parse the string
+    map: transformed.sourceMapText ? JSON.parse(transformed.sourceMapText) : null
+  };
 }
 
 
-export function transpileUpdate(event: string, path: string, context: BuildContext) {
-  Logger.debug(`transpileUpdate, event: ${event}, path: ${path}`);
+export function resolveId(importee: string, importer: string, compilerOptions: ts.CompilerOptions) {
+  // Handle the special `typescript-helpers` import itself.
+  if (importee === helpersId) {
+    return helpersId;
+  }
 
-  return transpile(context);
+  if (!importer) {
+    return null;
+  }
+
+  importer = importer.split('\\').join('/');
+
+  const result = ts.nodeModuleNameResolver(importee, importer, compilerOptions, resolveHost);
+
+  if (result.resolvedModule && result.resolvedModule.resolvedFileName) {
+    if (endsWith(result.resolvedModule.resolvedFileName, '.d.ts')) {
+      return null;
+    }
+
+    return result.resolvedModule.resolvedFileName;
+  }
+
+  return null;
 }
 
-export function transpileApp(context: BuildContext, transpileConfig?: TranspileConfig) {
-  transpileConfig = fillConfigDefaults(context, transpileConfig, TRANSPILE_TASK_INFO);
-  const srcFile = join(context.buildDir, transpileConfig.source);
-  const destFile = join(context.buildDir, transpileConfig.destFileName);
 
-  return transpile6To5(context, srcFile, destFile);
+export function getTsConfig() {
+  let config: TsConfig = null;
+  const tsConfigPath = join(getRootDir(), 'tsconfig.json');
+
+  try {
+    const tsConfigFile = ts.readConfigFile(tsConfigPath, path => readFileSync(path, 'utf8'));
+
+    if (!tsConfigFile) {
+      throw new Error(`tsconfig error: invalid tsconfig file, "${tsConfigPath}"`);
+
+    } else if (tsConfigFile.error && tsConfigFile.error.messageText) {
+      throw new Error(`tsconfig error: ${tsConfigFile.error.messageText}`);
+
+    } else if (!tsConfigFile.config) {
+      throw new Error(`tsconfig error: invalid config, "${tsConfigPath}""`);
+
+    } else if (!tsConfigFile.config.compilerOptions) {
+      throw new Error(`tsconfig error: invalid compilerOptions, "${tsConfigPath}""`);
+
+    } else {
+      config = tsConfigFile.config;
+      setCompilerOptionDefaults(config.compilerOptions);
+    }
+
+  } catch (e) {
+    throw new Error(`tsconfig error: error reading tsconfig file "${tsConfigPath}", ${e}`);
+  }
+
+  return config;
 }
 
 
-export function transpile6To5(context: BuildContext, srcFile: string, destFile: string) {
-  return new Promise((resolve, reject) => {
+export function getCompilerOptions(): ts.CompilerOptions {
+  let config = getTsConfig();
+  if (config && config.compilerOptions) {
+    // convert to typescripts actual typed compiler options
+    const tsCompilerOptions: ts.CompilerOptions = objectAssign({}, config.compilerOptions);
 
-    const spawn = require('cross-spawn');
-    const tscCmd = join(context.rootDir, 'node_modules', '.bin', 'tsc');
-    const tscCmdArgs = [
-      '--out', destFile,
-      '--target', 'es5',
-      '--allowJs',
-      '--sourceMap',
-      srcFile
-    ];
-    let hadAnError = false;
+    if (config.compilerOptions.module === 'es2015' || config.compilerOptions.module === 'es6') {
+      tsCompilerOptions.module = ts.ModuleKind.ES2015;
+    } else if (config.compilerOptions.module === 'commonjs') {
+      tsCompilerOptions.module = ts.ModuleKind.CommonJS;
+    }
 
-    const ls = spawn(tscCmd, tscCmdArgs);
+    if (config.compilerOptions.target === 'es5') {
+      tsCompilerOptions.target = ts.ScriptTarget.ES5;
+    } else if (config.compilerOptions.target === 'es6' || config.compilerOptions.target === 'es2015') {
+      tsCompilerOptions.target = ts.ScriptTarget.ES2015;
+    } else if (config.compilerOptions.target === 'latest') {
+      tsCompilerOptions.target = ts.ScriptTarget.Latest;
+    }
 
-    ls.stdout.on('data', (data: string) => {
-      Logger.info(data);
-    });
-
-    ls.stderr.on('data', (data: string) => {
-      Logger.error(`transpile error: ${data}`);
-      hadAnError = true;
-    });
-
-    ls.on('close', (code: string) => {
-      if (hadAnError) {
-        reject(new Error(`Transpiling from ES6 to ES5 encountered an error`));
-      } else {
-        resolve();
-      }
-    });
-
-  });
+    return tsCompilerOptions;
+  }
+  return null;
 }
 
-export interface TranspileConfig {
-  source: string;
-  destFileName: string;
+
+function setCompilerOptionDefaults(compilerOptions: TsCompilerOptions) {
+  compilerOptions.target = 'es5';
+  compilerOptions.module = 'es2015';
 }
 
-const TRANSPILE_TASK_INFO: TaskInfo = {
-  fullArgConfig: '--tsc',
-  shortArgConfig: '-tsc',
-  envConfig: 'ionic_transpile',
-  defaultConfigFilename: 'transpile.config'
+
+const resolveHost: any = {
+  directoryExists (dirPath: string) {
+    try {
+      return statSync( dirPath ).isDirectory();
+    } catch ( err ) {
+      return false;
+    }
+  },
+  fileExists (filePath: string) {
+    try {
+      return statSync( filePath ).isFile();
+    } catch ( err ) {
+      return false;
+    }
+  }
 };
+
+
+export interface IonCompilerPluginOptions {
+  include?: string[];
+  exclude?: string[];
+  module?: string;
+}
+
+
+export interface TransformedOutput {
+  code: string;
+  map: any;
+}
+
+
+export interface TsConfig {
+  // https://www.typescriptlang.org/docs/handbook/compiler-options.html
+  compilerOptions: TsCompilerOptions;
+  include: string[];
+  exclude: string[];
+}
+
+export interface TsCompilerOptions {
+  module: string;
+  noEmitOnError: boolean;
+  outDir: string;
+  removeComments: boolean;
+  target: string;
+}
+
+const ION_COMPILER_COMMENT = '/* ion-compiler */';
+
