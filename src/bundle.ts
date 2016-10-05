@@ -28,7 +28,6 @@ export function bundleUpdate(event: string, path: string, context: BuildContext,
   const logger = new Logger(`bundle ${(options.isProd ? 'prod' : 'dev')} update`);
 
   Logger.debug(`bundleUpdate, event: ${event}, path: ${path}`);
-  Logger.debug(`Memory usage: ${process.memoryUsage().rss / 1000000}MB`);
 
   return runBundle(context, options, null, useCache).then(() => {
     return logger.finish();

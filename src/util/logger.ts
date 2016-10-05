@@ -1,5 +1,6 @@
 import { join } from 'path';
 import { isDebugMode } from './config';
+import { readJSONSync } from 'fs-extra';
 
 
 export class Logger {
@@ -91,6 +92,7 @@ export class Logger {
 
   static debug(...msg: string[]) {
     if (isDebugMode()) {
+      msg.push(`- Memory: ${(process.memoryUsage().rss / 1000000).toFixed(2)}MB`);
       print('log', msg.join(' '), ' DEBUG! ');
     }
   }
@@ -109,8 +111,8 @@ let printedAppScriptsVersion = false;
 function getAppScriptsVersion() {
   let rtn = '';
   try {
-    const packageJson = require(join(__dirname, '..', 'package.json'));
-    rtn = packageJson.version;
+    const packageJson = readJSONSync(join(__dirname, '..', '..', 'package.json'));
+    rtn = packageJson.version || '';
   } catch (e) {}
   return rtn;
 }
