@@ -100,10 +100,11 @@ function runNgc(context: BuildContext, options: BuildOptions, ngcConfig: NgcConf
     cp.on('close', (code: string) => {
       if (errorMsgs.length) {
         Logger.error(`NGC Compilation failed`);
-
         errorMsgs.forEach(errorMsg => {
           Logger.error(errorMsg);
         });
+
+        reject('');
 
       } else {
         resolve();

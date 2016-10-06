@@ -13,17 +13,9 @@ export function minify(context?: BuildContext) {
 
   // both css and js minify can run at the same time
   const promises: Promise<any>[] = [
-    cleancss(context)
+    minifyJs(context),
+    minifyCss(context)
   ];
-
-  if (isClosureSupported(context)) {
-    // use closure if it's supported and local executable provided
-    promises.push(closure(context));
-
-  } else {
-    // default to uglify if no closure
-    promises.push(uglifyjs(context));
-  }
 
   return Promise.all(promises).then(() => {
     return logger.finish();
@@ -32,4 +24,19 @@ export function minify(context?: BuildContext) {
     logger.fail(err);
     return Promise.reject(err);
   });
+}
+
+
+export function minifyJs(context?: BuildContext) {
+  if (isClosureSupported(context)) {
+    // use closure if it's supported and local executable provided
+    return closure(context);
+  }
+
+  // default to uglify if no closure
+  return uglifyjs(context);
+}
+
+export function minifyCss(context?: BuildContext) {
+  return cleancss(context);
 }

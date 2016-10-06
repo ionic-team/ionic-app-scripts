@@ -2,7 +2,7 @@ import { BuildContext, BuildOptions } from './util/interfaces';
 import { generateContext, generateBuildOptions } from './util/config';
 import { bundle, bundleUpdate } from './bundle';
 import { clean } from './clean';
-import { minify } from './minify';
+import { minifyJs, minifyCss } from './minify';
 import { copy } from './copy';
 import { lint } from './lint';
 import { Logger } from './util/logger';
@@ -47,14 +47,24 @@ function buildProd(context: BuildContext, options: BuildOptions) {
   const copyPromise = copy(context);
   const lintPromise = lint(context);
 
+  // kick off ngc to run the Ahead of Time compiler
   return ngc(context, options).then(() => {
+    // ngc has finished, now let's bundle it all together
     return bundle(context, options);
 
   }).then(() => {
-    return sass(context);
+    // js minify can kick off right away
+    const jsPromise = minifyJs(context);
 
-  }).then(() => {
-    return minify(context);
+    // sass needs to finish, then css minify can run when sass is done
+    const sassPromise = sass(context).then(() => {
+      return minifyCss(context);
+    });
+
+    return Promise.all([
+      jsPromise,
+      sassPromise
+    ]);
 
   }).then(() => {
     // ensure the async tasks have fully completed before resolving
