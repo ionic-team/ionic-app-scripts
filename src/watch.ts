@@ -4,6 +4,7 @@ import { fillConfigDefaults, generateBuildOptions, generateContext, replacePathV
 import { Logger } from './util/logger';
 import * as chokidar from 'chokidar';
 
+// https://github.com/paulmillr/chokidar
 
 export function watch(context?: BuildContext, options?: BuildOptions, watchConfig?: WatchConfig) {
   context = generateContext(context);
@@ -17,8 +18,9 @@ export function watch(context?: BuildContext, options?: BuildOptions, watchConfi
   const logger = new Logger('watch');
 
   return build(context, options).then(() => {
-    startWatchers(context, options, watchConfig);
-    return logger.ready();
+    return startWatchers(context, options, watchConfig).then(() => {
+      return logger.ready();
+    });
 
   }).catch((err: Error) => {
     return logger.fail(err);
@@ -26,44 +28,63 @@ export function watch(context?: BuildContext, options?: BuildOptions, watchConfi
 }
 
 
-export function startWatchers(context: BuildContext, options: BuildOptions, watchConfig: WatchConfig) {
-  // https://github.com/paulmillr/chokidar
+function startWatchers(context: BuildContext, options: BuildOptions, watchConfig: WatchConfig) {
+  const promises = watchConfig
+    .watchers
+    .filter(w => w.callback && w.paths)
+    .map(w => startWatcher(w, context, options, watchConfig));
 
-  watchConfig.watchers.forEach(watcher => {
-    if (watcher.callback && watcher.paths) {
-      let taskPromise = Promise.resolve();
-      let nextTask: any = null;
-      const watcherOptions = watcher.options || {};
-      if (!watcherOptions.cwd) {
-        watcherOptions.cwd = context.rootDir;
-      }
-      if (typeof watcherOptions.ignoreInitial !== 'boolean') {
-        watcherOptions.ignoreInitial = true;
-      }
-      const paths = cleanPaths(context, watcher.paths);
-      const chokidarWatcher = chokidar.watch(paths, watcherOptions);
+  return Promise.all(promises);
+}
 
-      chokidarWatcher.on('all', (event: string, path: string) => {
-        setIonicEnvironment(options.isProd);
 
-        Logger.debug(`watch callback start, id: ${watchCount}, isProd: ${options.isProd}, event: ${event}, path: ${path}`);
+function startWatcher(watcher: Watcher, context: BuildContext, options: BuildOptions, watchConfig: WatchConfig) {
+  return new Promise((resolve, reject) => {
 
-        nextTask = watcher.callback.bind(null, event, path, context, options);
-        taskPromise.then(() => {
-          Logger.debug(`watch callback complete, id: ${watchCount}, isProd: ${options.isProd}, event: ${event}, path: ${path}`);
-          taskPromise = nextTask();
-          nextTask = null;
-          watchCount++;
+    let taskPromise = Promise.resolve();
+    let nextTask: any = null;
 
-        }).catch(err => {
-          Logger.debug(`watch callback error, id: ${watchCount}, isProd: ${options.isProd}, event: ${event}, path: ${path}`);
-          Logger.debug(`${err}`);
-          taskPromise = nextTask();
-          nextTask = null;
-          watchCount++;
-        });
-      });
+    const watcherOptions = watcher.options || {};
+    if (!watcherOptions.cwd) {
+      watcherOptions.cwd = context.rootDir;
     }
+
+    if (typeof watcherOptions.ignoreInitial !== 'boolean') {
+      watcherOptions.ignoreInitial = true;
+    }
+    const paths = cleanPaths(context, watcher.paths);
+    const chokidarWatcher = chokidar.watch(paths, watcherOptions);
+
+    chokidarWatcher.on('all', (event: string, path: string) => {
+      setIonicEnvironment(options.isProd);
+
+      Logger.debug(`watch callback start, id: ${watchCount}, isProd: ${options.isProd}, event: ${event}, path: ${path}`);
+
+      nextTask = watcher.callback.bind(null, event, path, context, options);
+      taskPromise.then(() => {
+        Logger.debug(`watch callback complete, id: ${watchCount}, isProd: ${options.isProd}, event: ${event}, path: ${path}`);
+        taskPromise = nextTask();
+        nextTask = null;
+        watchCount++;
+
+      }).catch(err => {
+        Logger.debug(`watch callback error, id: ${watchCount}, isProd: ${options.isProd}, event: ${event}, path: ${path}`);
+        Logger.debug(`${err}`);
+        taskPromise = nextTask();
+        nextTask = null;
+        watchCount++;
+      });
+    });
+
+    chokidarWatcher.on('ready', () => {
+      Logger.debug(`watcher ready: ${watcherOptions.cwd}${paths}`);
+      resolve();
+    });
+
+    chokidarWatcher.on('error', (err: any) => {
+      Logger.error(`watcher error: ${watcherOptions.cwd}${paths}: ${err}`);
+      reject();
+    });
   });
 }
 
