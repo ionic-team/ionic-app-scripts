@@ -58,23 +58,53 @@ function runNgc(context: BuildContext, options: BuildOptions, ngcConfig: NgcConf
     const ngcCmdArgs = [
       '--project', getTmpTsConfigPath(context)
     ];
-    let hadAnError = false;
 
     // would love to not use spawn here but import and run ngc directly
     const cp = spawn(ngcCmd, ngcCmdArgs);
+
+    let errorMsgs: string[] = [];
 
     cp.stdout.on('data', (data: string) => {
       Logger.info(data);
     });
 
     cp.stderr.on('data', (data: string) => {
-      Logger.error(`ngc: ${data}`);
-      hadAnError = true;
+      if (data) {
+        data.toString().split('\n').forEach(line => {
+          if (!line.trim().length) {
+            // if it's got no data then don't bother
+            return;
+          }
+          if (line.substr(0, 4) === '    ' || line === 'Compilation failed') {
+            // if it's indented then it's some callstack message we don't care about
+            return;
+          }
+          // split by the : character, then rebuild the line until it's too long
+          // and make a new line
+          const lineSections = line.split(': ');
+          let msgSections: string[] = [];
+          for (var i = 0; i < lineSections.length; i++) {
+            msgSections.push(lineSections[i]);
+            if (msgSections.join(': ').length > 40) {
+              errorMsgs.push(msgSections.join(': '));
+              msgSections = [];
+            }
+          }
+          if (msgSections.length) {
+            errorMsgs.push(msgSections.join(': '));
+          }
+        });
+      }
     });
 
     cp.on('close', (code: string) => {
-      if (hadAnError) {
-        reject(new Error(`NGC encountered an error`));
+      if (errorMsgs.length) {
+        Logger.error(`NGC Compilation failed`);
+
+        errorMsgs.forEach(errorMsg => {
+          Logger.error(errorMsg);
+        });
+
       } else {
         resolve();
       }
