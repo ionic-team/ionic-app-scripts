@@ -4,7 +4,6 @@
 
 import { endsWith, objectAssign } from './util/helpers';
 import { fixExportClass, helpersId, helperImports } from './util/typescript-helpers';
-import { getRootDir } from './util/config';
 import { join } from 'path';
 import { Logger } from './util/logger';
 import { readFileSync, statSync } from 'fs';
@@ -91,9 +90,9 @@ export function resolveId(importee: string, importer: string, compilerOptions: t
 }
 
 
-export function getTsConfig() {
+export function getTsConfig(rootDir: string) {
   let config: TsConfig = null;
-  const tsConfigPath = join(getRootDir(), 'tsconfig.json');
+  const tsConfigPath = join(rootDir, 'tsconfig.json');
 
   try {
     const tsConfigFile = ts.readConfigFile(tsConfigPath, path => readFileSync(path, 'utf8'));
@@ -123,8 +122,8 @@ export function getTsConfig() {
 }
 
 
-export function getCompilerOptions(): ts.CompilerOptions {
-  let config = getTsConfig();
+export function getCompilerOptions(rootDir: string): ts.CompilerOptions {
+  const config = getTsConfig(rootDir);
   if (config && config.compilerOptions) {
     // convert to typescripts actual typed compiler options
     const tsCompilerOptions: ts.CompilerOptions = objectAssign({}, config.compilerOptions);

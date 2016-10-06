@@ -85,7 +85,7 @@ function runNgc(context: BuildContext, options: BuildOptions, ngcConfig: NgcConf
 
 function createTmpTsConfig(context: BuildContext, ngcConfig: NgcConfig) {
   // create the tsconfig from the original src
-  const tsConfig = getTsConfig();
+  const tsConfig = getTsConfig(context.rootDir);
 
   // delete outDir if it's set since we only want
   // to compile to the same directory we're in

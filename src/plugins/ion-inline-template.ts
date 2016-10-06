@@ -2,9 +2,7 @@ import { inlineTemplate } from '../template';
 import * as pluginutils from 'rollup-pluginutils';
 
 
-export default function ionInlineTemplate(options?: IonInlineTemplateOptions) {
-  options = options || {};
-
+export default function ionInlineTemplate(options: IonInlineTemplateOptions) {
   const filter = pluginutils.createFilter(
     options.include || ['*.ts+(|x)', '**/*.ts+(|x)'],
     options.exclude || ['*.d.ts', '**/*.d.ts']);

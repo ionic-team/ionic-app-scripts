@@ -4,19 +4,16 @@
 
 import { helperFns, helpersId } from '../util/typescript-helpers';
 import { getCompilerOptions, resolveId, transpile } from '../transpile';
-import { getUseSourceMapSetting } from '../util/config';
 import * as pluginutils from 'rollup-pluginutils';
 
 
-export default function ionCompiler(options?: IonCompilerOptions) {
-  options = options || {};
-
+export default function ionCompiler(options: IonCompilerOptions) {
   const filter = pluginutils.createFilter(
     options.include || ['*.ts+(|x)', '**/*.ts+(|x)'],
     options.exclude || ['*.d.ts', '**/*.d.ts']);
 
-  const compilerOptions = getCompilerOptions();
-  compilerOptions.sourceMap = getUseSourceMapSetting();
+  const compilerOptions = getCompilerOptions(options.rootDir);
+  compilerOptions.sourceMap = options.sourceMap;
 
   return {
     name: 'ion-compiler',
@@ -41,6 +38,8 @@ export default function ionCompiler(options?: IonCompilerOptions) {
 
 
 export interface IonCompilerOptions {
+  rootDir: string;
+  sourceMap: boolean;
   include?: string[];
   exclude?: string[];
 }

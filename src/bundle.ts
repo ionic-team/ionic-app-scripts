@@ -1,6 +1,6 @@
 import { BuildContext, BuildOptions, TaskInfo } from './util/interfaces';
 import { endsWith } from './util/helpers';
-import { fillConfigDefaults, generateContext, generateBuildOptions, replacePathVars, setSourceMapVar } from './util/config';
+import { fillConfigDefaults, generateContext, generateBuildOptions, replacePathVars } from './util/config';
 import ionCompiler from './plugins/ion-compiler';
 import inlineTemplate from './plugins/ion-inline-template';
 import { join, isAbsolute } from 'path';
@@ -43,8 +43,6 @@ export function bundleUpdate(event: string, path: string, context: BuildContext,
 function runBundle(context: BuildContext, options: BuildOptions, rollupConfig: RollupConfig, useCache: boolean): Promise<any> {
   rollupConfig = fillConfigDefaults(context, rollupConfig, ROLLUP_TASK_INFO);
 
-  setSourceMapVar(rollupConfig.sourceMap);
-
   if (!isAbsolute(rollupConfig.dest)) {
     // user can pass in absolute paths
     // otherwise save it in the build directory
@@ -62,7 +60,13 @@ function runBundle(context: BuildContext, options: BuildOptions, rollupConfig: R
     // dev mode auto-adds the ion-inline-template and
     // ion-compiler plugins, which will inline templates
     // and transpile source typescript code to JS before bundling
-    rollupConfig.plugins.unshift(inlineTemplate(), ionCompiler());
+    rollupConfig.plugins.unshift(
+      inlineTemplate({}),
+      ionCompiler({
+        rootDir: context.rootDir,
+        sourceMap: rollupConfig.sourceMap
+      })
+    );
   }
 
   if (useCache) {
