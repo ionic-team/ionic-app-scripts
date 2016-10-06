@@ -45,7 +45,8 @@ function copySrcToDest(context: BuildContext, src: string, dest: string, filter?
   src = replacePathVars(context, src);
   dest = replacePathVars(context, dest);
   const opts = {
-    filter: filter
+    filter: filter,
+    clobber: false
   };
 
   return new Promise((resolve: any, reject: any) => {
