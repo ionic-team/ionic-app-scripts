@@ -57,11 +57,9 @@ function runBundle(context: BuildContext, options: BuildOptions, rollupConfig: R
     // ngc does full production builds itself and the bundler
     // will already have receive transpiled and AoT templates
 
-    // dev mode auto-adds the ion-inline-template and
-    // ion-compiler plugins, which will inline templates
-    // and transpile source typescript code to JS before bundling
+    // dev mode auto-adds the ion-compiler plugin, which will inline
+    // templates and transpile source typescript code to JS before bundling
     rollupConfig.plugins.unshift(
-      inlineTemplate({}),
       ionCompiler({
         rootDir: context.rootDir,
         sourceMap: rollupConfig.sourceMap

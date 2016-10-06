@@ -2,8 +2,9 @@
 // https://github.com/rollup/rollup-plugin-typescript
 // MIT Licenced
 
-import { helperFns, helpersId } from '../util/typescript-helpers';
 import { getCompilerOptions, resolveId, transpile } from '../transpile';
+import { helperFns, helpersId } from '../util/typescript-helpers';
+import { inlineTemplate } from '../template';
 import * as pluginutils from 'rollup-pluginutils';
 
 
@@ -30,6 +31,7 @@ export default function ionCompiler(options: IonCompilerOptions) {
 
     transform(sourceText: string, sourcePath: string): any {
       if (filter(sourcePath)) {
+        sourceText = inlineTemplate(sourceText, sourcePath);
         return transpile(sourceText, sourcePath, compilerOptions, true);
       }
     }

@@ -80,11 +80,10 @@ function getSourceComponentFile(htmlFilePath: string, context: BuildContext) {
 }
 
 
-export function inlineTemplate(sourceText: string, sourcePath: string): InlineTemplateOutput {
+export function inlineTemplate(sourceText: string, sourcePath: string): string {
   const magicString = new MagicString(sourceText);
   const componentDir = parse(sourcePath).dir;
   let match: TemplateUrlMatch;
-  let hasReplacements = false;
   let replacement: string;
   let lastStart = -1;
 
@@ -92,33 +91,22 @@ export function inlineTemplate(sourceText: string, sourcePath: string): InlineTe
     if (match.start === lastStart) {
       // panic! we don't want to melt any machines if there's a bug
       Logger.debug(`Error matching component: ${match.component}`);
-      return null;
+      return magicString.toString();
     }
     lastStart = match.start;
 
     if (match.templateUrl === '') {
       Logger.error(`Error @Component templateUrl missing in: "${sourcePath}"`);
-      return null;
+      return magicString.toString();
     }
 
     replacement = updateTemplate(componentDir, match);
     if (replacement) {
       magicString.overwrite(match.start, match.end, replacement);
-      hasReplacements = true;
     }
   }
 
-  if (hasReplacements) {
-    return {
-      code: magicString.toString(),
-      map: magicString.generateMap({
-        source: sourcePath,
-        hires: false
-      })
-    };
-  }
-
-  return null;
+  return magicString.toString();
 }
 
 
@@ -133,11 +121,11 @@ function updateTemplate(componentDir: string, match: TemplateUrlMatch): string {
 
 export function replaceTemplateUrl(match: TemplateUrlMatch, templateContent: string): string {
   // turn the template into one line and espcape single quotes
-  // templateContent = templateContent.replace(/\r|\n/g, '\\n');
-  // templateContent = templateContent.replace(/\'/g, '\\\'');
+  templateContent = templateContent.replace(/\r|\n/g, '\\n');
+  templateContent = templateContent.replace(/\'/g, '\\\'');
 
   const orgTemplateProperty = match.templateProperty;
-  const newTemplateProperty = 'template: /* ion-inline-template */ `' + templateContent + '`';
+  const newTemplateProperty = 'template: /* ion-inline-template */ \'' + templateContent + '\'';
 
   return match.component.replace(orgTemplateProperty, newTemplateProperty);
 }
@@ -172,12 +160,6 @@ export function getTemplateMatch(str: string): TemplateUrlMatch {
 
 
 const COMPONENT_REGEX = /@Component\s*?\(\s*?(\{([\s\S]*?)(\s*templateUrl\s*:\s*(['"`])(.*?)(['"`])\s*?)([\s\S]*?)}\s*?)\)/m;
-
-
-export interface InlineTemplateOutput {
-  code: string;
-  map: any;
-}
 
 export interface TemplateUrlMatch {
   start: number;

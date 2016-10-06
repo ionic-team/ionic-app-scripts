@@ -13,7 +13,7 @@ describe('template', () => {
       const sourcePath = 'somefile.ts';
       const output = inlineTemplate(sourceText, sourcePath);
 
-      expect(output).toEqual(null);
+      expect(output).toEqual(sourceText);
     });
 
     it('should do nothing for files with incomplete @Component', () => {
@@ -23,7 +23,7 @@ describe('template', () => {
       const sourcePath = 'somefile.ts';
       const output = inlineTemplate(sourceText, sourcePath);
 
-      expect(output).toEqual(null);
+      expect(output).toEqual(sourceText);
     });
 
     it('should do nothing for files without @Component', () => {
@@ -33,7 +33,7 @@ describe('template', () => {
       const sourcePath = 'somefile.ts';
       const output = inlineTemplate(sourceText, sourcePath);
 
-      expect(output).toEqual(null);
+      expect(output).toEqual(sourceText);
     });
 
     describe('replaceTemplateUrl', () => {
@@ -41,23 +41,18 @@ describe('template', () => {
       it('should turn the template into one line', () => {
         const str = `
           @Component({
-            templateUrl: "somepage.html"
-          })
-        `;
+            templateUrl: "somepage.html"})`;
         const templateContent = `
-          <div>
-            this is multiline content
-          </div>
+          <div>\t
+            this is "multiline" 'content'
+          </div>\r
         `;
         const match = getTemplateMatch(str);
         const result = replaceTemplateUrl(match, templateContent);
 
-        expect(result).toEqual(`@Component({template: /* ion-inline-template */ \`
-          <div>
-            this is multiline content
-          </div>
-        \`
-          })`);
+        const expected = `@Component({template: /* ion-inline-template */ '\\n          <div>\t\\n            this is "multiline" \\'content\\'\\n          </div>\\n\\n        '})`;
+
+        expect(result).toEqual(expected);
       });
 
     });
