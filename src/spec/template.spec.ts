@@ -6,9 +6,9 @@ describe('template', () => {
 
   describe('inlineTemplate', () => {
 
-    it('should do nothing for files with incomplete @Component', () => {
+    it('should do nothing for files with incomplete Component', () => {
       const sourceText = `
-        // @Component this be bork
+        // Component this be bork
       `;
       const sourcePath = 'somefile.ts';
       const output = inlineTemplate(sourceText, sourcePath);
@@ -16,9 +16,9 @@ describe('template', () => {
       expect(output).toEqual(sourceText);
     });
 
-    it('should do nothing for files with incomplete @Component', () => {
+    it('should do nothing for files with incomplete Component', () => {
       const sourceText = `
-        // @Component this be bork
+        // Component this be bork
       `;
       const sourcePath = 'somefile.ts';
       const output = inlineTemplate(sourceText, sourcePath);
@@ -26,7 +26,7 @@ describe('template', () => {
       expect(output).toEqual(sourceText);
     });
 
-    it('should do nothing for files without @Component', () => {
+    it('should do nothing for files without Component', () => {
       const sourceText = `
         console.log('yeah nothing');
       `;
@@ -40,7 +40,7 @@ describe('template', () => {
 
       it('should turn the template into one line', () => {
         const str = `
-          @Component({
+          Component({
             templateUrl: "somepage.html"})`;
         const templateContent = `
           <div>\t
@@ -50,7 +50,7 @@ describe('template', () => {
         const match = getTemplateMatch(str);
         const result = replaceTemplateUrl(match, templateContent);
 
-        const expected = `@Component({template: /* ion-inline-template */ '\\n          <div>\t\\n            this is "multiline" \\'content\\'\\n          </div>\\n\\n        '})`;
+        const expected = `Component({template: /* ion-inline-template */ '\\n          <div>\t\\n            this is "multiline" \\'content\\'\\n          </div>\\n\\n        '})`;
 
         expect(result).toEqual(expected);
       });
@@ -59,9 +59,9 @@ describe('template', () => {
 
     describe('COMPONENT_REGEX match', () => {
 
-      it('should get @Component with template url and selector above', () => {
+      it('should get Component with template url and selector above', () => {
         const str = `
-          @Component({
+          Component({
             selector: 'page-home',
             templateUrl: 'home.html'
           })
@@ -71,9 +71,9 @@ describe('template', () => {
         expect(match.templateUrl).toEqual('home.html');
       });
 
-      it('should get @Component with template url and selector below', () => {
+      it('should get Component with template url and selector below', () => {
         const str = `
-          @Component({
+          Component({
             templateUrl: 'home.html',
             selector: 'page-home
           })
@@ -83,9 +83,9 @@ describe('template', () => {
         expect(match.templateUrl).toEqual('home.html');
       });
 
-      it('should get @Component with template url, spaces, tabs and new lines', () => {
+      it('should get Component with template url, spaces, tabs and new lines', () => {
         const str = `\t\n\r
-          @Component(
+          Component(
             {
 
               templateUrl :
@@ -99,58 +99,58 @@ describe('template', () => {
         expect(match.templateUrl).toEqual('c:\\some\windows\path.ts');
       });
 
-      it('should get @Component with template url and spaces', () => {
-        const str = '  @Component  (  {  templateUrl  :  `  hi  `  }  )  ';
+      it('should get Component with template url and spaces', () => {
+        const str = '  Component  (  {  templateUrl  :  `  hi  `  }  )  ';
         const match = getTemplateMatch(str);
-        expect(match.component).toEqual('@Component  (  {  templateUrl  :  `  hi  `  }  )');
+        expect(match.component).toEqual('Component  (  {  templateUrl  :  `  hi  `  }  )');
         expect(match.templateProperty).toEqual('  templateUrl  :  `  hi  `');
         expect(match.templateUrl).toEqual('hi');
       });
 
-      it('should get @Component with template url and back-ticks', () => {
-        const str = '@Component({templateUrl:`hi`})';
+      it('should get Component with template url and back-ticks', () => {
+        const str = 'Component({templateUrl:`hi`})';
         const match = getTemplateMatch(str);
-        expect(match.component).toEqual('@Component({templateUrl:`hi`})');
+        expect(match.component).toEqual('Component({templateUrl:`hi`})');
         expect(match.templateProperty).toEqual('templateUrl:`hi`');
         expect(match.templateUrl).toEqual('hi');
       });
 
-      it('should get @Component with template url and double quotes', () => {
-        const str = '@Component({templateUrl:"hi"})';
+      it('should get Component with template url and double quotes', () => {
+        const str = 'Component({templateUrl:"hi"})';
         const match = getTemplateMatch(str);
-        expect(match.component).toEqual('@Component({templateUrl:"hi"})');
+        expect(match.component).toEqual('Component({templateUrl:"hi"})');
         expect(match.templateProperty).toEqual('templateUrl:"hi"');
         expect(match.templateUrl).toEqual('hi');
       });
 
-      it('should get @Component with template url and single quotes', () => {
-        const str = '@Component({templateUrl:\'hi\'})';
+      it('should get Component with template url and single quotes', () => {
+        const str = 'Component({templateUrl:\'hi\'})';
         const match = getTemplateMatch(str);
-        expect(match.component).toEqual('@Component({templateUrl:\'hi\'})');
+        expect(match.component).toEqual('Component({templateUrl:\'hi\'})');
         expect(match.templateProperty).toEqual('templateUrl:\'hi\'');
         expect(match.templateUrl).toEqual('hi');
       });
 
-      it('should get null for @Component without string for templateUrl', () => {
-        const str = '@Component({templateUrl:someVar})';
+      it('should get null for Component without string for templateUrl', () => {
+        const str = 'Component({templateUrl:someVar})';
         const match = getTemplateMatch(str);
         expect(match).toEqual(null);
       });
 
-      it('should get null for @Component without templateUrl', () => {
-        const str = '@Component({template:"hi"})';
+      it('should get null for Component without templateUrl', () => {
+        const str = 'Component({template:"hi"})';
         const match = getTemplateMatch(str);
         expect(match).toEqual(null);
       });
 
-      it('should get null for @Component without brackets', () => {
-        const str = '@Component()';
+      it('should get null for Component without brackets', () => {
+        const str = 'Component()';
         const match = getTemplateMatch(str);
         expect(match).toEqual(null);
       });
 
-      it('should get null for @Component without parentheses', () => {
-        const str = '@Component';
+      it('should get null for Component without parentheses', () => {
+        const str = 'Component';
         const match = getTemplateMatch(str);
         expect(match).toEqual(null);
       });
@@ -161,7 +161,7 @@ describe('template', () => {
         expect(match).toEqual(null);
       });
 
-      it('should get null for no @Component', () => {
+      it('should get null for no Component', () => {
         const str = 'whatever';
         const match = getTemplateMatch(str);
         expect(match).toEqual(null);

@@ -159,7 +159,7 @@ export function getTemplateMatch(str: string): TemplateUrlMatch {
 }
 
 
-const COMPONENT_REGEX = /@Component\s*?\(\s*?(\{([\s\S]*?)(\s*templateUrl\s*:\s*(['"`])(.*?)(['"`])\s*?)([\s\S]*?)}\s*?)\)/m;
+const COMPONENT_REGEX = /Component\s*?\(\s*?(\{([\s\S]*?)(\s*templateUrl\s*:\s*(['"`])(.*?)(['"`])\s*?)([\s\S]*?)}\s*?)\)/m;
 
 export interface TemplateUrlMatch {
   start: number;
