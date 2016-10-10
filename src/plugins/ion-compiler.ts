@@ -1,47 +1,61 @@
-// Ported from 'rollup-plugin-typescript':
-// https://github.com/rollup/rollup-plugin-typescript
-// MIT Licenced
-
-import { getCompilerOptions, resolveId, transpile } from '../transpile';
-import { helperFns, helpersId } from '../util/typescript-helpers';
-import { inlineTemplate } from '../template';
+import { BuildContext, BuildOptions } from '../util/interfaces';
 import * as pluginutils from 'rollup-pluginutils';
+import { dirname, join } from 'path';
 
 
-export default function ionCompiler(options: IonCompilerOptions) {
-  const filter = pluginutils.createFilter(
-    options.include || ['*.ts+(|x)', '**/*.ts+(|x)'],
-    options.exclude || ['*.d.ts', '**/*.d.ts']);
-
-  const compilerOptions = getCompilerOptions(options.rootDir);
-  compilerOptions.sourceMap = options.sourceMap;
+export default function ionCompiler(context: BuildContext, options: BuildOptions) {
+  const filter = pluginutils.createFilter(INCLUDE, EXCLUDE);
 
   return {
     name: 'ion-compiler',
 
-    resolveId(importee: string, importer: string) {
-      return resolveId(importee, importer, compilerOptions);
-    },
-
-    load(id: string) {
-      if (id === helpersId) {
-        return helperFns;
-      }
-    },
-
     transform(sourceText: string, sourcePath: string): any {
-      if (filter(sourcePath)) {
-        sourceText = inlineTemplate(sourceText, sourcePath);
-        return transpile(sourceText, sourcePath, compilerOptions, true);
+      if (!filter(sourcePath)) {
+        return null;
       }
+
+      const file = context.files[sourcePath];
+      if (!file || !file.output) {
+        console.error(`unable to find ${sourcePath}`);
+        return null;
+      }
+
+      return {
+        code: file.output,
+        map: file.map
+      };
+    },
+
+    resolveId(importee: string, importer: string): any {
+      if (!importer || /\0/.test(importee)) {
+        // disregard entry module
+        // ignore IDs with null character, these belong to other plugins
+        return null;
+      }
+
+      const importerFile = context.files[importer];
+      if (importerFile && importerFile.output) {
+        const attemptedImportee = join(dirname(importer), importee) + '.ts';
+        const importeeFile = context.files[attemptedImportee];
+        if (importeeFile) {
+          return attemptedImportee;
+        }
+      }
+
+      return null;
+    },
+
+    load(sourcePath: string) {
+      const file = context.files[sourcePath];
+      if (file && file.input) {
+        return file.input;
+      }
+
+      return null;
     }
   };
 }
 
 
-export interface IonCompilerOptions {
-  rootDir: string;
-  sourceMap: boolean;
-  include?: string[];
-  exclude?: string[];
-}
+const INCLUDE = ['*.ts+(|x)', '**/*.ts+(|x)'];
+const EXCLUDE = ['*.d.ts', '**/*.d.ts'];

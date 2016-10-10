@@ -1,8 +1,10 @@
 import { build } from './build';
 import { BuildContext, BuildOptions, TaskInfo } from './util/interfaces';
 import { fillConfigDefaults, generateBuildOptions, generateContext, replacePathVars, setIonicEnvironment } from './util/config';
-import { Logger } from './util/logger';
+import { BuildError, Logger } from './util/logger';
+import * as chalk from 'chalk';
 import * as chokidar from 'chokidar';
+
 
 // https://github.com/paulmillr/chokidar
 
@@ -17,14 +19,17 @@ export function watch(context?: BuildContext, options?: BuildOptions, watchConfi
 
   const logger = new Logger('watch');
 
-  return build(context, options).then(() => {
+  function buildDone() {
     return startWatchers(context, options, watchConfig).then(() => {
-      return logger.ready();
+      return logger.ready(chalk.green);
     });
+  }
 
-  }).catch((err: Error) => {
-    return logger.fail(err);
-  });
+  return build(context, options)
+    .then(buildDone, buildDone)
+    .catch(err => {
+      throw logger.fail(err);
+    });
 }
 
 
@@ -64,6 +69,9 @@ function startWatcher(watcher: Watcher, context: BuildContext, options: BuildOpt
       taskPromise.then(() => {
         Logger.debug(`watch callback complete, id: ${watchCount}, isProd: ${options.isProd}, event: ${event}, path: ${path}`);
         taskPromise = nextTask();
+        taskPromise.catch(taskPromiseErr => {
+          Logger.error(`${taskPromiseErr}`);
+        });
         nextTask = null;
         watchCount++;
 
@@ -71,6 +79,9 @@ function startWatcher(watcher: Watcher, context: BuildContext, options: BuildOpt
         Logger.debug(`watch callback error, id: ${watchCount}, isProd: ${options.isProd}, event: ${event}, path: ${path}`);
         Logger.debug(`${err}`);
         taskPromise = nextTask();
+        taskPromise.catch(taskPromiseErr => {
+          Logger.error(`${taskPromiseErr}`);
+        });
         nextTask = null;
         watchCount++;
       });
@@ -82,8 +93,7 @@ function startWatcher(watcher: Watcher, context: BuildContext, options: BuildOpt
     });
 
     chokidarWatcher.on('error', (err: any) => {
-      Logger.error(`watcher error: ${watcherOptions.cwd}${paths}: ${err}`);
-      reject();
+      reject(new BuildError(`watcher error: ${watcherOptions.cwd}${paths}: ${err}`));
     });
   });
 }

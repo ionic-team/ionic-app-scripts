@@ -1,4 +1,5 @@
 import { readFile, writeFile } from 'fs';
+import { BuildError } from './logger';
 
 
 export const objectAssign = (Object.assign) ? Object.assign : function (target: any, source: any) {
@@ -28,10 +29,10 @@ export function endsWith(str: string, tail: string) {
 
 
 export function writeFileAsync(filePath: string, content: string): Promise<any> {
-  return new Promise( (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     writeFile(filePath, content, (err) => {
       if (err) {
-        reject(err);
+        reject(new BuildError(err));
       } else {
         resolve();
       }
@@ -41,12 +42,12 @@ export function writeFileAsync(filePath: string, content: string): Promise<any> 
 
 
 export function readFileAsync(filePath: string): Promise<string> {
-  return new Promise( (resolve, reject) => {
-    readFile(filePath, (err, buffer) => {
+  return new Promise((resolve, reject) => {
+    readFile(filePath, 'utf-8', (err, buffer) => {
       if (err) {
-        reject(err);
+        reject(new BuildError(err));
       } else {
-        resolve(buffer.toString());
+        resolve(buffer);
       }
     });
   });

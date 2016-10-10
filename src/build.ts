@@ -2,12 +2,13 @@ import { BuildContext, BuildOptions } from './util/interfaces';
 import { generateContext, generateBuildOptions } from './util/config';
 import { bundle, bundleUpdate } from './bundle';
 import { clean } from './clean';
-import { minifyJs, minifyCss } from './minify';
 import { copy } from './copy';
 import { lint } from './lint';
 import { Logger } from './util/logger';
+import { minifyCss, minifyJs } from './minify';
 import { ngc } from './ngc';
 import { sass, sassUpdate } from './sass';
+import * as chalk from 'chalk';
 
 
 export function build(context: BuildContext, options: BuildOptions) {
@@ -16,25 +17,24 @@ export function build(context: BuildContext, options: BuildOptions) {
 
   const logger = new Logger(`build ${(options.isProd ? 'prod' : 'dev')}`);
 
-  const promises: Promise<any>[] = [];
-
-  if (options.isProd) {
-    // production build
-    promises.push(buildProd(context, options));
-
-  } else {
-    // dev build
-    promises.push(buildDev(context, options));
-  }
-
-  return Promise.all(promises).then(() => {
+  return runBuild(context, options).then(() => {
     // congrats, we did it!  (•_•) / ( •_•)>⌐■-■ / (⌐■_■)
     return logger.finish();
 
-  }).catch((err: Error) => {
-    logger.fail(err);
-    return Promise.reject(err);
+  }).catch(err => {
+    throw logger.fail(err);
   });
+}
+
+
+function runBuild(context: BuildContext, options: BuildOptions) {
+  if (options.isProd) {
+    // production build
+    return buildProd(context, options);
+  }
+
+  // dev build
+  return buildDev(context, options);
 }
 
 
@@ -80,26 +80,35 @@ function buildDev(context: BuildContext, options: BuildOptions) {
   // sync empty the www directory
   clean(context);
 
-  // async tasks
-  // these can happen all while other tasks are running
-  const copyPromise = copy(context);
-  const lintPromise = lint(context);
-
-  return bundle(context, options).then(() => {
-    return sass(context);
-
-  }).then(() => {
-    // ensure the async tasks have fully completed before resolving
-    return Promise.all([
-      copyPromise,
-      lintPromise
-    ]);
-  });
+  // just bundle, and if that passes then do the rest at the same time
+  return bundle(context, options)
+    .then(() => {
+      return Promise.all([
+        sass(context),
+        copy(context),
+        lint(context)
+      ]);
+    });
 }
 
 
 export function buildUpdate(event: string, path: string, context: BuildContext, options: BuildOptions) {
-  return bundleUpdate(event, path, context, options, true).then(() => {
-    return sassUpdate(event, path, context, options, true);
-  });
+  function buildSuccess() {
+    if (event !== 'change') {
+      // if just the TS file changed, then there's no need to do a sass update
+      // however, if a new TS file was added or was deleted, then we should do a sass update
+      return sassUpdate(event, path, context, options, true);
+    }
+    Logger.info(chalk.green('watch ready'));
+    return Promise.resolve();
+  }
+
+  function buildFail() {
+    Logger.info(chalk.green('watch ready'));
+    return Promise.resolve();
+  }
+
+  return bundleUpdate(event, path, context, options, true)
+    .then(buildSuccess, buildFail)
+    .catch(buildFail);
 }

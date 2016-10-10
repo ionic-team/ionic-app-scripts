@@ -1,7 +1,7 @@
 import { BuildContext, TaskInfo } from './util/interfaces';
 import { fillConfigDefaults, generateContext } from './util/config';
 import { join } from 'path';
-import { Logger } from './util/logger';
+import { BuildError, Logger } from './util/logger';
 import { writeFileAsync } from './util/helpers';
 import * as uglify from 'uglify-js';
 
@@ -15,33 +15,36 @@ export function uglifyjs(context?: BuildContext, uglifyJsConfig?: UglifyJsConfig
   return runUglify(context, uglifyJsConfig).then(() => {
     return logger.finish();
 
-  }).catch((err: Error) => {
-    logger.fail(err);
-    return Promise.reject(err);
+  }).catch(err => {
+    throw logger.fail(err);
   });
 }
 
 
 function runUglify(context: BuildContext, uglifyJsConfig: UglifyJsConfig): Promise<any> {
-  try {
-    // provide a full path for the config options
-    uglifyJsConfig.sourceFile = join(context.buildDir, uglifyJsConfig.sourceFile);
-    uglifyJsConfig.inSourceMap = join(context.buildDir, uglifyJsConfig.inSourceMap);
-    uglifyJsConfig.destFileName = join(context.buildDir, uglifyJsConfig.destFileName);
+  return new Promise((resolve, reject) => {
+    try {
+      // provide a full path for the config options
+      uglifyJsConfig.sourceFile = join(context.buildDir, uglifyJsConfig.sourceFile);
+      uglifyJsConfig.inSourceMap = join(context.buildDir, uglifyJsConfig.inSourceMap);
+      uglifyJsConfig.destFileName = join(context.buildDir, uglifyJsConfig.destFileName);
 
-    const minifiedOutputPath = join(context.buildDir, uglifyJsConfig.outSourceMap);
-    const minifyOutput: uglify.MinifyOutput = runUglifyInternal(uglifyJsConfig);
+      const minifiedOutputPath = join(context.buildDir, uglifyJsConfig.outSourceMap);
+      const minifyOutput: uglify.MinifyOutput = runUglifyInternal(uglifyJsConfig);
 
-    const writeFilePromises: Promise<any>[] = [
-      writeFileAsync(uglifyJsConfig.destFileName, minifyOutput.code),
-      writeFileAsync(minifiedOutputPath, minifyOutput.map)
-    ];
+      const writeFilePromises: Promise<any>[] = [
+        writeFileAsync(uglifyJsConfig.destFileName, minifyOutput.code),
+        writeFileAsync(minifiedOutputPath, minifyOutput.map)
+      ];
 
-    return Promise.all(writeFilePromises);
+      return Promise.all(writeFilePromises).then(() => {
+        resolve();
+      });
 
-  } catch (ex) {
-    return Promise.reject(ex);
-  }
+    } catch (e) {
+      reject(new BuildError(e));
+    }
+  });
 }
 
 

@@ -6,6 +6,9 @@ export interface BuildContext {
   wwwDir?: string;
   buildDir?: string;
   moduleFiles?: string[];
+  files?: {[key: string]: TsFile};
+  cachedTypeScript?: any;
+  cachedBundle?: any;
 }
 
 
@@ -20,4 +23,11 @@ export interface TaskInfo {
   shortArgConfig: string;
   envConfig: string;
   defaultConfigFilename: string;
+}
+
+
+export interface TsFile {
+  input?: string;
+  output?: string;
+  map?: any;
 }

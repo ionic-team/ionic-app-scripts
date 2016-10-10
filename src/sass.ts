@@ -3,7 +3,7 @@ import { BuildContext, BuildOptions, TaskInfo } from './util/interfaces';
 import { ensureDirSync, readdirSync, writeFile } from 'fs-extra';
 import { fillConfigDefaults, generateContext, generateBuildOptions, replacePathVars } from './util/config';
 import { getModulePathsCache } from './bundle';
-import { Logger } from './util/logger';
+import { BuildError, Logger } from './util/logger';
 import * as nodeSass from 'node-sass';
 import * as postcss from 'postcss';
 import * as autoprefixer from 'autoprefixer';
@@ -16,14 +16,24 @@ export function sass(context?: BuildContext, options?: BuildOptions, sassConfig?
 
   const logger = new Logger('sass');
 
+  // let's begin shall we...
+  return runSass(context, options, sassConfig, useCache).then(() => {
+    return logger.finish();
+
+  }).catch(err => {
+    throw logger.fail(err);
+  });
+}
+
+
+function runSass(context: BuildContext, options: BuildOptions, sassConfig: SassConfig, useCache: boolean) {
   if (!context.moduleFiles) {
     // we haven't already gotten the moduleFiles in this process
     // see if we have it cached
     context.moduleFiles = getModulePathsCache();
     if (!context.moduleFiles) {
-      logger.fail(null, 'Cannot generate Sass files without first bundling JavaScript ' +
-                  'files in order to know all used modules. Please build JS files first.');
-      return Promise.reject(new Error('Missing module paths for sass build'));
+      return Promise.reject(new BuildError('Cannot generate Sass files without first bundling JavaScript ' +
+                  'files in order to know all used modules. Please build JS files first.'));
     }
   }
 
@@ -49,14 +59,7 @@ export function sass(context?: BuildContext, options?: BuildOptions, sassConfig?
     generateSassData(context, options, sassConfig);
   }
 
-  // let's begin shall we...
-  return render(sassConfig, useCache).then(() => {
-    return logger.finish();
-
-  }).catch((err: Error) => {
-    logger.fail(err, null, false);
-    return Promise.reject(err);
-  });
+  return render(context, sassConfig, useCache);
 }
 
 
@@ -200,7 +203,7 @@ function getComponentDirectories(moduleDirectories: string[], sassConfig: SassCo
 }
 
 
-function render(sassConfig: SassConfig, useCache: boolean) {
+function render(context: BuildContext, sassConfig: SassConfig, useCache: boolean) {
   return new Promise((resolve, reject) => {
 
     if (useCache && lastRenderKey !== null) {
@@ -222,23 +225,33 @@ function render(sassConfig: SassConfig, useCache: boolean) {
     nodeSass.render(sassConfig, (renderErr: any, sassResult: SassResult) => {
       if (renderErr) {
         // sass render error!
-        if (renderErr.line) {
-          Logger.error(`Sass Error: line: ${renderErr.line}, column: ${renderErr.column}\n${renderErr.message}`);
+        if (renderErr.file) {
+          let sassFile: string = renderErr.file;
+          sassFile = sassFile.replace(context.rootDir, '');
+          if (/\/|\\/.test(sassFile.charAt(0))) {
+            sassFile = sassFile.substr(1);
+          }
+          if (sassFile.length > 80) {
+            sassFile = '...' + sassFile.substr(sassFile.length - 80);
+          }
+          Logger.error(`sass: ${sassFile}, line: ${renderErr.line}`);
+          Logger.log(renderErr.message);
+          console.log(''); // just for a new line
+
         } else {
-          Logger.error(`Sass Error: ${renderErr}`);
+          Logger.error(`sass error: ${renderErr}`);
         }
 
-        reject(new Error('Sass compile error'));
+        reject(new BuildError());
 
       } else {
         // sass render success!
         renderSassSuccess(sassResult, sassConfig).then(() => {
           lastRenderKey = getRenderCacheKey(sassConfig);
-
           resolve();
 
-        }).catch(reason => {
-          reject(reason);
+        }).catch(err => {
+          reject(new BuildError(err));
         });
       }
     });
@@ -344,7 +357,7 @@ function writeOutput(sassConfig: SassConfig, cssOutput: string, mappingsOutput: 
 
     writeFile(sassConfig.outFile, cssOutput, (cssWriteErr: any) => {
       if (cssWriteErr) {
-        reject(new Error(`Error writing css file, ${sassConfig.outFile}: ${cssWriteErr}`));
+        reject(new BuildError(`Error writing css file, ${sassConfig.outFile}: ${cssWriteErr}`));
 
       } else {
         Logger.debug(`sass saved output: ${sassConfig.outFile}`);

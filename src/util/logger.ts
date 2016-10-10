@@ -1,6 +1,30 @@
 import { join } from 'path';
 import { isDebugMode } from './config';
 import { readJSONSync } from 'fs-extra';
+import * as chalk from 'chalk';
+
+
+export class BuildError extends Error {
+  hasBeenLogged = false;
+
+  constructor(err?: any) {
+    super();
+    if (err) {
+      if (err.message) {
+        this.message = err.message;
+      } else if (err) {
+        this.message = err;
+      }
+      if (err.stack) {
+        this.stack = err.stack;
+      }
+      if (err.name) {
+        this.name = err.name;
+      }
+    }
+  }
+
+}
 
 
 export class Logger {
@@ -10,23 +34,27 @@ export class Logger {
   constructor(scope: string) {
     if (!printedAppScriptsVersion) {
       printedAppScriptsVersion = true;
-      Logger.info(`ionic-app-scripts ${getAppScriptsVersion()}`);
+      Logger.info(chalk.cyan(`ionic-app-scripts ${getAppScriptsVersion()}`));
     }
 
     this.start = Date.now();
     this.scope = scope;
-    Logger.info(`${scope} started ...`);
+    let msg = `${scope} started ${chalk.dim('...')}`;
+    if (isDebugMode()) {
+      msg += memoryUsage();
+    }
+    Logger.info(msg);
   }
 
-  ready() {
-    return this.completed('ready');
+  ready(chalkColor?: Function) {
+    return this.completed('ready', chalkColor);
   }
 
-  finish() {
-    return this.completed('finished');
+  finish(chalkColor?: Function) {
+    return this.completed('finished', chalkColor);
   }
 
-  private completed(msg: string) {
+  private completed(msg: string, chalkColor: Function) {
     let duration = Date.now() - this.start;
     let time: string;
 
@@ -42,69 +70,100 @@ export class Logger {
       }
     }
 
-    Logger.info(`${this.scope} ${msg} ${time}`);
+    msg = `${this.scope} ${msg}`;
+    if (chalkColor) {
+      msg = chalkColor(msg);
+    }
+
+    msg += ' ' + chalk.dim(time);
+
+    if (isDebugMode()) {
+      msg += memoryUsage();
+    }
+
+    Logger.info(msg);
     return true;
   }
 
-  fail(err: Error, msg: string = null, printExceptionStack = true) {
-    let printMessage = true;
-    if (err && (err as any).hasBeenHandled === true) {
-      // the exception has been handled, so don't print the message
-      printMessage = false;
-    }
-
-    if (printMessage) {
-      if (msg) {
-        Logger.error(`${this.scope} failed:  ${msg}`);
-      }
-
-      if (err) {
-        if (err.message) {
-          Logger.error(`${this.scope} failed:  ${err.message}`);
-        }
-        if (typeof err === 'string') {
-          Logger.error(err);
-        }
-        if (printExceptionStack && err.stack) {
-          Logger.error(err.stack);
-        }
-      }
-    }
-
+  fail(err: BuildError) {
     if (err) {
-      (err as any).hasBeenHandled = true;
+      if (err instanceof BuildError) {
+        let failedMsg = `${this.scope} failed`;
+        if (err.message) {
+          failedMsg += `: ${err.message}`;
+        }
+
+        if (!err.hasBeenLogged) {
+          Logger.error(`${failedMsg}`);
+
+          err.hasBeenLogged = true;
+
+          if (err.stack && isDebugMode()) {
+            Logger.debug(err.stack);
+          }
+
+        } else if (isDebugMode()) {
+          Logger.debug(`${failedMsg}`);
+        }
+        return err;
+      }
     }
 
-    return false;
+    return err;
   }
 
-  static info(...msg: string[]) {
-    print('info', msg.join(' '));
+  /**
+   * Does not print out a time prefix or color any text. Only prefix
+   * with whitespace so the message is lined up with timestamped logs.
+   */
+  static log(...msg: any[]) {
+    console.log(`            ${msg.join(' ')}`);
   }
 
-  static warn(...msg: string[]) {
-    print('warn', msg.join(' '));
+  /**
+   * Prints out a dim colored timestamp prefix.
+   */
+  static info(...msg: any[]) {
+    console.log(`${chalk.dim(timePrefix())}  ${msg.join(' ')}`);
   }
 
-  static error(...msg: string[]) {
-    print('error', msg.join(' '));
+  /**
+   * Prints out a yellow colored timestamp prefix.
+   */
+  static warn(...msg: any[]) {
+    console.warn(chalk.yellow(`${timePrefix()}  ${msg.join(' ')}`));
   }
 
-  static debug(...msg: string[]) {
+  /**
+   * Prints out a error colored timestamp prefix.
+   */
+  static error(...msg: any[]) {
+    let errMsg = chalk.red(`${timePrefix()}  ${msg.join(' ')}`);
     if (isDebugMode()) {
-      msg.push(`- Memory: ${(process.memoryUsage().rss / 1000000).toFixed(2)}MB`);
-      print('log', msg.join(' '), ' DEBUG! ');
+      errMsg += memoryUsage();
+    }
+    console.error(errMsg);
+  }
+
+  /**
+   * Prints out a blue colored DEBUG prefix. Only prints out when debug mode.
+   */
+  static debug(...msg: any[]) {
+    if (isDebugMode()) {
+      msg.push(memoryUsage());
+      console.log(`${chalk.cyan('[ DEBUG! ]')}  ${msg.join(' ')}`);
     }
   }
 
 }
 
-function print(type: string, msg: string, prefix?: string) {
+function timePrefix() {
   const date = new Date();
-  if (!prefix) {
-    prefix = ('0' + date.getHours()).slice(-2) + ':' + ('0' + date.getMinutes()).slice(-2) + ':' + ('0' + date.getSeconds()).slice(-2);
-  }
-  (<any>console)[type](`[${prefix}]  ${msg}`);
+  return '[' + ('0' + date.getHours()).slice(-2) + ':' + ('0' + date.getMinutes()).slice(-2) + ':' + ('0' + date.getSeconds()).slice(-2) + ']';
+}
+
+function memoryUsage() {
+  return chalk.dim(` MEM: ${(process.memoryUsage().rss / 1000000).toFixed(1)}MB`);
 }
 
 let printedAppScriptsVersion = false;

@@ -1,197 +1,149 @@
-// Ported from 'rollup-plugin-typescript':
-// https://github.com/rollup/rollup-plugin-typescript
-// MIT Licenced
-
-import { endsWith, objectAssign } from './util/helpers';
-import { fixExportClass, helpersId, helperImports } from './util/typescript-helpers';
+import { BuildContext, BuildOptions } from './util/interfaces';
+import { endsWith } from './util/helpers';
+import { generateContext, generateBuildOptions } from './util/config';
+import { runDiagnostics, printDiagnostic } from './util/ts-diagnostics';
+import { inlineTemplate } from './template';
 import { join } from 'path';
-import { Logger } from './util/logger';
-import { readFileSync, statSync } from 'fs';
+import { BuildError, Logger } from './util/logger';
+import { readFileSync } from 'fs';
 import * as ts from 'typescript';
 
 
-export function transpile(sourceText: string, sourcePath: string, compilerOptions: ts.CompilerOptions, reportDiagnostics: boolean): TransformedOutput {
-  Logger.debug(`transpile: ${sourcePath}`);
+export function transpile(context: BuildContext, options: BuildOptions, sourceMap: boolean = true): Promise<any> {
+  context = generateContext(context);
+  options = generateBuildOptions(options);
 
-  if (sourceText.indexOf(ION_COMPILER_COMMENT) > -1) {
-    Logger.debug(`file already transpiled: ${sourcePath}`);
-    return null;
-  }
+  const logger = new Logger(`transpile`);
 
-  const transformed = ts.transpileModule(
-    fixExportClass(sourceText, sourcePath),
-    {
-      fileName: sourcePath,
-      reportDiagnostics: reportDiagnostics,
-      compilerOptions
-    }
-  );
+  return runTranspile(context, options, sourceMap)
+    .then(() => {
+      return logger.finish();
 
-  // All errors except `Cannot compile modules into 'es6' when targeting 'ES5' or lower.`
-  const diagnostics = transformed.diagnostics ? transformed.diagnostics.filter(diagnostic => diagnostic.code !== 1204) : [];
+    }).catch(err => {
+      throw logger.fail(err);
+    });
+}
 
-  let fatalError = false;
 
-  diagnostics.forEach(diagnostic => {
-    const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
+function runTranspile(context: BuildContext, options: BuildOptions, sourceMap: boolean) {
+  return new Promise((resolve, reject) => {
+    const tsConfig = getTsConfig(context);
 
-    if (diagnostic.file) {
-      const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
-      Logger.error(`${diagnostic.file.fileName}(${line + 1},${character + 1}): error TS${diagnostic.code}: ${message}` );
+    // force it to save in the src directory
+    // however, it's only in memory and won't actually write to disk
+    tsConfig.options.outDir = context.srcDir;
+    tsConfig.options.sourceMap = sourceMap;
+    tsConfig.options.declaration = false;
+    const tsFileNames = cleanFileNames(context, tsConfig.fileNames);
+
+    context.files = {};
+    const host = ts.createCompilerHost(tsConfig.options);
+
+    Logger.debug(`ts.createProgram, cachedTypeScript: ${context.cachedTypeScript}`);
+
+    const program = ts.createProgram(tsFileNames, tsConfig.options, host, context.cachedTypeScript);
+    program.emit(undefined, (path: string, data: string) => {
+      writeCallback(context, path, data);
+    });
+
+    const hasDiagnostics = runDiagnostics(context, program);
+
+    if (hasDiagnostics) {
+      // transpile failed :(
+      reject(new BuildError());
 
     } else {
-      Logger.error(`Error: ${message}` );
-    }
+      // transpile success :)
+      // cache the typescript program for later use
+      context.cachedTypeScript = program;
 
-    if (diagnostic.category === ts.DiagnosticCategory.Error) {
-      fatalError = true;
+      resolve();
     }
   });
-
-  if (fatalError) {
-    throw new Error(`There were TypeScript errors transpiling`);
-  }
-
-  return {
-    // always append an import for the helpers
-    code: ION_COMPILER_COMMENT + '\n' +
-          transformed.outputText + '\n' +
-          helperImports,
-
-    // rollup expects `map` to be an object so we must parse the string
-    map: transformed.sourceMapText ? JSON.parse(transformed.sourceMapText) : null
-  };
 }
 
 
-export function resolveId(importee: string, importer: string, compilerOptions: ts.CompilerOptions) {
-  // Handle the special `typescript-helpers` import itself.
-  if (importee === helpersId) {
-    return helpersId;
+function cleanFileNames(options: BuildOptions, fileNames: string[]) {
+  let removeFileName = 'main.prod.ts';
+  if (options.isProd) {
+    removeFileName = 'main.dev.ts';
   }
+  return fileNames.filter(f => {
+    return (f.indexOf(removeFileName) === -1);
+  });
+}
 
-  if (!importer) {
-    return null;
-  }
 
-  importer = importer.split('\\').join('/');
+function writeCallback(context: BuildContext, sourcePath: string, data: string) {
+  if (endsWith(sourcePath, '.js')) {
+    sourcePath = sourcePath.substring(0, sourcePath.length - 3) + '.ts';
 
-  const result = ts.nodeModuleNameResolver(importee, importer, compilerOptions, resolveHost);
-
-  if (result.resolvedModule && result.resolvedModule.resolvedFileName) {
-    if (endsWith(result.resolvedModule.resolvedFileName, '.d.ts')) {
-      return null;
+    let file = context.files[sourcePath];
+    if (!file) {
+      file = context.files[sourcePath] = {};
     }
+    file.output = inlineTemplate(data, sourcePath);
 
-    return result.resolvedModule.resolvedFileName;
+  } else if (endsWith(sourcePath, '.js.map')) {
+    sourcePath = sourcePath.substring(0, sourcePath.length - 7) + '.ts';
+
+    let file = context.files[sourcePath];
+    if (!file) {
+      file = context.files[sourcePath] = {};
+    }
+    file.map = data;
   }
-
-  return null;
 }
 
 
-export function getTsConfig(rootDir: string) {
+export function getTsConfig(context: BuildContext): TsConfig {
   let config: TsConfig = null;
-  const tsConfigPath = join(rootDir, 'tsconfig.json');
+  const tsConfigPath = getTsConfigPath(context);
 
-  try {
-    const tsConfigFile = ts.readConfigFile(tsConfigPath, path => readFileSync(path, 'utf8'));
+  const tsConfigFile = ts.readConfigFile(tsConfigPath, path => readFileSync(path, 'utf8'));
 
-    if (!tsConfigFile) {
-      throw new Error(`tsconfig error: invalid tsconfig file, "${tsConfigPath}"`);
+  if (!tsConfigFile) {
+    throw new BuildError(`tsconfig: invalid tsconfig file, "${tsConfigPath}"`);
 
-    } else if (tsConfigFile.error && tsConfigFile.error.messageText) {
-      throw new Error(`tsconfig error: ${tsConfigFile.error.messageText}`);
+  } else if (tsConfigFile.error && tsConfigFile.error.messageText) {
+    throw new BuildError(`tsconfig: ${tsConfigFile.error.messageText}`);
 
-    } else if (!tsConfigFile.config) {
-      throw new Error(`tsconfig error: invalid config, "${tsConfigPath}""`);
+  } else if (!tsConfigFile.config) {
+    throw new BuildError(`tsconfig: invalid config, "${tsConfigPath}""`);
 
-    } else if (!tsConfigFile.config.compilerOptions) {
-      throw new Error(`tsconfig error: invalid compilerOptions, "${tsConfigPath}""`);
+  } else {
+    const parsedConfig = ts.parseJsonConfigFileContent(
+                                tsConfigFile.config,
+                                ts.sys, context.rootDir,
+                                {}, tsConfigPath);
 
-    } else {
-      config = tsConfigFile.config;
-      setCompilerOptionDefaults(config.compilerOptions);
+    if (parsedConfig.errors && parsedConfig.errors.length) {
+      parsedConfig.errors.forEach(d => {
+        printDiagnostic(context, d);
+      });
+      throw new BuildError();
     }
 
-  } catch (e) {
-    throw new Error(`tsconfig error: error reading tsconfig file "${tsConfigPath}", ${e}`);
+    config = {
+      options: parsedConfig.options,
+      fileNames: parsedConfig.fileNames,
+      typingOptions: parsedConfig.typingOptions,
+      raw: parsedConfig.raw
+    };
   }
 
   return config;
 }
 
 
-export function getCompilerOptions(rootDir: string): ts.CompilerOptions {
-  const config = getTsConfig(rootDir);
-  if (config && config.compilerOptions) {
-    // convert to typescripts actual typed compiler options
-    const tsCompilerOptions: ts.CompilerOptions = objectAssign({}, config.compilerOptions);
-
-    if (config.compilerOptions.module === 'es2015' || config.compilerOptions.module === 'es6') {
-      tsCompilerOptions.module = ts.ModuleKind.ES2015;
-    } else if (config.compilerOptions.module === 'commonjs') {
-      tsCompilerOptions.module = ts.ModuleKind.CommonJS;
-    }
-
-    if (config.compilerOptions.target === 'es5') {
-      tsCompilerOptions.target = ts.ScriptTarget.ES5;
-    } else if (config.compilerOptions.target === 'es6' || config.compilerOptions.target === 'es2015') {
-      tsCompilerOptions.target = ts.ScriptTarget.ES2015;
-    } else if (config.compilerOptions.target === 'latest') {
-      tsCompilerOptions.target = ts.ScriptTarget.Latest;
-    }
-
-    return tsCompilerOptions;
-  }
-  return null;
-}
-
-
-function setCompilerOptionDefaults(compilerOptions: TsCompilerOptions) {
-  compilerOptions.target = 'es5';
-  compilerOptions.module = 'es2015';
-}
-
-
-const resolveHost: any = {
-  directoryExists (dirPath: string) {
-    try {
-      return statSync( dirPath ).isDirectory();
-    } catch ( err ) {
-      return false;
-    }
-  },
-  fileExists (filePath: string) {
-    try {
-      return statSync( filePath ).isFile();
-    } catch ( err ) {
-      return false;
-    }
-  }
-};
-
-
-export interface TransformedOutput {
-  code: string;
-  map: any;
+export function getTsConfigPath(context: BuildContext) {
+  return join(context.rootDir, 'tsconfig.json');
 }
 
 
 export interface TsConfig {
-  // https://www.typescriptlang.org/docs/handbook/compiler-options.html
-  compilerOptions: TsCompilerOptions;
-  include: string[];
-  exclude: string[];
+  options: ts.CompilerOptions;
+  fileNames: string[];
+  typingOptions: ts.TypingOptions;
+  raw: any;
 }
-
-export interface TsCompilerOptions {
-  module: string;
-  noEmitOnError: boolean;
-  outDir: string;
-  removeComments: boolean;
-  target: string;
-}
-
-const ION_COMPILER_COMMENT = '/* ion-compiler */';
-

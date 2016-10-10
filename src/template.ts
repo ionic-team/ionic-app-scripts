@@ -17,9 +17,8 @@ export function templateUpdate(event: string, path: string, context: BuildContex
     // congrats, we did it!
     return logger.finish();
 
-  }).catch((err: Error) => {
-    logger.fail(err);
-    return Promise.reject(err);
+  }).catch(err => {
+    throw logger.fail(err);
   });
 }
 
@@ -31,7 +30,7 @@ function runTemplateUpdate(event: string, path: string, context: BuildContext, o
     // just a change event, see if this html file has a component in the same directory
     // doing this to prevent an unnecessary TS compile and bundling without cache if it was just a HTML change
     const componentFile = getSourceComponentFile(path, context);
-    if (clearCachedModule(componentFile)) {
+    if (componentFile && clearCachedModule(context, componentFile)) {
       // we successfully found the compiled JS file and cleared it from the bundle cache
       return bundleUpdate(event, path, context, options, true);
     }
@@ -73,7 +72,7 @@ function getSourceComponentFile(htmlFilePath: string, context: BuildContext) {
     }
 
   } catch (e) {
-    Logger.error(e);
+    Logger.debug(`${getSourceComponentFile} ${e}`);
   }
 
   return rtn;

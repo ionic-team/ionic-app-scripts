@@ -2,11 +2,11 @@ import { BuildContext, BuildOptions, TaskInfo } from './util/interfaces';
 import { endsWith } from './util/helpers';
 import { fillConfigDefaults, generateContext, generateBuildOptions, replacePathVars } from './util/config';
 import ionCompiler from './plugins/ion-compiler';
-import inlineTemplate from './plugins/ion-inline-template';
 import { join, isAbsolute } from 'path';
-import { Logger } from './util/logger';
+import { BuildError, Logger } from './util/logger';
 import { outputJson, readJsonSync } from 'fs-extra';
 import { tmpdir } from 'os';
+import { transpile } from './transpile';
 
 
 export function bundle(context?: BuildContext, options?: BuildOptions, rollupConfig?: RollupConfig, useCache = true) {
@@ -15,12 +15,16 @@ export function bundle(context?: BuildContext, options?: BuildOptions, rollupCon
 
   const logger = new Logger(`bundle ${(options.isProd ? 'prod' : 'dev')}`);
 
-  // bundle the app then create create css
-  return runBundle(context, options, rollupConfig, useCache).then(() => {
+  rollupConfig = fillConfigDefaults(context, rollupConfig, ROLLUP_TASK_INFO);
+
+  return transpile(context, options, rollupConfig.sourceMap).then(() => {
+    return runRollup(context, options, rollupConfig, useCache);
+
+  }).then(() => {
     return logger.finish();
-  }).catch((err: Error) => {
-    logger.fail(err);
-    return Promise.reject(err);
+
+  }).catch(err => {
+    throw logger.fail(err);
   });
 }
 
@@ -30,19 +34,28 @@ export function bundleUpdate(event: string, path: string, context: BuildContext,
 
   Logger.debug(`bundleUpdate, event: ${event}, path: ${path}`);
 
-  return runBundle(context, options, null, useCache).then(() => {
-    return logger.finish();
+  const rollupConfig = fillConfigDefaults(context, null, ROLLUP_TASK_INFO);
 
-  }).catch((err: Error) => {
-    logger.fail(err);
-    return Promise.reject(err);
-  });
+  function transpileSuccess() {
+    return runRollup(context, options, rollupConfig, useCache).then(() => {
+      return logger.finish();
+    });
+  }
+
+  function transpileFail(reason: any) {
+    return logger.finish();
+  }
+
+  return transpile(context, options, rollupConfig.sourceMap)
+    .then(transpileSuccess, transpileFail)
+    .catch(err => {
+      throw logger.fail(err);
+    }
+  );
 }
 
 
-function runBundle(context: BuildContext, options: BuildOptions, rollupConfig: RollupConfig, useCache: boolean): Promise<any> {
-  rollupConfig = fillConfigDefaults(context, rollupConfig, ROLLUP_TASK_INFO);
-
+function runRollup(context: BuildContext, options: BuildOptions, rollupConfig: RollupConfig, useCache: boolean): Promise<any> {
   if (!isAbsolute(rollupConfig.dest)) {
     // user can pass in absolute paths
     // otherwise save it in the build directory
@@ -60,16 +73,13 @@ function runBundle(context: BuildContext, options: BuildOptions, rollupConfig: R
     // dev mode auto-adds the ion-compiler plugin, which will inline
     // templates and transpile source typescript code to JS before bundling
     rollupConfig.plugins.unshift(
-      ionCompiler({
-        rootDir: context.rootDir,
-        sourceMap: rollupConfig.sourceMap
-      })
+      ionCompiler(context, options)
     );
   }
 
   if (useCache) {
     // tell rollup to use a previous bundle as its starting point
-    rollupConfig.cache = bundleCache;
+    rollupConfig.cache = context.cachedBundle;
   }
 
   if (!rollupConfig.onwarn) {
@@ -96,7 +106,7 @@ function runBundle(context: BuildContext, options: BuildOptions, rollupConfig: R
     setModulePathsCache(context.moduleFiles);
 
     // cache our bundle for later use
-    bundleCache = bundle;
+    context.cachedBundle = bundle;
 
     // clean up any references
     rollupConfig.cache = rollupConfig.onwarn = rollupConfig.plugins = null;
@@ -106,8 +116,8 @@ function runBundle(context: BuildContext, options: BuildOptions, rollupConfig: R
 
   }).catch((err: any) => {
     // ensure references are cleared up when there's an error
-    bundleCache = rollupConfig.cache = rollupConfig.onwarn = rollupConfig.plugins = null;
-    return Promise.reject(err);
+    context.cachedBundle = rollupConfig.cache = rollupConfig.onwarn = rollupConfig.plugins = null;
+    throw err;
   });
 }
 
@@ -116,9 +126,9 @@ function checkDeprecations(options: BuildOptions, rollupConfig: RollupConfig) {
   if (!options.isProd) {
     if (rollupConfig.entry.indexOf('.tmp') > -1 || endsWith(rollupConfig.entry, '.js')) {
       // warning added 2016-10-05, v0.0.29
-      throw new Error('\nDev builds no longer use the ".tmp" directory. Please update your rollup config\'s\n' +
-                      'entry to use your "src" directory\'s "main.dev.ts" TypeScript file.\n' +
-                      'For example, the entry for dev builds should be: "src/app/main.dev.ts"');
+      throw new BuildError('\nDev builds no longer use the ".tmp" directory. Please update your rollup config\'s\n' +
+                           'entry to use your "src" directory\'s "main.dev.ts" TypeScript file.\n' +
+                           'For example, the entry for dev builds should be: "src/app/main.dev.ts"');
 
     }
   }
@@ -163,22 +173,19 @@ function getModulesPathsCachePath(): string {
 }
 
 
-// used to track the cache for subsequent bundles
-let bundleCache: RollupBundle = null;
-
-export function clearCachedModule(id: string) {
-  if (bundleCache) {
-    const cachedModule = bundleCache.modules.find(m => m.id === id);
+export function clearCachedModule(context: BuildContext, id: string) {
+  if (context.cachedBundle) {
+    const cachedModule = (<RollupBundle>context.cachedBundle).modules.find(m => m.id === id);
     if (cachedModule) {
-      const index = bundleCache.modules.indexOf(cachedModule);
+      const index = context.cachedBundle.modules.indexOf(cachedModule);
       if (index > -1) {
-        bundleCache.modules.splice(index, 1);
+        context.cachedBundle.modules.splice(index, 1);
         Logger.debug(`clearCachedModule: ${id}`);
         return true;
       }
     }
   }
-  Logger.debug(`clearCachedModule: no existing bundleCache to clear`);
+  Logger.debug(`clearCachedModule: no existing context.cachedBundle to clear`);
   return false;
 }
 

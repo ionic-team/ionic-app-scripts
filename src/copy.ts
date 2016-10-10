@@ -1,7 +1,7 @@
 import { BuildContext, BuildOptions, TaskInfo } from './util/interfaces';
 import { fillConfigDefaults, generateContext, replacePathVars } from './util/config';
 import { copy as fsCopy } from 'fs-extra';
-import { Logger } from './util/logger';
+import { BuildError, Logger } from './util/logger';
 
 
 export function copy(context?: BuildContext, copyConfig?: CopyConfig) {
@@ -13,9 +13,8 @@ export function copy(context?: BuildContext, copyConfig?: CopyConfig) {
   return runCopy(context, copyConfig).then(() => {
     return logger.finish();
 
-  }).catch((err: Error) => {
-    logger.fail(err);
-    return Promise.reject(err);
+  }).catch(err => {
+    throw logger.fail(err);
   });
 }
 
@@ -55,7 +54,7 @@ function copySrcToDest(context: BuildContext, src: string, dest: string, filter?
         const msg = `Error copying "${src}" to "${dest}": ${err}`;
 
         if (msg.indexOf('ENOENT') < 0 && msg.indexOf('EEXIST') < 0) {
-          reject(new Error(`Error copying "${src}" to "${dest}": ${err}`));
+          reject(new BuildError(`Error copying "${src}" to "${dest}": ${err}`));
           return;
         }
       }

@@ -13,16 +13,23 @@ export { watch } from './watch';
 export * from './util/config';
 export * from './util/helpers';
 export * from './util/interfaces';
+import { Logger } from './util/logger';
 
 
 export function run(task: string) {
   try {
-    require(`../dist/${task}`)[task]().catch((e: Error) => {
-      console.error(`Error running ionic app script "${task}": ${e}`);
-      process.exit(1);
+    require(`../dist/${task}`)[task]().catch((err: any) => {
+      errorLog(task, err);
     });
   } catch (e) {
-    console.error(`Error running ionic app script "${task}": ${e}`);
-    process.exit(1);
+    errorLog(task, e);
   }
+}
+
+function errorLog(task: string, e: any) {
+  Logger.error(`ionic-app-script task: "${task}"`);
+  if (e && e.toString() !== 'Error') {
+    Logger.error(`${e}`);
+  }
+  process.exit(1);
 }

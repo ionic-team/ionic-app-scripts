@@ -1,10 +1,11 @@
 import { basename, join } from 'path';
 import { BuildContext, BuildOptions, TaskInfo } from './util/interfaces';
-import { copy as fsCopy, emptyDirSync, outputJsonSync, statSync } from 'fs-extra';
-import { fillConfigDefaults, generateContext, generateBuildOptions, getNodeBinExecutable } from './util/config';
+import { copy as fsCopy, emptyDirSync, outputJsonSync, readFileSync, statSync } from 'fs-extra';
 import { endsWith } from './util/helpers';
-import { Logger } from './util/logger';
-import { getTsConfig } from './transpile';
+import { fillConfigDefaults, generateContext, generateBuildOptions, getNodeBinExecutable } from './util/config';
+import { getTsConfigPath } from './transpile';
+import { BuildError, Logger } from './util/logger';
+import * as ts from 'typescript';
 
 
 export function ngc(context?: BuildContext, options?: BuildOptions, ngcConfig?: NgcConfig) {
@@ -24,9 +25,8 @@ export function ngc(context?: BuildContext, options?: BuildOptions, ngcConfig?: 
   }).then(() => {
     return logger.finish();
 
-  }).catch((err: Error) => {
-    logger.fail(err);
-    return Promise.reject(err);
+  }).catch(err => {
+    throw logger.fail(err);
   });
 }
 
@@ -47,7 +47,7 @@ function runNgc(context: BuildContext, options: BuildOptions, ngcConfig: NgcConf
 
     const ngcCmd = getNodeBinExecutable(context, 'ngc');
     if (!ngcCmd) {
-      reject(new Error(`Unable to find Angular Compiler "ngc" command: ${ngcCmd}. Please ensure @angular/compiler-cli has been installed with NPM.`));
+      reject(new BuildError(`Unable to find Angular Compiler "ngc" command: ${ngcCmd}. Please ensure @angular/compiler-cli has been installed with NPM.`));
       return;
     }
 
@@ -58,6 +58,8 @@ function runNgc(context: BuildContext, options: BuildOptions, ngcConfig: NgcConf
     const ngcCmdArgs = [
       '--project', getTmpTsConfigPath(context)
     ];
+
+    Logger.debug(`run: ${ngcCmd} ${ngcCmdArgs.join(' ')}`);
 
     // would love to not use spawn here but import and run ngc directly
     const cp = spawn(ngcCmd, ngcCmdArgs);
@@ -99,12 +101,10 @@ function runNgc(context: BuildContext, options: BuildOptions, ngcConfig: NgcConf
 
     cp.on('close', (code: string) => {
       if (errorMsgs.length) {
-        Logger.error(`NGC Compilation failed`);
         errorMsgs.forEach(errorMsg => {
           Logger.error(errorMsg);
         });
-
-        reject('');
+        reject(new BuildError());
 
       } else {
         resolve();
@@ -116,17 +116,23 @@ function runNgc(context: BuildContext, options: BuildOptions, ngcConfig: NgcConf
 
 function createTmpTsConfig(context: BuildContext, ngcConfig: NgcConfig) {
   // create the tsconfig from the original src
-  const tsConfig = getTsConfig(context.rootDir);
+  const tsConfigPath = getTsConfigPath(context);
+  const tsConfigFile = ts.readConfigFile(tsConfigPath, path => readFileSync(path, 'utf8'));
+
+  if (!tsConfigFile || !tsConfigFile.config) {
+    throw new BuildError(`invalid tsconfig: ${tsConfigPath}`);
+  }
+
+  if (!tsConfigFile.config.compilerOptions) {
+    throw new BuildError(`invalid tsconfig compilerOptions: ${tsConfigPath}`);
+  }
 
   // delete outDir if it's set since we only want
   // to compile to the same directory we're in
-  delete tsConfig.compilerOptions.outDir;
-
-  // force where to look for ts files
-  tsConfig.include = ngcConfig.include;
+  delete tsConfigFile.config.compilerOptions.outDir;
 
   // save the modified copy into the tmp directory
-  outputJsonSync(getTmpTsConfigPath(context), tsConfig);
+  outputJsonSync(getTmpTsConfigPath(context), tsConfigFile.config);
 }
 
 
@@ -137,18 +143,19 @@ function copySrcTsToTmpDir(context: BuildContext) {
     try {
       emptyDirSync(context.tmpDir);
     } catch (e) {
-      throw new Error(`tmpDir error: ${e}`);
+      reject(new BuildError(`tmpDir error: ${e}`));
+      return;
     }
 
     const copyOpts: any = {
       filter: filterCopyFiles
     };
 
-    Logger.debug(`copySrcTsToTmpDir, src: ${context.srcDir}, src: ${context.tmpDir}`);
+    Logger.debug(`copySrcTsToTmpDir, srcDir: ${context.srcDir} to tmpDir: ${context.tmpDir}`);
 
     fsCopy(context.srcDir, context.tmpDir, copyOpts, (err) => {
       if (err) {
-        reject(err);
+        reject(new BuildError(err));
       } else {
         resolve();
       }
