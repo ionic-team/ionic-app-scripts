@@ -33,7 +33,7 @@
     "magic-string": "0.16.0",
     "node-sass": "3.9.3",
     "postcss": "5.2.0",
-    "rollup": "0.36.1",
+    "rollup": "0.36.3",
     "rollup-plugin-commonjs": "5.0.4",
     "rollup-plugin-json": "2.0.2",
     "rollup-plugin-node-builtins": "2.0.0",
