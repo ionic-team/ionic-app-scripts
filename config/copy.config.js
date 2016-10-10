@@ -12,6 +12,10 @@ module.exports = {
       dest: 'www/index.html'
     },
     {
+      src: 'src/manifest.json',
+      dest: 'www/manifest.json'
+    },
+    {
       src: 'src/service-worker.js',
       dest: 'www/service-worker.js'
     },
