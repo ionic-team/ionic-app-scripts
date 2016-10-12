@@ -70,7 +70,7 @@ module.exports = {
    * to be imported so their values override default variables.
    */
   variableSassFiles: [
-    'src/theme/variables.scss'
+    '{{SRC}}/theme/variables.scss'
   ],
 
   /**

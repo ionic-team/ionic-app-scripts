@@ -12,14 +12,14 @@ module.exports = {
 
     {
       paths: [
-        'src/**/*.ts'
+        '{{SRC}}/**/*.ts'
       ],
       callback: buildUpdate
     },
 
     {
       paths: [
-        'src/**/*.html'
+        '{{SRC}}/**/*.html'
       ],
       options: { ignored: /(index.html$)/ },
       callback: templateUpdate
@@ -27,14 +27,14 @@ module.exports = {
 
     {
       paths: [
-        'src/**/*.scss'
+        '{{SRC}}/**/*.scss'
       ],
       callback: sassUpdate
     },
 
     {
       paths: [
-        'src/assets'
+        '{{SRC}}/assets'
       ],
       callback: copyUpdate
     },

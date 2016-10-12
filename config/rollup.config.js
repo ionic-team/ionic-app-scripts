@@ -13,7 +13,7 @@ var rollupConfig = {
    * be included, along with the minimum necessary code
    * from its dependencies
    */
-  entry: 'src/app/main.dev.ts',
+  entry: '{{SRC}}/app/main.dev.ts',
 
   /**
    * sourceMap: If true, a separate sourcemap file will
