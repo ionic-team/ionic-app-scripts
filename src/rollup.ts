@@ -76,7 +76,7 @@ export function rollupWorker(context: BuildContext, workerConfig: RollupWorkerCo
 
     if (context.useBundleCache) {
       // tell rollup to use a previous bundle as its starting point
-      // rollupConfig.cache = cachedBundle;
+      rollupConfig.cache = cachedBundle;
     }
 
     if (!rollupConfig.onwarn) {
