@@ -1,29 +1,30 @@
-import { BuildContext, BuildOptions } from './util/interfaces';
-import { bundleUpdate, clearCachedModule } from './bundle';
+import { BuildContext } from './util/interfaces';
+import { BuildError, Logger } from './util/logger';
+import { bundleUpdate } from './bundle';
+import { clearCachedModule } from './rollup';
 import { dirname, join, parse, basename } from 'path';
 import { endsWith } from './util/helpers';
-import { Logger } from './util/logger';
 import { readFileSync, readdirSync } from 'fs';
 import { sassUpdate } from './sass';
 import * as MagicString from 'magic-string';
 
 
-export function templateUpdate(event: string, path: string, context: BuildContext, options: BuildOptions) {
+export function templateUpdate(event: string, path: string, context: BuildContext) {
   path = join(context.rootDir, path);
 
-  const logger = new Logger('templateUpdate');
+  const logger = new Logger('template update');
 
-  return runTemplateUpdate(event, path, context, options).then(() => {
-    // congrats, we did it!
-    return logger.finish();
-
-  }).catch(err => {
-    throw logger.fail(err);
-  });
+  return templateUpdateWorker(event, path, context)
+    .then(() => {
+      logger.finish();
+    })
+    .catch(err => {
+      throw logger.fail(err);
+    });
 }
 
 
-function runTemplateUpdate(event: string, path: string, context: BuildContext, options: BuildOptions) {
+function templateUpdateWorker(event: string, path: string, context: BuildContext) {
   Logger.debug(`templateUpdate, event: ${event}, path: ${path}`);
 
   if (event === 'change') {
@@ -32,14 +33,21 @@ function runTemplateUpdate(event: string, path: string, context: BuildContext, o
     const componentFile = getSourceComponentFile(path, context);
     if (componentFile && clearCachedModule(context, componentFile)) {
       // we successfully found the compiled JS file and cleared it from the bundle cache
-      return bundleUpdate(event, path, context, options, true);
+      context.useBundleCache = true;
+      return bundleUpdate(event, path, context);
     }
   }
 
   // not sure how it changed, just do a full rebuild without the bundle cache
-  return bundleUpdate(event, path, context, options, false).then(() => {
-    return sassUpdate(event, path, context, options, true);
-  });
+  context.useBundleCache = false;
+  return bundleUpdate(event, path, context)
+    .then(() => {
+      context.useSassCache = true;
+      return sassUpdate(event, path, context);
+    })
+    .catch(err => {
+      throw new BuildError(err);
+    });
 }
 
 

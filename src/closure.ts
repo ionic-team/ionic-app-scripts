@@ -1,20 +1,28 @@
 import { BuildContext, TaskInfo } from './util/interfaces';
-import { generateContext, fillConfigDefaults } from './util/config';
+import { generateContext, getUserConfigFile } from './util/config';
 import { Logger } from './util/logger';
+import { runWorker } from './worker-client';
 
 
-export function closure(context?: BuildContext, closureConfig?: ClosureConfig) {
+export function closure(context?: BuildContext, configFile?: string) {
   context = generateContext(context);
-  closureConfig = fillConfigDefaults(context, closureConfig, CLOSURE_TASK_INFO);
+  configFile = getUserConfigFile(context, taskInfo, configFile);
 
   const logger = new Logger('closure');
 
-  return Promise.resolve().then(() => {
-    Logger.warn('Closer Compiler unsupported at this time.');
-    return logger.finish();
+  return runWorker('closure', context, configFile).then(() => {
+    logger.finish();
 
   }).catch(err => {
     throw logger.fail(err);
+  });
+}
+
+
+export function closureWorker(context: BuildContext, configFile: string): Promise<any> {
+  return new Promise((resolve, reject) => {
+    Logger.warn('Closer Compiler unsupported at this time.');
+    resolve();
   });
 }
 
@@ -25,11 +33,11 @@ export function isClosureSupported(context: BuildContext) {
 }
 
 
-const CLOSURE_TASK_INFO: TaskInfo = {
+const taskInfo: TaskInfo = {
   fullArgConfig: '--closure',
   shortArgConfig: '-l',
   envConfig: 'ionic_closure',
-  defaultConfigFilename: 'closure.config'
+  defaultConfigFile: 'closure.config'
 };
 
 

@@ -1,22 +1,20 @@
 import { join } from 'path';
 import { BuildContext, TaskInfo } from './util/interfaces';
-import { generateContext, fillConfigDefaults } from './util/config';
 import { BuildError, Logger } from './util/logger';
+import { fillConfigDefaults, generateContext, getUserConfigFile } from './util/config';
 import { readFileAsync, writeFileAsync } from './util/helpers';
+import { runWorker } from './worker-client';
 import * as cleanCss from 'clean-css';
 
 
-export function cleancss(context?: BuildContext, cleanCssConfig?: CleanCssConfig) {
+export function cleancss(context?: BuildContext, configFile?: string) {
   context = generateContext(context);
-  cleanCssConfig = fillConfigDefaults(context, cleanCssConfig, CLEANCSS_TASK_INFO);
+  configFile = getUserConfigFile(context, taskInfo, configFile);
 
   const logger = new Logger('cleancss');
 
-  const srcFile = join(context.buildDir, cleanCssConfig.sourceFileName);
-  const destFile = join(context.buildDir, cleanCssConfig.destFileName);
-
-  return runCleanCss(srcFile, destFile).then(() => {
-    return logger.finish();
+  return runWorker('cleancss', context, configFile).then(() => {
+    logger.finish();
 
   }).catch(err => {
     throw logger.fail(err);
@@ -24,10 +22,14 @@ export function cleancss(context?: BuildContext, cleanCssConfig?: CleanCssConfig
 }
 
 
-function runCleanCss(srcFile: string, destFile: string): Promise<any> {
+export function cleancssWorker(context: BuildContext, configFile: string): Promise<any> {
   return new Promise((resolve, reject) => {
+    const cleanCssConfig: CleanCssConfig = fillConfigDefaults(configFile, taskInfo.defaultConfigFile);
+    const srcFile = join(context.buildDir, cleanCssConfig.sourceFileName);
+    const destFile = join(context.buildDir, cleanCssConfig.destFileName);
 
     Logger.debug(`cleancss read: ${srcFile}`);
+
     readFileAsync(srcFile).then(fileContent => {
       const minifier = new cleanCss();
       minifier.minify(fileContent, (err, minified) => {
@@ -53,11 +55,12 @@ function runCleanCss(srcFile: string, destFile: string): Promise<any> {
   });
 }
 
-const CLEANCSS_TASK_INFO: TaskInfo = {
+
+const taskInfo: TaskInfo = {
   fullArgConfig: '--cleancss',
   shortArgConfig: '-e',
   envConfig: 'ionic_cleancss',
-  defaultConfigFilename: 'cleancss.config'
+  defaultConfigFile: 'cleancss.config'
 };
 
 

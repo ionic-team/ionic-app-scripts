@@ -5,7 +5,7 @@ export { cleancss } from './cleancss';
 export { copy, copyUpdate } from './copy';
 export { lint } from './lint';
 export { minify } from './minify';
-export { ngc, ngcUpdate } from './ngc';
+export { ngc } from './ngc';
 export { sass, sassUpdate } from './sass';
 export { transpile } from './transpile';
 export { uglifyjs } from './uglifyjs';

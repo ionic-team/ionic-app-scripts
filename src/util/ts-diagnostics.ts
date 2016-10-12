@@ -133,11 +133,27 @@ function printCodeHighlight(d: ts.Diagnostic) {
     while (msg.length < LEFT_PADDING.length) {
       msg = ' ' + msg;
     }
-    msg = chalk.dim(msg) + l.text;
+    msg = chalk.dim(msg) + cheapSyntaxHighlight(l.text);
     console.log(msg);
   });
 
   console.log(''); // just for an empty line
+}
+
+
+function cheapSyntaxHighlight(text: string) {
+  if (text.trim().startsWith('//')) {
+    return chalk.dim(text);
+  }
+
+  const words = text.split(' ').map(word => {
+    if (keywords.indexOf(word) > -1) {
+      return chalk.cyan(word);
+    }
+    return word;
+  });
+
+  return words.join(' ');
 }
 
 
@@ -191,3 +207,39 @@ interface PrintLine {
 
 const LEFT_PADDING = '            ';
 const MAX_LEN = 100;
+
+const keywords = [
+  'as',
+  'break',
+  'case',
+  'catch',
+  'class',
+  'const',
+  'continue',
+  'debugger',
+  'default',
+  'delete',
+  'do',
+  'else',
+  'export',
+  'extends',
+  'finally',
+  'for',
+  'from',
+  'function',
+  'if',
+  'import',
+  'in',
+  'instanceof',
+  'new',
+  'return',
+  'super',
+  'switch',
+  'this',
+  'throw',
+  'try',
+  'typeof',
+  'var',
+  'void',
+  'while',
+];

@@ -1,17 +1,17 @@
-import { BuildContext, BuildOptions, TaskInfo } from './util/interfaces';
-import { fillConfigDefaults, generateContext, replacePathVars } from './util/config';
+import { BuildContext, TaskInfo } from './util/interfaces';
+import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars } from './util/config';
 import { copy as fsCopy } from 'fs-extra';
 import { BuildError, Logger } from './util/logger';
 
 
-export function copy(context?: BuildContext, copyConfig?: CopyConfig) {
+export function copy(context?: BuildContext, configFile?: string) {
   context = generateContext(context);
-  copyConfig = fillConfigDefaults(context, copyConfig, COPY_TASK_INFO);
+  configFile = getUserConfigFile(context, taskInfo, configFile);
 
   const logger = new Logger('copy');
 
-  return runCopy(context, copyConfig).then(() => {
-    return logger.finish();
+  return copyWorker(context, configFile).then(() => {
+    logger.finish();
 
   }).catch(err => {
     throw logger.fail(err);
@@ -19,15 +19,15 @@ export function copy(context?: BuildContext, copyConfig?: CopyConfig) {
 }
 
 
-export function copyUpdate(event: string, path: string, context: BuildContext, options: BuildOptions) {
+export function copyUpdate(event: string, path: string, context: BuildContext) {
   Logger.debug(`copyUpdate, event: ${event}, path: ${path}`);
-
-  const copyConfig = fillConfigDefaults(context, null, COPY_TASK_INFO);
-  return runCopy(context, copyConfig);
+  const configFile = getUserConfigFile(context, taskInfo, null);
+  return copyWorker(context, configFile);
 }
 
 
-function runCopy(context: BuildContext, copyConfig: CopyConfig) {
+export function copyWorker(context: BuildContext, configFile: string) {
+  const copyConfig: CopyConfig = fillConfigDefaults(configFile, taskInfo.defaultConfigFile);
   const promises: Promise<any>[] = [];
 
   copyConfig.include.forEach(copyOptions => {
@@ -64,12 +64,13 @@ function copySrcToDest(context: BuildContext, src: string, dest: string, filter?
 }
 
 
-const COPY_TASK_INFO: TaskInfo = {
+const taskInfo: TaskInfo = {
   fullArgConfig: '--copy',
   shortArgConfig: '-y',
   envConfig: 'ionic_copy',
-  defaultConfigFilename: 'copy.config'
+  defaultConfigFile: 'copy.config'
 };
+
 
 export interface CopyConfig {
   include: CopyOptions[];

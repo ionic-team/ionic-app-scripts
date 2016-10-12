@@ -1,5 +1,5 @@
 import { accessSync } from 'fs-extra';
-import { BuildContext, BuildOptions, TaskInfo } from './interfaces';
+import { BuildContext, TaskInfo } from './interfaces';
 import { join } from 'path';
 import { objectAssign } from './helpers';
 
@@ -22,20 +22,30 @@ export function generateContext(context?: BuildContext): BuildContext {
     context = {};
   }
 
-  context.rootDir = context.rootDir || getConfigValueDefaults('--rootDir', null, ENV_VAR_ROOT_DIR, processCwd, context);
+  context.rootDir = context.rootDir || getConfigValueDefault('--rootDir', null, ENV_VAR_ROOT_DIR, processCwd, context);
   setProcessEnvVar(ENV_VAR_ROOT_DIR, context.rootDir);
 
-  context.tmpDir = context.tmpDir || getConfigValueDefaults('--tmpDir', null, ENV_VAR_TMP_DIR, join(context.rootDir, TMP_DIR), context);
+  context.tmpDir = context.tmpDir || getConfigValueDefault('--tmpDir', null, ENV_VAR_TMP_DIR, join(context.rootDir, TMP_DIR), context);
   setProcessEnvVar(ENV_VAR_TMP_DIR, context.tmpDir);
 
-  context.srcDir = context.srcDir || getConfigValueDefaults('--srcDir', null, ENV_VAR_SRC_DIR, join(context.rootDir, SRC_DIR), context);
+  context.srcDir = context.srcDir || getConfigValueDefault('--srcDir', null, ENV_VAR_SRC_DIR, join(context.rootDir, SRC_DIR), context);
   setProcessEnvVar(ENV_VAR_SRC_DIR, context.srcDir);
 
-  context.wwwDir = context.wwwDir || getConfigValueDefaults('--wwwDir', null, ENV_VAR_WWW_DIR, join(context.rootDir, WWW_DIR), context);
+  context.wwwDir = context.wwwDir || getConfigValueDefault('--wwwDir', null, ENV_VAR_WWW_DIR, join(context.rootDir, WWW_DIR), context);
   setProcessEnvVar(ENV_VAR_WWW_DIR, context.wwwDir);
 
-  context.buildDir = context.buildDir || getConfigValueDefaults('--buildDir', null, ENV_VAR_BUILD_DIR, join(context.wwwDir, BUILD_DIR), context);
+  context.buildDir = context.buildDir || getConfigValueDefault('--buildDir', null, ENV_VAR_BUILD_DIR, join(context.wwwDir, BUILD_DIR), context);
   setProcessEnvVar(ENV_VAR_BUILD_DIR, context.buildDir);
+
+  if (typeof context.isProd !== 'boolean') {
+    context.isProd = !(hasArg('--dev', '-d') || (getEnvVariable(ENV_VAR_IONIC_DEV) === 'true'));
+  }
+
+  setIonicEnvironment(context.isProd);
+
+  if (typeof context.isWatch !== 'boolean') {
+    context.isWatch = hasArg('--watch', '-w');
+  }
 
   checkDebugMode();
 
@@ -43,60 +53,34 @@ export function generateContext(context?: BuildContext): BuildContext {
 }
 
 
-export function generateBuildOptions(options?: BuildOptions): BuildOptions {
-  if (!options) {
-    options = {};
-  }
-
-  if (typeof options.isProd !== 'boolean') {
-    options.isProd = !(hasArg('--dev', '-d') || (getEnvVariable(ENV_VAR_IONIC_DEV) === 'true'));
-  }
-
-  setIonicEnvironment(options.isProd);
-
-  if (typeof options.isWatch !== 'boolean') {
-    options.isWatch = hasArg('--watch', '-w');
-  }
-
-  return options;
+export function getUserConfigFile(context: BuildContext, task: TaskInfo, userConfigFile: string) {
+  return userConfigFile || getConfigValueDefault(task.fullArgConfig, task.shortArgConfig, task.envConfig, null, context);
 }
 
 
-export function fillConfigDefaults(context: BuildContext, userConfig: any, task: TaskInfo): any {
-  // if the context property wasn't already set, then see if a config file
-  // was supplied by the user as an arg or env variable
-  if (!userConfig) {
-    userConfig = getConfigFileData(task.fullArgConfig, task.shortArgConfig, task.envConfig, null, context);
+export function fillConfigDefaults(userConfigFile: string, defaultConfigFile: string): any {
+  let userConfig: any = null;
+
+  if (userConfigFile) {
+    try {
+      // create a fresh copy of the config each time
+      userConfig = require(userConfigFile);
+
+    } catch (e) {
+      console.error(`Config file "${userConfigFile}" not found. Using defaults instead.`);
+      console.error(e);
+    }
   }
 
-  const defaultConfig = require(join('..', '..', 'config', task.defaultConfigFilename));
+  const defaultConfig = require(join('..', '..', 'config', defaultConfigFile));
 
+  // create a fresh copy of the config each time
   // always assign any default values which were not already supplied by the user
   return objectAssign({}, defaultConfig, userConfig);
 }
 
 
-function getConfigFileData(fullName: string, shortName: string, envVarName: string, defaultValue: string, context: BuildContext): any {
-  // see if the user supplied a value for where to look up their config file
-  const configFilePath = getConfigValueDefaults(fullName, shortName, envVarName, null, context);
-
-  if (configFilePath) {
-    try {
-      // create a fresh copy of the config each time
-      const config = require(configFilePath);
-      return objectAssign({}, config);
-
-    } catch (e) {
-      console.error(`Config file "${configFilePath}" not found. Using defaults instead.`);
-      console.error(e);
-    }
-  }
-
-  return null;
-}
-
-
-export function getConfigValueDefaults(argFullName: string, argShortName: string, envVarName: string, defaultValue: string, context: BuildContext) {
+export function getConfigValueDefault(argFullName: string, argShortName: string, envVarName: string, defaultValue: string, context: BuildContext) {
   // first see if the value was set in the command-line args
   const argValue = getArgValue(argFullName, argShortName);
   if (argValue) {

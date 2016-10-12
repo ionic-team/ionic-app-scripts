@@ -1,25 +1,32 @@
 import { access } from 'fs';
 import { BuildContext, TaskInfo } from './util/interfaces';
-import { generateContext, getConfigValueDefaults, getNodeBinExecutable } from './util/config';
-import { join } from 'path';
 import { BuildError, Logger } from './util/logger';
+import { generateContext, getUserConfigFile, getConfigValueDefault, getNodeBinExecutable } from './util/config';
+import { join } from 'path';
 
 
-export function lint(context?: BuildContext, tsConfigPath?: string) {
+export function lint(context?: BuildContext, configFile?: string) {
   context = generateContext(context);
+  configFile = getUserConfigFile(context, taskInfo, configFile);
 
-  const defaultTsLintPath = join(context.rootDir, 'tslint.json');
+  return lintWorker(context, configFile)
+    .catch(err => {
+      throw new BuildError(err);
+    });
+}
 
-  tsConfigPath = tsConfigPath || getConfigValueDefaults(TSCONFIG_TASK_INFO.fullArgConfig,
-                                                        TSCONFIG_TASK_INFO.shortArgConfig,
-                                                        TSCONFIG_TASK_INFO.envConfig,
-                                                        defaultTsLintPath,
-                                                        context);
 
-  Logger.debug(`tslint config: ${tsConfigPath}`);
-
+export function lintWorker(context: BuildContext, tsLintFile?: string) {
   return new Promise((resolve, reject) => {
-    access(tsConfigPath, (err) => {
+    tsLintFile = tsLintFile || getConfigValueDefault(taskInfo.fullArgConfig,
+                                                          taskInfo.shortArgConfig,
+                                                          taskInfo.envConfig,
+                                                          join(context.rootDir, 'tslint.json'),
+                                                          context);
+
+    Logger.debug(`tslint config: ${tsLintFile}`);
+
+    access(tsLintFile, (err) => {
       if (err) {
         // if the tslint.json file cannot be found that's fine, the
         // dev may not want to run tslint at all and to do that they
@@ -30,8 +37,9 @@ export function lint(context?: BuildContext, tsConfigPath?: string) {
       }
       const logger = new Logger('lint');
 
-      runTsLint(context, tsConfigPath).then(() => {
-        resolve(logger.finish());
+      runTsLint(context, tsLintFile).then(() => {
+        logger.finish();
+        resolve(true);
 
       }).catch(err => {
         logger.fail(err);
@@ -104,15 +112,15 @@ function runTsLint(context: BuildContext, tsConfigPath: string) {
 }
 
 
-const TSCONFIG_TASK_INFO: TaskInfo = {
+const taskInfo: TaskInfo = {
   fullArgConfig: '--tslint',
   shortArgConfig: '-l',
   envConfig: 'ionic_tslint',
-  defaultConfigFilename: '../tslint'
+  defaultConfigFile: '../tslint'
 };
 
 
-export interface TsConfig {
+export interface TsLintConfig {
   // http://palantir.github.io/tslint/
-  executable: string;
+
 }

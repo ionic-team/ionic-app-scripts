@@ -1,71 +1,96 @@
-import { BuildContext, BuildOptions } from './util/interfaces';
+import { BuildContext, TsFiles } from './util/interfaces';
+import { BuildError, Logger } from './util/logger';
 import { endsWith } from './util/helpers';
-import { generateContext, generateBuildOptions } from './util/config';
-import { runDiagnostics, printDiagnostic } from './util/ts-diagnostics';
+import { generateContext } from './util/config';
 import { inlineTemplate } from './template';
 import { join } from 'path';
-import { BuildError, Logger } from './util/logger';
 import { readFileSync } from 'fs';
+import { runDiagnostics, printDiagnostic } from './util/ts-diagnostics';
 import * as ts from 'typescript';
 
 
-export function transpile(context: BuildContext, options: BuildOptions, sourceMap: boolean = true): Promise<any> {
+export function transpile(context?: BuildContext): Promise<TsFiles> {
   context = generateContext(context);
-  options = generateBuildOptions(options);
+  const configFile = getTsConfigPath(context);
 
-  const logger = new Logger(`transpile`);
+  const logger = new Logger('transpile');
 
-  return runTranspile(context, options, sourceMap)
-    .then(() => {
-      return logger.finish();
+  return transpileWorker(context, configFile).then(tsFiles => {
+    logger.finish();
+    return tsFiles;
 
-    }).catch(err => {
+  }).catch(err => {
+    throw logger.fail(err);
+  });
+}
+
+
+export function transpileUpdate(event: string, path: string, context: BuildContext): Promise<TsFiles> {
+  if (path.endsWith('.ts')) {
+    cachedTsFiles = null;
+  }
+
+  if (cachedTsFiles) {
+    return Promise.resolve(cachedTsFiles);
+  }
+
+  const configFile = getTsConfigPath(context);
+  const logger = new Logger('transpile update');
+
+  return transpileWorker(context, configFile)
+    .then(tsFiles => {
+      logger.finish();
+      return tsFiles;
+    })
+    .catch(err => {
       throw logger.fail(err);
     });
 }
 
 
-function runTranspile(context: BuildContext, options: BuildOptions, sourceMap: boolean) {
+export function transpileWorker(context: BuildContext, configFile: string): Promise<TsFiles> {
   return new Promise((resolve, reject) => {
-    const tsConfig = getTsConfig(context);
+    const tsConfig = getTsConfig(context, configFile);
 
     // force it to save in the src directory
     // however, it's only in memory and won't actually write to disk
     tsConfig.options.outDir = context.srcDir;
-    tsConfig.options.sourceMap = sourceMap;
+    tsConfig.options.sourceMap = context.jsSourceMaps;
     tsConfig.options.declaration = false;
     const tsFileNames = cleanFileNames(context, tsConfig.fileNames);
 
-    context.files = {};
+    const tsFiles: TsFiles = {};
     const host = ts.createCompilerHost(tsConfig.options);
 
-    Logger.debug(`ts.createProgram, cachedTypeScript: ${context.cachedTypeScript}`);
+    Logger.debug(`ts.createProgram, cachedProgram: ${!!cachedProgram}`);
 
-    const program = ts.createProgram(tsFileNames, tsConfig.options, host, context.cachedTypeScript);
+    const program = ts.createProgram(tsFileNames, tsConfig.options, host, cachedProgram);
     program.emit(undefined, (path: string, data: string) => {
-      writeCallback(context, path, data);
+      writeCallback(tsFiles, path, data);
     });
 
     const hasDiagnostics = runDiagnostics(context, program);
 
     if (hasDiagnostics) {
       // transpile failed :(
+      cachedProgram = cachedTsFiles = null;
       reject(new BuildError());
 
     } else {
       // transpile success :)
       // cache the typescript program for later use
-      context.cachedTypeScript = program;
+      cachedProgram = program;
+      cachedTsFiles = tsFiles;
 
-      resolve();
+      resolve(tsFiles);
     }
   });
 }
 
 
-function cleanFileNames(options: BuildOptions, fileNames: string[]) {
+function cleanFileNames(context: BuildContext, fileNames: string[]) {
   let removeFileName = 'main.prod.ts';
-  if (options.isProd) {
+  if (context.isProd) {
     removeFileName = 'main.dev.ts';
   }
   return fileNames.filter(f => {
@@ -74,31 +99,31 @@ function cleanFileNames(options: BuildOptions, fileNames: string[]) {
 }
 
 
-function writeCallback(context: BuildContext, sourcePath: string, data: string) {
+function writeCallback(tsFiles: TsFiles, sourcePath: string, data: string) {
   if (endsWith(sourcePath, '.js')) {
     sourcePath = sourcePath.substring(0, sourcePath.length - 3) + '.ts';
 
-    let file = context.files[sourcePath];
+    let file = tsFiles[sourcePath];
     if (!file) {
-      file = context.files[sourcePath] = {};
+      file = tsFiles[sourcePath] = {};
     }
     file.output = inlineTemplate(data, sourcePath);
 
   } else if (endsWith(sourcePath, '.js.map')) {
     sourcePath = sourcePath.substring(0, sourcePath.length - 7) + '.ts';
 
-    let file = context.files[sourcePath];
+    let file = tsFiles[sourcePath];
     if (!file) {
-      file = context.files[sourcePath] = {};
+      file = tsFiles[sourcePath] = {};
     }
     file.map = data;
   }
 }
 
 
-export function getTsConfig(context: BuildContext): TsConfig {
+export function getTsConfig(context: BuildContext, tsConfigPath?: string): TsConfig {
   let config: TsConfig = null;
-  const tsConfigPath = getTsConfigPath(context);
+  tsConfigPath = tsConfigPath || getTsConfigPath(context);
 
   const tsConfigFile = ts.readConfigFile(tsConfigPath, path => readFileSync(path, 'utf8'));
 
@@ -134,6 +159,10 @@ export function getTsConfig(context: BuildContext): TsConfig {
 
   return config;
 }
+
+
+let cachedProgram: ts.Program = null;
+let cachedTsFiles: TsFiles = null;
 
 
 export function getTsConfigPath(context: BuildContext) {

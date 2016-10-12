@@ -21,7 +21,19 @@ export class BuildError extends Error {
       if (err.name) {
         this.name = err.name;
       }
+      if (typeof err.hasBeenLogged === 'boolean') {
+        this.hasBeenLogged = err.hasBeenLogged;
+      }
     }
+  }
+
+  toJson() {
+    return {
+      message: this.message,
+      name: this.name,
+      stack: this.stack,
+      hasBeenLogged: this.hasBeenLogged
+    };
   }
 
 }
@@ -47,11 +59,11 @@ export class Logger {
   }
 
   ready(chalkColor?: Function) {
-    return this.completed('ready', chalkColor);
+    this.completed('ready', chalkColor);
   }
 
   finish(chalkColor?: Function) {
-    return this.completed('finished', chalkColor);
+    this.completed('finished', chalkColor);
   }
 
   private completed(msg: string, chalkColor: Function) {
@@ -82,7 +94,6 @@ export class Logger {
     }
 
     Logger.info(msg);
-    return true;
   }
 
   fail(err: BuildError) {

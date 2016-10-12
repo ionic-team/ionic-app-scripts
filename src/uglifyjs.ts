@@ -1,19 +1,20 @@
 import { BuildContext, TaskInfo } from './util/interfaces';
-import { fillConfigDefaults, generateContext } from './util/config';
-import { join } from 'path';
 import { BuildError, Logger } from './util/logger';
+import { fillConfigDefaults, generateContext, getUserConfigFile } from './util/config';
+import { join } from 'path';
+import { runWorker } from './worker-client';
 import { writeFileAsync } from './util/helpers';
 import * as uglify from 'uglify-js';
 
 
-export function uglifyjs(context?: BuildContext, uglifyJsConfig?: UglifyJsConfig) {
+export function uglifyjs(context?: BuildContext, configFile?: string) {
   context = generateContext(context);
-  uglifyJsConfig = fillConfigDefaults(context, uglifyJsConfig, UGLIFY_TASK_INFO);
+  configFile = getUserConfigFile(context, taskInfo, configFile);
 
   const logger = new Logger('uglifyjs');
 
-  return runUglify(context, uglifyJsConfig).then(() => {
-    return logger.finish();
+  return runWorker('uglifyjs', context, configFile).then(() => {
+    logger.finish();
 
   }).catch(err => {
     throw logger.fail(err);
@@ -21,10 +22,11 @@ export function uglifyjs(context?: BuildContext, uglifyJsConfig?: UglifyJsConfig
 }
 
 
-function runUglify(context: BuildContext, uglifyJsConfig: UglifyJsConfig): Promise<any> {
+export function uglifyjsWorker(context: BuildContext, configFile: string): Promise<any> {
   return new Promise((resolve, reject) => {
     try {
       // provide a full path for the config options
+      const uglifyJsConfig: UglifyJsConfig = fillConfigDefaults(configFile, taskInfo.defaultConfigFile);
       uglifyJsConfig.sourceFile = join(context.buildDir, uglifyJsConfig.sourceFile);
       uglifyJsConfig.inSourceMap = join(context.buildDir, uglifyJsConfig.inSourceMap);
       uglifyJsConfig.destFileName = join(context.buildDir, uglifyJsConfig.destFileName);
@@ -32,7 +34,7 @@ function runUglify(context: BuildContext, uglifyJsConfig: UglifyJsConfig): Promi
       const minifiedOutputPath = join(context.buildDir, uglifyJsConfig.outSourceMap);
       const minifyOutput: uglify.MinifyOutput = runUglifyInternal(uglifyJsConfig);
 
-      const writeFilePromises: Promise<any>[] = [
+      const writeFilePromises = [
         writeFileAsync(uglifyJsConfig.destFileName, minifyOutput.code),
         writeFileAsync(minifiedOutputPath, minifyOutput.map)
       ];
@@ -57,11 +59,11 @@ function runUglifyInternal(uglifyJsConfig: UglifyJsConfig): uglify.MinifyOutput 
 }
 
 
-const UGLIFY_TASK_INFO: TaskInfo = {
+const taskInfo: TaskInfo = {
   fullArgConfig: '--uglifyjs',
   shortArgConfig: '-u',
   envConfig: 'ionic_uglifyjs',
-  defaultConfigFilename: 'uglifyjs.config'
+  defaultConfigFile: 'uglifyjs.config'
 };
 
 

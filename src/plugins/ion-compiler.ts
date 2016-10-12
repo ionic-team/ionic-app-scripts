@@ -1,9 +1,9 @@
-import { BuildContext, BuildOptions } from '../util/interfaces';
-import * as pluginutils from 'rollup-pluginutils';
 import { dirname, join } from 'path';
+import { TsFiles } from '../util/interfaces';
+import * as pluginutils from 'rollup-pluginutils';
 
 
-export default function ionCompiler(context: BuildContext, options: BuildOptions) {
+export function ionCompiler(tsFiles: TsFiles) {
   const filter = pluginutils.createFilter(INCLUDE, EXCLUDE);
 
   return {
@@ -14,7 +14,7 @@ export default function ionCompiler(context: BuildContext, options: BuildOptions
         return null;
       }
 
-      const file = context.files[sourcePath];
+      const file = tsFiles[sourcePath];
       if (!file || !file.output) {
         console.error(`unable to find ${sourcePath}`);
         return null;
@@ -33,10 +33,10 @@ export default function ionCompiler(context: BuildContext, options: BuildOptions
         return null;
       }
 
-      const importerFile = context.files[importer];
+      const importerFile = tsFiles[importer];
       if (importerFile && importerFile.output) {
         const attemptedImportee = join(dirname(importer), importee) + '.ts';
-        const importeeFile = context.files[attemptedImportee];
+        const importeeFile = tsFiles[attemptedImportee];
         if (importeeFile) {
           return attemptedImportee;
         }
@@ -46,7 +46,7 @@ export default function ionCompiler(context: BuildContext, options: BuildOptions
     },
 
     load(sourcePath: string) {
-      const file = context.files[sourcePath];
+      const file = tsFiles[sourcePath];
       if (file && file.input) {
         return file.input;
       }

@@ -1,6 +1,6 @@
 import { build } from './build';
-import { BuildContext, BuildOptions, TaskInfo } from './util/interfaces';
-import { fillConfigDefaults, generateBuildOptions, generateContext, replacePathVars, setIonicEnvironment } from './util/config';
+import { BuildContext, TaskInfo } from './util/interfaces';
+import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars, setIonicEnvironment } from './util/config';
 import { BuildError, Logger } from './util/logger';
 import * as chalk from 'chalk';
 import * as chokidar from 'chokidar';
@@ -8,42 +8,43 @@ import * as chokidar from 'chokidar';
 
 // https://github.com/paulmillr/chokidar
 
-export function watch(context?: BuildContext, options?: BuildOptions, watchConfig?: WatchConfig) {
+export function watch(context?: BuildContext, configFile?: string) {
   context = generateContext(context);
-  options = generateBuildOptions(options);
-  watchConfig = fillConfigDefaults(context, watchConfig, WATCH_TASK_INFO);
+  configFile = getUserConfigFile(context, taskInfo, configFile);
 
   // force watch options
-  options.isProd = false;
-  options.isWatch = true;
+  context.isProd = false;
+  context.isWatch = true;
 
   const logger = new Logger('watch');
 
   function buildDone() {
-    return startWatchers(context, options, watchConfig).then(() => {
-      return logger.ready(chalk.green);
+    return startWatchers(context, configFile).then(() => {
+      logger.ready(chalk.green);
     });
   }
 
-  return build(context, options)
+  return build(context)
     .then(buildDone, buildDone)
-    .catch(err => {
+    .catch((err: any) => {
       throw logger.fail(err);
     });
 }
 
 
-function startWatchers(context: BuildContext, options: BuildOptions, watchConfig: WatchConfig) {
+function startWatchers(context: BuildContext, configFile: string) {
+  const watchConfig: WatchConfig = fillConfigDefaults(configFile, taskInfo.defaultConfigFile);
+
   const promises = watchConfig
     .watchers
     .filter(w => w.callback && w.paths)
-    .map(w => startWatcher(w, context, options, watchConfig));
+    .map(w => startWatcher(w, context, watchConfig));
 
   return Promise.all(promises);
 }
 
 
-function startWatcher(watcher: Watcher, context: BuildContext, options: BuildOptions, watchConfig: WatchConfig) {
+function startWatcher(watcher: Watcher, context: BuildContext, watchConfig: WatchConfig) {
   return new Promise((resolve, reject) => {
 
     let taskPromise = Promise.resolve();
@@ -61,27 +62,31 @@ function startWatcher(watcher: Watcher, context: BuildContext, options: BuildOpt
     const chokidarWatcher = chokidar.watch(paths, watcherOptions);
 
     chokidarWatcher.on('all', (event: string, path: string) => {
-      setIonicEnvironment(options.isProd);
+      setIonicEnvironment(context.isProd);
 
-      Logger.debug(`watch callback start, id: ${watchCount}, isProd: ${options.isProd}, event: ${event}, path: ${path}`);
+      Logger.debug(`watch callback start, id: ${watchCount}, isProd: ${context.isProd}, event: ${event}, path: ${path}`);
 
-      nextTask = watcher.callback.bind(null, event, path, context, options);
+      function taskDone() {
+        Logger.info(chalk.green('watch ready'));
+      }
+
+      nextTask = watcher.callback.bind(null, event, path, context);
       taskPromise.then(() => {
-        Logger.debug(`watch callback complete, id: ${watchCount}, isProd: ${options.isProd}, event: ${event}, path: ${path}`);
+        Logger.debug(`watch callback complete, id: ${watchCount}, isProd: ${context.isProd}, event: ${event}, path: ${path}`);
         taskPromise = nextTask();
-        taskPromise.catch(taskPromiseErr => {
-          Logger.error(`${taskPromiseErr}`);
-        });
+        taskPromise
+          .then(taskDone, taskDone)
+          .catch(taskDone);
         nextTask = null;
         watchCount++;
 
       }).catch(err => {
-        Logger.debug(`watch callback error, id: ${watchCount}, isProd: ${options.isProd}, event: ${event}, path: ${path}`);
+        Logger.debug(`watch callback error, id: ${watchCount}, isProd: ${context.isProd}, event: ${event}, path: ${path}`);
         Logger.debug(`${err}`);
         taskPromise = nextTask();
-        taskPromise.catch(taskPromiseErr => {
-          Logger.error(`${taskPromiseErr}`);
-        });
+        taskPromise
+          .then(taskDone, taskDone)
+          .catch(taskDone);
         nextTask = null;
         watchCount++;
       });
@@ -110,11 +115,11 @@ function cleanPaths(context: BuildContext, paths: any): any {
 }
 
 
-const WATCH_TASK_INFO: TaskInfo = {
+const taskInfo: TaskInfo = {
   fullArgConfig: '--watch',
   shortArgConfig: '-w',
   envConfig: 'ionic_watch',
-  defaultConfigFilename: 'watch.config'
+  defaultConfigFile: 'watch.config'
 };
 
 
@@ -133,7 +138,7 @@ export interface Watcher {
     cwd?: string;
   };
   callback: {
-    (event: string, path: string, context: BuildContext, options: BuildOptions): void;
+    (event: string, path: string, context: BuildContext): void;
   };
 }
 

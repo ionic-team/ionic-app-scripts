@@ -1,25 +1,23 @@
-import { BuildContext, BuildOptions } from './util/interfaces';
-import { generateContext, generateBuildOptions } from './util/config';
+import { BuildContext } from './util/interfaces';
+import { BuildError, Logger } from './util/logger';
+import { generateContext } from './util/config';
 import { bundle, bundleUpdate } from './bundle';
 import { clean } from './clean';
 import { copy } from './copy';
 import { lint } from './lint';
-import { Logger } from './util/logger';
 import { minifyCss, minifyJs } from './minify';
 import { ngc } from './ngc';
 import { sass, sassUpdate } from './sass';
-import * as chalk from 'chalk';
 
 
-export function build(context: BuildContext, options: BuildOptions) {
+export function build(context: BuildContext) {
   context = generateContext(context);
-  options = generateBuildOptions(options);
 
-  const logger = new Logger(`build ${(options.isProd ? 'prod' : 'dev')}`);
+  const logger = new Logger(`build ${(context.isProd ? 'prod' : 'dev')}`);
 
-  return runBuild(context, options).then(() => {
+  return runBuild(context).then(() => {
     // congrats, we did it!  (•_•) / ( •_•)>⌐■-■ / (⌐■_■)
-    return logger.finish();
+    logger.finish();
 
   }).catch(err => {
     throw logger.fail(err);
@@ -27,18 +25,18 @@ export function build(context: BuildContext, options: BuildOptions) {
 }
 
 
-function runBuild(context: BuildContext, options: BuildOptions) {
-  if (options.isProd) {
+function runBuild(context: BuildContext) {
+  if (context.isProd) {
     // production build
-    return buildProd(context, options);
+    return buildProd(context);
   }
 
   // dev build
-  return buildDev(context, options);
+  return buildDev(context);
 }
 
 
-function buildProd(context: BuildContext, options: BuildOptions) {
+function buildProd(context: BuildContext) {
   // sync empty the www directory
   clean(context);
 
@@ -48,9 +46,9 @@ function buildProd(context: BuildContext, options: BuildOptions) {
   const lintPromise = lint(context);
 
   // kick off ngc to run the Ahead of Time compiler
-  return ngc(context, options).then(() => {
+  return ngc(context).then(() => {
     // ngc has finished, now let's bundle it all together
-    return bundle(context, options);
+    return bundle(context);
 
   }).then(() => {
     // js minify can kick off right away
@@ -76,12 +74,12 @@ function buildProd(context: BuildContext, options: BuildOptions) {
 }
 
 
-function buildDev(context: BuildContext, options: BuildOptions) {
+function buildDev(context: BuildContext) {
   // sync empty the www directory
   clean(context);
 
   // just bundle, and if that passes then do the rest at the same time
-  return bundle(context, options)
+  return bundle(context)
     .then(() => {
       return Promise.all([
         sass(context),
@@ -92,23 +90,16 @@ function buildDev(context: BuildContext, options: BuildOptions) {
 }
 
 
-export function buildUpdate(event: string, path: string, context: BuildContext, options: BuildOptions) {
-  function buildSuccess() {
-    if (event !== 'change') {
-      // if just the TS file changed, then there's no need to do a sass update
-      // however, if a new TS file was added or was deleted, then we should do a sass update
-      return sassUpdate(event, path, context, options, true);
-    }
-    Logger.info(chalk.green('watch ready'));
-    return Promise.resolve();
-  }
-
-  function buildFail() {
-    Logger.info(chalk.green('watch ready'));
-    return Promise.resolve();
-  }
-
-  return bundleUpdate(event, path, context, options, true)
-    .then(buildSuccess, buildFail)
-    .catch(buildFail);
+export function buildUpdate(event: string, path: string, context: BuildContext) {
+  return bundleUpdate(event, path, context)
+    .then(() => {
+      if (event !== 'change') {
+        // if just the TS file changed, then there's no need to do a sass update
+        // however, if a new TS file was added or was deleted, then we should do a sass update
+        return sassUpdate(event, path, context);
+      }
+    })
+    .catch(err => {
+      throw new BuildError(err);
+    });
 }

@@ -1,77 +1,95 @@
 import { basename, dirname, join, sep } from 'path';
-import { BuildContext, BuildOptions, TaskInfo } from './util/interfaces';
-import { ensureDirSync, readdirSync, writeFile } from 'fs-extra';
-import { fillConfigDefaults, generateContext, generateBuildOptions, replacePathVars } from './util/config';
-import { getModulePathsCache } from './bundle';
+import { BuildContext, TaskInfo } from './util/interfaces';
 import { BuildError, Logger } from './util/logger';
+import { ensureDirSync, readdirSync, writeFile } from 'fs-extra';
+import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars } from './util/config';
+import { getModulePathsCache } from './rollup';
+import { runWorker } from './worker-client';
 import * as nodeSass from 'node-sass';
 import * as postcss from 'postcss';
 import * as autoprefixer from 'autoprefixer';
 
 
-export function sass(context?: BuildContext, options?: BuildOptions, sassConfig?: SassConfig, useCache = false) {
+export function sass(context?: BuildContext, configFile?: string) {
   context = generateContext(context);
-  options = generateBuildOptions(options);
-  sassConfig = fillConfigDefaults(context, sassConfig, SASS_TASK_INFO);
+  configFile = getUserConfigFile(context, taskInfo, configFile);
 
   const logger = new Logger('sass');
 
-  // let's begin shall we...
-  return runSass(context, options, sassConfig, useCache).then(() => {
-    return logger.finish();
+  return runWorker('sass', context, configFile)
+    .then(() => {
+      logger.finish();
 
-  }).catch(err => {
-    throw logger.fail(err);
+    }).catch(err => {
+      throw logger.fail(err);
+    });
+}
+
+
+export function sassUpdate(event: string, path: string, context: BuildContext) {
+  const configFile = getUserConfigFile(context, taskInfo, null);
+
+  const logger = new Logger('sass update');
+
+  return runWorker('sass', context, configFile)
+    .then(() => {
+      logger.finish();
+    })
+    .catch(err => {
+      throw logger.fail(err);
+    });
+}
+
+
+export function sassWorker(context: BuildContext, configFile: string) {
+  return new Promise((resolve, reject) => {
+    if (!context.moduleFiles) {
+      // we haven't already gotten the moduleFiles in this process
+      // see if we have it cached
+      context.moduleFiles = getModulePathsCache();
+      if (!context.moduleFiles) {
+        reject(new BuildError('Cannot generate Sass files without first bundling JavaScript ' +
+                    'files in order to know all used modules. Please build JS files first.'));
+        return;
+      }
+    }
+
+    const sassConfig: SassConfig = fillConfigDefaults(configFile, taskInfo.defaultConfigFile);
+
+    // where the final css output file is saved
+    if (!sassConfig.outFile) {
+      sassConfig.outFile = join(context.buildDir, sassConfig.outputFilename);
+    }
+    Logger.debug(`sass outFile: ${sassConfig.outFile}`);
+
+    // import paths where the sass compiler will look for imports
+    sassConfig.includePaths.unshift(join(context.srcDir));
+    Logger.debug(`sass includePaths: ${sassConfig.includePaths}`);
+
+    // sass import sorting algorithms incase there was something to tweak
+    sassConfig.sortComponentPathsFn = (sassConfig.sortComponentPathsFn || defaultSortComponentPathsFn);
+    sassConfig.sortComponentFilesFn = (sassConfig.sortComponentFilesFn || defaultSortComponentFilesFn);
+
+    if (!sassConfig.file) {
+      // if the sass config was not given an input file, then
+      // we're going to dynamically generate the sass data by
+      // scanning through all the components included in the bundle
+      // and generate the sass on the fly
+      generateSassData(context, sassConfig);
+    }
+
+    return render(context, sassConfig).then(() => {
+      resolve(true);
+    }, (reason: any) => {
+      reject(reason);
+    }).catch(err => {
+      throw new BuildError(err);
+    });
   });
 }
 
 
-function runSass(context: BuildContext, options: BuildOptions, sassConfig: SassConfig, useCache: boolean) {
-  if (!context.moduleFiles) {
-    // we haven't already gotten the moduleFiles in this process
-    // see if we have it cached
-    context.moduleFiles = getModulePathsCache();
-    if (!context.moduleFiles) {
-      return Promise.reject(new BuildError('Cannot generate Sass files without first bundling JavaScript ' +
-                  'files in order to know all used modules. Please build JS files first.'));
-    }
-  }
-
-  // where the final css output file is saved
-  if (!sassConfig.outFile) {
-    sassConfig.outFile = join(context.buildDir, sassConfig.outputFilename);
-  }
-  Logger.debug(`sass outFile: ${sassConfig.outFile}`);
-
-  // import paths where the sass compiler will look for imports
-  sassConfig.includePaths.unshift(join(context.srcDir));
-  Logger.debug(`sass includePaths: ${sassConfig.includePaths}`);
-
-  // sass import sorting algorithms incase there was something to tweak
-  sassConfig.sortComponentPathsFn = (sassConfig.sortComponentPathsFn || defaultSortComponentPathsFn);
-  sassConfig.sortComponentFilesFn = (sassConfig.sortComponentFilesFn || defaultSortComponentFilesFn);
-
-  if (!sassConfig.file) {
-    // if the sass config was not given an input file, then
-    // we're going to dynamically generate the sass data by
-    // scanning through all the components included in the bundle
-    // and generate the sass on the fly
-    generateSassData(context, options, sassConfig);
-  }
-
-  return render(context, sassConfig, useCache);
-}
-
-
-export function sassUpdate(event: string, path: string, context: BuildContext, options: BuildOptions, useCache: boolean = false) {
-  Logger.debug(`sassUpdate, event: ${event}, path: ${path}`);
-
-  const sassConfig = fillConfigDefaults(context, null, SASS_TASK_INFO);
-  return sass(context, options, sassConfig, useCache);
-}
-
-
-function generateSassData(context: BuildContext, options: BuildOptions, sassConfig: SassConfig) {
+function generateSassData(context: BuildContext, sassConfig: SassConfig) {
   /**
    * 1) Import user sass variables first since user variables
    *    should have precedence over default library variables.
@@ -203,10 +221,10 @@ function getComponentDirectories(moduleDirectories: string[], sassConfig: SassCo
 }
 
 
-function render(context: BuildContext, sassConfig: SassConfig, useCache: boolean) {
+function render(context: BuildContext, sassConfig: SassConfig) {
   return new Promise((resolve, reject) => {
 
-    if (useCache && lastRenderKey !== null) {
+    if (context.useSassCache && lastRenderKey !== null) {
       // if the sass data imports are same, don't bother
       const renderKey = getRenderCacheKey(sassConfig);
       if (renderKey === lastRenderKey) {
@@ -242,7 +260,7 @@ function render(context: BuildContext, sassConfig: SassConfig, useCache: boolean
           Logger.error(`sass error: ${renderErr}`);
         }
 
-        reject(new BuildError());
+        reject();
 
       } else {
         // sass render success!
@@ -441,11 +459,11 @@ function getRenderCacheKey(sassConfig: SassConfig) {
 let lastRenderKey: string = null;
 
 
-const SASS_TASK_INFO: TaskInfo = {
+const taskInfo: TaskInfo = {
   fullArgConfig: '--sass',
   shortArgConfig: '-s',
   envConfig: 'ionic_sass',
-  defaultConfigFilename: 'sass.config'
+  defaultConfigFile: 'sass.config'
 };
 
 
