@@ -8,8 +8,6 @@ export interface BuildContext {
   moduleFiles?: string[];
   isProd?: boolean;
   isWatch?: boolean;
-  jsSourceMaps?: boolean;
-  cssSourceMaps?: boolean;
   useTranspileCache?: boolean;
   useBundleCache?: boolean;
   useSassCache?: boolean;

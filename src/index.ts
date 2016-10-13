@@ -13,10 +13,16 @@ export { watch } from './watch';
 export * from './util/config';
 export * from './util/helpers';
 export * from './util/interfaces';
-import { Logger } from './util/logger';
+
+import { Logger, getAppScriptsVersion } from './util/logger';
+import * as chalk from 'chalk';
 
 
 export function run(task: string) {
+  try {
+    Logger.info(chalk.cyan(`ionic-app-scripts ${getAppScriptsVersion()}`));
+  } catch (e) {}
+
   try {
     require(`../dist/${task}`)[task]().catch((err: any) => {
       errorLog(task, err);

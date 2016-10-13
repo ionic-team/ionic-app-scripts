@@ -1,5 +1,6 @@
 import { BuildContext, TsFiles } from './util/interfaces';
 import { BuildError, Logger } from './util/logger';
+import { buildJsSourceMaps } from './bundle';
 import { endsWith } from './util/helpers';
 import { generateContext } from './util/config';
 import { inlineTemplate } from './template';
@@ -9,7 +10,7 @@ import { runDiagnostics, printDiagnostic } from './util/logger-typescript';
 import * as ts from 'typescript';
 
 
-export function transpile(context?: BuildContext): Promise<TsFiles> {
+export function transpile(context?: BuildContext) {
   context = generateContext(context);
   const configFile = getTsConfigPath(context);
 
@@ -17,7 +18,6 @@ export function transpile(context?: BuildContext): Promise<TsFiles> {
 
   return transpileWorker(context, configFile).then(tsFiles => {
     logger.finish();
-    return tsFiles;
 
   }).catch(err => {
     throw logger.fail(err);
@@ -25,13 +25,14 @@ export function transpile(context?: BuildContext): Promise<TsFiles> {
 }
 
 
-export function transpileUpdate(event: string, path: string, context: BuildContext): Promise<TsFiles> {
+export function transpileUpdate(event: string, path: string, context: BuildContext) {
   if (path.endsWith('.ts')) {
     cachedTsFiles = null;
   }
 
   if (cachedTsFiles) {
-    return Promise.resolve(cachedTsFiles);
+    context.tsFiles = cachedTsFiles;
+    return Promise.resolve();
   }
 
   const configFile = getTsConfigPath(context);
@@ -40,7 +41,7 @@ export function transpileUpdate(event: string, path: string, context: BuildConte
   return transpileWorker(context, configFile)
     .then(tsFiles => {
       logger.finish();
-      return tsFiles;
+
     })
     .catch(err => {
       throw logger.fail(err);
@@ -48,14 +49,16 @@ export function transpileUpdate(event: string, path: string, context: BuildConte
 }
 
 
-export function transpileWorker(context: BuildContext, configFile: string): Promise<TsFiles> {
+export function transpileWorker(context: BuildContext, configFile: string) {
+  context.tsFiles = null;
+
   return new Promise((resolve, reject) => {
     const tsConfig = getTsConfig(context, configFile);
 
     // force it to save in the src directory
     // however, it's only in memory and won't actually write to disk
     tsConfig.options.outDir = context.srcDir;
-    tsConfig.options.sourceMap = context.jsSourceMaps;
+    tsConfig.options.sourceMap = buildJsSourceMaps(context);
     tsConfig.options.declaration = false;
     const tsFileNames = cleanFileNames(context, tsConfig.fileNames);
 
@@ -81,8 +84,9 @@ export function transpileWorker(context: BuildContext, configFile: string): Prom
       // cache the typescript program for later use
       cachedProgram = program;
       cachedTsFiles = tsFiles;
+      context.tsFiles = tsFiles;
 
-      resolve(tsFiles);
+      resolve();
     }
   });
 }

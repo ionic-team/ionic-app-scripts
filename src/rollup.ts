@@ -9,13 +9,11 @@ import { tmpdir } from 'os';
 import * as rollupBundler from 'rollup';
 
 
-export function rollup(context: BuildContext, configFile: string, tsFiles: TsFiles) {
+export function rollup(context: BuildContext, configFile: string) {
   context = generateContext(context);
   configFile = getUserConfigFile(context, taskInfo, configFile);
 
   const logger = new Logger('bundle');
-
-  context.tsFiles = tsFiles;
 
   return rollupWorker(context, configFile).then(() => {
     logger.finish();
@@ -26,12 +24,10 @@ export function rollup(context: BuildContext, configFile: string, tsFiles: TsFil
 }
 
 
-export function rollupUpdate(event: string, path: string, context: BuildContext, tsFiles: TsFiles) {
+export function rollupUpdate(event: string, path: string, context: BuildContext) {
   const logger = new Logger('bundle update');
 
   const configFile = getUserConfigFile(context, taskInfo, null);
-
-  context.tsFiles = tsFiles;
 
   return rollupWorker(context, configFile).then(() => {
     logger.finish();
@@ -44,11 +40,6 @@ export function rollupUpdate(event: string, path: string, context: BuildContext,
 
 export function rollupWorker(context: BuildContext, configFile: string): Promise<any> {
   return new Promise((resolve, reject) => {
-    if (!context.tsFiles) {
-      reject(new BuildError(`missing ts files`));
-      return;
-    }
-
     let rollupConfig = getRollupConfig(context, configFile);
 
     if (!isAbsolute(rollupConfig.dest)) {

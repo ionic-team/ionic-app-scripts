@@ -44,11 +44,6 @@ export class Logger {
   private scope: string;
 
   constructor(scope: string) {
-    if (!printedAppScriptsVersion) {
-      printedAppScriptsVersion = true;
-      Logger.info(chalk.cyan(`ionic-app-scripts ${getAppScriptsVersion()}`));
-    }
-
     this.start = Date.now();
     this.scope = scope;
     let msg = `${scope} started ${chalk.dim('...')}`;
@@ -357,12 +352,13 @@ function timePrefix() {
   return '[' + ('0' + date.getHours()).slice(-2) + ':' + ('0' + date.getMinutes()).slice(-2) + ':' + ('0' + date.getSeconds()).slice(-2) + ']';
 }
 
+
 function memoryUsage() {
   return chalk.dim(` MEM: ${(process.memoryUsage().rss / 1000000).toFixed(1)}MB`);
 }
 
-let printedAppScriptsVersion = false;
-function getAppScriptsVersion() {
+
+export function getAppScriptsVersion() {
   let rtn = '';
   try {
     const packageJson = readJSONSync(join(__dirname, '..', '..', 'package.json'));
@@ -376,7 +372,6 @@ export interface PrintLine {
   lineNumber: number;
   text: string;
 }
-
 
 
 const JS_KEYWORDS = [

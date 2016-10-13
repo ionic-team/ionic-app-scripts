@@ -14,16 +14,20 @@ export function ionCompiler(context: BuildContext) {
         return null;
       }
 
-      const file = context.tsFiles[sourcePath];
-      if (!file || !file.output) {
-        console.error(`unable to find ${sourcePath}`);
-        return null;
+      if (context.tsFiles) {
+        const file = context.tsFiles[sourcePath];
+        if (!file || !file.output) {
+          console.error(`unable to find ${sourcePath}`);
+          return null;
+        }
+
+        return {
+          code: file.output,
+          map: file.map
+        };
       }
 
-      return {
-        code: file.output,
-        map: file.map
-      };
+      return null;
     },
 
     resolveId(importee: string, importer: string): any {
@@ -33,12 +37,14 @@ export function ionCompiler(context: BuildContext) {
         return null;
       }
 
-      const importerFile = context.tsFiles[importer];
-      if (importerFile && importerFile.output) {
-        const attemptedImportee = join(dirname(importer), importee) + '.ts';
-        const importeeFile = context.tsFiles[attemptedImportee];
-        if (importeeFile) {
-          return attemptedImportee;
+      if (context.tsFiles) {
+        const importerFile = context.tsFiles[importer];
+        if (importerFile && importerFile.output) {
+          const attemptedImportee = join(dirname(importer), importee) + '.ts';
+          const importeeFile = context.tsFiles[attemptedImportee];
+          if (importeeFile) {
+            return attemptedImportee;
+          }
         }
       }
 
@@ -46,9 +52,11 @@ export function ionCompiler(context: BuildContext) {
     },
 
     load(sourcePath: string) {
-      const file = context.tsFiles[sourcePath];
-      if (file && file.input) {
-        return file.input;
+      if (context.tsFiles) {
+        const file = context.tsFiles[sourcePath];
+        if (file && file.input) {
+          return file.input;
+        }
       }
 
       return null;
