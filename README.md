@@ -2,6 +2,11 @@
 
 Helper scripts to get [Ionic apps](http://ionicframework.com/) up and running quickly (minus the config overload).
 
+To get the latest `@ionic/app-scripts`, please run:
+
+```
+npm install @ionic/app-scripts@latest --save-dev
+```
 
 ### Config Defaults
 
