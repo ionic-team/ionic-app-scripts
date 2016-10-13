@@ -1,32 +1,38 @@
 import { access } from 'fs';
 import { BuildContext, TaskInfo } from './util/interfaces';
 import { BuildError, Logger } from './util/logger';
-import { generateContext, getUserConfigFile, getConfigValueDefault, getNodeBinExecutable } from './util/config';
+import { generateContext, getUserConfigFile, getConfigValueDefault } from './util/config';
 import { join } from 'path';
+import { createProgram, findConfiguration, getFileNames } from 'tslint';
+import { printFailures } from './util/logger-tslint';
+import { runWorker } from './worker-client';
+import * as Linter from 'tslint';
+import * as fs from 'fs';
+import * as ts from 'typescript';
 
 
 export function lint(context?: BuildContext, configFile?: string) {
   context = generateContext(context);
   configFile = getUserConfigFile(context, taskInfo, configFile);
 
-  return lintWorker(context, configFile)
+  return runWorker('lint', context, configFile)
     .catch(err => {
       throw new BuildError(err);
     });
 }
 
 
-export function lintWorker(context: BuildContext, tsLintFile?: string) {
+export function lintWorker(context: BuildContext, configFile?: string) {
   return new Promise((resolve, reject) => {
-    tsLintFile = tsLintFile || getConfigValueDefault(taskInfo.fullArgConfig,
+    configFile = configFile || getConfigValueDefault(taskInfo.fullArgConfig,
                                                           taskInfo.shortArgConfig,
                                                           taskInfo.envConfig,
                                                           join(context.rootDir, 'tslint.json'),
                                                           context);
 
-    Logger.debug(`tslint config: ${tsLintFile}`);
+    Logger.debug(`tslint config: ${configFile}`);
 
-    access(tsLintFile, (err) => {
+    access(configFile, (err) => {
       if (err) {
         // if the tslint.json file cannot be found that's fine, the
         // dev may not want to run tslint at all and to do that they
@@ -35,16 +41,17 @@ export function lintWorker(context: BuildContext, tsLintFile?: string) {
         resolve();
         return;
       }
+
       const logger = new Logger('lint');
 
-      runTsLint(context, tsLintFile).then(() => {
+      lintApp(context, configFile).then(() => {
+        // always finish and resolve
         logger.finish();
-        resolve(true);
+        resolve();
 
-      }).catch(err => {
-        logger.fail(err);
-        // tslint should not break the build by default
-        // so just resolve
+      }).catch(() => {
+        // always finish and resolve
+        logger.finish();
         resolve();
       });
 
@@ -53,62 +60,74 @@ export function lintWorker(context: BuildContext, tsLintFile?: string) {
 }
 
 
-function runTsLint(context: BuildContext, tsConfigPath: string) {
-  return new Promise((resolve, reject) => {
-    const cmd = getNodeBinExecutable(context, 'tslint');
-    if (!cmd) {
-      reject(new BuildError(`Unable to find "tslint" command: ${cmd}`));
-      return false;
+function lintApp(context: BuildContext, configFile: string) {
+  const program = createProgram(configFile, context.srcDir);
+  const files = getFileNames(program);
+
+  const promises = files.map(file => {
+    return lintFile(context, program, file);
+  });
+
+  return Promise.all(promises);
+}
+
+
+function lintFile(context: BuildContext, program: ts.Program, file: string) {
+  return new Promise((resolve) => {
+
+    if (isMpegFile(file)) {
+      // silly .ts files actually being video files
+      resolve();
+      return;
     }
 
-    const files = join(context.srcDir, '**', '*.ts');
-
-    const args = [
-      '--config', tsConfigPath,
-      files
-    ];
-
-    const spawn = require('cross-spawn');
-    const cp = spawn(cmd, args);
-
-    cp.on('error', (err: string) => {
-      reject(new BuildError(`tslint error: ${err}`));
-    });
-
-    function printData(data: string) {
-      // NOTE: linting should not fail builds
-      // do not reject() here
-      let output: string[] = [];
-      data = data.toString();
-      const lines = data.split('\n');
-      lines.forEach(line => {
-        line = line.trim();
-        line = line.replace(context.rootDir, '');
-        if (/\/|\\/.test(line.charAt(0))) {
-          line = line.substr(1);
-        }
-        if (line.length) {
-          output.push(line);
-        }
-      });
-
-      if (output.length) {
-        Logger.warn(`tslint warning`);
-        console.log(''); // just for new line
-        output.forEach(line => {
-          Logger.log(line);
-        });
-        console.log(''); // just for new line
+    fs.readFile(file, 'utf8', (err, contents) => {
+      if (err) {
+        // don't care if there was an error
+        // let's just move on with our lives
+        resolve();
+        return;
       }
-    }
 
-    cp.stdout.on('data', printData);
-    cp.stderr.on('data', printData);
+      try {
+        const configuration = findConfiguration(null, file);
 
-    cp.on('close', () => {
+        const linter = new Linter(file, contents, {
+          configuration: configuration,
+          formatter: null,
+          formattersDirectory: null,
+          rulesDirectory: null,
+        }, program);
+
+        const lintResult = linter.lint();
+        printFailures(context, <any>lintResult.failures);
+
+      } catch (e) {
+        Logger.debug(`Linter ${e}`);
+      }
+
       resolve();
     });
+
   });
+}
+
+
+function isMpegFile(file: string) {
+  var buffer = new Buffer(256);
+  buffer.fill(0);
+
+  const fd = fs.openSync(file, 'r');
+  try {
+    fs.readSync(fd, buffer, 0, 256, null);
+    if (buffer.readInt8(0) === 0x47 && buffer.readInt8(188) === 0x47) {
+      Logger.debug(`tslint: ${file}: ignoring MPEG transport stream`);
+      return true;
+    }
+  } finally {
+    fs.closeSync(fd);
+  }
+  return false;
 }
 
 
@@ -118,9 +137,3 @@ const taskInfo: TaskInfo = {
   envConfig: 'ionic_tslint',
   defaultConfigFile: '../tslint'
 };
-
-
-export interface TsLintConfig {
-  // http://palantir.github.io/tslint/
-
-}

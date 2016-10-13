@@ -1,6 +1,5 @@
 import { BuildContext } from './interfaces';
-import { Logger } from './logger';
-import * as chalk from 'chalk';
+import { Logger, PrintLine } from './logger';
 import * as ts from 'typescript';
 
 
@@ -25,36 +24,20 @@ export function runDiagnostics(context: BuildContext, program: ts.Program) {
 
 export function printDiagnostic(context: BuildContext, d: ts.Diagnostic) {
   let header = 'error';
-  const message = ts.flattenDiagnosticMessageText(d.messageText, '\n');
 
   if (d.file) {
     const { line } = d.file.getLineAndCharacterOfPosition(d.start);
-    let filename = d.file.fileName.replace(context.rootDir, '');
-    if (/\/|\\/.test(filename.charAt(0))) {
-      filename = filename.substr(1);
-    }
-    if (filename.length > 80) {
-      filename = '...' + filename.substr(filename.length - 80);
-    }
-    header = `typescript: ${filename}, line: ${line + 1}`;
+    header = Logger.formatHeader('typescript', d.file.fileName, context.rootDir, line + 1);
   }
 
   Logger.error(`${header}`);
 
-  let msgWords = message.replace(/\s/gm, ' ').split(' ');
-  let msgLine = '';
-  msgWords.filter(m => m.length).forEach(m => {
-    msgLine += m + ' ';
-    if ((LEFT_PADDING.length + msgLine.length) > MAX_LEN) {
-      console.log(LEFT_PADDING + msgLine);
-      msgLine = '';
-    }
+  const message = ts.flattenDiagnosticMessageText(d.messageText, '\n');
+  Logger.wordWrap(message).forEach(m => {
+    console.log(m);
   });
-  if (msgLine.length) {
-    console.log(LEFT_PADDING + msgLine);
-  }
 
-  console.log(''); // just for an empty line
+  Logger.newLine();
 
   if (d.file) {
     printCodeHighlight(d);
@@ -66,7 +49,7 @@ function printCodeHighlight(d: ts.Diagnostic) {
   const { line, character } = d.file.getLineAndCharacterOfPosition(d.start);
   const srcLines = d.file.getText().replace(/\\r/g, '\n').split('\n');
 
-  const errorLine = {
+  const errorLine: PrintLine = {
     lineNumber: line + 1,
     text: srcLines[line]
   };
@@ -77,169 +60,30 @@ function printCodeHighlight(d: ts.Diagnostic) {
 
   const printLines: PrintLine[] = [];
 
-  if (line > 0 && meaningfulLine(srcLines[line - 1])) {
-    const beforeLine = {
+  if (line > 0 && Logger.meaningfulLine(srcLines[line - 1])) {
+    const beforeLine: PrintLine = {
       lineNumber: line,
       text: srcLines[line - 1]
     };
-    if (LEFT_PADDING.length + beforeLine.text.length > MAX_LEN) {
-      beforeLine.text = beforeLine.text.substr(0, MAX_LEN - LEFT_PADDING.length - 1);
+    if (Logger.LEFT_PADDING.length + beforeLine.text.length > Logger.MAX_LEN) {
+      beforeLine.text = beforeLine.text.substr(0, Logger.MAX_LEN - Logger.LEFT_PADDING.length - 1);
     }
     printLines.push(beforeLine);
   }
 
-  let errorCharStart = character;
-  let rightSideChars = errorLine.text.length - errorCharStart + d.length - 1;
-  while (errorLine.text.length + LEFT_PADDING.length > MAX_LEN) {
-    if (errorCharStart > (errorLine.text.length - errorCharStart + d.length) && errorCharStart > 5) {
-      // larger on left side
-      errorLine.text = errorLine.text.substr(1);
-      errorCharStart--;
-
-    } else if (rightSideChars > 1) {
-      // larger on right side
-      errorLine.text = errorLine.text.substr(0, errorLine.text.length - 1);
-      rightSideChars--;
-
-    } else {
-      break;
-    }
-  }
-
-  const lineChars = errorLine.text.split('');
-  for (var i = 0; i < lineChars.length; i++) {
-    if (i >= errorCharStart && i < errorCharStart + d.length) {
-      lineChars[i] = chalk.bgRed(lineChars[i]);
-    }
-  }
-  errorLine.text = lineChars.join('');
+  errorLine.text = Logger.highlightError(errorLine.text, character, d.length);
   printLines.push(errorLine);
 
-  if (line + 1 < srcLines.length && meaningfulLine(srcLines[line + 1])) {
-    const afterLine = {
+  if (line + 1 < srcLines.length && Logger.meaningfulLine(srcLines[line + 1])) {
+    const afterLine: PrintLine = {
       lineNumber: line + 2,
       text: srcLines[line + 1]
     };
-    if (LEFT_PADDING.length + afterLine.text.length > MAX_LEN) {
-      afterLine.text = afterLine.text.substr(0, MAX_LEN - LEFT_PADDING.length - 1);
+    if (Logger.LEFT_PADDING.length + afterLine.text.length > Logger.MAX_LEN) {
+      afterLine.text = afterLine.text.substr(0, Logger.MAX_LEN - Logger.LEFT_PADDING.length - 1);
     }
     printLines.push(afterLine);
   }
 
-  removeWhitespaceIndent(printLines);
-
-  printLines.forEach(l => {
-    let msg = 'L' + l.lineNumber + ':  ';
-    while (msg.length < LEFT_PADDING.length) {
-      msg = ' ' + msg;
-    }
-    msg = chalk.dim(msg) + cheapSyntaxHighlight(l.text);
-    console.log(msg);
-  });
-
-  console.log(''); // just for an empty line
+  Logger.printErrorLines(printLines);
 }
-
-
-function cheapSyntaxHighlight(text: string) {
-  if (text.trim().startsWith('//')) {
-    return chalk.dim(text);
-  }
-
-  const words = text.split(' ').map(word => {
-    if (keywords.indexOf(word) > -1) {
-      return chalk.cyan(word);
-    }
-    return word;
-  });
-
-  return words.join(' ');
-}
-
-
-function meaningfulLine(line: string) {
-  if (line) {
-    line = line.trim();
-    if (line.length) {
-      return (MEH_LINES.indexOf(line) < 0);
-    }
-  }
-  return false;
-}
-const MEH_LINES = [';', ':', '{', '}', '(', ')', '/**', '/*', '*/', '*', '({', '})'];
-
-
-function removeWhitespaceIndent(lines: PrintLine[]) {
-  for (var i = 0; i < 100; i++) {
-    if (!eachLineHasLeadingWhitespace(lines)) {
-      return;
-    }
-    for (var i = 0; i < lines.length; i++) {
-      lines[i].text = lines[i].text.substr(1);
-      if (!lines[i].text.length) {
-        return;
-      }
-    }
-  }
-}
-
-
-function eachLineHasLeadingWhitespace(lines: PrintLine[]) {
-  if (!lines.length) {
-    return false;
-  }
-  for (var i = 0; i < lines.length; i++) {
-    if (lines[i].text.length < 1) {
-      return false;
-    }
-    var firstChar = lines[i].text.charAt(0);
-    if (firstChar !== ' ' && firstChar !== '\t') {
-      return false;
-    }
-  }
-  return true;
-}
-
-interface PrintLine {
-  lineNumber: number;
-  text: string;
-}
-
-const LEFT_PADDING = '            ';
-const MAX_LEN = 100;
-
-const keywords = [
-  'as',
-  'break',
-  'case',
-  'catch',
-  'class',
-  'const',
-  'continue',
-  'debugger',
-  'default',
-  'delete',
-  'do',
-  'else',
-  'export',
-  'extends',
-  'finally',
-  'for',
-  'from',
-  'function',
-  'if',
-  'import',
-  'in',
-  'instanceof',
-  'new',
-  'return',
-  'super',
-  'switch',
-  'this',
-  'throw',
-  'try',
-  'typeof',
-  'var',
-  'void',
-  'while',
-];
