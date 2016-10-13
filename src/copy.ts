@@ -10,7 +10,10 @@ export function copy(context?: BuildContext, configFile?: string) {
 
   const logger = new Logger('copy');
 
+  context.successfulCopy = false;
+
   return copyWorker(context, configFile).then(() => {
+    context.successfulCopy = true;
     logger.finish();
 
   }).catch(err => {

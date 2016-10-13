@@ -37,7 +37,7 @@ function runBuild(context: BuildContext) {
 
 
 function buildProd(context: BuildContext) {
-  // sync empty the www directory
+  // sync empty the www/build directory
   clean(context);
 
   // async tasks
@@ -75,25 +75,34 @@ function buildProd(context: BuildContext) {
 
 
 function buildDev(context: BuildContext) {
-  // sync empty the www directory
+  // sync empty the www/build directory
   clean(context);
+
+  // async tasks
+  // these can happen all while other tasks are running
+  const copyPromise = copy(context);
+  const lintPromise = lint(context);
 
   // just bundle, and if that passes then do the rest at the same time
   return bundle(context)
     .then(() => {
       return Promise.all([
         sass(context),
-        copy(context),
-        lint(context)
+        copyPromise,
+        lintPromise
       ]);
     });
 }
 
 
 export function buildUpdate(event: string, path: string, context: BuildContext) {
+  if (!context.successfulCopy) {
+    copy(context);
+  }
+
   return bundleUpdate(event, path, context)
     .then(() => {
-      if (event !== 'change') {
+      if (event !== 'change' || !context.successfulSass) {
         // if just the TS file changed, then there's no need to do a sass update
         // however, if a new TS file was added or was deleted, then we should do a sass update
         return sassUpdate(event, path, context);

@@ -16,8 +16,11 @@ export function sass(context?: BuildContext, configFile?: string) {
 
   const logger = new Logger('sass');
 
+  context.successfulCopy = false;
+
   return runWorker('sass', context, configFile)
     .then(() => {
+      context.successfulSass = true;
       logger.finish();
 
     }).catch(err => {
