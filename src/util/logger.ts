@@ -128,32 +128,55 @@ export class Logger {
    * with whitespace so the message is lined up with timestamped logs.
    */
   static log(...msg: any[]) {
-    console.log(`            ${msg.join(' ')}`);
+    const lines = Logger.wordWrap(msg.join(' '));
+    lines.forEach(line => {
+      console.log(line);
+    });
   }
 
   /**
    * Prints out a dim colored timestamp prefix.
    */
   static info(...msg: any[]) {
-    console.log(`${chalk.dim(timePrefix())}  ${msg.join(' ')}`);
+    const lines = Logger.wordWrap(msg.join(' '));
+    if (lines.length) {
+      let prefix = timePrefix();
+      lines[0] = chalk.dim(prefix) + lines[0].substr(prefix.length);
+    }
+    lines.forEach(line => {
+      console.log(line);
+    });
   }
 
   /**
    * Prints out a yellow colored timestamp prefix.
    */
   static warn(...msg: any[]) {
-    console.warn(chalk.yellow(`${timePrefix()}  ${msg.join(' ')}`));
+    const lines = Logger.wordWrap(msg.join(' '));
+    if (lines.length) {
+      let prefix = timePrefix();
+      lines[0] = prefix + lines[0].substr(prefix.length);
+    }
+    lines.forEach(line => {
+      console.warn(chalk.yellow(line));
+    });
   }
 
   /**
    * Prints out a error colored timestamp prefix.
    */
   static error(...msg: any[]) {
-    let errMsg = chalk.red(`${timePrefix()}  ${msg.join(' ')}`);
-    if (isDebugMode()) {
-      errMsg += memoryUsage();
+    const lines = Logger.wordWrap(msg.join(' '));
+    if (lines.length) {
+      let prefix = timePrefix();
+      lines[0] = prefix + lines[0].substr(prefix.length);
+      if (isDebugMode()) {
+        lines[0] += memoryUsage();
+      }
     }
-    console.error(errMsg);
+    lines.forEach(line => {
+      console.error(chalk.red(line));
+    });
   }
 
   /**
@@ -162,7 +185,15 @@ export class Logger {
   static debug(...msg: any[]) {
     if (isDebugMode()) {
       msg.push(memoryUsage());
-      console.log(`${chalk.cyan('[ DEBUG! ]')}  ${msg.join(' ')}`);
+
+      const lines = Logger.wordWrap(msg.join(' '));
+      if (lines.length) {
+        let prefix = '[ DEBUG! ]';
+        lines[0] = prefix + lines[0].substr(prefix.length);
+      }
+      lines.forEach(line => {
+        console.log(chalk.cyan(line));
+      });
     }
   }
 
