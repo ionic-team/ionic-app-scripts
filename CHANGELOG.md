@@ -12,6 +12,7 @@ npm install @ionic/app-scripts@latest --save-dev
 * Add syntax highlighting and colors to typescript, sass and tslint errors
 * Improved error messages for typescript errors
 * `clean` task only cleans out the `www/build/` directory rather than all of `www/`
+* Add task to copy `src/service-worker.js` to `www/service-worker.js`
 * Add task to copy `src/manifest.json` to `www/manifest.json`
 
 
