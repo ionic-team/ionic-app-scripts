@@ -1,8 +1,17 @@
+To get the latest `@ionic/app-scripts`, please run:
+
+```
+npm install @ionic/app-scripts@latest --save-dev
+```
+
+
 # 0.0.31 (2016-10-11)
 
 * Add ability use multiple processor cores for various subtasks
 * Use typescript `createProgram` to transpile entire app
 * Add syntax highlighting and colors to typescript, sass and tslint errors
+* Improved error messages for typescript errors
+* `clean` task only cleans out the `www/build/` directory rather than all of `www/`
 * Add task to copy `src/manifest.json` to `www/manifest.json`
 
 
