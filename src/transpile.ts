@@ -5,7 +5,7 @@ import { generateContext } from './util/config';
 import { inlineTemplate } from './template';
 import { join } from 'path';
 import { readFileSync } from 'fs';
-import { runDiagnostics, printDiagnostic } from './util/ts-diagnostics';
+import { runDiagnostics, printDiagnostic } from './util/logger-typescript';
 import * as ts from 'typescript';
 
 
