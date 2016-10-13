@@ -13,6 +13,7 @@ export interface BuildContext {
   useTranspileCache?: boolean;
   useBundleCache?: boolean;
   useSassCache?: boolean;
+  tsFiles?: TsFiles;
 }
 
 

@@ -6,19 +6,18 @@ import { ionCompiler } from './plugins/ion-compiler';
 import { join, isAbsolute } from 'path';
 import { outputJson, readJsonSync } from 'fs-extra';
 import { tmpdir } from 'os';
+import * as rollupBundler from 'rollup';
 
 
 export function rollup(context: BuildContext, configFile: string, tsFiles: TsFiles) {
   context = generateContext(context);
+  configFile = getUserConfigFile(context, taskInfo, configFile);
 
   const logger = new Logger('bundle');
 
-  const workerConfig: RollupWorkerConfig = {
-    configFile: getUserConfigFile(context, taskInfo, configFile),
-    tsFiles: tsFiles
-  };
+  context.tsFiles = tsFiles;
 
-  return rollupWorker(context, workerConfig).then(() => {
+  return rollupWorker(context, configFile).then(() => {
     logger.finish();
 
   }).catch(err => {
@@ -30,12 +29,11 @@ export function rollup(context: BuildContext, configFile: string, tsFiles: TsFil
 export function rollupUpdate(event: string, path: string, context: BuildContext, tsFiles: TsFiles) {
   const logger = new Logger('bundle update');
 
-  const workerConfig: RollupWorkerConfig = {
-    configFile: getUserConfigFile(context, taskInfo, null),
-    tsFiles: tsFiles
-  };
+  const configFile = getUserConfigFile(context, taskInfo, null);
 
-  return rollupWorker(context, workerConfig).then(() => {
+  context.tsFiles = tsFiles;
+
+  return rollupWorker(context, configFile).then(() => {
     logger.finish();
 
   }).catch(err => {
@@ -44,14 +42,14 @@ export function rollupUpdate(event: string, path: string, context: BuildContext,
 }
 
 
-export function rollupWorker(context: BuildContext, workerConfig: RollupWorkerConfig): Promise<any> {
+export function rollupWorker(context: BuildContext, configFile: string): Promise<any> {
   return new Promise((resolve, reject) => {
-    if (!workerConfig.tsFiles) {
+    if (!context.tsFiles) {
       reject(new BuildError(`missing ts files`));
       return;
     }
 
-    const rollupConfig = getRollupConfig(context, workerConfig.configFile);
+    let rollupConfig = getRollupConfig(context, configFile);
 
     if (!isAbsolute(rollupConfig.dest)) {
       // user can pass in absolute paths
@@ -70,7 +68,7 @@ export function rollupWorker(context: BuildContext, workerConfig: RollupWorkerCo
       // dev mode auto-adds the ion-compiler plugin, which will inline
       // templates and transpile source typescript code to JS before bundling
       rollupConfig.plugins.unshift(
-        ionCompiler(workerConfig.tsFiles)
+        ionCompiler(context)
       );
     }
 
@@ -89,8 +87,7 @@ export function rollupWorker(context: BuildContext, workerConfig: RollupWorkerCo
     checkDeprecations(context, rollupConfig);
 
     // bundle the app then create create css
-    const rollup = require('rollup').rollup;
-    rollup(rollupConfig).then((bundle: RollupBundle) => {
+    rollupBundler.rollup(rollupConfig).then((bundle: RollupBundle) => {
 
       Logger.debug(`bundle.modules: ${bundle.modules.length}`);
 
@@ -104,25 +101,24 @@ export function rollupWorker(context: BuildContext, workerConfig: RollupWorkerCo
 
       // cache our bundle for later use
       if (context.isWatch) {
-        // cachedBundle = bundle;
+        cachedBundle = bundle;
       }
-
-      // clean up any references
-      rollupConfig.cache = rollupConfig.onwarn = rollupConfig.plugins = null;
 
       // write the bundle
       bundle.write(rollupConfig).then(() => {
+        // clean up any references (overkill yes, but let's play it safe)
+        bundle = rollupConfig = rollupConfig.cache = rollupConfig.onwarn = rollupConfig.plugins = null;
         resolve();
 
       }).catch((err: any) => {
-      // ensure references are cleared up when there's an error
-        cachedBundle = rollupConfig.cache = rollupConfig.onwarn = rollupConfig.plugins = null;
+        // ensure references are cleared up when there's an error
+        bundle = cachedBundle = rollupConfig = rollupConfig.cache = rollupConfig.onwarn = rollupConfig.plugins = null;
         throw new BuildError(err);
       });
 
     }).catch((err: any) => {
       // ensure references are cleared up when there's an error
-      cachedBundle = rollupConfig.cache = rollupConfig.onwarn = rollupConfig.plugins = null;
+      cachedBundle = rollupConfig = rollupConfig.cache = rollupConfig.onwarn = rollupConfig.plugins = null;
       throw new BuildError(err);
     });
   });
@@ -255,10 +251,4 @@ export interface RollupBundle {
 
 export interface RollupModule {
   id: string;
-}
-
-
-export interface RollupWorkerConfig {
-  configFile: string;
-  tsFiles?: TsFiles;
 }
