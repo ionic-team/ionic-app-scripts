@@ -1,6 +1,10 @@
-import { readFile, writeFile } from 'fs';
-import { BuildError } from './logger';
+import { outputJson, readFile, readJsonSync, writeFile } from 'fs-extra';
+import { BuildError, Logger } from './logger';
+import { join } from 'path';
+import { tmpdir } from 'os';
+import { TsFiles } from './interfaces';
 
+let tsFiles: TsFiles;
 
 export const objectAssign = (Object.assign) ? Object.assign : function (target: any, source: any) {
   const output = Object(target);
@@ -51,4 +55,49 @@ export function readFileAsync(filePath: string): Promise<string> {
       }
     });
   });
+}
+
+export function setModulePathsCache(modulePaths: string[]) {
+  // async save the module paths for later lookup
+  const modulesCachePath = getModulesPathsCachePath();
+
+  Logger.debug(`Cached module paths: ${modulePaths && modulePaths.length}, ${modulesCachePath}`);
+
+  outputJson(modulesCachePath, modulePaths, (err) => {
+    if (err) {
+      Logger.error(`Error writing module paths cache: ${err}`);
+    }
+  });
+}
+
+
+export function getModulesPathsCachePath(): string {
+  // make a unique tmp directory for this project's module paths cache file
+  let cwd = process.cwd().replace(/-|:|\/|\\|\.|~|;|\s/g, '').toLowerCase();
+  if (cwd.length > 40) {
+    cwd = cwd.substr(cwd.length - 40);
+  }
+  return join(tmpdir(), cwd, 'modulepaths.json');
+}
+
+export function getModulePathsCache(): string[] {
+  // sync get the cached array of module paths (if they exist)
+  let modulePaths: string[] = null;
+  const modulesCachePath = getModulesPathsCachePath();
+  try {
+    modulePaths = readJsonSync(modulesCachePath, <any>{ throws: false });
+    Logger.debug(`Cached module paths: ${modulePaths && modulePaths.length}, ${modulesCachePath}`);
+  } catch (e) {
+    Logger.debug(`Cached module paths not found: ${modulesCachePath}`);
+  }
+  return modulePaths;
+}
+
+
+export function cacheTranspiledTsFiles(inTsFiles: TsFiles) {
+  tsFiles = inTsFiles;
+}
+
+export function getCachedTranspiledTsFiles() {
+  return tsFiles;
 }

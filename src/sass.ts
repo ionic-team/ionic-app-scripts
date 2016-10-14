@@ -3,7 +3,7 @@ import { BuildContext, TaskInfo } from './util/interfaces';
 import { BuildError, Logger } from './util/logger';
 import { ensureDirSync, readdirSync, writeFile } from 'fs-extra';
 import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars } from './util/config';
-import { getModulePathsCache } from './rollup';
+import { getModulePathsCache } from './util/helpers';
 import { runWorker } from './worker-client';
 import * as nodeSass from 'node-sass';
 import * as postcss from 'postcss';
