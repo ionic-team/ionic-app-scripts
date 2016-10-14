@@ -21,13 +21,13 @@ export function build(context: BuildContext) {
       // congrats, we did it!  (•_•) / ( •_•)>⌐■-■ / (⌐■_■)
       logger.finish();
     })
-    .catch(err => {
+    .catch((err: BuildError) => {
       throw logger.fail(err);
     });
 }
 
 
-function runBuild(context: BuildContext) {
+function runBuild(context: BuildContext): Promise<any> {
   if (context.isProd) {
     // production build
     return buildProd(context);
