@@ -55,9 +55,6 @@ export function transpileWorker(context: BuildContext, configFile: string) {
   return new Promise((resolve, reject) => {
     const tsConfig = getTsConfig(context, configFile);
 
-    // force it to save in the src directory
-    // however, it's only in memory and won't actually write to disk
-    tsConfig.options.outDir = context.srcDir;
     tsConfig.options.sourceMap = buildJsSourceMaps(context);
     tsConfig.options.declaration = false;
     const tsFileNames = cleanFileNames(context, tsConfig.fileNames);
