@@ -1,7 +1,7 @@
 import { BuildContext } from './util/interfaces';
 import { BuildError } from './util/logger';
 import { generateContext } from './util/config';
-import { rollup, rollupUpdate, getRollupConfig } from './rollup';
+import { rollup, rollupUpdate, getRollupConfig, getOutputDest } from './rollup';
 
 
 export function bundle(context?: BuildContext, configFile?: string) {
@@ -25,4 +25,10 @@ export function bundleUpdate(event: string, path: string, context: BuildContext)
 export function buildJsSourceMaps(context: BuildContext) {
   const rollupConfig = getRollupConfig(context, null);
   return rollupConfig.sourceMap;
+}
+
+
+export function getJsOutputDest(context: BuildContext) {
+  const rollupConfig = getRollupConfig(context, null);
+  return getOutputDest(context, rollupConfig);
 }

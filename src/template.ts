@@ -1,10 +1,9 @@
 import { BuildContext } from './util/interfaces';
 import { BuildError, Logger } from './util/logger';
-import { bundleUpdate } from './bundle';
-import { clearCachedModule } from './rollup';
+import { bundleUpdate, getJsOutputDest } from './bundle';
 import { dirname, join, parse, basename } from 'path';
 import { endsWith } from './util/helpers';
-import { readFileSync, readdirSync } from 'fs';
+import { readFileSync, readdirSync, writeFileSync } from 'fs';
 import { sassUpdate } from './sass';
 import * as MagicString from 'magic-string';
 
@@ -28,13 +27,9 @@ function templateUpdateWorker(event: string, path: string, context: BuildContext
   Logger.debug(`templateUpdate, event: ${event}, path: ${path}`);
 
   if (event === 'change') {
-    // just a change event, see if this html file has a component in the same directory
-    // doing this to prevent an unnecessary TS compile and bundling without cache if it was just a HTML change
-    const componentFile = getSourceComponentFile(path, context);
-    if (componentFile && clearCachedModule(context, componentFile)) {
-      // we successfully found the compiled JS file and cleared it from the bundle cache
-      context.useBundleCache = true;
-      return bundleUpdate(event, path, context);
+    if (updateBundledJsTemplate(context, path)) {
+      Logger.debug(`templateUpdate, updated js bundle, path: ${path}`);
+      return Promise.resolve();
     }
   }
 
@@ -118,36 +113,90 @@ export function inlineTemplate(sourceText: string, sourcePath: string): string {
 
 
 function updateTemplate(componentDir: string, match: TemplateUrlMatch): string {
-  const templateContent = getTemplateContent(componentDir, match.templateUrl);
-  if (!templateContent) {
-    return null;
+  const htmlFilePath = join(componentDir, match.templateUrl);
+
+  try {
+    const templateContent = readFileSync(htmlFilePath, 'utf8');
+    return replaceTemplateUrl(match, htmlFilePath, templateContent);
+  } catch (e) {
+    Logger.error(`template error, "${htmlFilePath}": ${e}`);
   }
-  return replaceTemplateUrl(match, templateContent);
+
+  return null;
 }
 
 
-export function replaceTemplateUrl(match: TemplateUrlMatch, templateContent: string): string {
-  // turn the template into one line and espcape single quotes
-  templateContent = templateContent.replace(/\r|\n/g, '\\n');
-  templateContent = templateContent.replace(/\'/g, '\\\'');
-
+export function replaceTemplateUrl(match: TemplateUrlMatch, htmlFilePath: string, templateContent: string): string {
   const orgTemplateProperty = match.templateProperty;
-  const newTemplateProperty = 'template: /* ion-inline-template */ \'' + templateContent + '\'';
+  const newTemplateProperty = getTemplateFormat(htmlFilePath, templateContent);
 
   return match.component.replace(orgTemplateProperty, newTemplateProperty);
 }
 
 
-function getTemplateContent(componentDir: string, templateUrl: string) {
-  let rtn: string = null;
+function updateBundledJsTemplate(context: BuildContext, htmlFilePath: string) {
+  const outputDest = getJsOutputDest(context);
 
   try {
-    rtn = readFileSync(join(componentDir, templateUrl), 'utf-8');
+    let bundleSourceText = readFileSync(outputDest, 'utf8');
+    let newTemplateContent = readFileSync(htmlFilePath, 'utf8');
+
+    bundleSourceText = replaceBundleJsTemplate(bundleSourceText, newTemplateContent, htmlFilePath);
+
+    if (bundleSourceText) {
+      writeFileSync(outputDest, bundleSourceText, { encoding: 'utf8'});
+      return true;
+    }
+
   } catch (e) {
-    Logger.error(`Error reading template file, "${templateUrl}": ${e}`);
+    Logger.debug(`templateUpdate, error opening bundle js: ${e}`);
   }
 
-  return rtn;
+  return false;
+}
+
+export function replaceBundleJsTemplate(bundleSourceText: string, newTemplateContent: string, htmlFilePath: string): string {
+  const prefix = getTemplatePrefix(htmlFilePath);
+  const startIndex = bundleSourceText.indexOf(prefix);
+
+  if (startIndex === -1) {
+    return null;
+  }
+
+  const suffix = getTemplateSuffix(htmlFilePath);
+  const endIndex = bundleSourceText.indexOf(suffix, startIndex + 1);
+
+  if (endIndex === -1) {
+    return null;
+  }
+
+  const oldTemplate = bundleSourceText.substring(startIndex, endIndex + suffix.length);
+  const newTemplate = getTemplateFormat(htmlFilePath, newTemplateContent);
+
+  while (bundleSourceText.indexOf(oldTemplate) > -1) {
+    bundleSourceText = bundleSourceText.replace(oldTemplate, newTemplate);
+  }
+
+  return bundleSourceText;
+}
+
+
+export function getTemplateFormat(htmlFilePath: string, content: string) {
+  // turn the template into one line and espcape single quotes
+  content = content.replace(/\r|\n/g, '\\n');
+  content = content.replace(/\'/g, '\\\'');
+
+  return `${getTemplatePrefix(htmlFilePath)}'${content}'${getTemplateSuffix(htmlFilePath)}`;
+}
+
+
+function getTemplatePrefix(sourcePath: string) {
+  return `template:/*ion-inline-start:"${sourcePath}"*/`;
+}
+
+
+function getTemplateSuffix(sourcePath: string) {
+  return `/*ion-inline-end:"${sourcePath}"*/`;
 }
 
 
