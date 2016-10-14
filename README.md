@@ -12,9 +12,11 @@ npm install @ionic/app-scripts@latest --save-dev
 
 Out of the box, Ionic starters have been preconfigured with great defaults for building fast apps, including:
 
+- Multi-core processing tasks in parallel for faster builds
 - Transpiling source code to ES5 JavaScript
 - Ahead of Time (AoT) template compiling
 - Just in Time (JiT) template compiling
+- Template inlining for JiT builds
 - Bundling modules for faster runtime execution
 - Treeshaking unused components and dead-code removal
 - Generating CSS from bundled component Sass files

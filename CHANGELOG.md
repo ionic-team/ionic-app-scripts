@@ -5,7 +5,18 @@ npm install @ionic/app-scripts@latest --save-dev
 ```
 
 
-# 0.0.31 (2016-10-11)
+# 0.0.33 (2016-10-14)
+
+* Improve build times for template changes
+* Fix bundle updates on template changes
+
+
+# 0.0.32 (2016-10-14)
+
+* Fix Windows entry path normalization
+
+
+# 0.0.31 (2016-10-13)
 
 * Add ability use multiple processor cores for various subtasks
 * Use typescript `createProgram` to transpile entire app
