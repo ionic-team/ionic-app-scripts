@@ -1,3 +1,3 @@
 module.exports = {
-  useWebpack: true
+  useWebpack: false
 }
