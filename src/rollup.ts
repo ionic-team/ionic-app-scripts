@@ -3,7 +3,7 @@ import { BuildError, Logger } from './util/logger';
 import { endsWith } from './util/helpers';
 import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars } from './util/config';
 import { ionCompiler } from './plugins/ion-compiler';
-import { join, isAbsolute } from 'path';
+import { join, isAbsolute, normalize } from 'path';
 import { outputJson, readJsonSync } from 'fs-extra';
 import { tmpdir } from 'os';
 import * as rollupBundler from 'rollup';
@@ -49,8 +49,8 @@ export function rollupWorker(context: BuildContext, configFile: string): Promise
     }
 
     // replace any path vars like {{TMP}} with the real path
-    rollupConfig.entry = replacePathVars(context, rollupConfig.entry);
-    rollupConfig.dest = replacePathVars(context, rollupConfig.dest);
+    rollupConfig.entry = replacePathVars(context, normalize(rollupConfig.entry));
+    rollupConfig.dest = replacePathVars(context, normalize(rollupConfig.dest));
 
     if (!context.isProd) {
       // ngc does full production builds itself and the bundler

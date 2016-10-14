@@ -4,7 +4,7 @@ import { buildJsSourceMaps } from './bundle';
 import { endsWith } from './util/helpers';
 import { generateContext } from './util/config';
 import { inlineTemplate } from './template';
-import { join } from 'path';
+import { join, normalize } from 'path';
 import { readFileSync } from 'fs';
 import { runDiagnostics, printDiagnostic } from './util/logger-typescript';
 import * as ts from 'typescript';
@@ -104,6 +104,8 @@ function cleanFileNames(context: BuildContext, fileNames: string[]) {
 
 
 function writeCallback(tsFiles: TsFiles, sourcePath: string, data: string) {
+  sourcePath = normalize(sourcePath);
+
   if (endsWith(sourcePath, '.js')) {
     sourcePath = sourcePath.substring(0, sourcePath.length - 3) + '.ts';
 
