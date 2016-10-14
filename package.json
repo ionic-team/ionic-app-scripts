@@ -48,10 +48,12 @@
   },
   "devDependencies": {
     "@types/chalk": "0.4.30",
+    "@types/chokidar": "^1.4.29",
     "@types/clean-css": "3.4.29",
     "@types/fs-extra": "0.0.33",
     "@types/jasmine": "2.2.33",
     "@types/node": "6.0.38",
+    "@types/node-sass": "0.0.29",
     "@types/uglify-js": "2.0.27",
     "jasmine": "2.5.2",
     "tslint": "3.15.1",
