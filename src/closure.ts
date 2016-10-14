@@ -10,12 +10,13 @@ export function closure(context?: BuildContext, configFile?: string) {
 
   const logger = new Logger('closure');
 
-  return runWorker('closure', context, configFile).then(() => {
-    logger.finish();
-
-  }).catch(err => {
-    throw logger.fail(err);
-  });
+  return runWorker('closure', context, configFile)
+    .then(() => {
+      logger.finish();
+    })
+    .catch(err => {
+      throw logger.fail(err);
+    });
 }
 
 
@@ -43,5 +44,5 @@ const taskInfo: TaskInfo = {
 
 export interface ClosureConfig {
   // https://developers.google.com/closure/compiler/docs/gettingstarted_app
-  executable: string;
+  pathToJavaExecutable: string;
 }

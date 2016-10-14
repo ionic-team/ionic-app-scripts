@@ -11,12 +11,13 @@ export function minify(context?: BuildContext) {
 
   const logger = new Logger('minify');
 
-  return minifyWorker(context).then(() => {
-    logger.finish();
-
-  }).catch(err => {
-    throw logger.fail(err);
-  });
+  return minifyWorker(context)
+    .then(() => {
+      logger.finish();
+    })
+    .catch(err => {
+      throw logger.fail(err);
+    });
 }
 
 

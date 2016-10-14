@@ -13,12 +13,13 @@ export function cleancss(context?: BuildContext, configFile?: string) {
 
   const logger = new Logger('cleancss');
 
-  return runWorker('cleancss', context, configFile).then(() => {
-    logger.finish();
-
-  }).catch(err => {
-    throw logger.fail(err);
-  });
+  return runWorker('cleancss', context, configFile)
+    .then(() => {
+      logger.finish();
+    })
+    .catch(err => {
+      throw logger.fail(err);
+    });
 }
 
 

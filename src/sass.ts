@@ -22,8 +22,8 @@ export function sass(context?: BuildContext, configFile?: string) {
     .then(() => {
       context.successfulSass = true;
       logger.finish();
-
-    }).catch(err => {
+    })
+    .catch(err => {
       throw logger.fail(err);
     });
 }
@@ -37,8 +37,8 @@ export function sassUpdate(event: string, path: string, context: BuildContext) {
   return runWorker('sass', context, configFile)
     .then(() => {
       logger.finish();
-    })
-    .catch(err => {
+
+    }).catch(err => {
       throw logger.fail(err);
     });
 }
@@ -81,13 +81,15 @@ export function sassWorker(context: BuildContext, configFile: string) {
       generateSassData(context, sassConfig);
     }
 
-    return render(context, sassConfig).then(() => {
-      resolve(true);
-    }, (reason: any) => {
-      reject(reason);
-    }).catch(err => {
-      throw new BuildError(err);
-    });
+    return render(context, sassConfig)
+      .then(() => {
+        resolve(true);
+      }, (reason: any) => {
+        reject(reason);
+      })
+      .catch(err => {
+        throw new BuildError(err);
+      });
   });
 }
 
