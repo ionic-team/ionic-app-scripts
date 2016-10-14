@@ -16,13 +16,14 @@ export function build(context: BuildContext) {
 
   const logger = new Logger(`build ${(context.isProd ? 'prod' : 'dev')}`);
 
-  return runBuild(context).then(() => {
-    // congrats, we did it!  (•_•) / ( •_•)>⌐■-■ / (⌐■_■)
-    logger.finish();
-
-  }).catch(err => {
-    throw logger.fail(err);
-  });
+  return runBuild(context)
+    .then(() => {
+      // congrats, we did it!  (•_•) / ( •_•)>⌐■-■ / (⌐■_■)
+      logger.finish();
+    })
+    .catch(err => {
+      throw logger.fail(err);
+    });
 }
 
 
@@ -51,8 +52,8 @@ function buildProd(context: BuildContext) {
     .then(() => {
       // ngc has finished, now let's bundle it all together
       return bundle(context);
-
-    }).then(() => {
+    })
+    .then(() => {
       // js minify can kick off right away
       const jsPromise = minifyJs(context);
 
@@ -66,8 +67,8 @@ function buildProd(context: BuildContext) {
         jsPromise,
         sassPromise
       ]);
-
-    }).then(() => {
+    })
+    .then(() => {
       // ensure the async tasks have fully completed before resolving
       return Promise.all([
         copyPromise,
@@ -114,7 +115,7 @@ export function buildUpdate(event: string, path: string, context: BuildContext) 
 
   return transpileUpdate(event, path, context)
     .then(() => {
-      return bundleUpdate(event, path, context)
+      return bundleUpdate(event, path, context);
     })
     .then(() => {
       if (event !== 'change' || !context.successfulSass) {

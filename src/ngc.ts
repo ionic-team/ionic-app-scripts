@@ -14,12 +14,13 @@ export function ngc(context?: BuildContext, configFile?: string) {
 
   const logger = new Logger('ngc');
 
-  return ngcWorker(context, configFile).then(() => {
-    logger.finish();
-
-  }).catch(err => {
-    throw logger.fail(err);
-  });
+  return ngcWorker(context, configFile)
+    .then(() => {
+      logger.finish();
+    })
+    .catch(err => {
+      throw logger.fail(err);
+    });
 }
 
 

@@ -13,12 +13,13 @@ export function uglifyjs(context?: BuildContext, configFile?: string) {
 
   const logger = new Logger('uglifyjs');
 
-  return runWorker('uglifyjs', context, configFile).then(() => {
-    logger.finish();
-
-  }).catch(err => {
-    throw logger.fail(err);
-  });
+  return runWorker('uglifyjs', context, configFile)
+    .then(() => {
+      logger.finish();
+    })
+    .catch(err => {
+      throw logger.fail(err);
+    });
 }
 
 

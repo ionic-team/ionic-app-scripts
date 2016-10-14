@@ -12,13 +12,14 @@ export function copy(context?: BuildContext, configFile?: string) {
 
   context.successfulCopy = false;
 
-  return copyWorker(context, configFile).then(() => {
-    context.successfulCopy = true;
-    logger.finish();
-
-  }).catch(err => {
-    throw logger.fail(err);
-  });
+  return copyWorker(context, configFile)
+    .then(() => {
+      context.successfulCopy = true;
+      logger.finish();
+    })
+    .catch(err => {
+      throw logger.fail(err);
+    });
 }
 
 

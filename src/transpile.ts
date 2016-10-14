@@ -16,12 +16,13 @@ export function transpile(context?: BuildContext) {
 
   const logger = new Logger('transpile');
 
-  return transpileWorker(context, configFile).then(tsFiles => {
-    logger.finish();
-
-  }).catch(err => {
-    throw logger.fail(err);
-  });
+  return transpileWorker(context, configFile)
+    .then(() => {
+      logger.finish();
+    })
+    .catch(err => {
+      throw logger.fail(err);
+    });
 }
 
 
@@ -41,7 +42,6 @@ export function transpileUpdate(event: string, path: string, context: BuildConte
   return transpileWorker(context, configFile)
     .then(tsFiles => {
       logger.finish();
-
     })
     .catch(err => {
       throw logger.fail(err);

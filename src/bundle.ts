@@ -1,17 +1,18 @@
 import { BuildContext, TaskInfo } from './util/interfaces';
 import { BuildError } from './util/logger';
 import { fillConfigDefaults, generateContext, getUserConfigFile } from './util/config';
-import { rollup, rollupUpdate, getRollupConfig } from './rollup';
-import { webpack, webpackUpdate } from './webpack';
+import { rollup, rollupUpdate, getRollupConfig, getOutputDest as rollupGetOutputDest } from './rollup';
+import { getWebpackConfig, webpack, webpackUpdate, getOutputDest as webpackGetOutputDest } from './webpack';
 
 
 export function bundle(context?: BuildContext, configFile?: string) {
   context = generateContext(context);
   const bundleConfig = getBundleConfig(context, configFile);
 
-  return createBundle(context, configFile, bundleConfig).catch((err: Error) => {
-    throw new BuildError(err);
-  });
+  return createBundle(context, configFile, bundleConfig)
+    .catch((err: Error) => {
+      throw new BuildError(err);
+    });
 }
 
 function createBundle(context: BuildContext, configFile: string, bundleConfig: BundleConfig) {
@@ -25,13 +26,15 @@ function createBundle(context: BuildContext, configFile: string, bundleConfig: B
 export function bundleUpdate(event: string, path: string, context: BuildContext) {
   const bundleConfig = getBundleConfig(context, null);
   if (bundleConfig.useWebpack) {
-    return webpackUpdate(event, path, context, null).catch( (err: Error) => {
-      throw new BuildError(err);
-    });
+    return webpackUpdate(event, path, context, null)
+      .catch( (err: Error) => {
+        throw new BuildError(err);
+      });
   } else {
-    return rollupUpdate(event, path, context).catch( (err: Error) => {
-      throw new BuildError(err);
-    });
+    return rollupUpdate(event, path, context)
+      .catch( (err: Error) => {
+        throw new BuildError(err);
+      });
   }
 }
 
@@ -43,6 +46,17 @@ export function buildJsSourceMaps(context: BuildContext) {
   } else {
     const rollupConfig = getRollupConfig(context, null);
     return rollupConfig.sourceMap;
+  }
+}
+
+export function getJsOutputDest(context: BuildContext) {
+  const bundleConfig = getBundleConfig(context, null);
+  if (bundleConfig.useWebpack) {
+    const webpackConfig = getWebpackConfig(context, null);
+    return webpackGetOutputDest(context, webpackConfig);
+  } else {
+    const rollupConfig = getRollupConfig(context, null);
+    return rollupGetOutputDest(context, rollupConfig);
   }
 }
 

@@ -44,16 +44,17 @@ export function lintWorker(context: BuildContext, configFile?: string) {
 
       const logger = new Logger('lint');
 
-      lintApp(context, configFile).then(() => {
-        // always finish and resolve
-        logger.finish();
-        resolve();
+      lintApp(context, configFile)
+        .then(() => {
+          // always finish and resolve
+          logger.finish();
+          resolve();
 
-      }).catch(() => {
-        // always finish and resolve
-        logger.finish();
-        resolve();
-      });
+        }).catch(() => {
+          // always finish and resolve
+          logger.finish();
+          resolve();
+        });
 
     });
   });

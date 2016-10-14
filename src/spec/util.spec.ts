@@ -1,5 +1,5 @@
 import { BuildContext } from '../util/interfaces';
-import { generateContext, getConfigValueDefault, getUserConfigFile, fillConfigDefaults } from '../util/config';
+import { generateContext, getConfigValueDefault, getUserConfigFile } from '../util/config';
 import { addArgv, setProcessEnvVar, setProcessArgs, setProcessEnv, setCwd } from '../util/config';
 
 
@@ -79,56 +79,6 @@ describe('util', () => {
     });
 
   });
-
-  // describe('fillConfigDefaults', () => {
-
-  //   it('should not return same config instances', () => {
-  //     addArgv('-s');
-  //     addArgv('configFile');
-  //     const configStub = {};
-  //     spyOn(require('module'), '_load').and.returnValue(configStub);
-
-  //     const config = fillConfigDefaults({ rootDir: './' }, null, { fullArgConfig: '', shortArgConfig: '-s', defaultConfigFilename: '', envConfig: '' });
-  //     expect(config).not.toBe(configStub);
-  //   });
-
-  //   it('should load config when null is passed for config object', () => {
-  //     const configFilePath = `dummyConfigFilePath`;
-  //     const requiredModules: string[] = [];
-  //     const config: any = null;
-
-  //     addArgv('-s');
-  //     addArgv(configFilePath);
-  //     spyOn(require('module'), '_load').and
-  //       .callFake((moduleName: string) => {
-  //         requiredModules.push(moduleName);
-  //         return {};
-  //       });
-
-  //     fillConfigDefaults({ rootDir: './' }, config, { fullArgConfig: '', shortArgConfig: '-s', defaultConfigFilename: '', envConfig: '' });
-
-  //     expect(requiredModules).toContain(configFilePath);
-  //   });
-
-  //   it('should not load config when empty object is passed for config object', () => {
-  //     const configFilePath = `dummyConfigFilePath`;
-  //     const requiredModules: string[] = [];
-  //     const config = {};
-
-  //     addArgv('-s');
-  //     addArgv(configFilePath);
-  //     spyOn(require('module'), '_load').and
-  //       .callFake((moduleName: string) => {
-  //         requiredModules.push(moduleName);
-  //         return {};
-  //       });
-
-  //     fillConfigDefaults({ rootDir: './' }, config, { fullArgConfig: '', shortArgConfig: '-s', defaultConfigFilename: '', envConfig: '' });
-
-  //     expect(requiredModules).not.toContain(configFilePath);
-  //   });
-
-  // });
 
   describe('getUserConfigFile', () => {
 

@@ -2,6 +2,7 @@ import { cacheTranspiledTsFiles, setModulePathsCache } from './util/helpers';
 import { BuildContext, TaskInfo } from './util/interfaces';
 import { BuildError, Logger } from './util/logger';
 import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars } from './util/config';
+import { isAbsolute, join } from 'path';
 
 import * as wp from 'webpack';
 
@@ -72,6 +73,11 @@ export function getWebpackConfig(context: BuildContext, configFile: string): Web
   return webpackConfig;
 }
 
+export function getOutputDest(context: BuildContext, webpackConfig: WebpackConfig) {
+  const destFilePath = join(webpackConfig.output.path, webpackConfig.output.filename);
+  return destFilePath;
+}
+
 const taskInfo: TaskInfo = {
   fullArgConfig: '--webpack',
   shortArgConfig: '-wp',
@@ -84,5 +90,10 @@ export interface WebpackConfig {
   // https://www.npmjs.com/package/webpack
   devtool: string;
   entry: string;
-  output: any;
+  output: WebpackOutputObject;
+}
+
+export interface WebpackOutputObject {
+  path: string;
+  filename: string;
 }

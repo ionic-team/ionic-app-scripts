@@ -1,5 +1,5 @@
 import { inlineTemplate, replaceTemplateUrl } from '../template';
-import { getTemplateMatch } from '../template';
+import { getTemplateMatch, getTemplateFormat, replaceBundleJsTemplate } from '../template';
 
 
 describe('template', () => {
@@ -47,12 +47,37 @@ describe('template', () => {
             this is "multiline" 'content'
           </div>\r
         `;
+        const htmlFilePath = '/full/path/to/somepage.html';
         const match = getTemplateMatch(str);
-        const result = replaceTemplateUrl(match, templateContent);
+        const result = replaceTemplateUrl(match, htmlFilePath, templateContent);
 
-        const expected = `Component({template: /* ion-inline-template */ '\\n          <div>\t\\n            this is "multiline" \\'content\\'\\n          </div>\\n\\n        '})`;
+        const expected = `Component({template:/*ion-inline-start:"/full/path/to/somepage.html"*/'\\n          <div>\t\\n            this is "multiline" \\'content\\'\\n          </div>\\n\\n        '/*ion-inline-end:"/full/path/to/somepage.html"*/})`;
 
         expect(result).toEqual(expected);
+      });
+
+    });
+
+    describe('replaceBundleJsTemplate', () => {
+
+      it('should replace already inlined template with new content', () => {
+        const htmlFilePath = 'c:\\path/to\some/crazy:thing.html;';
+        const oldContent = 'some old content';
+        const tmplate = getTemplateFormat(htmlFilePath, oldContent);
+        const bundleSourceText = `
+          @Component({
+            selector: 'yo-div',
+            /*blah*/${tmplate}/*derp*/
+          })
+          @Component({
+            selector: 'yo-div2',
+            /*222*/${tmplate}/*2222*/
+          })
+        `;
+        const newContent = 'some new content';
+        const output = replaceBundleJsTemplate(bundleSourceText, newContent, htmlFilePath);
+        expect(output.indexOf(newContent)).toEqual(141);
+        expect(output.indexOf(newContent, 142)).toEqual(373);
       });
 
     });

@@ -13,12 +13,13 @@ export function rollup(context: BuildContext, configFile: string) {
 
   const logger = new Logger('bundle');
 
-  return rollupWorker(context, configFile).then(() => {
-    logger.finish();
-
-  }).catch(err => {
-    throw logger.fail(err);
-  });
+  return rollupWorker(context, configFile)
+    .then(() => {
+      logger.finish();
+    })
+    .catch(err => {
+      throw logger.fail(err);
+    });
 }
 
 
@@ -27,12 +28,13 @@ export function rollupUpdate(event: string, path: string, context: BuildContext)
 
   const configFile = getUserConfigFile(context, taskInfo, null);
 
-  return rollupWorker(context, configFile).then(() => {
-    logger.finish();
-
-  }).catch(err => {
-    throw logger.fail(err);
-  });
+  return rollupWorker(context, configFile)
+    .then(() => {
+      logger.finish();
+    })
+    .catch(err => {
+      throw logger.fail(err);
+    });
 }
 
 
@@ -40,11 +42,7 @@ export function rollupWorker(context: BuildContext, configFile: string): Promise
   return new Promise((resolve, reject) => {
     let rollupConfig = getRollupConfig(context, configFile);
 
-    if (!isAbsolute(rollupConfig.dest)) {
-      // user can pass in absolute paths
-      // otherwise save it in the build directory
-      rollupConfig.dest = join(context.buildDir, rollupConfig.dest);
-    }
+    rollupConfig.dest = getOutputDest(context, rollupConfig);
 
     // replace any path vars like {{TMP}} with the real path
     rollupConfig.entry = replacePathVars(context, normalize(rollupConfig.entry));
@@ -117,6 +115,16 @@ export function rollupWorker(context: BuildContext, configFile: string): Promise
 export function getRollupConfig(context: BuildContext, configFile: string): RollupConfig {
   configFile = getUserConfigFile(context, taskInfo, configFile);
   return fillConfigDefaults(configFile, taskInfo.defaultConfigFile);
+}
+
+
+export function getOutputDest(context: BuildContext, rollupConfig: RollupConfig) {
+  if (!isAbsolute(rollupConfig.dest)) {
+    // user can pass in absolute paths
+    // otherwise save it in the build directory
+    return join(context.buildDir, rollupConfig.dest);
+  }
+  return rollupConfig.dest;
 }
 
 
