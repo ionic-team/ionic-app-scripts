@@ -96,16 +96,16 @@ export function rollupWorker(context: BuildContext, configFile: string): Promise
       // write the bundle
       return bundle.write(rollupConfig);
     })
-    .then(() => {
-        // clean up any references (overkill yes, but let's play it safe)
-        rollupConfig = rollupConfig.cache = rollupConfig.onwarn = rollupConfig.plugins = null;
-        resolve();
-    })
-    .catch((err: any) => {
-      // ensure references are cleared up when there's an error
-      cachedBundle = rollupConfig = rollupConfig.cache = rollupConfig.onwarn = rollupConfig.plugins = null;
-      reject(new BuildError(err));
-    });
+      .then(() => {
+          // clean up any references (overkill yes, but let's play it safe)
+          rollupConfig = rollupConfig.cache = rollupConfig.onwarn = rollupConfig.plugins = null;
+          resolve();
+      })
+      .catch((err: any) => {
+        // ensure references are cleared up when there's an error
+        cachedBundle = rollupConfig = rollupConfig.cache = rollupConfig.onwarn = rollupConfig.plugins = null;
+        reject(new BuildError(err));
+      });
   });
 }
 
