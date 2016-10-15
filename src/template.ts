@@ -137,8 +137,9 @@ export function replaceBundleJsTemplate(bundleSourceText: string, newTemplateCon
   const oldTemplate = bundleSourceText.substring(startIndex, endIndex + suffix.length);
   const newTemplate = getTemplateFormat(htmlFilePath, newTemplateContent);
 
-  while (bundleSourceText.indexOf(oldTemplate) > -1) {
-    bundleSourceText = bundleSourceText.replace(oldTemplate, newTemplate);
+  let lastChange: string = null;
+  while (bundleSourceText.indexOf(oldTemplate) > -1 && bundleSourceText !== lastChange) {
+    lastChange = bundleSourceText = bundleSourceText.replace(oldTemplate, newTemplate);
   }
 
   return bundleSourceText;
