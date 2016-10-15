@@ -76,30 +76,31 @@ export function rollupWorker(context: BuildContext, configFile: string): Promise
     checkDeprecations(context, rollupConfig);
 
     // bundle the app then create create css
-    rollupBundler.rollup(rollupConfig).then((bundle: RollupBundle) => {
+    rollupBundler.rollup(rollupConfig)
+      .then((bundle: RollupBundle) => {
 
-      Logger.debug(`bundle.modules: ${bundle.modules.length}`);
+        Logger.debug(`bundle.modules: ${bundle.modules.length}`);
 
-      // set the module files used in this bundle
-      // this reference can be used elsewhere in the build (sass)
-      context.moduleFiles = bundle.modules.map((m) => m.id);
+        // set the module files used in this bundle
+        // this reference can be used elsewhere in the build (sass)
+        context.moduleFiles = bundle.modules.map((m) => m.id);
 
-      // async cache all the module paths so we don't need
-      // to always bundle to know which modules are used
-      setModulePathsCache(context.moduleFiles);
+        // async cache all the module paths so we don't need
+        // to always bundle to know which modules are used
+        setModulePathsCache(context.moduleFiles);
 
-      // cache our bundle for later use
-      if (context.isWatch) {
-        cachedBundle = bundle;
-      }
+        // cache our bundle for later use
+        if (context.isWatch) {
+          cachedBundle = bundle;
+        }
 
-      // write the bundle
-      return bundle.write(rollupConfig);
-    })
+        // write the bundle
+        return bundle.write(rollupConfig);
+      })
       .then(() => {
-          // clean up any references (overkill yes, but let's play it safe)
-          rollupConfig = rollupConfig.cache = rollupConfig.onwarn = rollupConfig.plugins = null;
-          resolve();
+        // clean up any references (overkill yes, but let's play it safe)
+        rollupConfig = rollupConfig.cache = rollupConfig.onwarn = rollupConfig.plugins = null;
+        resolve();
       })
       .catch((err: any) => {
         // ensure references are cleared up when there's an error
