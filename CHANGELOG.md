@@ -5,6 +5,11 @@ npm install @ionic/app-scripts@latest --save-dev
 ```
 
 
+# 0.0.36 (2016-10-15)
+
+* Fix handling multiple async template updates
+
+
 # 0.0.35 (2016-10-15)
 
 * Fix resolving index files correctly
