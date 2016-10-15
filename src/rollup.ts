@@ -178,23 +178,6 @@ function getModulesPathsCachePath(): string {
 }
 
 
-export function clearCachedModule(context: BuildContext, id: string) {
-  if (cachedBundle) {
-    const cachedModule = cachedBundle.modules.find(m => m.id === id);
-    if (cachedModule) {
-      const index = cachedBundle.modules.indexOf(cachedModule);
-      if (index > -1) {
-        cachedBundle.modules.splice(index, 1);
-        Logger.debug(`clearCachedModule: ${id}`);
-        return true;
-      }
-    }
-  }
-  Logger.debug(`clearCachedModule: no existing context.cachedBundle to clear`);
-  return false;
-}
-
-
 let cachedBundle: RollupBundle = null;
 
 
