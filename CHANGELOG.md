@@ -5,6 +5,24 @@ npm install @ionic/app-scripts@latest --save-dev
 ```
 
 
+# 0.0.36 (2016-10-15)
+
+* Fix handling multiple async template updates
+
+
+# 0.0.35 (2016-10-15)
+
+* Fix resolving index files correctly
+* Fix template rebuilds for multiple templates in one file
+* Fix ability to watchers to ignore paths
+
+
+# 0.0.34 (2016-10-15)
+
+* Fix silently failed bundles
+* Fix template path resolving issues
+
+
 # 0.0.33 (2016-10-14)
 
 * Improve build times for template changes

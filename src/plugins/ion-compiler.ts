@@ -1,5 +1,5 @@
 import { BuildContext } from '../util/interfaces';
-import { dirname, join } from 'path';
+import { dirname, join, resolve } from 'path';
 import * as pluginutils from 'rollup-pluginutils';
 
 
@@ -31,24 +31,7 @@ export function ionCompiler(context: BuildContext) {
     },
 
     resolveId(importee: string, importer: string): any {
-      if (!importer || /\0/.test(importee)) {
-        // disregard entry module
-        // ignore IDs with null character, these belong to other plugins
-        return null;
-      }
-
-      if (context.tsFiles) {
-        const importerFile = context.tsFiles[importer];
-        if (importerFile && importerFile.output) {
-          const attemptedImportee = join(dirname(importer), importee) + '.ts';
-          const importeeFile = context.tsFiles[attemptedImportee];
-          if (importeeFile) {
-            return attemptedImportee;
-          }
-        }
-      }
-
-      return null;
+      return resolveId(importee, importer, context);
     },
 
     load(sourcePath: string) {
@@ -62,6 +45,37 @@ export function ionCompiler(context: BuildContext) {
       return null;
     }
   };
+}
+
+
+export function resolveId(importee: string, importer: string, context: BuildContext) {
+  if (!importer || /\0/.test(importee)) {
+    // disregard entry module
+    // ignore IDs with null character, these belong to other plugins
+    return null;
+  }
+
+  if (context.tsFiles) {
+    const importerFile = context.tsFiles[importer];
+    if (importerFile && importerFile.output) {
+      const attemptedImporteeBasename =  resolve(join(dirname(importer), importee));
+      const attemptedImportee = attemptedImporteeBasename + '.ts';
+      const importeeFile = context.tsFiles[attemptedImportee];
+      if (importeeFile) {
+        return attemptedImportee;
+      } else {
+        // rather than a file, the attempedImportee could be a directory
+        // while via node resolve pattern auto resolves to index file
+        const attemptedImporteeIndex = resolve(join(attemptedImporteeBasename, 'index.ts'));
+        const importeeIndexFile = context.tsFiles[attemptedImporteeIndex];
+        if (importeeIndexFile) {
+          return attemptedImporteeIndex;
+        }
+      }
+    }
+  }
+
+  return null;
 }
 
 

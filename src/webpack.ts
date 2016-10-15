@@ -1,9 +1,8 @@
-import { cacheTranspiledTsFiles, setModulePathsCache } from './util/helpers';
 import { BuildContext, TaskInfo } from './util/interfaces';
 import { BuildError, Logger } from './util/logger';
+import { cacheTranspiledTsFiles, setModulePathsCache } from './util/helpers';
 import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars } from './util/config';
-import { isAbsolute, join } from 'path';
-
+import { join } from 'path';
 import * as wp from 'webpack';
 
 
@@ -15,37 +14,43 @@ export function webpack(context: BuildContext, configFile: string) {
 
   const logger = new Logger('webpack');
 
-  return createWebpackBundle(context, configFile).then(() => {
-    logger.finish();
-  }).catch(err => {
-    throw logger.fail(err);
-  });
+  return webpackWorker(context, configFile)
+    .then(() => {
+      logger.finish();
+    })
+    .catch(err => {
+      throw logger.fail(err);
+    });
 }
+
 
 export function webpackUpdate(event: string, path: string, context: BuildContext, configFile: string) {
   configFile = getUserConfigFile(context, taskInfo, configFile);
-  const logger = new Logger('bundle update');
+  const logger = new Logger('webpack update');
 
   cacheTranspiledTsFiles(context.tsFiles);
 
-  return createWebpackBundle(context, configFile).then(() => {
-    logger.finish();
-  }).catch(err => {
-    throw logger.fail(err);
-  });
+  return webpackWorker(context, configFile)
+    .then(() => {
+      logger.finish();
+    })
+    .catch(err => {
+      throw logger.fail(err);
+    });
 }
 
 
-export function createWebpackBundle(context: BuildContext, configFile: string): Promise<any> {
+export function webpackWorker(context: BuildContext, configFile: string): Promise<any> {
   return new Promise((resolve, reject) => {
     try {
       const webpackConfig = getWebpackConfig(context, configFile);
       const compiler = wp(webpackConfig);
+
       compiler.run((err: Error, stats: any) => {
         if (err) {
           reject(err);
-        } else {
 
+        } else {
           // set the module files used in this bundle
           // this reference can be used elsewhere in the build (sass)
           context.moduleFiles = stats.compilation.modules.map((obj: any) => {
@@ -59,28 +64,33 @@ export function createWebpackBundle(context: BuildContext, configFile: string): 
           resolve();
         }
       });
+
     } catch (e) {
       reject(new BuildError(e));
     }
   });
 }
 
+
 export function getWebpackConfig(context: BuildContext, configFile: string): WebpackConfig {
   configFile = getUserConfigFile(context, taskInfo, configFile);
+
   let webpackConfig: WebpackConfig = fillConfigDefaults(configFile, taskInfo.defaultConfigFile);
   webpackConfig.entry = replacePathVars(context, webpackConfig.entry);
   webpackConfig.output.path = replacePathVars(context, webpackConfig.output.path);
+
   return webpackConfig;
 }
 
+
 export function getOutputDest(context: BuildContext, webpackConfig: WebpackConfig) {
-  const destFilePath = join(webpackConfig.output.path, webpackConfig.output.filename);
-  return destFilePath;
+  return join(webpackConfig.output.path, webpackConfig.output.filename);
 }
+
 
 const taskInfo: TaskInfo = {
   fullArgConfig: '--webpack',
-  shortArgConfig: '-wp',
+  shortArgConfig: '-w',
   envConfig: 'ionic_webpack',
   defaultConfigFile: 'webpack.config'
 };

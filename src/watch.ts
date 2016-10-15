@@ -1,7 +1,8 @@
 import { build } from './build';
 import { BuildContext, TaskInfo } from './util/interfaces';
-import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars, setIonicEnvironment } from './util/config';
 import { BuildError, Logger } from './util/logger';
+import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars, setIonicEnvironment } from './util/config';
+import { normalize } from 'path';
 import * as chalk from 'chalk';
 import * as chokidar from 'chokidar';
 
@@ -26,7 +27,7 @@ export function watch(context?: BuildContext, configFile?: string) {
 
   return build(context)
     .then(buildDone, buildDone)
-    .catch((err: any) => {
+    .catch(err => {
       throw logger.fail(err);
     });
 }
@@ -37,29 +38,33 @@ function startWatchers(context: BuildContext, configFile: string) {
 
   const promises = watchConfig
     .watchers
-    .filter(w => w.callback && w.paths)
-    .map(w => startWatcher(w, context, watchConfig));
+    .map((w, i) => startWatcher(i, w, context, watchConfig));
 
   return Promise.all(promises);
 }
 
 
-function startWatcher(watcher: Watcher, context: BuildContext, watchConfig: WatchConfig) {
+function startWatcher(index: number, watcher: Watcher, context: BuildContext, watchConfig: WatchConfig) {
   return new Promise((resolve, reject) => {
+
+    prepareWatcher(context, watcher);
+
+    if (!watcher.paths) {
+      Logger.error(`watcher config, index ${index}: missing "paths"`);
+      resolve();
+      return;
+    }
+
+    if (!watcher.callback) {
+      Logger.error(`watcher config, index ${index}: missing "callback"`);
+      resolve();
+      return;
+    }
 
     let taskPromise = Promise.resolve();
     let nextTask: any = null;
 
-    const watcherOptions = watcher.options || {};
-    if (!watcherOptions.cwd) {
-      watcherOptions.cwd = context.rootDir;
-    }
-
-    if (typeof watcherOptions.ignoreInitial !== 'boolean') {
-      watcherOptions.ignoreInitial = true;
-    }
-    const paths = cleanPaths(context, watcher.paths);
-    const chokidarWatcher = chokidar.watch(paths, watcherOptions);
+    const chokidarWatcher = chokidar.watch(<any>watcher.paths, watcher.options);
 
     chokidarWatcher.on('all', (event: string, path: string) => {
       setIonicEnvironment(context.isProd);
@@ -93,25 +98,38 @@ function startWatcher(watcher: Watcher, context: BuildContext, watchConfig: Watc
     });
 
     chokidarWatcher.on('ready', () => {
-      Logger.debug(`watcher ready: ${watcherOptions.cwd}${paths}`);
+      Logger.debug(`watcher ready: ${watcher.options.cwd}${watcher.paths}`);
       resolve();
     });
 
     chokidarWatcher.on('error', (err: any) => {
-      reject(new BuildError(`watcher error: ${watcherOptions.cwd}${paths}: ${err}`));
+      reject(new BuildError(`watcher error: ${watcher.options.cwd}${watcher.paths}: ${err}`));
     });
   });
 }
 
 
-function cleanPaths(context: BuildContext, paths: any): any {
-  if (Array.isArray(paths)) {
-    return paths.map(p => replacePathVars(context, p));
+export function prepareWatcher(context: BuildContext, watcher: Watcher) {
+  watcher.options = watcher.options || {};
+
+  if (!watcher.options.cwd) {
+    watcher.options.cwd = context.rootDir;
   }
-  if (typeof paths === 'string') {
-    return replacePathVars(context, paths);
+
+  if (typeof watcher.options.ignoreInitial !== 'boolean') {
+    watcher.options.ignoreInitial = true;
   }
-  return paths;
+
+  if (typeof watcher.options.ignored === 'string') {
+    watcher.options.ignored = normalize(replacePathVars(context, watcher.options.ignored));
+  }
+
+  if (typeof watcher.paths === 'string') {
+    watcher.paths = normalize(replacePathVars(context, watcher.paths));
+
+  } else if (Array.isArray(watcher.paths)) {
+    watcher.paths = watcher.paths.map(p => normalize(replacePathVars(context, p)));
+  }
 }
 
 
@@ -130,14 +148,14 @@ export interface WatchConfig {
 
 export interface Watcher {
   // https://www.npmjs.com/package/chokidar
-  paths: string[];
-  options: {
-    ignored?: string;
+  paths?: string[]|string;
+  options?: {
+    ignored?: string|Function;
     ignoreInitial?: boolean;
     followSymlinks?: boolean;
     cwd?: string;
   };
-  callback: {
+  callback?: {
     (event: string, path: string, context: BuildContext): void;
   };
 }

@@ -11,7 +11,7 @@ export function rollup(context: BuildContext, configFile: string) {
   context = generateContext(context);
   configFile = getUserConfigFile(context, taskInfo, configFile);
 
-  const logger = new Logger('bundle');
+  const logger = new Logger('rollup');
 
   return rollupWorker(context, configFile)
     .then(() => {
@@ -24,7 +24,7 @@ export function rollup(context: BuildContext, configFile: string) {
 
 
 export function rollupUpdate(event: string, path: string, context: BuildContext) {
-  const logger = new Logger('bundle update');
+  const logger = new Logger('rollup update');
 
   const configFile = getUserConfigFile(context, taskInfo, null);
 
@@ -74,40 +74,37 @@ export function rollupWorker(context: BuildContext, configFile: string): Promise
     checkDeprecations(context, rollupConfig);
 
     // bundle the app then create create css
-    rollupBundler.rollup(rollupConfig).then((bundle: RollupBundle) => {
+    rollupBundler.rollup(rollupConfig)
+      .then((bundle: RollupBundle) => {
 
-      Logger.debug(`bundle.modules: ${bundle.modules.length}`);
+        Logger.debug(`bundle.modules: ${bundle.modules.length}`);
 
-      // set the module files used in this bundle
-      // this reference can be used elsewhere in the build (sass)
-      context.moduleFiles = bundle.modules.map((m) => m.id);
+        // set the module files used in this bundle
+        // this reference can be used elsewhere in the build (sass)
+        context.moduleFiles = bundle.modules.map((m) => m.id);
 
-      // async cache all the module paths so we don't need
-      // to always bundle to know which modules are used
-      setModulePathsCache(context.moduleFiles);
+        // async cache all the module paths so we don't need
+        // to always bundle to know which modules are used
+        setModulePathsCache(context.moduleFiles);
 
-      // cache our bundle for later use
-      if (context.isWatch) {
-        cachedBundle = bundle;
-      }
+        // cache our bundle for later use
+        if (context.isWatch) {
+          cachedBundle = bundle;
+        }
 
-      // write the bundle
-      bundle.write(rollupConfig).then(() => {
+        // write the bundle
+        return bundle.write(rollupConfig);
+      })
+      .then(() => {
         // clean up any references (overkill yes, but let's play it safe)
-        bundle = rollupConfig = rollupConfig.cache = rollupConfig.onwarn = rollupConfig.plugins = null;
+        rollupConfig = rollupConfig.cache = rollupConfig.onwarn = rollupConfig.plugins = null;
         resolve();
-
-      }).catch((err: any) => {
+      })
+      .catch((err: any) => {
         // ensure references are cleared up when there's an error
-        bundle = cachedBundle = rollupConfig = rollupConfig.cache = rollupConfig.onwarn = rollupConfig.plugins = null;
-        throw new BuildError(err);
+        cachedBundle = rollupConfig = rollupConfig.cache = rollupConfig.onwarn = rollupConfig.plugins = null;
+        reject(new BuildError(err));
       });
-
-    }).catch((err: any) => {
-      // ensure references are cleared up when there's an error
-      cachedBundle = rollupConfig = rollupConfig.cache = rollupConfig.onwarn = rollupConfig.plugins = null;
-      throw new BuildError(err);
-    });
   });
 }
 
@@ -138,22 +135,6 @@ function checkDeprecations(context: BuildContext, rollupConfig: RollupConfig) {
 
     }
   }
-}
-
-export function clearCachedModule(context: BuildContext, id: string) {
-  if (cachedBundle) {
-    const cachedModule = cachedBundle.modules.find(m => m.id === id);
-    if (cachedModule) {
-      const index = cachedBundle.modules.indexOf(cachedModule);
-      if (index > -1) {
-        cachedBundle.modules.splice(index, 1);
-        Logger.debug(`clearCachedModule: ${id}`);
-        return true;
-      }
-    }
-  }
-  Logger.debug(`clearCachedModule: no existing context.cachedBundle to clear`);
-  return false;
 }
 
 

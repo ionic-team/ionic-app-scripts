@@ -1,11 +1,9 @@
 import { BuildContext } from './util/interfaces';
 import { BuildError, Logger } from './util/logger';
 import { bundleUpdate, getJsOutputDest } from './bundle';
-import { dirname, join, parse, basename } from 'path';
-import { endsWith } from './util/helpers';
-import { readFileSync, readdirSync, writeFileSync } from 'fs';
+import { join, parse, resolve } from 'path';
+import { readFileSync, writeFileSync } from 'fs';
 import { sassUpdate } from './sass';
-import * as MagicString from 'magic-string';
 
 
 export function templateUpdate(event: string, path: string, context: BuildContext) {
@@ -46,73 +44,36 @@ function templateUpdateWorker(event: string, path: string, context: BuildContext
 }
 
 
-function getSourceComponentFile(htmlFilePath: string, context: BuildContext) {
-  let rtn: string = null;
-
-  try {
-    const changedHtmlFilename = basename(htmlFilePath);
-    const componentDir = dirname(htmlFilePath);
-    const filePaths = readdirSync(componentDir);
-    let match: TemplateUrlMatch;
-
-    for (var i = 0; i < filePaths.length; i++) {
-      var filePath = filePaths[i];
-      if (endsWith(filePath, '.ts') && !endsWith(filePath, '.d.ts')) {
-        // found a .ts file in this same directory
-        // open it up and see if it's a component
-        // and see if it has a template url with the same filename
-        var tsComponentFile = join(componentDir, filePath);
-        var source = readFileSync(join(componentDir, filePath)).toString();
-
-        if (match = getTemplateMatch(source)) {
-          var componentHtmlFilename = basename(match.templateUrl);
-          if (changedHtmlFilename === componentHtmlFilename) {
-            rtn = tsComponentFile;
-            break;
-          }
-        }
-      }
-    }
-
-  } catch (e) {
-    Logger.debug(`${getSourceComponentFile} ${e}`);
-  }
-
-  return rtn;
-}
-
-
 export function inlineTemplate(sourceText: string, sourcePath: string): string {
-  const magicString = new MagicString(sourceText);
   const componentDir = parse(sourcePath).dir;
   let match: TemplateUrlMatch;
   let replacement: string;
-  let lastStart = -1;
+  let lastMatch: string = null;
 
-  while (match = getTemplateMatch(magicString.toString())) {
-    if (match.start === lastStart) {
+  while (match = getTemplateMatch(sourceText)) {
+    if (match.component === lastMatch) {
       // panic! we don't want to melt any machines if there's a bug
       Logger.debug(`Error matching component: ${match.component}`);
-      return magicString.toString();
+      return sourceText;
     }
-    lastStart = match.start;
+    lastMatch = match.component;
 
     if (match.templateUrl === '') {
       Logger.error(`Error @Component templateUrl missing in: "${sourcePath}"`);
-      return magicString.toString();
+      return sourceText;
     }
 
     replacement = updateTemplate(componentDir, match);
     if (replacement) {
-      magicString.overwrite(match.start, match.end, replacement);
+      sourceText = sourceText.replace(match.component, replacement);
     }
   }
 
-  return magicString.toString();
+  return sourceText;
 }
 
 
-function updateTemplate(componentDir: string, match: TemplateUrlMatch): string {
+export function updateTemplate(componentDir: string, match: TemplateUrlMatch): string {
   const htmlFilePath = join(componentDir, match.templateUrl);
 
   try {
@@ -135,6 +96,8 @@ export function replaceTemplateUrl(match: TemplateUrlMatch, htmlFilePath: string
 
 
 function updateBundledJsTemplate(context: BuildContext, htmlFilePath: string) {
+  Logger.debug(`updateBundledJsTemplate, start: ${htmlFilePath}`);
+
   const outputDest = getJsOutputDest(context);
 
   try {
@@ -145,11 +108,12 @@ function updateBundledJsTemplate(context: BuildContext, htmlFilePath: string) {
 
     if (bundleSourceText) {
       writeFileSync(outputDest, bundleSourceText, { encoding: 'utf8'});
+      Logger.debug(`updateBundledJsTemplate, updated: ${htmlFilePath}`);
       return true;
     }
 
   } catch (e) {
-    Logger.debug(`templateUpdate, error opening bundle js: ${e}`);
+    Logger.debug(`updateBundledJsTemplate error: ${e}`);
   }
 
   return false;
@@ -173,8 +137,9 @@ export function replaceBundleJsTemplate(bundleSourceText: string, newTemplateCon
   const oldTemplate = bundleSourceText.substring(startIndex, endIndex + suffix.length);
   const newTemplate = getTemplateFormat(htmlFilePath, newTemplateContent);
 
-  while (bundleSourceText.indexOf(oldTemplate) > -1) {
-    bundleSourceText = bundleSourceText.replace(oldTemplate, newTemplate);
+  let lastChange: string = null;
+  while (bundleSourceText.indexOf(oldTemplate) > -1 && bundleSourceText !== lastChange) {
+    lastChange = bundleSourceText = bundleSourceText.replace(oldTemplate, newTemplate);
   }
 
   return bundleSourceText;
@@ -190,13 +155,13 @@ export function getTemplateFormat(htmlFilePath: string, content: string) {
 }
 
 
-function getTemplatePrefix(sourcePath: string) {
-  return `template:/*ion-inline-start:"${sourcePath}"*/`;
+function getTemplatePrefix(htmlFilePath: string) {
+  return `template:/*ion-inline-start:"${resolve(htmlFilePath)}"*/`;
 }
 
 
-function getTemplateSuffix(sourcePath: string) {
-  return `/*ion-inline-end:"${sourcePath}"*/`;
+function getTemplateSuffix(htmlFilePath: string) {
+  return `/*ion-inline-end:"${resolve(htmlFilePath)}"*/`;
 }
 
 

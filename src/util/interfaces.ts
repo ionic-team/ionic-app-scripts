@@ -8,6 +8,7 @@ export interface BuildContext {
   moduleFiles?: string[];
   isProd?: boolean;
   isWatch?: boolean;
+  bundler?: string;
   useTranspileCache?: boolean;
   useBundleCache?: boolean;
   useSassCache?: boolean;

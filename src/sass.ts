@@ -5,7 +5,7 @@ import { ensureDirSync, readdirSync, writeFile } from 'fs-extra';
 import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars } from './util/config';
 import { getModulePathsCache } from './util/helpers';
 import { runWorker } from './worker-client';
-import * as nodeSass from 'node-sass';
+import { SassError, render as nodeSassRender, Result } from 'node-sass';
 import * as postcss from 'postcss';
 import * as autoprefixer from 'autoprefixer';
 
@@ -245,7 +245,7 @@ function render(context: BuildContext, sassConfig: SassConfig) {
       sassConfig.sourceMapContents = true;
     }
 
-    nodeSass.render(sassConfig, (renderErr: any, sassResult: SassResult) => {
+    nodeSassRender(sassConfig, (renderErr: SassError, sassResult: Result) => {
       if (renderErr) {
         // sass render error!
         if (renderErr.file) {
@@ -282,7 +282,7 @@ function render(context: BuildContext, sassConfig: SassConfig) {
 }
 
 
-function renderSassSuccess(sassResult: SassResult, sassConfig: SassConfig): Promise<any> {
+function renderSassSuccess(sassResult: Result, sassConfig: SassConfig): Promise<any> {
   if (sassConfig.autoprefixer) {
     // with autoprefixer
 
@@ -325,11 +325,11 @@ function renderSassSuccess(sassResult: SassResult, sassConfig: SassConfig): Prom
     sassMapResult = JSON.parse(sassResult.map.toString()).mappings;
   }
 
-  return writeOutput(sassConfig, sassResult.css, sassMapResult);
+  return writeOutput(sassConfig, sassResult.css.toString(), sassMapResult);
 }
 
 
-function generateSourceMaps(sassResult: SassResult, sassConfig: SassConfig) {
+function generateSourceMaps(sassResult: Result, sassConfig: SassConfig) {
   // this can be async and nothing needs to wait on it
 
   // build Source Maps!
@@ -490,12 +490,6 @@ export interface SassConfig {
   sourceMap?: string;
   omitSourceMapUrl?: boolean;
   sourceMapContents?: boolean;
-}
-
-
-export interface SassResult {
-  css: string;
-  map: SassMap;
 }
 
 

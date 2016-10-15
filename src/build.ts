@@ -16,7 +16,7 @@ export function build(context: BuildContext) {
 
   const logger = new Logger(`build ${(context.isProd ? 'prod' : 'dev')}`);
 
-  return runBuild(context)
+  return buildWorker(context)
     .then(() => {
       // congrats, we did it!  (•_•) / ( •_•)>⌐■-■ / (⌐■_■)
       logger.finish();
@@ -27,7 +27,7 @@ export function build(context: BuildContext) {
 }
 
 
-function runBuild(context: BuildContext) {
+function buildWorker(context: BuildContext) {
   if (context.isProd) {
     // production build
     return buildProd(context);

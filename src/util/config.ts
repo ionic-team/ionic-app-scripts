@@ -41,6 +41,10 @@ export function generateContext(context?: BuildContext): BuildContext {
     context.isProd = !(hasArg('--dev', '-d') || (getEnvVariable(ENV_VAR_IONIC_DEV) === 'true'));
   }
 
+  if (!isValidBundler(context.bundler)) {
+    context.bundler = bundlerStrategy();
+  }
+
   setIonicEnvironment(context.isProd);
 
   if (typeof context.isWatch !== 'boolean') {
@@ -77,6 +81,45 @@ export function fillConfigDefaults(userConfigFile: string, defaultConfigFile: st
   // create a fresh copy of the config each time
   // always assign any default values which were not already supplied by the user
   return objectAssign({}, defaultConfig, userConfig);
+}
+
+
+export function bundlerStrategy() {
+  // 1) If a user provided a rollup config, use rollup
+  // 2) If a user set ionic_bundler = "rollup", use rollup
+  // 3) Default to use webpack
+
+  // 1) User provided a rollup config via cmd line args
+  let rollupVal = getArgValue('--rollup', '-r');
+  if (rollupVal) {
+    return BUNDLER_ROLLUP;
+  }
+
+  // 2) User provided a rollup config env var
+  rollupVal = getEnvVariable('ionic_rollup');
+  if (rollupVal) {
+    return BUNDLER_ROLLUP;
+  }
+
+  // 3) User set bundler through full arg
+  let bundler = getArgValue('--bundler', null);
+  if (isValidBundler(bundler)) {
+    return bundler;
+  }
+
+  // 4) User set to use rollup at the bundler
+  bundler = getEnvVariable('ionic_bundler');
+  if (isValidBundler(bundler)) {
+    return bundler;
+  }
+
+  // 5) Default to use webpack
+  return BUNDLER_WEBPACK;
+}
+
+
+function isValidBundler(bundler: string) {
+  return (bundler === BUNDLER_ROLLUP || bundler === BUNDLER_WEBPACK);
 }
 
 
@@ -231,3 +274,6 @@ const ENV_VAR_TMP_DIR = 'ionic_tmp_dir';
 const ENV_VAR_SRC_DIR = 'ionic_src_dir';
 const ENV_VAR_WWW_DIR = 'ionic_www_dir';
 const ENV_VAR_BUILD_DIR = 'ionic_build_dir';
+
+export const BUNDLER_ROLLUP = 'rollup';
+export const BUNDLER_WEBPACK = 'webpack';

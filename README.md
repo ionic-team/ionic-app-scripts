@@ -13,6 +13,7 @@ npm install @ionic/app-scripts@latest --save-dev
 Out of the box, Ionic starters have been preconfigured with great defaults for building fast apps, including:
 
 - Multi-core processing tasks in parallel for faster builds
+- In-memory file transpiling and bundling
 - Transpiling source code to ES5 JavaScript
 - Ahead of Time (AoT) template compiling
 - Just in Time (JiT) template compiling
@@ -97,12 +98,14 @@ npm run build --rollup ./config/rollup.config.js
 | Sass        | `ionic_sass`        | `--sass` or `-s`      |
 | TSLint      | `ionic_tslint`      | `--tslint` or `-l`    |
 | UglifyJS    | `ionic_uglifyjs`    | `--uglifyjs` or `-u`  |
+| Webpack     | `ionic_webpack`     | `--webpack` or `-w`   |
 
 
 ### Overriding Config Values
 
 | Config Values   | NPM Config Property | Cmd-line Flag | Defaults        |
 |-----------------|---------------------|---------------|-----------------|
+| bundler         | `ionic_bundler`     | `--bundler`   | `webpack`       |
 | root directory  | `ionic_root_dir`    | `--rootDir`   | `process.cwd()` |
 | tmp directory   | `ionic_tmp_dir`     | `--tmpDir`    | `.tmp`          |
 | www directory   | `ionic_www_dir`     | `--wwwDir`    | `www`           |
