@@ -85,10 +85,6 @@ export function fillConfigDefaults(userConfigFile: string, defaultConfigFile: st
 
 
 export function bundlerStrategy() {
-  // 1) If a user provided a rollup config, use rollup
-  // 2) If a user set ionic_bundler = "rollup", use rollup
-  // 3) Default to use webpack
-
   // 1) User provided a rollup config via cmd line args
   let rollupVal = getArgValue('--rollup', '-r');
   if (rollupVal) {
