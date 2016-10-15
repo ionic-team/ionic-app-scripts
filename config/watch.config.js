@@ -14,6 +14,7 @@ module.exports = {
       paths: [
         '{{SRC}}/**/*.ts'
       ],
+      options: { ignored: '{{SRC}}/**/*.spec.ts' },
       callback: buildUpdate
     },
 
