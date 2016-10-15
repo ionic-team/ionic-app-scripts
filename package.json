@@ -17,6 +17,7 @@
   },
   "scripts": {
     "build": "npm run clean && tsc",
+    "build-and-test": "npm run build && npm run test",
     "clean": "rm -rf ./dist",
     "lint": "tslint -c ./tslint.json --project ./tsconfig.json",
     "prepublish": "jasmine JASMINE_CONFIG_PATH=src/spec/jasmine.config.json && npm run build",
