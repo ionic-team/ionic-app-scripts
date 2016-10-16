@@ -1,6 +1,6 @@
 import { accessSync } from 'fs-extra';
 import { BuildContext, TaskInfo } from './interfaces';
-import { join } from 'path';
+import { join, resolve } from 'path';
 import { objectAssign } from './helpers';
 
 
@@ -22,19 +22,19 @@ export function generateContext(context?: BuildContext): BuildContext {
     context = {};
   }
 
-  context.rootDir = context.rootDir || getConfigValueDefault('--rootDir', null, ENV_VAR_ROOT_DIR, processCwd, context);
+  context.rootDir = resolve(context.rootDir || getConfigValueDefault('--rootDir', null, ENV_VAR_ROOT_DIR, processCwd, context));
   setProcessEnvVar(ENV_VAR_ROOT_DIR, context.rootDir);
 
-  context.tmpDir = context.tmpDir || getConfigValueDefault('--tmpDir', null, ENV_VAR_TMP_DIR, join(context.rootDir, TMP_DIR), context);
+  context.tmpDir = resolve(context.tmpDir || getConfigValueDefault('--tmpDir', null, ENV_VAR_TMP_DIR, join(context.rootDir, TMP_DIR), context));
   setProcessEnvVar(ENV_VAR_TMP_DIR, context.tmpDir);
 
-  context.srcDir = context.srcDir || getConfigValueDefault('--srcDir', null, ENV_VAR_SRC_DIR, join(context.rootDir, SRC_DIR), context);
+  context.srcDir = resolve(context.srcDir || getConfigValueDefault('--srcDir', null, ENV_VAR_SRC_DIR, join(context.rootDir, SRC_DIR), context));
   setProcessEnvVar(ENV_VAR_SRC_DIR, context.srcDir);
 
-  context.wwwDir = context.wwwDir || getConfigValueDefault('--wwwDir', null, ENV_VAR_WWW_DIR, join(context.rootDir, WWW_DIR), context);
+  context.wwwDir = resolve(context.wwwDir || getConfigValueDefault('--wwwDir', null, ENV_VAR_WWW_DIR, join(context.rootDir, WWW_DIR), context));
   setProcessEnvVar(ENV_VAR_WWW_DIR, context.wwwDir);
 
-  context.buildDir = context.buildDir || getConfigValueDefault('--buildDir', null, ENV_VAR_BUILD_DIR, join(context.wwwDir, BUILD_DIR), context);
+  context.buildDir = resolve(context.buildDir || getConfigValueDefault('--buildDir', null, ENV_VAR_BUILD_DIR, join(context.wwwDir, BUILD_DIR), context));
   setProcessEnvVar(ENV_VAR_BUILD_DIR, context.buildDir);
 
   if (typeof context.isProd !== 'boolean') {
