@@ -120,19 +120,12 @@ function fileChanged(context: BuildContext, filePath: string|string[]) {
   if (liveReloadServer) {
     const files = Array.isArray(filePath) ? filePath : [filePath];
 
-    console.log('FileChange', files);
-
     liveReloadServer.changed({
       body: {
         files: files.map(f => '/' + relative(context.wwwDir, f))
       }
     });
   }
-}
-
-
-function reload(context: BuildContext) {
-  fileChanged(context, DEV_SERVER_DEFAULT_INDEX);
 }
 
 
