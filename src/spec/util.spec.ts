@@ -1,6 +1,7 @@
 import { BuildContext } from '../util/interfaces';
 import { generateContext, getConfigValueDefault, getUserConfigFile } from '../util/config';
 import { addArgv, setProcessEnvVar, setProcessArgs, setProcessEnv, setCwd } from '../util/config';
+import { resolve } from 'path';
 
 
 describe('util', () => {
@@ -47,7 +48,7 @@ describe('util', () => {
       addArgv('shortArgValue');
       setProcessEnvVar('npm_package_config_envVar', 'myNPMConfigVal');
       setProcessEnvVar('envVar', 'myProcessEnvVar');
-      const val = getConfigValueDefault('--full', '-s', 'envVar', 'defaultValue', context);
+      const val = getConfigValueDefault('--full', '-s', 'envVar', 'defaultValue');
       expect(val).toEqual('fullArgValue');
     });
 
@@ -56,25 +57,25 @@ describe('util', () => {
       addArgv('shortArgValue');
       setProcessEnvVar('npm_package_config_envVar', 'myNPMConfigVal');
       setProcessEnvVar('envVar', 'myProcessEnvVar');
-      const val = getConfigValueDefault('--full', '-s', 'envVar', 'defaultValue', context);
+      const val = getConfigValueDefault('--full', '-s', 'envVar', 'defaultValue');
       expect(val).toEqual('shortArgValue');
     });
 
     it('should get npm config value', () => {
       setProcessEnvVar('npm_package_config_envVar', 'myNPMConfigVal');
       setProcessEnvVar('envVar', 'myProcessEnvVar');
-      const val = getConfigValueDefault('--full', '-s', 'envVar', 'defaultValue', context);
+      const val = getConfigValueDefault('--full', '-s', 'envVar', 'defaultValue');
       expect(val).toEqual('myNPMConfigVal');
     });
 
     it('should get envVar value', () => {
       setProcessEnvVar('envVar', 'myProcessEnvVar');
-      const val = getConfigValueDefault('--full', '-s', 'envVar', 'defaultValue', context);
+      const val = getConfigValueDefault('--full', '-s', 'envVar', 'defaultValue');
       expect(val).toEqual('myProcessEnvVar');
     });
 
     it('should get default value', () => {
-      const val = getConfigValueDefault('--full', '-s', 'envVar', 'defaultValue', context);
+      const val = getConfigValueDefault('--full', '-s', 'envVar', 'defaultValue');
       expect(val).toEqual('defaultValue');
     });
 
@@ -88,10 +89,10 @@ describe('util', () => {
       });
 
       const userConfigFile: string = null;
-      const context = { rootDir: './' };
+      const context = { rootDir: process.cwd() };
       const taskInfo = { fullArgConfig: '--full', shortArgConfig: '-s', defaultConfigFile: 'default.config.js', envConfig: 'ionic_config' };
       const rtn = getUserConfigFile(context, taskInfo, userConfigFile);
-      expect(rtn).toEqual('myconfig.js');
+      expect(rtn).toEqual(resolve('myconfig.js'));
     });
 
     it('should get config from env var', () => {
@@ -100,10 +101,10 @@ describe('util', () => {
       });
 
       const userConfigFile: string = null;
-      const context = { rootDir: './' };
+      const context = { rootDir: process.cwd() };
       const taskInfo = { fullArgConfig: '--full', shortArgConfig: '-s', defaultConfigFile: 'default.config.js', envConfig: 'ionic_config' };
       const rtn = getUserConfigFile(context, taskInfo, userConfigFile);
-      expect(rtn).toEqual('myconfig.js');
+      expect(rtn).toEqual(resolve('myconfig.js'));
     });
 
     it('should get config from short arg', () => {
@@ -111,10 +112,10 @@ describe('util', () => {
       addArgv('myconfig.js');
 
       const userConfigFile: string = null;
-      const context = { rootDir: './' };
+      const context = { rootDir: process.cwd() };
       const taskInfo = { fullArgConfig: '--full', shortArgConfig: '-s', defaultConfigFile: 'default.config.js', envConfig: 'ionic_config' };
       const rtn = getUserConfigFile(context, taskInfo, userConfigFile);
-      expect(rtn).toEqual('myconfig.js');
+      expect(rtn).toEqual(resolve('myconfig.js'));
     });
 
     it('should get config from full arg', () => {
@@ -122,23 +123,23 @@ describe('util', () => {
       addArgv('myconfig.js');
 
       const userConfigFile: string = null;
-      const context = { rootDir: './' };
+      const context = { rootDir: process.cwd() };
       const taskInfo = { fullArgConfig: '--full', shortArgConfig: '-s', defaultConfigFile: 'default.config.js', envConfig: 'ionic_config' };
       const rtn = getUserConfigFile(context, taskInfo, userConfigFile);
-      expect(rtn).toEqual('myconfig.js');
+      expect(rtn).toEqual(resolve('myconfig.js'));
     });
 
     it('should get userConfigFile', () => {
       const userConfigFile = 'myconfig.js';
-      const context = { rootDir: './' };
+      const context = { rootDir: process.cwd() };
       const taskInfo = { fullArgConfig: '--full', shortArgConfig: '-s', defaultConfigFile: 'default.config.js', envConfig: 'env.config.js' };
       const rtn = getUserConfigFile(context, taskInfo, userConfigFile);
-      expect(rtn).toEqual('myconfig.js');
+      expect(rtn).toEqual(resolve('myconfig.js'));
     });
 
     it('should not get a user config', () => {
       const userConfigFile: string = null;
-      const context = { rootDir: './' };
+      const context = { rootDir: process.cwd() };
       const taskInfo = { fullArgConfig: '--full', shortArgConfig: '-s', defaultConfigFile: 'default.config.js', envConfig: 'ionic_config' };
       const rtn = getUserConfigFile(context, taskInfo, userConfigFile);
       expect(rtn).toEqual(null);

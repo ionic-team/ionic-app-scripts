@@ -22,19 +22,19 @@ export function generateContext(context?: BuildContext): BuildContext {
     context = {};
   }
 
-  context.rootDir = resolve(context.rootDir || getConfigValueDefault('--rootDir', null, ENV_VAR_ROOT_DIR, processCwd, context));
+  context.rootDir = resolve(context.rootDir || getConfigValueDefault('--rootDir', null, ENV_VAR_ROOT_DIR, processCwd));
   setProcessEnvVar(ENV_VAR_ROOT_DIR, context.rootDir);
 
-  context.tmpDir = resolve(context.tmpDir || getConfigValueDefault('--tmpDir', null, ENV_VAR_TMP_DIR, join(context.rootDir, TMP_DIR), context));
+  context.tmpDir = resolve(context.tmpDir || getConfigValueDefault('--tmpDir', null, ENV_VAR_TMP_DIR, join(context.rootDir, TMP_DIR)));
   setProcessEnvVar(ENV_VAR_TMP_DIR, context.tmpDir);
 
-  context.srcDir = resolve(context.srcDir || getConfigValueDefault('--srcDir', null, ENV_VAR_SRC_DIR, join(context.rootDir, SRC_DIR), context));
+  context.srcDir = resolve(context.srcDir || getConfigValueDefault('--srcDir', null, ENV_VAR_SRC_DIR, join(context.rootDir, SRC_DIR)));
   setProcessEnvVar(ENV_VAR_SRC_DIR, context.srcDir);
 
-  context.wwwDir = resolve(context.wwwDir || getConfigValueDefault('--wwwDir', null, ENV_VAR_WWW_DIR, join(context.rootDir, WWW_DIR), context));
+  context.wwwDir = resolve(context.wwwDir || getConfigValueDefault('--wwwDir', null, ENV_VAR_WWW_DIR, join(context.rootDir, WWW_DIR)));
   setProcessEnvVar(ENV_VAR_WWW_DIR, context.wwwDir);
 
-  context.buildDir = resolve(context.buildDir || getConfigValueDefault('--buildDir', null, ENV_VAR_BUILD_DIR, join(context.wwwDir, BUILD_DIR), context));
+  context.buildDir = resolve(context.buildDir || getConfigValueDefault('--buildDir', null, ENV_VAR_BUILD_DIR, join(context.wwwDir, BUILD_DIR)));
   setProcessEnvVar(ENV_VAR_BUILD_DIR, context.buildDir);
 
   if (typeof context.isProd !== 'boolean') {
@@ -54,7 +54,16 @@ export function generateContext(context?: BuildContext): BuildContext {
 
 
 export function getUserConfigFile(context: BuildContext, task: TaskInfo, userConfigFile: string) {
-  return userConfigFile || getConfigValueDefault(task.fullArgConfig, task.shortArgConfig, task.envConfig, null, context);
+  if (userConfigFile) {
+    return resolve(userConfigFile);
+  }
+
+  const defaultConfig = getConfigValueDefault(task.fullArgConfig, task.shortArgConfig, task.envConfig, null);
+  if (defaultConfig) {
+    return join(context.rootDir, defaultConfig);
+  }
+
+  return null;
 }
 
 
@@ -80,18 +89,18 @@ export function fillConfigDefaults(userConfigFile: string, defaultConfigFile: st
 }
 
 
-export function getConfigValueDefault(argFullName: string, argShortName: string, envVarName: string, defaultValue: string, context: BuildContext) {
+export function getConfigValueDefault(argFullName: string, argShortName: string, envVarName: string, defaultValue: string) {
   // first see if the value was set in the command-line args
-  const argValue = getArgValue(argFullName, argShortName);
-  if (argValue) {
-    return join(context.rootDir, argValue);
+  let val = getArgValue(argFullName, argShortName);
+  if (val) {
+    return val;
   }
 
   // next see if it was set in the environment variables
   // which also checks if it was set in the npm package.json config
-  const envVar = getEnvVariable(envVarName);
-  if (envVar) {
-    return join(context.rootDir, envVar);
+  val = getEnvVariable(envVarName);
+  if (val) {
+    return val;
   }
 
   // return the default if nothing above was found

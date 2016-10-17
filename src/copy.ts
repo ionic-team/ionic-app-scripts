@@ -24,16 +24,15 @@ export function copy(context?: BuildContext, configFile?: string) {
 }
 
 
-export function copyUpdate(event: string, filepath: string, context: BuildContext) {
+export function copyUpdate(event: string, filePath: string, context: BuildContext) {
   const configFile = getUserConfigFile(context, taskInfo, null);
-  filepath = path.join(context.rootDir, filepath);
 
-  Logger.debug(`copyUpdate, event: ${event}, path: ${filepath}`);
+  Logger.debug(`copyUpdate, event: ${event}, path: ${filePath}`);
 
   if (event === 'change' || event === 'add' || event === 'addDir') {
     // figure out which copy option(s) this one file/directory belongs to
     const copyConfig: CopyConfig = fillConfigDefaults(configFile, taskInfo.defaultConfigFile);
-    const fileCopyOptions = findFileCopyOptions(context, copyConfig, filepath);
+    const fileCopyOptions = findFileCopyOptions(context, copyConfig, filePath);
 
     if (fileCopyOptions.length) {
       const promises = fileCopyOptions.map(copyOptions => {
@@ -44,7 +43,7 @@ export function copyUpdate(event: string, filepath: string, context: BuildContex
 
   } else if (event === 'unlink' || event === 'unlinkDir') {
     return new Promise((resolve, reject) => {
-      fs.remove(filepath, (err) => {
+      fs.remove(path.join(context.rootDir, filePath), (err) => {
         if (err) {
           reject(new BuildError(err));
         } else {
@@ -62,16 +61,23 @@ export function copyWorker(context: BuildContext, configFile: string) {
   const copyConfig: CopyConfig = fillConfigDefaults(configFile, taskInfo.defaultConfigFile);
 
   const promises = copyConfig.include.map(copyOptions => {
-    return copySrcToDest(context, copyOptions.src, copyOptions.dest, copyOptions.filter, false);
+    return copySrcToDest(context, copyOptions.src, copyOptions.dest, copyOptions.filter, true);
   });
 
   return Promise.all(promises);
 }
 
 
-function findFileCopyOptions(context: BuildContext, copyConfig: CopyConfig, filepath: string) {
+export function findFileCopyOptions(context: BuildContext, copyConfig: CopyConfig, filePath: string) {
   const copyOptions: CopyOptions[] = [];
-  const filePathSegments = filepath.split(path.sep);
+
+  if (!copyConfig || !copyConfig.include || !context.rootDir) {
+    return copyOptions;
+  }
+
+  filePath = path.join(context.rootDir, filePath);
+
+  const filePathSegments = filePath.split(path.sep);
   let srcPath: string;
   let srcLookupPath: string;
   let destCopyOption: string;
@@ -80,15 +86,16 @@ function findFileCopyOptions(context: BuildContext, copyConfig: CopyConfig, file
   while (filePathSegments.length > 1) {
     srcPath = filePathSegments.join(path.sep);
 
+
     for (var i = 0; i < copyConfig.include.length; i++) {
       srcLookupPath = path.resolve(replacePathVars(context, copyConfig.include[i].src));
 
       if (srcPath === srcLookupPath) {
         destCopyOption = path.resolve(replacePathVars(context, copyConfig.include[i].dest));
-        destPath = filepath.replace(srcLookupPath, destCopyOption);
+        destPath = filePath.replace(srcLookupPath, destCopyOption);
 
         copyOptions.push({
-          src: filepath,
+          src: filePath,
           dest: destPath,
           filter: copyConfig.include[i].filter
         });
@@ -149,5 +156,5 @@ export interface CopyOptions {
   // https://www.npmjs.com/package/fs-extra
   src: string;
   dest: string;
-  filter: any;
+  filter?: any;
 }
