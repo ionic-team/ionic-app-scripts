@@ -1,7 +1,7 @@
 import { basename, join } from 'path';
 import { BuildContext, TaskInfo } from './util/interfaces';
 import { copy as fsCopy, emptyDirSync, outputJsonSync, readFileSync, statSync } from 'fs-extra';
-import { endsWith } from './util/helpers';
+import { endsWith, objectAssign } from './util/helpers';
 import { fillConfigDefaults, generateContext, getUserConfigFile, getNodeBinExecutable } from './util/config';
 import { getTsConfigPath } from './transpile';
 import { BuildError, Logger } from './util/logger';
@@ -127,8 +127,10 @@ function createTmpTsConfig(context: BuildContext, ngcConfig: NgcConfig) {
   // to compile to the same directory we're in
   delete tsConfigFile.config.compilerOptions.outDir;
 
+  const mergedConfig = objectAssign({}, tsConfigFile.config, ngcConfig);
+
   // save the modified copy into the tmp directory
-  outputJsonSync(getTmpTsConfigPath(context), tsConfigFile.config);
+  outputJsonSync(getTmpTsConfigPath(context), mergedConfig);
 }
 
 
