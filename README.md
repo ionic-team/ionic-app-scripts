@@ -96,7 +96,7 @@ npm run build --rollup ./config/rollup.config.js
 | NGC         | `ionic_ngc`         | `--ngc` or `-n`       |
 | Rollup      | `ionic_rollup`      | `--rollup` or `-r`    |
 | Sass        | `ionic_sass`        | `--sass` or `-s`      |
-| TSLint      | `ionic_tslint`      | `--tslint` or `-l`    |
+| TSLint      | `ionic_tslint`      | `--tslint` or `-i`    |
 | UglifyJS    | `ionic_uglifyjs`    | `--uglifyjs` or `-u`  |
 | Webpack     | `ionic_webpack`     | `--webpack` or `-w`   |
 
