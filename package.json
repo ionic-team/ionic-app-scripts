@@ -41,6 +41,7 @@
     "rollup-plugin-node-globals": "1.0.9",
     "rollup-plugin-node-resolve": "2.0.0",
     "rollup-pluginutils": "1.5.2",
+    "tiny-lr": "^1.0.2",
     "tslint": "3.15.1",
     "tslint-eslint-rules": "1.5.0",
     "typescript": "^2.0.3",
@@ -57,6 +58,7 @@
     "@types/node-sass": "0.0.29",
     "@types/uglify-js": "2.0.27",
     "jasmine": "2.5.2",
+    "mime-types": "^2.1.12",
     "mock-fs": "^3.11.0",
     "tslint": "3.15.1",
     "tslint-ionic-rules": "0.0.5"

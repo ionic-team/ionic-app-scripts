@@ -1,5 +1,6 @@
 import { BuildContext, TaskInfo } from './util/interfaces';
 import { BuildError, Logger } from './util/logger';
+import { emit, EventType } from './util/events';
 import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars } from './util/config';
 import * as fs from 'fs-extra';
 import * as path from 'path';
@@ -38,15 +39,25 @@ export function copyUpdate(event: string, filePath: string, context: BuildContex
       const promises = fileCopyOptions.map(copyOptions => {
         return copySrcToDest(context, copyOptions.src, copyOptions.dest, copyOptions.filter, true);
       });
-      return Promise.all(promises);
+      return Promise.all(promises).then(destFiles => {
+        emit(EventType.FileChange, context, destFiles);
+      });
     }
 
   } else if (event === 'unlink' || event === 'unlinkDir') {
     return new Promise((resolve, reject) => {
-      fs.remove(path.join(context.rootDir, filePath), (err) => {
+      const destFile = path.join(context.rootDir, filePath);
+      fs.remove(destFile, (err) => {
         if (err) {
           reject(new BuildError(err));
+
         } else {
+          if (event === 'unlink') {
+            emit(EventType.FileDelete, context, destFile);
+          } else if (event === 'unlinkDir') {
+            emit(EventType.DirectoryDelete, context, destFile);
+          }
+
           resolve();
         }
       });
@@ -113,7 +124,7 @@ export function findFileCopyOptions(context: BuildContext, copyConfig: CopyConfi
 }
 
 
-function copySrcToDest(context: BuildContext, src: string, dest: string, filter: any, clobber: boolean) {
+function copySrcToDest(context: BuildContext, src: string, dest: string, filter: any, clobber: boolean): Promise<string> {
   return new Promise((resolve, reject) => {
     src = path.resolve(replacePathVars(context, src));
     dest = path.resolve(replacePathVars(context, dest));
@@ -133,7 +144,7 @@ function copySrcToDest(context: BuildContext, src: string, dest: string, filter:
           return;
         }
       }
-      resolve();
+      resolve(dest);
     });
   });
 }

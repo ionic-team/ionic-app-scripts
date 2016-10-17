@@ -2,6 +2,7 @@ var buildUpdate = require('../dist/build').buildUpdate;
 var templateUpdate = require('../dist/template').templateUpdate;
 var copyUpdate = require('../dist/copy').copyUpdate;
 var sassUpdate = require('../dist/sass').sassUpdate;
+var copyConfig = require('./copy.config').include;
 
 
 // https://www.npmjs.com/package/chokidar
@@ -34,9 +35,7 @@ module.exports = {
     },
 
     {
-      paths: [
-        '{{SRC}}/assets'
-      ],
+      paths: copyConfig.map(f => f.src),
       callback: copyUpdate
     },
 

@@ -1,5 +1,6 @@
 import { BuildContext, TaskInfo } from './util/interfaces';
 import { BuildError, Logger } from './util/logger';
+import { emit, EventType } from './util/events';
 import { endsWith } from './util/helpers';
 import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars } from './util/config';
 import { ionCompiler } from './plugins/ion-compiler';
@@ -99,7 +100,9 @@ export function rollupWorker(context: BuildContext, configFile: string): Promise
       })
       .then(() => {
         // clean up any references (overkill yes, but let's play it safe)
+        emit(EventType.FileChange, context, rollupConfig.dest);
         rollupConfig = rollupConfig.cache = rollupConfig.onwarn = rollupConfig.plugins = null;
+
         resolve();
       })
       .catch((err: any) => {

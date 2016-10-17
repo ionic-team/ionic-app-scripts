@@ -1,10 +1,10 @@
 import { basename, dirname, join, sep } from 'path';
 import { BuildContext, TaskInfo } from './util/interfaces';
 import { BuildError, Logger } from './util/logger';
+import { emit, EventType } from './util/events';
 import { ensureDirSync, readdirSync, writeFile } from 'fs-extra';
 import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars } from './util/config';
 import { getModulePathsCache } from './rollup';
-import { runWorker } from './worker-client';
 import { SassError, render as nodeSassRender, Result } from 'node-sass';
 import * as postcss from 'postcss';
 import * as autoprefixer from 'autoprefixer';
@@ -18,7 +18,7 @@ export function sass(context?: BuildContext, configFile?: string) {
 
   context.successfulCopy = false;
 
-  return runWorker('sass', context, configFile)
+  return sassWorker(context, configFile)
     .then(() => {
       context.successfulSass = true;
       logger.finish();
@@ -34,11 +34,11 @@ export function sassUpdate(event: string, path: string, context: BuildContext) {
 
   const logger = new Logger('sass update');
 
-  return runWorker('sass', context, configFile)
+  return sassWorker(context, configFile)
     .then(() => {
       logger.finish();
-
-    }).catch(err => {
+    })
+    .catch(err => {
       throw logger.fail(err);
     });
 }
@@ -269,7 +269,7 @@ function render(context: BuildContext, sassConfig: SassConfig) {
 
       } else {
         // sass render success!
-        renderSassSuccess(sassResult, sassConfig).then(() => {
+        renderSassSuccess(context, sassResult, sassConfig).then(() => {
           lastRenderKey = getRenderCacheKey(sassConfig);
           resolve();
 
@@ -282,7 +282,7 @@ function render(context: BuildContext, sassConfig: SassConfig) {
 }
 
 
-function renderSassSuccess(sassResult: Result, sassConfig: SassConfig): Promise<any> {
+function renderSassSuccess(context: BuildContext, sassResult: Result, sassConfig: SassConfig): Promise<any> {
   if (sassConfig.autoprefixer) {
     // with autoprefixer
 
@@ -313,7 +313,7 @@ function renderSassSuccess(sassResult: Result, sassConfig: SassConfig): Promise<
         }
 
         Logger.debug(`sass: postcss/autoprefixer completed`);
-        return writeOutput(sassConfig, postCssResult.css, apMapResult);
+        return writeOutput(context, sassConfig, postCssResult.css, apMapResult);
       });
   }
 
@@ -325,7 +325,7 @@ function renderSassSuccess(sassResult: Result, sassConfig: SassConfig): Promise<
     sassMapResult = JSON.parse(sassResult.map.toString()).mappings;
   }
 
-  return writeOutput(sassConfig, sassResult.css.toString(), sassMapResult);
+  return writeOutput(context, sassConfig, sassResult.css.toString(), sassMapResult);
 }
 
 
@@ -370,7 +370,7 @@ function generateSourceMaps(sassResult: Result, sassConfig: SassConfig) {
 }
 
 
-function writeOutput(sassConfig: SassConfig, cssOutput: string, mappingsOutput: string) {
+function writeOutput(context: BuildContext, sassConfig: SassConfig, cssOutput: string, mappingsOutput: string) {
   return new Promise((resolve, reject) => {
 
     Logger.debug(`sass start write output: ${sassConfig.outFile}`);
@@ -401,6 +401,9 @@ function writeOutput(sassConfig: SassConfig, cssOutput: string, mappingsOutput: 
             }
           });
         }
+
+        // notify a file has changed
+        emit(EventType.FileChange, context, sassConfig.outFile);
 
         // css file all saved
         // note that we're not waiting on the css map to finish saving
