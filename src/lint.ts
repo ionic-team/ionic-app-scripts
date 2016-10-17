@@ -1,7 +1,7 @@
 import { access } from 'fs';
 import { BuildContext, TaskInfo } from './util/interfaces';
 import { BuildError, Logger } from './util/logger';
-import { generateContext, getUserConfigFile, getConfigValueDefault } from './util/config';
+import { generateContext, getUserConfigFile } from './util/config';
 import { join } from 'path';
 import { createProgram, findConfiguration, getFileNames } from 'tslint';
 import { printFailures } from './util/logger-tslint';
@@ -13,7 +13,6 @@ import * as ts from 'typescript';
 
 export function lint(context?: BuildContext, configFile?: string) {
   context = generateContext(context);
-  configFile = getUserConfigFile(context, taskInfo, configFile);
 
   return runWorker('lint', context, configFile)
     .catch(err => {
@@ -24,11 +23,10 @@ export function lint(context?: BuildContext, configFile?: string) {
 
 export function lintWorker(context: BuildContext, configFile?: string) {
   return new Promise((resolve, reject) => {
-    configFile = configFile || getConfigValueDefault(taskInfo.fullArgConfig,
-                                                          taskInfo.shortArgConfig,
-                                                          taskInfo.envConfig,
-                                                          join(context.rootDir, 'tslint.json'),
-                                                          context);
+    configFile = getUserConfigFile(context, taskInfo, configFile);
+    if (!configFile) {
+      configFile = join(context.rootDir, 'tslint.json');
+    }
 
     Logger.debug(`tslint config: ${configFile}`);
 
@@ -134,7 +132,7 @@ function isMpegFile(file: string) {
 
 const taskInfo: TaskInfo = {
   fullArgConfig: '--tslint',
-  shortArgConfig: '-l',
+  shortArgConfig: '-i',
   envConfig: 'ionic_tslint',
   defaultConfigFile: '../tslint'
 };
