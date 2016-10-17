@@ -112,10 +112,7 @@ function createLiveReloadServer(host: string) {
 
   liveReloadServer = tinylr();
 
-  liveReloadServer.listen(LIVE_RELOAD_DEFAULT_PORT, host, () => {
-    Logger.info('live reloader');
-
-  });
+  liveReloadServer.listen(LIVE_RELOAD_DEFAULT_PORT, host);
 }
 
 
