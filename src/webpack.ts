@@ -53,9 +53,18 @@ export function webpackWorker(context: BuildContext, configFile: string): Promis
         } else {
           // set the module files used in this bundle
           // this reference can be used elsewhere in the build (sass)
-          context.moduleFiles = stats.compilation.modules.map((obj: any) => {
-            return obj.resource;
+          const files = stats.compilation.modules.map((webpackObj: any) => {
+            if (webpackObj.resource) {
+              return webpackObj.resource;
+            } else {
+              return webpackObj.context;
+            }
+          }).filter((path: string) => {
+            // just make sure the path is not null
+            return path && path.length > 0;
           });
+
+          context.moduleFiles = files;
 
           // async cache all the module paths so we don't need
           // to always bundle to know which modules are used
