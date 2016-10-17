@@ -80,7 +80,7 @@ function lintFile(context: BuildContext, program: ts.Program, file: string) {
       return;
     }
 
-    readFile(file, 'utf8', (err, contents) => {
+    fs.readFile(file, 'utf8', (err, contents) => {
       if (err) {
         // don't care if there was an error
         // let's just move on with our lives
