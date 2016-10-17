@@ -1,12 +1,14 @@
-import { dirname, join, resolve } from 'path';
-
 import { BuildContext } from '../util/interfaces';
+import { dirname, join, resolve } from 'path';
 import { resolveId } from '../plugins/ion-compiler';
 
 const importer = '/Users/dan/Dev/ionic-conference-app/src/app/app.module.ts';
 
+
 describe('ion-compiler', () => {
+
   describe('resolveId', () => {
+
     it('should return null when given an undefined/null import', () => {
       // arrange
       // no arrange needed
@@ -158,5 +160,7 @@ describe('ion-compiler', () => {
       // assert
       expect(result).toEqual(null);
     });
+
   });
+
 });

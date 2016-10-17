@@ -52,7 +52,7 @@ var rollupConfig = {
 };
 
 
-if (process.env.IONIC_ENV == 'prod') {
+if (process.env.IONIC_ENV === 'prod') {
   // production mode
   rollupConfig.entry = '{{TMP}}/app/main.prod.ts';
   rollupConfig.sourceMap = false;

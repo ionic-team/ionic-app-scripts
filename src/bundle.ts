@@ -1,21 +1,38 @@
 import { BuildContext } from './util/interfaces';
 import { BuildError } from './util/logger';
-import { generateContext } from './util/config';
-import { rollup, rollupUpdate, getRollupConfig, getOutputDest } from './rollup';
+import { generateContext, BUNDLER_ROLLUP } from './util/config';
+import { rollup, rollupUpdate, getRollupConfig, getOutputDest as rollupGetOutputDest } from './rollup';
+import { webpack, webpackUpdate, getWebpackConfig, getOutputDest as webpackGetOutputDest } from './webpack';
 
 
 export function bundle(context?: BuildContext, configFile?: string) {
   context = generateContext(context);
 
-  return rollup(context, configFile)
-    .catch(err => {
+  return bundleWorker(context, configFile)
+    .catch((err: Error) => {
       throw new BuildError(err);
     });
 }
 
 
+function bundleWorker(context: BuildContext, configFile: string) {
+  if (context.bundler === BUNDLER_ROLLUP) {
+    return rollup(context, configFile);
+  }
+
+  return webpack(context, configFile);
+}
+
+
 export function bundleUpdate(event: string, path: string, context: BuildContext) {
-  return rollupUpdate(event, path, context)
+  if (context.bundler === BUNDLER_ROLLUP) {
+    return rollupUpdate(event, path, context)
+      .catch(err => {
+        throw new BuildError(err);
+      });
+  }
+
+  return webpackUpdate(event, path, context, null)
     .catch(err => {
       throw new BuildError(err);
     });
@@ -23,12 +40,22 @@ export function bundleUpdate(event: string, path: string, context: BuildContext)
 
 
 export function buildJsSourceMaps(context: BuildContext) {
-  const rollupConfig = getRollupConfig(context, null);
-  return rollupConfig.sourceMap;
+  if (context.bundler === BUNDLER_ROLLUP) {
+    const rollupConfig = getRollupConfig(context, null);
+    return rollupConfig.sourceMap;
+  }
+
+  // TODO - read this from webpack config (could be multiple values)
+  return true;
 }
 
 
 export function getJsOutputDest(context: BuildContext) {
-  const rollupConfig = getRollupConfig(context, null);
-  return getOutputDest(context, rollupConfig);
+  if (context.bundler === BUNDLER_ROLLUP) {
+    const rollupConfig = getRollupConfig(context, null);
+    return rollupGetOutputDest(context, rollupConfig);
+  }
+
+  const webpackConfig = getWebpackConfig(context, null);
+  return webpackGetOutputDest(context, webpackConfig);
 }

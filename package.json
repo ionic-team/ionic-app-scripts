@@ -1,6 +1,6 @@
 {
   "name": "@ionic/app-scripts",
-  "version": "0.0.36",
+  "version": "0.0.37",
   "description": "Scripts for Ionic Projects",
   "homepage": "http://ionicframework.com/",
   "author": "Ionic Team <hi@ionic.io> (http://ionic.io)",
@@ -32,6 +32,7 @@
     "clean-css": "3.4.19",
     "cross-spawn": "4.0.0",
     "fs-extra": "0.30.0",
+    "json-loader": "^0.5.4",
     "node-sass": "3.9.3",
     "postcss": "5.2.0",
     "rollup": "0.36.3",
@@ -45,7 +46,8 @@
     "tslint": "3.15.1",
     "tslint-eslint-rules": "1.5.0",
     "typescript": "^2.0.3",
-    "uglify-js": "2.7.3"
+    "uglify-js": "2.7.3",
+    "webpack": "^2.1.0-beta.25"
   },
   "devDependencies": {
     "@types/chalk": "0.4.30",
@@ -57,6 +59,7 @@
     "@types/node": "6.0.38",
     "@types/node-sass": "0.0.29",
     "@types/uglify-js": "2.0.27",
+    "@types/webpack": "^1.12.35",
     "jasmine": "2.5.2",
     "mime-types": "^2.1.12",
     "mock-fs": "^3.11.0",

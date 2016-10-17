@@ -1,12 +1,10 @@
 import { BuildContext, TaskInfo } from './util/interfaces';
 import { BuildError, Logger } from './util/logger';
 import { emit, EventType } from './util/events';
-import { endsWith } from './util/helpers';
+import { endsWith, setModulePathsCache } from './util/helpers';
 import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars } from './util/config';
 import { ionCompiler } from './plugins/ion-compiler';
 import { join, isAbsolute, normalize } from 'path';
-import { outputJson, readJsonSync } from 'fs-extra';
-import { tmpdir } from 'os';
 import * as rollupBundler from 'rollup';
 
 
@@ -14,7 +12,7 @@ export function rollup(context: BuildContext, configFile: string) {
   context = generateContext(context);
   configFile = getUserConfigFile(context, taskInfo, configFile);
 
-  const logger = new Logger('bundle');
+  const logger = new Logger('rollup');
 
   return rollupWorker(context, configFile)
     .then(() => {
@@ -27,7 +25,7 @@ export function rollup(context: BuildContext, configFile: string) {
 
 
 export function rollupUpdate(event: string, path: string, context: BuildContext) {
-  const logger = new Logger('bundle update');
+  const logger = new Logger('rollup update');
 
   const configFile = getUserConfigFile(context, taskInfo, null);
 
@@ -140,44 +138,6 @@ function checkDeprecations(context: BuildContext, rollupConfig: RollupConfig) {
 
     }
   }
-}
-
-
-export function getModulePathsCache(): string[] {
-  // sync get the cached array of module paths (if they exist)
-  let modulePaths: string[] = null;
-  const modulesCachePath = getModulesPathsCachePath();
-  try {
-    modulePaths = readJsonSync(modulesCachePath, <any>{ throws: false });
-    Logger.debug(`Cached module paths: ${modulePaths && modulePaths.length}, ${modulesCachePath}`);
-  } catch (e) {
-    Logger.debug(`Cached module paths not found: ${modulesCachePath}`);
-  }
-  return modulePaths;
-}
-
-
-function setModulePathsCache(modulePaths: string[]) {
-  // async save the module paths for later lookup
-  const modulesCachePath = getModulesPathsCachePath();
-
-  Logger.debug(`Cached module paths: ${modulePaths && modulePaths.length}, ${modulesCachePath}`);
-
-  outputJson(modulesCachePath, modulePaths, (err) => {
-    if (err) {
-      Logger.error(`Error writing module paths cache: ${err}`);
-    }
-  });
-}
-
-
-function getModulesPathsCachePath(): string {
-  // make a unique tmp directory for this project's module paths cache file
-  let cwd = process.cwd().replace(/-|:|\/|\\|\.|~|;|\s/g, '').toLowerCase();
-  if (cwd.length > 40) {
-    cwd = cwd.substr(cwd.length - 40);
-  }
-  return join(tmpdir(), cwd, 'modulepaths.json');
 }
 
 

@@ -1,5 +1,5 @@
 import { BuildContext } from '../util/interfaces';
-import { generateContext, getConfigValueDefault, getUserConfigFile } from '../util/config';
+import { bundlerStrategy, generateContext, getConfigValueDefault, getUserConfigFile } from '../util/config';
 import { addArgv, setProcessEnvVar, setProcessArgs, setProcessEnv, setCwd } from '../util/config';
 import { resolve } from 'path';
 
@@ -25,6 +25,16 @@ describe('util', () => {
         isProd: false
       });
       expect(context.isProd).toEqual(false);
+    });
+
+    it('should set default bundler when invalid value', () => {
+      const context = generateContext();
+      expect(context.bundler).toEqual('webpack');
+    });
+
+    it('should set default bundler when not set', () => {
+      const context = generateContext();
+      expect(context.bundler).toEqual('webpack');
     });
 
     it('should set isProd by default', () => {
@@ -77,6 +87,78 @@ describe('util', () => {
     it('should get default value', () => {
       const val = getConfigValueDefault('--full', '-s', 'envVar', 'defaultValue');
       expect(val).toEqual('defaultValue');
+    });
+
+  });
+
+  describe('bundlerStrategy', () => {
+
+    it('should get rollup by full arg', () => {
+      addArgv('--rollup');
+      addArgv('my.rollup.confg.js');
+      const bundler = bundlerStrategy();
+      expect(bundler).toEqual('rollup');
+    });
+
+    it('should get rollup by short arg', () => {
+      addArgv('-r');
+      addArgv('my.rollup.confg.js');
+      const bundler = bundlerStrategy();
+      expect(bundler).toEqual('rollup');
+    });
+
+    it('should get rollup by bundler arg', () => {
+      addArgv('--bundler');
+      addArgv('rollup');
+      const bundler = bundlerStrategy();
+      expect(bundler).toEqual('rollup');
+    });
+
+    it('should get rollup by env var', () => {
+      setProcessEnv({
+        npm_package_config_ionic_bundler: 'rollup'
+      });
+      let bundler = bundlerStrategy();
+      expect(bundler).toEqual('rollup');
+
+      setProcessEnv({
+        ionic_bundler: 'rollup'
+      });
+      bundler = bundlerStrategy();
+      expect(bundler).toEqual('rollup');
+    });
+
+    it('should get webpack with invalid env var', () => {
+      setProcessEnv({
+        npm_package_config_ionic_bundler: 'bobsBundler'
+      });
+      let bundler = bundlerStrategy();
+      expect(bundler).toEqual('webpack');
+
+      setProcessEnv({
+        ionic_bundler: 'bobsBundler'
+      });
+      bundler = bundlerStrategy();
+      expect(bundler).toEqual('webpack');
+    });
+
+    it('should get webpack by env var', () => {
+      setProcessEnv({
+        npm_package_config_ionic_bundler: 'webpack'
+      });
+      let bundler = bundlerStrategy();
+      expect(bundler).toEqual('webpack');
+
+      setProcessEnv({
+        ionic_bundler: 'webpack'
+      });
+      bundler = bundlerStrategy();
+      expect(bundler).toEqual('webpack');
+    });
+
+    it('should get webpack by default', () => {
+      const bundler = bundlerStrategy();
+      expect(bundler).toEqual('webpack');
     });
 
   });
