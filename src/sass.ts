@@ -4,7 +4,7 @@ import { BuildError, Logger } from './util/logger';
 import { emit, EventType } from './util/events';
 import { ensureDirSync, readdirSync, writeFile } from 'fs-extra';
 import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars } from './util/config';
-import { getModulePathsCache } from './rollup';
+import { getModulePathsCache } from './util/helpers';
 import { SassError, render as nodeSassRender, Result } from 'node-sass';
 import * as postcss from 'postcss';
 import * as autoprefixer from 'autoprefixer';

@@ -3,7 +3,6 @@ import { dirname, join, resolve } from 'path';
 import * as pluginutils from 'rollup-pluginutils';
 
 
-
 export function ionCompiler(context: BuildContext) {
   const filter = pluginutils.createFilter(INCLUDE, EXCLUDE);
 
