@@ -65,6 +65,11 @@ export function createDevServer(context: BuildContext) {
 
 
 export function devServerListener(context: BuildContext, request: http.IncomingMessage, response: http.ServerResponse) {
+  if (devLogger.isDevLoggerUrl(request.url)) {
+    devLogger.responseDevLogger(request, response);
+    return;
+  }
+
   let filePath = '.' + request.url.split('?')[0];
   if (filePath === './') {
     filePath = './index.html';
@@ -96,8 +101,8 @@ function responseSuccess(context: BuildContext, filePath: string, content: Buffe
       content = liveReload.injectLiveReloadScript(content);
     }
 
-    if (devLogger.useConsoleLogger()) {
-      content = devLogger.injectConsoleLogger(content);
+    if (devLogger.useDevLogger()) {
+      content = devLogger.injectDevLoggerScript(content);
     }
   }
 
