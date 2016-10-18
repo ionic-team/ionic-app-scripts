@@ -10,7 +10,20 @@ export function runWorker(taskModule: string, taskWorker: string, context: Build
     const msg: WorkerMessage = {
       taskModule,
       taskWorker,
-      context,
+      context: {
+        // only copy over what's important
+        // don't copy over the large data properties
+        rootDir: context.rootDir,
+        tmpDir: context.tmpDir,
+        srcDir: context.srcDir,
+        wwwDir: context.wwwDir,
+        wwwIndex: context.wwwIndex,
+        buildDir: context.buildDir,
+        isProd: context.isProd,
+        isWatch: context.isWatch,
+        bundler: context.bundler,
+        inlineTemplates: context.inlineTemplates,
+      },
       workerConfig
     };
 

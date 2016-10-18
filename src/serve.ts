@@ -1,24 +1,21 @@
 import { BuildContext } from './util/interfaces';
-import { generateContext, getConfigValueDefault } from './util/config';
+import { generateContext, getConfigValueDefault, hasConfigValue } from './util/config';
 import { Logger } from './util/logger';
-import { join, relative } from 'path';
+import { join } from 'path';
 import { readFile } from 'fs';
 import { watch } from './watch';
 import * as chalk from 'chalk';
-import * as events from './util/events';
 import * as http from 'http';
+import * as liveReload from './util/live-reload';
+import * as devLogger from './util/logger-dev-server';
 import * as mime from 'mime-types';
-import * as tinylr from 'tiny-lr';
 
 
 let devServer: http.Server;
-let liveReloadServer: any;
 
 
 export function serve(context?: BuildContext) {
   context = generateContext(context);
-
-  setupEvents();
 
   return watch(context)
     .then(() => {
@@ -30,14 +27,17 @@ export function serve(context?: BuildContext) {
 
 
 export function createDevServer(context: BuildContext) {
-  const port = getDevServerPort(context);
-  const host = getDevServerHost(context);
+  const port = getDevServerPort();
+  const host = getDevServerHost();
   const devAddress = `http://${host || 'localhost'}:${port}/`;
 
   function httpServerListen() {
     devServer.listen(port, host, undefined, () => {
       Logger.info(chalk.green(`dev server running: ${devAddress}`));
-      createLiveReloadServer(host);
+
+      if (liveReload.useLiveReload()) {
+        liveReload.createLiveReloadServer(host);
+      }
     });
   }
 
@@ -64,79 +64,76 @@ export function createDevServer(context: BuildContext) {
 }
 
 
-function devServerListener(context: BuildContext, request: http.IncomingMessage, response: http.ServerResponse) {
-  let filePath = '.' + request.url;
+export function devServerListener(context: BuildContext, request: http.IncomingMessage, response: http.ServerResponse) {
+  let filePath = '.' + request.url.split('?')[0];
   if (filePath === './') {
-    filePath = './' + DEV_SERVER_DEFAULT_INDEX;
+    filePath = './index.html';
   }
-
   filePath = join(context.wwwDir, filePath);
-  filePath = filePath.split('?')[0];
-
-  if (filePath.indexOf('/cordova.js') > -1) {
-    response.writeHead(200, { 'Content-Type': 'application/javascript' });
-    response.end('// mock cordova file during development');
-    return;
-  }
 
   readFile(filePath, (err, content) => {
-    const contentType = {
-      'Content-Type': 'text/html',
-      'X-DEV-FILE-PATH': filePath
-    };
-
     if (err) {
-      if (err.code === 'ENOENT') {
-        response.writeHead(404, contentType);
-        response.end(`File not found: ${request.url}<br>Local file: ${filePath}`);
-
-      } else {
-        Logger.error(`http server error: ${err}`);
-        response.writeHead(500, contentType);
-        response.end(`Sorry, check with the site admin for error: ${err.code} ..\n`);
-      }
+      // gahh!
+      responseError(err, filePath, request, response);
 
     } else {
-      contentType['Content-Type'] = mime.lookup(filePath) || 'application/octet-stream';
-      response.writeHead(200, contentType);
-      response.end(content, mime.charset(contentType));
+      // 200!! found the file, let's send back dat data
+      responseSuccess(context, filePath, content, response);
     }
   });
 }
 
 
-function createLiveReloadServer(host: string) {
-  if (liveReloadServer) {
+function responseSuccess(context: BuildContext, filePath: string, content: Buffer, response: http.ServerResponse) {
+  const headers = {
+    'Content-Type': mime.lookup(filePath) || 'application/octet-stream',
+    'X-DEV-FILE-PATH': filePath
+  };
+  response.writeHead(200, headers);
+
+  if (isRootIndexFile(context, filePath)) {
+    if (liveReload.useLiveReload()) {
+      content = liveReload.injectLiveReloadScript(content);
+    }
+
+    if (devLogger.useConsoleLogger()) {
+      content = devLogger.injectConsoleLogger(content);
+    }
+  }
+
+  response.end(content, mime.charset(headers['Content-Type']));
+}
+
+
+function responseError(err: NodeJS.ErrnoException, filePath: string, request: http.IncomingMessage, response: http.ServerResponse) {
+  if (err.code === 'ENOENT') {
+    // dev file not found!
+    response404(filePath, request, response);
+
+  } else {
+    // derp, 500?!!
+    Logger.error(`http server error: ${err}`);
+    response.writeHead(500, { 'Content-Type': 'text/html' });
+    response.end(`Sorry, check with the site admin for error: ${err.code} ..\n`);
+  }
+}
+
+
+function response404(filePath: string, request: http.IncomingMessage, response: http.ServerResponse) {
+  if (filePath.indexOf('/cordova.js') > -1) {
+    // mock the cordova.js file during dev
+    response.writeHead(200, { 'Content-Type': 'application/javascript' });
+    response.end('// mock cordova file during development');
     return;
   }
 
-  liveReloadServer = tinylr();
-
-  liveReloadServer.listen(LIVE_RELOAD_DEFAULT_PORT, host);
+  // 404!!!
+  response.writeHead(404, { 'Content-Type': 'text/html' });
+  response.end(`File not found: ${request.url}<br>Local file: ${filePath}`);
 }
 
 
-function fileChanged(context: BuildContext, filePath: string|string[]) {
-  if (liveReloadServer) {
-    const files = Array.isArray(filePath) ? filePath : [filePath];
-
-    liveReloadServer.changed({
-      body: {
-        files: files.map(f => '/' + relative(context.wwwDir, f))
-      }
-    });
-  }
-}
-
-
-function setupEvents() {
-  events.on(events.EventType.FileChange, (context: BuildContext, filePath: string) => {
-    fileChanged(context, filePath);
-  });
-}
-
-
-function getDevServerPort(context: BuildContext) {
+function getDevServerPort() {
   const port = getConfigValueDefault('--port', '-p', 'ionic_port', null);
   if (port) {
     return parseInt(port, 10);
@@ -144,15 +141,42 @@ function getDevServerPort(context: BuildContext) {
   return DEV_SERVER_DEFAULT_PORT;
 }
 
-
-function getDevServerHost(context: BuildContext) {
-  const host = getConfigValueDefault('--host', '-h', 'ionic_host', null);
+function getDevServerHost() {
+  const host = getConfigValueDefault('--address', '-h', 'ionic_address', null);
   if (host) {
     return host;
   }
 }
 
 
+function isRootIndexFile(context: BuildContext, filePath: string) {
+  return (filePath === context.wwwIndex);
+}
+
+function useConsoleLogs() {
+  return hasConfigValue('--consolelogs', '-c', 'ionic_consolelogs', false);
+}
+
+function useServerLogs() {
+  return hasConfigValue('--serverlogs', '-s', 'ionic_serverlogs', false);
+}
+
+function launchBrowser() {
+  return !hasConfigValue('--nobrowser', '-b', 'ionic_launch_browser', false);
+}
+
+function browserToLaunch() {
+  return getConfigValueDefault('--browser', '-w', 'ionic_browser', null);
+}
+
+function browserOption() {
+  return getConfigValueDefault('--browseroption', '-o', 'ionic_browseroption', null);
+}
+
+function launchLab() {
+  return hasConfigValue('--lab', '-l', 'ionic_lab', false);
+}
+
+
 const DEV_SERVER_DEFAULT_PORT = 8100;
-const DEV_SERVER_DEFAULT_INDEX = 'index.html';
-const LIVE_RELOAD_DEFAULT_PORT = 35729;
+

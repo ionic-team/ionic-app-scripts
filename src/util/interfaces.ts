@@ -4,6 +4,7 @@ export interface BuildContext {
   tmpDir?: string;
   srcDir?: string;
   wwwDir?: string;
+  wwwIndex?: string;
   buildDir?: string;
   moduleFiles?: string[];
   isProd?: boolean;

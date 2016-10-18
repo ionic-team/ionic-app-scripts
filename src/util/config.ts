@@ -34,6 +34,8 @@ export function generateContext(context?: BuildContext): BuildContext {
   context.wwwDir = resolve(context.wwwDir || getConfigValueDefault('--wwwDir', null, ENV_VAR_WWW_DIR, join(context.rootDir, WWW_DIR)));
   setProcessEnvVar(ENV_VAR_WWW_DIR, context.wwwDir);
 
+  context.wwwIndex = join(context.wwwDir, WWW_INDEX_FILENAME);
+
   context.buildDir = resolve(context.buildDir || getConfigValueDefault('--buildDir', null, ENV_VAR_BUILD_DIR, join(context.wwwDir, BUILD_DIR)));
   setProcessEnvVar(ENV_VAR_BUILD_DIR, context.buildDir);
 
@@ -181,6 +183,22 @@ function getArgValue(fullName: string, shortName: string): string {
 }
 
 
+export function hasConfigValue(argFullName: string, argShortName: string, envVarName: string, defaultValue: boolean) {
+  if (hasArg(argFullName, argShortName)) {
+    return true;
+  }
+
+  const envVar: any = getEnvVariable(envVarName);
+  if (envVar === 'true' || envVar === true) {
+    return true;
+  } else if (envVar === 'false' || envVar === false) {
+    return false;
+  }
+
+  return defaultValue;
+}
+
+
 export function hasArg(fullName: string, shortName: string = null): boolean {
   return !!(processArgv.some(a => a === fullName) || (shortName !== null && processArgv.some(a => a === shortName)));
 }
@@ -269,6 +287,7 @@ const BUILD_DIR = 'build';
 const SRC_DIR = 'src';
 const TMP_DIR = '.tmp';
 const WWW_DIR = 'www';
+const WWW_INDEX_FILENAME = 'index.html';
 
 const ENV_VAR_PROD = 'prod';
 const ENV_VAR_DEV = 'dev';
