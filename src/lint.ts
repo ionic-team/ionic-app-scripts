@@ -14,48 +14,56 @@ import * as ts from 'typescript';
 export function lint(context?: BuildContext, configFile?: string) {
   context = generateContext(context);
 
-  return runWorker('lint', context, configFile)
+  return runWorker('lint', 'lintWorker', context, configFile)
     .catch(err => {
       throw new BuildError(err);
     });
 }
 
 
-export function lintWorker(context: BuildContext, configFile?: string) {
-  return new Promise((resolve, reject) => {
-    configFile = getUserConfigFile(context, taskInfo, configFile);
-    if (!configFile) {
-      configFile = join(context.rootDir, 'tslint.json');
-    }
+export function lintWorker(context: BuildContext, configFile: string) {
+  return getLintConfig(context, configFile).then(configFile => {
+    // there's a valid tslint config, let's continue
+    const logger = new Logger('lint');
 
-    Logger.debug(`tslint config: ${configFile}`);
+    return lintApp(context, configFile)
+      .then(() => {
+        // always finish and resolve
+        logger.finish();
 
-    access(configFile, (err) => {
-      if (err) {
-        // if the tslint.json file cannot be found that's fine, the
-        // dev may not want to run tslint at all and to do that they
-        // just don't have the file
-        Logger.debug(`tslint: ${err}`);
-        resolve();
-        return;
-      }
-
-      const logger = new Logger('lint');
-
-      lintApp(context, configFile)
-        .then(() => {
-          // always finish and resolve
-          logger.finish();
-          resolve();
-
-        }).catch(() => {
-          // always finish and resolve
-          logger.finish();
-          resolve();
-        });
-
-    });
+      }).catch(() => {
+        // always finish and resolve
+        logger.finish();
+      });
   });
+}
+
+
+export function lintUpdate(event: string, filePath: string, context: BuildContext) {
+  return new Promise(resolve => {
+    // throw this in a promise for async fun, but don't let it hang anything up
+    const workerConfig: LintWorkerConfig = {
+      configFile: getUserConfigFile(context, taskInfo, null),
+      filePath: filePath
+    };
+
+    runWorker('lint', 'lintUpdateWorker', context, workerConfig);
+    resolve();
+  });
+}
+
+
+export function lintUpdateWorker(context: BuildContext, workerConfig: LintWorkerConfig) {
+  return getLintConfig(context, workerConfig.configFile).then(configFile => {
+      // there's a valid tslint config, let's continue (but be quiet about it!)
+      const program = createProgram(configFile, context.srcDir);
+      return lintFile(context, program, workerConfig.filePath);
+
+    }, () => {
+      // rejected, but let's ignore
+    }).catch(() => {
+      // error, but whateves
+    });
 }
 
 
@@ -71,16 +79,16 @@ function lintApp(context: BuildContext, configFile: string) {
 }
 
 
-function lintFile(context: BuildContext, program: ts.Program, file: string) {
+function lintFile(context: BuildContext, program: ts.Program, filePath: string) {
   return new Promise((resolve) => {
 
-    if (isMpegFile(file)) {
+    if (isMpegFile(filePath)) {
       // silly .ts files actually being video files
       resolve();
       return;
     }
 
-    fs.readFile(file, 'utf8', (err, contents) => {
+    fs.readFile(filePath, 'utf8', (err, contents) => {
       if (err) {
         // don't care if there was an error
         // let's just move on with our lives
@@ -89,9 +97,9 @@ function lintFile(context: BuildContext, program: ts.Program, file: string) {
       }
 
       try {
-        const configuration = findConfiguration(null, file);
+        const configuration = findConfiguration(null, filePath);
 
-        const linter = new Linter(file, contents, {
+        const linter = new Linter(filePath, contents, {
           configuration: configuration,
           formatter: null,
           formattersDirectory: null,
@@ -108,6 +116,29 @@ function lintFile(context: BuildContext, program: ts.Program, file: string) {
       resolve();
     });
 
+  });
+}
+
+
+function getLintConfig(context: BuildContext, configFile: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    configFile = getUserConfigFile(context, taskInfo, configFile);
+    if (!configFile) {
+      configFile = join(context.rootDir, 'tslint.json');
+    }
+
+    Logger.debug(`tslint config: ${configFile}`);
+
+    access(configFile, (err) => {
+      if (err) {
+        // if the tslint.json file cannot be found that's fine, the
+        // dev may not want to run tslint at all and to do that they
+        // just don't have the file
+        reject();
+        return;
+      }
+      resolve(configFile);
+    });
   });
 }
 
@@ -136,3 +167,8 @@ const taskInfo: TaskInfo = {
   envConfig: 'ionic_tslint',
   defaultConfigFile: '../tslint'
 };
+
+export interface LintWorkerConfig {
+  configFile: string;
+  filePath: string;
+}

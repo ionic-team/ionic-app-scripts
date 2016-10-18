@@ -13,7 +13,7 @@ export function uglifyjs(context?: BuildContext, configFile?: string) {
 
   const logger = new Logger('uglifyjs');
 
-  return runWorker('uglifyjs', context, configFile)
+  return runWorker('uglifyjs', 'uglifyjsWorker', context, configFile)
     .then(() => {
       logger.finish();
     })

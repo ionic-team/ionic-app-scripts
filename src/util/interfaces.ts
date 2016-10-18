@@ -14,11 +14,13 @@ export interface BuildContext {
   tsFiles?: TsFiles;
   successfulCopy?: boolean;
   successfulSass?: boolean;
+  inlineTemplates?: boolean;
 }
 
 
 export interface WorkerMessage {
-  task?: string;
+  taskModule?: string;
+  taskWorker?: string;
   context?: BuildContext;
   workerConfig?: any;
   resolve?: any;

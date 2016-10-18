@@ -10,7 +10,7 @@ export function closure(context?: BuildContext, configFile?: string) {
 
   const logger = new Logger('closure');
 
-  return runWorker('closure', context, configFile)
+  return runWorker('closure', 'closureWorker', context, configFile)
     .then(() => {
       logger.finish();
     })

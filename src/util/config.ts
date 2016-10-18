@@ -47,6 +47,8 @@ export function generateContext(context?: BuildContext): BuildContext {
     context.isWatch = hasArg('--watch', '-w');
   }
 
+  context.inlineTemplates = true;
+
   checkDebugMode();
 
   return context;

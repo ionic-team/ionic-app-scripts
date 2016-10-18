@@ -4,10 +4,15 @@ import { fork, ChildProcess } from 'child_process';
 import { join } from 'path';
 
 
-export function runWorker(task: string, context: BuildContext, workerConfig: any) {
+export function runWorker(taskModule: string, taskWorker: string, context: BuildContext, workerConfig: any) {
   return new Promise((resolve, reject) => {
-    const worker = <ChildProcess>createWorker(task);
-    const msg: WorkerMessage = { task, context, workerConfig };
+    const worker = <ChildProcess>createWorker(taskModule);
+    const msg: WorkerMessage = {
+      taskModule,
+      taskWorker,
+      context,
+      workerConfig
+    };
 
     worker.on('message', (msg: WorkerMessage) => {
       if (msg.error) {
@@ -22,11 +27,11 @@ export function runWorker(task: string, context: BuildContext, workerConfig: any
     });
 
     worker.on('error', (err: any) => {
-      Logger.error(`worker error, task: ${task}, pid: ${worker.pid}, error: ${err}`);
+      Logger.error(`worker error, taskModule: ${taskModule}, pid: ${worker.pid}, error: ${err}`);
     });
 
     worker.on('exit', (code: number) => {
-      Logger.debug(`worker exited, task: ${task}, pid: ${worker.pid}`);
+      Logger.debug(`worker exited, taskModule: ${taskModule}, pid: ${worker.pid}`);
     });
 
     worker.send(msg);
@@ -50,13 +55,13 @@ function killWorker(pid: number) {
 }
 
 
-export function createWorker(task: string): any {
+export function createWorker(taskModule: string): any {
   for (var i = workers.length - 1; i >= 0; i--) {
-    if (workers[i].task === task) {
+    if (workers[i].task === taskModule) {
       try {
         workers[i].worker.kill('SIGKILL');
       } catch (e) {
-        Logger.debug(`createWorker, ${task} kill('SIGKILL'): ${e}`);
+        Logger.debug(`createWorker, ${taskModule} kill('SIGKILL'): ${e}`);
       } finally {
         delete workers[i].worker;
         workers.splice(i, 1);
@@ -68,17 +73,17 @@ export function createWorker(task: string): any {
     const workerModule = join(__dirname, 'worker-process.js');
     const worker = fork(workerModule);
 
-    Logger.debug(`worker created, task: ${task}, pid: ${worker.pid}`);
+    Logger.debug(`worker created, taskModule: ${taskModule}, pid: ${worker.pid}`);
 
     workers.push({
-      task: task,
+      task: taskModule,
       worker: worker
     });
 
     return worker;
 
   } catch (e) {
-    throw new BuildError(`unable to create worker-process, task: ${task}: ${e}`);
+    throw new BuildError(`unable to create worker-process, task: ${taskModule}: ${e}`);
   }
 }
 

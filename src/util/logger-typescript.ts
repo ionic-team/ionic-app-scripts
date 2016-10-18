@@ -23,7 +23,7 @@ export function runDiagnostics(context: BuildContext, program: ts.Program) {
 
 
 export function printDiagnostic(context: BuildContext, d: ts.Diagnostic) {
-  let header = 'error';
+  let header = 'typescript error';
 
   if (d.file) {
     const { line } = d.file.getLineAndCharacterOfPosition(d.start);

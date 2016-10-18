@@ -13,7 +13,7 @@ export function cleancss(context?: BuildContext, configFile?: string) {
 
   const logger = new Logger('cleancss');
 
-  return runWorker('cleancss', context, configFile)
+  return runWorker('cleancss', 'cleancssWorker', context, configFile)
     .then(() => {
       logger.finish();
     })

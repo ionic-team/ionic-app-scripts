@@ -4,64 +4,66 @@ import { WorkerMessage } from './util/interfaces';
 
 process.on('message', (msg: WorkerMessage) => {
   try {
-    const modulePath = `./${msg.task}`;
-    const taskWorkerName = `${msg.task}Worker`;
-    const taskWorker = require(modulePath)[taskWorkerName];
+    const modulePath = `./${msg.taskModule}`;
+    const taskWorker = require(modulePath)[msg.taskWorker];
 
     taskWorker(msg.context, msg.workerConfig)
       .then(
         (val: any) => {
-          taskResolve(msg.task, val);
+          taskResolve(msg.taskModule, msg.taskWorker, val);
         },
         (val: any) => {
-          taskReject(msg.task, val);
+          taskReject(msg.taskModule, msg.taskWorker, val);
         }
       )
       .catch((err: any) => {
-        taskError(msg.task, err);
+        taskError(msg.taskModule, msg.taskWorker, err);
       });
 
   } catch (e) {
-    taskError(msg.task, e);
+    taskError(msg.taskModule, msg.taskWorker, e);
     process.exit(1);
   }
 });
 
 
-function taskResolve(task: string, val: any) {
+function taskResolve(taskModule: string, taskWorker: string, val: any) {
   const msg: WorkerMessage = {
-    task: task,
+    taskModule: taskModule,
+    taskWorker: taskWorker,
     resolve: val,
     pid: process.pid
   };
 
-  Logger.debug(`worker resolve, task: ${msg.task}, pid: ${msg.pid}`);
+  Logger.debug(`worker resolve, taskModule: ${msg.taskModule}, pid: ${msg.pid}`);
 
   process.send(msg);
 }
 
 
-function taskReject(task: string, val: any) {
+function taskReject(taskModule: string, taskWorker: string, val: any) {
   const msg: WorkerMessage = {
-    task: task,
+    taskModule: taskModule,
+    taskWorker: taskWorker,
     reject: new BuildError(val).toJson(),
     pid: process.pid
   };
 
-  Logger.debug(`worker reject, task: ${msg.task}, pid: ${msg.pid}`);
+  Logger.debug(`worker reject, taskModule: ${msg.taskModule}, pid: ${msg.pid}`);
 
   process.send(msg);
 }
 
 
-function taskError(task: string, err: any) {
+function taskError(taskModule: string, taskWorker: string, err: any) {
   const msg: WorkerMessage = {
-    task: task,
+    taskModule: taskModule,
+    taskWorker: taskWorker,
     error: new BuildError(err).toJson(),
     pid: process.pid
   };
 
-  Logger.debug(`worker error, task: ${msg.task}, pid: ${msg.pid}`);
+  Logger.debug(`worker error, taskModule: ${msg.taskModule}, pid: ${msg.pid}`);
 
   process.send(msg);
 }
