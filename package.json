@@ -18,7 +18,7 @@
   "scripts": {
     "build": "npm run clean && tsc",
     "build-and-test": "npm run build && npm run test",
-    "clean": "rm -rf ./dist",
+    "clean": "rimraf ./dist",
     "lint": "tslint -c ./tslint.json --project ./tsconfig.json",
     "prepublish": "jasmine JASMINE_CONFIG_PATH=src/spec/jasmine.config.json && npm run build",
     "test": "jasmine JASMINE_CONFIG_PATH=src/spec/jasmine.config.json || true",
@@ -32,6 +32,7 @@
     "clean-css": "3.4.19",
     "cross-spawn": "4.0.0",
     "fs-extra": "0.30.0",
+    "happypack": "^2.2.1",
     "json-loader": "^0.5.4",
     "node-sass": "3.9.3",
     "postcss": "5.2.0",
@@ -63,6 +64,7 @@
     "jasmine": "2.5.2",
     "mime-types": "^2.1.12",
     "mock-fs": "^3.11.0",
+    "rimraf": "^2.5.4",
     "tslint": "3.15.1",
     "tslint-ionic-rules": "0.0.5"
   },
