@@ -66,18 +66,18 @@ function startWatcher(index: number, watcher: Watcher, context: BuildContext, wa
 
     const chokidarWatcher = chokidar.watch(<any>watcher.paths, watcher.options);
 
-    chokidarWatcher.on('all', (event: string, path: string) => {
+    chokidarWatcher.on('all', (event: string, filePath: string) => {
       setIonicEnvironment(context.isProd);
 
-      Logger.debug(`watch callback start, id: ${watchCount}, isProd: ${context.isProd}, event: ${event}, path: ${path}`);
+      Logger.debug(`watch callback start, id: ${watchCount}, isProd: ${context.isProd}, event: ${event}, path: ${filePath}`);
 
       function taskDone() {
         Logger.info(chalk.green('watch ready'));
       }
 
-      nextTask = watcher.callback.bind(null, event, path, context);
+      nextTask = watcher.callback.bind(null, event, filePath, context);
       taskPromise.then(() => {
-        Logger.debug(`watch callback complete, id: ${watchCount}, isProd: ${context.isProd}, event: ${event}, path: ${path}`);
+        Logger.debug(`watch callback complete, id: ${watchCount}, isProd: ${context.isProd}, event: ${event}, path: ${filePath}`);
         taskPromise = nextTask();
         taskPromise
           .then(taskDone, taskDone)
@@ -86,7 +86,7 @@ function startWatcher(index: number, watcher: Watcher, context: BuildContext, wa
         watchCount++;
 
       }).catch(err => {
-        Logger.debug(`watch callback error, id: ${watchCount}, isProd: ${context.isProd}, event: ${event}, path: ${path}`);
+        Logger.debug(`watch callback error, id: ${watchCount}, isProd: ${context.isProd}, event: ${event}, path: ${filePath}`);
         Logger.debug(`${err}`);
         taskPromise = nextTask();
         taskPromise
@@ -156,7 +156,7 @@ export interface Watcher {
     cwd?: string;
   };
   callback?: {
-    (event: string, path: string, context: BuildContext): void;
+    (event: string, filePath: string, context: BuildContext): void;
   };
 }
 

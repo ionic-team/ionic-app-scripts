@@ -26,7 +26,7 @@ export function rollup(context: BuildContext, configFile: string) {
 }
 
 
-export function rollupUpdate(event: string, path: string, context: BuildContext) {
+export function rollupUpdate(event: string, filePath: string, context: BuildContext) {
   const logger = new Logger('bundle update');
 
   const configFile = getUserConfigFile(context, taskInfo, null);

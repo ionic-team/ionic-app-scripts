@@ -108,20 +108,20 @@ function buildDev(context: BuildContext) {
 }
 
 
-export function buildUpdate(event: string, path: string, context: BuildContext) {
+export function buildUpdate(event: string, filePath: string, context: BuildContext) {
   if (!context.successfulCopy) {
     copy(context);
   }
 
-  return transpileUpdate(event, path, context)
+  return transpileUpdate(event, filePath, context)
     .then(() => {
-      return bundleUpdate(event, path, context);
+      return bundleUpdate(event, filePath, context);
     })
     .then(() => {
       if (event !== 'change' || !context.successfulSass) {
         // if just the TS file changed, then there's no need to do a sass update
         // however, if a new TS file was added or was deleted, then we should do a sass update
-        return sassUpdate(event, path, context);
+        return sassUpdate(event, filePath, context);
       }
     })
     .catch(err => {

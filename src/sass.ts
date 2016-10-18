@@ -29,7 +29,7 @@ export function sass(context?: BuildContext, configFile?: string) {
 }
 
 
-export function sassUpdate(event: string, path: string, context: BuildContext) {
+export function sassUpdate(event: string, filePath: string, context: BuildContext) {
   const configFile = getUserConfigFile(context, taskInfo, null);
 
   const logger = new Logger('sass update');

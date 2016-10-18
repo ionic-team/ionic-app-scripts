@@ -14,8 +14,8 @@ export function bundle(context?: BuildContext, configFile?: string) {
 }
 
 
-export function bundleUpdate(event: string, path: string, context: BuildContext) {
-  return rollupUpdate(event, path, context)
+export function bundleUpdate(event: string, filePath: string, context: BuildContext) {
+  return rollupUpdate(event, filePath, context)
     .catch(err => {
       throw new BuildError(err);
     });

@@ -6,12 +6,12 @@ import { readFileSync, writeFileSync } from 'fs';
 import { sassUpdate } from './sass';
 
 
-export function templateUpdate(event: string, path: string, context: BuildContext) {
-  path = join(context.rootDir, path);
+export function templateUpdate(event: string, filePath: string, context: BuildContext) {
+  filePath = join(context.rootDir, filePath);
 
   const logger = new Logger('template update');
 
-  return templateUpdateWorker(event, path, context)
+  return templateUpdateWorker(event, filePath, context)
     .then(() => {
       logger.finish();
     })
@@ -21,22 +21,22 @@ export function templateUpdate(event: string, path: string, context: BuildContex
 }
 
 
-function templateUpdateWorker(event: string, path: string, context: BuildContext) {
-  Logger.debug(`templateUpdate, event: ${event}, path: ${path}`);
+function templateUpdateWorker(event: string, filePath: string, context: BuildContext) {
+  Logger.debug(`templateUpdate, event: ${event}, path: ${filePath}`);
 
   if (event === 'change') {
-    if (updateBundledJsTemplate(context, path)) {
-      Logger.debug(`templateUpdate, updated js bundle, path: ${path}`);
+    if (updateBundledJsTemplate(context, filePath)) {
+      Logger.debug(`templateUpdate, updated js bundle, path: ${filePath}`);
       return Promise.resolve();
     }
   }
 
   // not sure how it changed, just do a full rebuild without the bundle cache
   context.useBundleCache = false;
-  return bundleUpdate(event, path, context)
+  return bundleUpdate(event, filePath, context)
     .then(() => {
       context.useSassCache = true;
-      return sassUpdate(event, path, context);
+      return sassUpdate(event, filePath, context);
     })
     .catch(err => {
       throw new BuildError(err);
