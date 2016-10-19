@@ -2,6 +2,7 @@ import { BuildContext, TaskInfo } from './util/interfaces';
 import { BuildError, Logger } from './util/logger';
 import { cacheTranspiledTsFiles, setModulePathsCache } from './util/helpers';
 import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars } from './util/config';
+import { InMemoryFileSystem } from './util/in-memory-file-system';
 import { join } from 'path';
 import * as wp from 'webpack';
 
@@ -44,7 +45,10 @@ export function webpackWorker(context: BuildContext, configFile: string): Promis
   return new Promise((resolve, reject) => {
     try {
       const webpackConfig = getWebpackConfig(context, configFile);
-      const compiler = wp(webpackConfig);
+      const compiler: any = wp(webpackConfig);
+
+      // wrap the default webpack file system with our custom version
+      compiler.inputFileSystem = new InMemoryFileSystem(compiler.inputFileSystem, context.tsFiles);
 
       compiler.run((err: Error, stats: any) => {
         if (err) {
