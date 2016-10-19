@@ -123,8 +123,7 @@ export class Logger {
    * with whitespace so the message is lined up with timestamped logs.
    */
   static log(...msg: any[]) {
-    const lines = Logger.wordWrap(msg.join(' '));
-    lines.forEach(line => {
+    Logger.wordWrap(msg).forEach(line => {
       console.log(line);
     });
   }
@@ -133,7 +132,7 @@ export class Logger {
    * Prints out a dim colored timestamp prefix.
    */
   static info(...msg: any[]) {
-    const lines = Logger.wordWrap(msg.join(' '));
+    const lines = Logger.wordWrap(msg);
     if (lines.length) {
       let prefix = timePrefix();
       lines[0] = chalk.dim(prefix) + lines[0].substr(prefix.length);
@@ -147,7 +146,7 @@ export class Logger {
    * Prints out a yellow colored timestamp prefix.
    */
   static warn(...msg: any[]) {
-    const lines = Logger.wordWrap(msg.join(' '));
+    const lines = Logger.wordWrap(msg);
     if (lines.length) {
       let prefix = timePrefix();
       lines[0] = prefix + lines[0].substr(prefix.length);
@@ -161,7 +160,7 @@ export class Logger {
    * Prints out a error colored timestamp prefix.
    */
   static error(...msg: any[]) {
-    const lines = Logger.wordWrap(msg.join(' '));
+    const lines = Logger.wordWrap(msg);
     if (lines.length) {
       let prefix = timePrefix();
       lines[0] = prefix + lines[0].substr(prefix.length);
@@ -181,7 +180,7 @@ export class Logger {
     if (isDebugMode()) {
       msg.push(memoryUsage());
 
-      const lines = Logger.wordWrap(msg.join(' '));
+      const lines = Logger.wordWrap(msg);
       if (lines.length) {
         let prefix = '[ DEBUG! ]';
         lines[0] = prefix + lines[0].substr(prefix.length);
@@ -197,7 +196,7 @@ export class Logger {
 
     errorLines.forEach(l => {
       let msg = 'L' + l.lineNumber + ':  ';
-      while (msg.length < Logger.LEFT_PADDING.length) {
+      while (msg.length < Logger.INDENT.length) {
         msg = ' ' + msg;
       }
       msg = chalk.dim(msg) + Logger.jsSyntaxHighlight(l.text);
@@ -209,7 +208,7 @@ export class Logger {
 
   static highlightError(errorLine: string, errorCharStart: number, errorCharLength: number) {
     let rightSideChars = errorLine.length - errorCharStart + errorCharLength - 1;
-    while (errorLine.length + Logger.LEFT_PADDING.length > Logger.MAX_LEN) {
+    while (errorLine.length + Logger.INDENT.length > Logger.MAX_LEN) {
       if (errorCharStart > (errorLine.length - errorCharStart + errorCharLength) && errorCharStart > 5) {
         // larger on left side
         errorLine = errorLine.substr(1);
@@ -235,20 +234,74 @@ export class Logger {
     return lineChars.join('');
   }
 
-  static wordWrap(text: string) {
+  static wordWrap(msg: any[]) {
     const output: string[] = [];
-    let msgWords = text.toString().replace(/\s/gm, ' ').split(' ');
 
-    let msgLine = '';
-    msgWords.filter(m => m.length).forEach(m => {
-      msgLine += m + ' ';
-      if ((Logger.LEFT_PADDING.length + msgLine.length) > Logger.MAX_LEN) {
-        output.push(Logger.LEFT_PADDING + msgLine);
-        msgLine = '';
+    const words: any[] = [];
+    msg.forEach(m => {
+      if (m === null) {
+        words.push('null');
+
+      } else if (typeof m === 'undefined') {
+        words.push('undefined');
+
+      } else if (typeof m === 'string') {
+        m.replace(/\s/gm, ' ').split(' ').forEach(strWord => {
+          if (strWord.trim().length) {
+            words.push(strWord.trim());
+          }
+        });
+
+      } else if (typeof m === 'number' || typeof m === 'boolean') {
+        words.push(m.toString());
+
+      } else if (typeof m === 'function') {
+        words.push(m.toString());
+
+      } else if (Array.isArray(m)) {
+        words.push(() => {
+          return m.toString();
+        });
+
+      } else if (Object(m) === m) {
+        words.push(() => {
+          return m.toString();
+        });
+
+      } else {
+        words.push(m.toString());
       }
     });
-    if (msgLine.length) {
-      output.push(Logger.LEFT_PADDING + msgLine);
+
+    let line = Logger.INDENT;
+    words.forEach(word => {
+      if (typeof word === 'function') {
+        if (line.trim().length) {
+          output.push(line);
+        }
+        output.push(word());
+        line = Logger.INDENT;
+
+      } else if (Logger.INDENT.length + word.length > Logger.MAX_LEN) {
+        // word is too long to play nice, just give it its own line
+        if (line.trim().length) {
+          output.push(line);
+        }
+        output.push(Logger.INDENT + word);
+        line = Logger.INDENT;
+
+      } else if ((word.length + line.length) > Logger.MAX_LEN) {
+        // this word would make the line too long
+        // print the line now, then start a new one
+        output.push(line);
+        line = Logger.INDENT + word + ' ';
+
+      } else {
+        line += word + ' ';
+      }
+    });
+    if (line.trim().length) {
+      output.push(line);
     }
     return output;
   }
@@ -309,8 +362,8 @@ export class Logger {
     console.log('');
   }
 
-  static LEFT_PADDING = '            ';
-  static MAX_LEN = 100;
+  static INDENT = '            ';
+  static MAX_LEN = 120;
 
 }
 
