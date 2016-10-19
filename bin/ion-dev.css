@@ -32,9 +32,10 @@
 }
 ._ionic-error-view .stack {
   color: #000;
+  width: 100%;
+  height: 300px;
   font-size: 12px;
   max-height: 300px;
-  overflow-y: auto;
 }
 ._ionic-error-view.show {
   transform: translate3d(0, 0, 0);

@@ -1,3 +1,4 @@
+
 // Ionic Dev Server: Dev Logger
 
 
@@ -31,7 +32,7 @@ var IonicDevServer = {
     var d = document.createElement('div');
     d.className = '_ionic-error-view';
 
-    d.innerHTML = '<div style="position: relative"><div class="_ionic-error-navbar"><h1 class="_title">Runtime Error</h1><div class="_ionic-error-close">Close</div></div><div class="_ionic-error-content"><div class="message">' + err.message + '</div><h4>Stacktrace</h4><div class="stack">' + err.stack + '</div>' + this._makeErrorButtonsHtml() + '</div></div>';
+    d.innerHTML = '<div style="position: relative"><div class="_ionic-error-navbar"><h1 class="_title">Runtime Error</h1><div class="_ionic-error-close">Close</div></div><div class="_ionic-error-content"><div class="message">' + err.message + '</div><h4>Stacktrace</h4><textarea class="stack">' + err.stack + '</textarea><!--<div class="_button" action="copy">Copy</div>-->' + this._makeErrorButtonsHtml() + '</div></div>';
 
     d.querySelector('._ionic-error-close').addEventListener('click', function(e) {
       window.requestAnimationFrame(function() {
@@ -41,6 +42,14 @@ var IonicDevServer = {
         }, 500);
       });
     });
+
+    /*
+    d.querySelector('[action="copy"]').addEventListener('click', function(e) {
+      if(window.IonicDevtools) {
+        window.IonicDevtools.copyErrorToClipboard(err);
+      }
+    });
+    */
 
     return d;
   },
