@@ -17,12 +17,14 @@ export class InMemoryFileSystem implements WebpackFileSystem {
   }
 
   readFile(path: string, callback: Function): any {
-    const inMemoryFile = this.tsFiles[path];
-    if (inMemoryFile) {
-      callback(null, new Buffer(inMemoryFile.output));
-    } else {
-      return this.originalFileSystem.readFile(path, callback);
+    if (this.tsFiles) {
+      const inMemoryFile = this.tsFiles[path];
+      if (inMemoryFile) {
+        callback(null, new Buffer(inMemoryFile.output));
+        return;
+      }
     }
+    return this.originalFileSystem.readFile(path, callback);
   }
 
   readJson(path: string, callback: Function): any {
