@@ -1,4 +1,4 @@
-// Ionic Dev Server: Dev Logger
+// Ionic Dev Server: Client Side Logger
 
 window.IonicDevServer = {
 

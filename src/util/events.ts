@@ -9,7 +9,7 @@ export function on(event: EventType, listener: {(context: BuildContext, arg: any
   return emmitter.on('event' + event.toString(), listener);
 }
 
-export function emit(event: EventType, context: BuildContext, arg: any) {
+export function emit(event: EventType, context: BuildContext, arg?: any) {
   return emmitter.emit('event' + event.toString(), context, arg);
 }
 
@@ -18,5 +18,11 @@ export enum EventType {
   FileAdd,
   FileDelete,
   DirectoryAdd,
-  DirectoryDelete
+  DirectoryDelete,
+  BundlerStart,
+  BunderFinish,
+  TranspilerStart,
+  TranspilerFinish,
+  SassStart,
+  SassFinish,
 };

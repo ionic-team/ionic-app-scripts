@@ -1,6 +1,7 @@
 import { BuildContext, TaskInfo } from './util/interfaces';
 import { BuildError, Logger } from './util/logger';
 import { cacheTranspiledTsFiles, setModulePathsCache } from './util/helpers';
+import { emit, EventType } from './util/events';
 import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars } from './util/config';
 import { InMemoryFileSystem } from './util/in-memory-file-system';
 import { join } from 'path';
@@ -15,8 +16,11 @@ export function webpack(context: BuildContext, configFile: string) {
 
   const logger = new Logger('webpack');
 
+  emit(EventType.BundlerStart, context);
+
   return webpackWorker(context, configFile)
     .then(() => {
+      emit(EventType.BunderFinish, context);
       logger.finish();
     })
     .catch(err => {
@@ -31,8 +35,11 @@ export function webpackUpdate(event: string, path: string, context: BuildContext
 
   cacheTranspiledTsFiles(context.tsFiles);
 
+  emit(EventType.BundlerStart, context);
+
   return webpackWorker(context, configFile)
     .then(() => {
+      emit(EventType.BunderFinish, context);
       logger.finish();
     })
     .catch(err => {
@@ -73,6 +80,8 @@ export function webpackWorker(context: BuildContext, configFile: string): Promis
           // async cache all the module paths so we don't need
           // to always bundle to know which modules are used
           setModulePathsCache(context.moduleFiles);
+
+          emit(EventType.FileChange, context, webpackConfig.output.path);
 
           resolve();
         }
