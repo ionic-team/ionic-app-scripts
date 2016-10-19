@@ -16,7 +16,7 @@ export function sass(context?: BuildContext, configFile?: string) {
 
   const logger = new Logger('sass');
 
-  context.successfulCopy = false;
+  context.successfulSass = false;
 
   return sassWorker(context, configFile)
     .then(() => {
