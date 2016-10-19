@@ -1,12 +1,19 @@
 import { join } from 'path';
 import { readFile } from 'fs';
+import { sendClientConsoleLogs, getWsPort } from './dev-server';
 import * as http from 'http';
 import * as mime from 'mime-types';
 
 
 function getConsoleLoggerScript() {
+  const ionDevServer = JSON.stringify({
+    sendConsoleLogs: sendClientConsoleLogs(),
+    wsPort: getWsPort()
+  });
+
   return `
   ${LOGGER_HEADER}
+  <script>var IonicDevServerConfig=${ionDevServer};</script>
   <link href="${LOGGER_DIR}/ion-dev.css" rel="stylesheet">
   <script src="${LOGGER_DIR}/ion-dev.js"></script>
   `;

@@ -1,8 +1,9 @@
-import { BuildContext } from './interfaces';
-import { getConfigValueDefault, hasConfigValue } from './config';
+import { BuildContext } from '../util/interfaces';
+import { getConfigValueDefault, hasConfigValue } from '../util/config';
 import { relative } from 'path';
-import * as events from './events';
+import * as events from '../util/events';
 import * as tinylr from 'tiny-lr';
+
 
 let liveReloadServer: any;
 let liveReloadScript: string;
@@ -71,7 +72,7 @@ function fileChanged(context: BuildContext, filePath: string|string[]) {
 
 
 function getLiveReloadServerPort() {
-  const port = getConfigValueDefault('--livereload-port', '-r', 'ionic_livereload_port', null);
+  const port = getConfigValueDefault('--livereload-port', null, 'ionic_livereload_port', null);
   if (port) {
     return parseInt(port, 10);
   }

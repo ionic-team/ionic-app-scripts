@@ -48,7 +48,8 @@
     "tslint-eslint-rules": "1.5.0",
     "typescript": "^2.0.3",
     "uglify-js": "2.7.3",
-    "webpack": "^2.1.0-beta.25"
+    "webpack": "^2.1.0-beta.25",
+    "ws": "^1.1.1"
   },
   "devDependencies": {
     "@types/chalk": "0.4.30",
@@ -61,6 +62,7 @@
     "@types/node-sass": "0.0.29",
     "@types/uglify-js": "2.0.27",
     "@types/webpack": "^1.12.35",
+    "@types/ws": "0.0.34",
     "jasmine": "2.5.2",
     "mime-types": "^2.1.12",
     "mock-fs": "^3.11.0",

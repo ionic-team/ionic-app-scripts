@@ -19,7 +19,7 @@ function printFailure(context: BuildContext, f: RuleFailure) {
 
   Logger.warn(header);
 
-  Logger.wordWrap(f.failure).forEach(m => {
+  Logger.wordWrap([f.failure]).forEach(m => {
     console.log(m);
   });
 
@@ -67,8 +67,8 @@ function printCodeHighlight(f: RuleFailure, sourceText: string, start: RuleFailu
       lineNumber: start.line,
       text: srcLines[start.line - 1]
     };
-    if (Logger.LEFT_PADDING.length + beforeLine.text.length > Logger.MAX_LEN) {
-      beforeLine.text = beforeLine.text.substr(0, Logger.MAX_LEN - Logger.LEFT_PADDING.length - 1);
+    if (Logger.INDENT.length + beforeLine.text.length > Logger.MAX_LEN) {
+      beforeLine.text = beforeLine.text.substr(0, Logger.MAX_LEN - Logger.INDENT.length - 1);
     }
     errorLines.unshift(beforeLine);
   }
@@ -78,8 +78,8 @@ function printCodeHighlight(f: RuleFailure, sourceText: string, start: RuleFailu
       lineNumber: end.line + 2,
       text: srcLines[end.line + 1]
     };
-    if (Logger.LEFT_PADDING.length + afterLine.text.length > Logger.MAX_LEN) {
-      afterLine.text = afterLine.text.substr(0, Logger.MAX_LEN - Logger.LEFT_PADDING.length - 1);
+    if (Logger.INDENT.length + afterLine.text.length > Logger.MAX_LEN) {
+      afterLine.text = afterLine.text.substr(0, Logger.MAX_LEN - Logger.INDENT.length - 1);
     }
     errorLines.push(afterLine);
   }

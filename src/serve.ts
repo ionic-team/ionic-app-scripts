@@ -5,13 +5,14 @@ import { join } from 'path';
 import { readFile } from 'fs';
 import { watch } from './watch';
 import * as chalk from 'chalk';
+import * as devLogger from './dev-server/injector';
 import * as http from 'http';
-import * as liveReload from './util/live-reload';
-import * as devLogger from './util/logger-dev-server';
+import * as liveReload from './dev-server/live-reload';
+import * as devServer from './dev-server/dev-server';
 import * as mime from 'mime-types';
 
 
-let devServer: http.Server;
+let httpServer: http.Server;
 
 
 export function serve(context?: BuildContext) {
@@ -27,34 +28,38 @@ export function serve(context?: BuildContext) {
 
 
 export function createDevServer(context: BuildContext) {
-  const port = getDevServerPort();
-  const host = getDevServerHost();
-  const devAddress = `http://${host || 'localhost'}:${port}/`;
+  const port = getHttpServerPort();
+  const host = getHttpServerHost();
+  const address = host || 'localhost';
 
   function httpServerListen() {
-    devServer.listen(port, host, undefined, () => {
-      Logger.info(chalk.green(`dev server running: ${devAddress}`));
+    httpServer.listen(port, host, undefined, () => {
+      Logger.info(chalk.green(`dev server running: http://${address}:${port}/`));
 
       if (liveReload.useLiveReload()) {
         liveReload.createLiveReloadServer(host);
       }
+
+      if (devLogger.useDevLogger()) {
+        devServer.createWebSocketServer();
+      }
     });
   }
 
-  if (devServer) {
-    devServer.close();
+  if (httpServer) {
+    httpServer.close();
   }
 
-  devServer = http.createServer((request, response) => {
+  httpServer = http.createServer((request, response) => {
     devServerListener(context, request, response);
   });
 
-  devServer.on('error', (err: any) => {
+  httpServer.on('error', (err: any) => {
     if (err.code === 'EADDRINUSE') {
       Logger.error(`server already in use, retrying....`);
 
       setTimeout(() => {
-        devServer.close();
+        httpServer.close();
         httpServerListen();
       }, 1500);
     }
@@ -138,7 +143,7 @@ function response404(filePath: string, request: http.IncomingMessage, response: 
 }
 
 
-function getDevServerPort() {
+function getHttpServerPort() {
   const port = getConfigValueDefault('--port', '-p', 'ionic_port', null);
   if (port) {
     return parseInt(port, 10);
@@ -146,7 +151,7 @@ function getDevServerPort() {
   return DEV_SERVER_DEFAULT_PORT;
 }
 
-function getDevServerHost() {
+function getHttpServerHost() {
   const host = getConfigValueDefault('--address', '-h', 'ionic_address', null);
   if (host) {
     return host;
@@ -156,10 +161,6 @@ function getDevServerHost() {
 
 function isRootIndexFile(context: BuildContext, filePath: string) {
   return (filePath === context.wwwIndex);
-}
-
-function useConsoleLogs() {
-  return hasConfigValue('--consolelogs', '-c', 'ionic_consolelogs', false);
 }
 
 function useServerLogs() {
