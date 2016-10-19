@@ -16,11 +16,8 @@ export function webpack(context: BuildContext, configFile: string) {
 
   const logger = new Logger('webpack');
 
-  emit(EventType.BundlerStart, context);
-
   return webpackWorker(context, configFile)
     .then(() => {
-      emit(EventType.BunderFinish, context);
       logger.finish();
     })
     .catch(err => {
@@ -35,11 +32,8 @@ export function webpackUpdate(event: string, path: string, context: BuildContext
 
   cacheTranspiledTsFiles(context.tsFiles);
 
-  emit(EventType.BundlerStart, context);
-
   return webpackWorker(context, configFile)
     .then(() => {
-      emit(EventType.BunderFinish, context);
       logger.finish();
     })
     .catch(err => {

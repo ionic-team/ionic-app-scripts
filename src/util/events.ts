@@ -5,24 +5,32 @@ import { EventEmitter } from 'events';
 const emmitter = new EventEmitter();
 
 
-export function on(event: EventType, listener: {(context: BuildContext, arg: any): void}) {
-  return emmitter.on('event' + event.toString(), listener);
+export function on(eventType: string, listener: {(context?: BuildContext, val?: any): void}) {
+  return emmitter.on(eventType, listener);
 }
 
-export function emit(event: EventType, context: BuildContext, arg?: any) {
-  return emmitter.emit('event' + event.toString(), context, arg);
+export function emit(eventType: string, context?: BuildContext, val?: any) {
+  return emmitter.emit(eventType, context, val);
 }
 
-export enum EventType {
-  FileChange,
-  FileAdd,
-  FileDelete,
-  DirectoryAdd,
-  DirectoryDelete,
-  BundlerStart,
-  BunderFinish,
-  TranspilerStart,
-  TranspilerFinish,
-  SassStart,
-  SassFinish,
+
+export const EventType = {
+  FileChange: 'FileChange',
+  FileAdd: 'FileAdd',
+  FileDelete: 'FileDelete',
+  DirectoryAdd: 'DirectoryAdd',
+  DirectoryDelete: 'DirectoryDelete',
+  TaskEvent: 'TaskEvent'
 };
+
+export function eventTypes() {
+  return Object.keys(EventType);
+}
+
+export interface TaskEvent {
+  scope: string;
+  type: string;
+  duration?: number;
+  time?: string;
+  msg?: string;
+}

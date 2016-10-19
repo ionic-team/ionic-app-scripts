@@ -1,3 +1,4 @@
+import { emit, EventType, TaskEvent } from './events';
 import { join } from 'path';
 import { isDebugMode } from './config';
 import { readJSONSync } from 'fs-extra';
@@ -51,6 +52,13 @@ export class Logger {
       msg += memoryUsage();
     }
     Logger.info(msg);
+
+    const taskEvent: TaskEvent = {
+      scope: this.scope.split(' ')[0],
+      type: 'start',
+      msg: `${scope} started ...`
+    };
+    emit(EventType.TaskEvent, null, taskEvent);
   }
 
   ready(chalkColor?: Function) {
@@ -61,28 +69,36 @@ export class Logger {
     this.completed('finished', chalkColor);
   }
 
-  private completed(msg: string, chalkColor: Function) {
-    let duration = Date.now() - this.start;
-    let time: string;
+  private completed(type: string, chalkColor: Function) {
 
-    if (duration > 1000) {
-      time = 'in ' + (duration / 1000).toFixed(2) + ' s';
+    const taskEvent: TaskEvent = {
+      scope: this.scope.split(' ')[0],
+      type: type
+    };
+
+    taskEvent.duration = Date.now() - this.start;
+
+    if (taskEvent.duration > 1000) {
+      taskEvent.time = 'in ' + (taskEvent.duration / 1000).toFixed(2) + ' s';
 
     } else {
-      let ms = parseFloat((duration).toFixed(3));
+      let ms = parseFloat((taskEvent.duration).toFixed(3));
       if (ms > 0) {
-        time = 'in ' + duration + ' ms';
+        taskEvent.time = 'in ' + taskEvent.duration + ' ms';
       } else {
-        time = 'in less than 1 ms';
+        taskEvent.time = 'in less than 1 ms';
       }
     }
 
-    msg = `${this.scope} ${msg}`;
+    taskEvent.msg = `${this.scope} ${taskEvent.type} ${taskEvent.time}`;
+    emit(EventType.TaskEvent, null, taskEvent);
+
+    let msg = `${this.scope} ${type}`;
     if (chalkColor) {
       msg = chalkColor(msg);
     }
 
-    msg += ' ' + chalk.dim(time);
+    msg += ' ' + chalk.dim(taskEvent.time);
 
     if (isDebugMode()) {
       msg += memoryUsage();
@@ -92,6 +108,12 @@ export class Logger {
   }
 
   fail(err: BuildError) {
+    const taskEvent: TaskEvent = {
+      scope: this.scope.split(' ')[0],
+      type: 'failed'
+    };
+    emit(EventType.TaskEvent, null, taskEvent);
+
     if (err) {
       if (err instanceof BuildError) {
         let failedMsg = `${this.scope} failed`;

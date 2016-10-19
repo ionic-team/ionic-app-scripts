@@ -14,11 +14,8 @@ export function rollup(context: BuildContext, configFile: string) {
 
   const logger = new Logger('rollup');
 
-  emit(EventType.BundlerStart, context);
-
   return rollupWorker(context, configFile)
     .then(() => {
-      emit(EventType.BunderFinish, context);
       logger.finish();
     })
     .catch(err => {
@@ -32,11 +29,8 @@ export function rollupUpdate(event: string, filePath: string, context: BuildCont
 
   const configFile = getUserConfigFile(context, taskInfo, null);
 
-  emit(EventType.BundlerStart, context);
-
   return rollupWorker(context, configFile)
     .then(() => {
-      emit(EventType.BunderFinish, context);
       logger.finish();
     })
     .catch(err => {

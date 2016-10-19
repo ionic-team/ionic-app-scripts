@@ -1,5 +1,7 @@
 // Ionic Dev Server: Server Side Logger
 
+import { BuildContext } from '../util/interfaces';
+import { on, EventType, TaskEvent } from '../util/events';
 import { getConfigValueDefault, hasConfigValue } from '../util/config';
 import { Logger } from '../util/logger';
 import { Server as WebSocketServer } from 'ws';
@@ -21,14 +23,32 @@ export function createWebSocketServer() {
       }
     });
 
-    // ws.send('something');
+    on(EventType.TaskEvent, (context: BuildContext, val: any) => {
+      sendTaskEventToClient(ws, val);
+    });
+
   });
 
 }
 
 
-function printClientMessage(msg: DevClientMessage) {
-  if (msg.args.length) {
+function sendTaskEventToClient(ws: any, taskEvent: TaskEvent) {
+  try {
+    const msg: WsMessage = {
+      category: 'taskEvent',
+      type: taskEvent.scope,
+      data: taskEvent
+    };
+    ws.send(JSON.stringify(msg));
+
+  } catch (e) {
+    Logger.error(`error sending client message: ${e}`);
+  }
+}
+
+
+function printClientMessage(msg: WsMessage) {
+  if (msg.data) {
     switch (msg.category) {
       case 'console':
         printConsole(msg);
@@ -42,30 +62,31 @@ function printClientMessage(msg: DevClientMessage) {
 }
 
 
-function printConsole(msg: DevClientMessage) {
-  msg.args[0] = `console.${msg.type}: ${msg.args[0]}`;
+function printConsole(msg: WsMessage) {
+  const args = msg.data;
+  args[0] = `console.${msg.type}: ${args[0]}`;
 
   switch (msg.type) {
     case 'error':
-      Logger.error.apply(this, msg.args);
+      Logger.error.apply(this, args);
       break;
 
     case 'warn':
-      Logger.warn.apply(this, msg.args);
+      Logger.warn.apply(this, args);
       break;
 
     case 'debug':
-      Logger.debug.apply(this, msg.args);
+      Logger.debug.apply(this, args);
       break;
 
     default:
-      Logger.info.apply(this, msg.args);
+      Logger.info.apply(this, args);
       break;
   }
 }
 
 
-function printException(msg: DevClientMessage) {
+function printException(msg: WsMessage) {
 
 }
 
@@ -87,9 +108,8 @@ export function getWsPort() {
 const DEV_LOGGER_DEFAULT_PORT = 53703;
 
 
-export interface DevClientMessage {
+export interface WsMessage {
   category: string;
   type: string;
-  args: string[];
-  timestamp: number;
+  data: any;
 }

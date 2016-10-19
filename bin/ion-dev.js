@@ -23,7 +23,16 @@ window.IonicDevServer = {
       IonicDevServer.socketReady = true;
 
       IonicDevServer.socket.onmessage = function(ev) {
-        IonicDevServer.consoleLog('Client received a message', ev);
+        try {
+          var msg = JSON.parse(ev.data);
+          switch (msg.category) {
+            case 'taskEvent':
+              IonicDevServer.receiveTaskEvent(msg);
+              break;
+          }
+        } catch (e) {
+          IonicDevServer.consoleError('error receiving ws message', e);
+        }
       };
 
       IonicDevServer.socket.onclose = () => {
@@ -61,13 +70,12 @@ window.IonicDevServer = {
           var msg = {
             category: 'console',
             type: consoleType,
-            args: [],
-            timestamp: Date.now()
+            data: []
           };
           for (var i = 0; i < arguments.length; i++) {
-            msg.args.push(arguments[i]);
+            msg.data.push(arguments[i]);
           }
-          if (msg.args.length) {
+          if (msg.data.length) {
             IonicDevServer.queueMessageSend(msg);
           }
         };
@@ -78,6 +86,12 @@ window.IonicDevServer = {
       if (console.hasOwnProperty(consoleType) && typeof console[consoleType] === 'function') {
         patchConsole(consoleType);
       }
+    }
+  },
+
+  receiveTaskEvent: function(taskEvent) {
+    if (taskEvent.data && ['bundle', 'sass', 'transpile', 'template'].indexOf(taskEvent.data.scope) > -1) {
+      IonicDevServer.consoleLog(taskEvent.data.msg);
     }
   }
 
