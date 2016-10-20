@@ -7,7 +7,7 @@ import { inlineTemplate } from './template';
 import { join, normalize, resolve } from 'path';
 import { lintUpdate } from './lint';
 import { readFileSync } from 'fs';
-import { runDiagnostics, printDiagnostic } from './util/logger-typescript';
+import { runDiagnostics } from './util/logger-typescript';
 import { runWorker } from './worker-client';
 import * as ts from 'typescript';
 
@@ -105,7 +105,11 @@ export function transpileWorker(context: BuildContext, workerConfig: TranspileWo
       }
     });
 
-    const hasDiagnostics = runDiagnostics(context, program);
+    const tsDiagnostics = program.getSyntacticDiagnostics()
+                          .concat(program.getSemanticDiagnostics())
+                          .concat(program.getOptionsDiagnostics());
+
+    const hasDiagnostics = runDiagnostics(context, tsDiagnostics);
 
     if (hasDiagnostics) {
       // transpile failed :(
@@ -164,13 +168,12 @@ function transpileUpdateWorker(event: string, filePath: string, context: BuildCo
       // transpile this one module
       const transpileOutput = ts.transpileModule(sourceText, transpileOptions);
 
-      if (transpileOutput.diagnostics.length) {
+      const hasDiagnostics = runDiagnostics(context, transpileOutput.diagnostics);
+
+      if (hasDiagnostics) {
         // darn, we've got some errors with this transpiling :(
         // but at least we reported the errors like really really fast, so there's that
         Logger.debug(`transpileUpdateWorker: transpileModule, diagnostics: ${transpileOutput.diagnostics.length}`);
-        transpileOutput.diagnostics.forEach(d => {
-          printDiagnostic(context, d);
-        });
         return Promise.reject(new BuildError());
 
       } else if (!transpileOutput.outputText) {
@@ -277,10 +280,9 @@ export function getTsConfig(context: BuildContext, tsConfigPath?: string): TsCon
                                 ts.sys, context.rootDir,
                                 {}, tsConfigPath);
 
-    if (parsedConfig.errors && parsedConfig.errors.length) {
-      parsedConfig.errors.forEach(d => {
-        printDiagnostic(context, d);
-      });
+    const hasDiagnostics = runDiagnostics(context, parsedConfig.errors);
+
+    if (hasDiagnostics) {
       throw new BuildError();
     }
 

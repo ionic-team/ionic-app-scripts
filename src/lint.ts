@@ -4,7 +4,7 @@ import { BuildError, Logger } from './util/logger';
 import { generateContext, getUserConfigFile } from './util/config';
 import { join } from 'path';
 import { createProgram, findConfiguration, getFileNames } from 'tslint';
-import { printFailures } from './util/logger-tslint';
+import { runDiagnostics } from './util/logger-tslint';
 import { runWorker } from './worker-client';
 import * as Linter from 'tslint';
 import * as fs from 'fs';
@@ -107,7 +107,9 @@ function lintFile(context: BuildContext, program: ts.Program, filePath: string) 
         }, program);
 
         const lintResult = linter.lint();
-        printFailures(context, <any>lintResult.failures);
+        if (lintResult && lintResult.failures) {
+          runDiagnostics(context, <any>lintResult.failures);
+        }
 
       } catch (e) {
         Logger.debug(`Linter ${e}`);

@@ -42,7 +42,16 @@ export function injectDevLoggerScript(content: any): any {
 }
 
 
-export function responseDevLogger(request: http.IncomingMessage, response: http.ServerResponse) {
+export function isDevLoggerUrl(request: http.IncomingMessage, response: http.ServerResponse) {
+  if (request.url.indexOf(LOGGER_DIR) > -1) {
+    responseDevLogger(request, response);
+    return true;
+  }
+  return false;
+}
+
+
+function responseDevLogger(request: http.IncomingMessage, response: http.ServerResponse) {
   const urlParts = request.url.split('?')[0].split('/');
   const fileName = urlParts[urlParts.length - 1];
   const filePath = join(__dirname, '..', '..', 'bin', fileName);
@@ -61,11 +70,6 @@ export function responseDevLogger(request: http.IncomingMessage, response: http.
       response.end(content, mime.charset(headers['Content-Type']));
     }
   });
-}
-
-
-export function isDevLoggerUrl(filePath: string) {
-  return filePath.indexOf(LOGGER_DIR) > -1;
 }
 
 

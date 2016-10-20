@@ -1,90 +1,82 @@
 import { BuildContext } from './interfaces';
-import { Logger, PrintLine } from './logger';
+import { Diagnostic, Logger, PrintLine } from './logger';
+import { objectAssign } from './helpers';
 
 
-export function printFailures(context: BuildContext, failures: RuleFailure[]) {
-  if (failures) {
-    failures.forEach(failure => {
-      printFailure(context, failure);
+export function runDiagnostics(context: BuildContext, failures: RuleFailure[]) {
+  const diagnostics = failures.map(failure => {
+    return loadDiagnostic(context, failure);
+  });
+
+  if (diagnostics.length) {
+    diagnostics.forEach(d => {
+      Logger.printDiagnostic(objectAssign({}, d), 'warn');
     });
+    return true;
   }
+
+  return false;
 }
 
 
-function printFailure(context: BuildContext, f: RuleFailure) {
+function loadDiagnostic(context: BuildContext, f: RuleFailure) {
   const start: RuleFailurePosition = f.startPosition.toJson();
   const end: RuleFailurePosition = f.endPosition.toJson();
 
-  let header = Logger.formatHeader('tslint', f.fileName, context.rootDir, start.line + 1, end.line + 1);
-
-  Logger.warn(header);
-
-  Logger.wordWrap([f.failure]).forEach(m => {
-    console.log(m);
-  });
-
-  Logger.newLine();
+  const d: Diagnostic = {
+    type: 'tslint',
+    header: Logger.formatHeader('tslint', f.fileName, context.rootDir, start.line + 1, end.line + 1),
+    code: f.ruleName,
+    messageText: f.failure,
+    printLines: []
+  };
 
   if (f.sourceFile && f.sourceFile.text) {
-    printCodeHighlight(f, f.sourceFile.text, start, end);
-  }
-}
+    const srcLines: string[] = f.sourceFile.text.replace(/\\r/g, '\n').split('\n');
 
-
-function printCodeHighlight(f: RuleFailure, sourceText: string, start: RuleFailurePosition, end: RuleFailurePosition) {
-  const srcLines: string[] = sourceText.replace(/\\r/g, '\n').split('\n');
-
-  const errorLines: PrintLine[] = [];
-  for (var i = start.line; i <= end.line; i++) {
-    if (srcLines[i].trim().length) {
-      errorLines.push({
-        lineNumber: i + 1,
-        text: srcLines[i]
-      });
-    }
-  }
-
-  if (!errorLines.length) {
-    return;
-  }
-
-  if (errorLines.length === 1) {
-    let errorCharStart = start.character;
-    let errorCharLength = 0;
-    for (var i = errorCharStart; i < errorLines[0].text.length; i++) {
-      var lineChar = errorLines[0].text.charAt(i);
-      if (STOP_CHARS.indexOf(lineChar) > -1) {
-        break;
+    for (var i = start.line; i <= end.line; i++) {
+      if (srcLines[i].trim().length) {
+        var errorLine: PrintLine = {
+          lineIndex: i,
+          lineNumber: i + 1,
+          text: srcLines[i],
+          errorCharStart: (i === start.line) ? start.character : (i === end.line) ? end.character : -1,
+          errorLength: 0,
+        };
+        for (var j = errorLine.errorCharStart; j < errorLine.text.length; j++) {
+          if (STOP_CHARS.indexOf(errorLine.text.charAt(j)) > -1) {
+            break;
+          }
+          errorLine.errorLength++;
+        }
+        d.printLines.push(errorLine);
       }
-      errorCharLength++;
     }
 
-    errorLines[0].text = Logger.highlightError(errorLines[0].text, errorCharStart, errorCharLength);
-  }
-
-  if (start.line > 0 && Logger.meaningfulLine(srcLines[start.line - 1])) {
-    const beforeLine = {
-      lineNumber: start.line,
-      text: srcLines[start.line - 1]
-    };
-    if (Logger.INDENT.length + beforeLine.text.length > Logger.MAX_LEN) {
-      beforeLine.text = beforeLine.text.substr(0, Logger.MAX_LEN - Logger.INDENT.length - 1);
+    if (start.line > 0 && Logger.meaningfulLine(srcLines[start.line - 1])) {
+      const beforeLine: PrintLine = {
+        lineIndex: start.line - 1,
+        lineNumber: start.line,
+        text: srcLines[start.line - 1],
+        errorCharStart: -1,
+        errorLength: -1
+      };
+      d.printLines.unshift(beforeLine);
     }
-    errorLines.unshift(beforeLine);
-  }
 
-  if (end.line < srcLines.length && Logger.meaningfulLine(srcLines[end.line + 1])) {
-    const afterLine = {
-      lineNumber: end.line + 2,
-      text: srcLines[end.line + 1]
-    };
-    if (Logger.INDENT.length + afterLine.text.length > Logger.MAX_LEN) {
-      afterLine.text = afterLine.text.substr(0, Logger.MAX_LEN - Logger.INDENT.length - 1);
+    if (end.line < srcLines.length && Logger.meaningfulLine(srcLines[end.line + 1])) {
+      const afterLine: PrintLine = {
+        lineIndex: end.line + 1,
+        lineNumber: end.line + 2,
+        text: srcLines[end.line + 1],
+        errorCharStart: -1,
+        errorLength: -1
+      };
+      d.printLines.push(afterLine);
     }
-    errorLines.push(afterLine);
   }
 
-  Logger.printErrorLines(errorLines);
+  return d;
 }
 
 

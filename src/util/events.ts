@@ -5,12 +5,13 @@ import { EventEmitter } from 'events';
 const emmitter = new EventEmitter();
 
 
-export function on(eventType: string, listener: {(context?: BuildContext, val?: any): void}) {
+export function on(eventType: string, listener: {(data?: any): void}) {
   return emmitter.on(eventType, listener);
 }
 
-export function emit(eventType: string, context?: BuildContext, val?: any) {
-  return emmitter.emit(eventType, context, val);
+
+export function emit(eventType: string, val?: any) {
+  return emmitter.emit(eventType, val);
 }
 
 
@@ -20,17 +21,7 @@ export const EventType = {
   FileDelete: 'FileDelete',
   DirectoryAdd: 'DirectoryAdd',
   DirectoryDelete: 'DirectoryDelete',
-  TaskEvent: 'TaskEvent'
+  TaskEvent: 'TaskEvent',
+  TranspileDiagnostics: 'TranspileDiagnostics'
 };
 
-export function eventTypes() {
-  return Object.keys(EventType);
-}
-
-export interface TaskEvent {
-  scope: string;
-  type: string;
-  duration?: number;
-  time?: string;
-  msg?: string;
-}

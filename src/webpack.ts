@@ -75,7 +75,7 @@ export function webpackWorker(context: BuildContext, configFile: string): Promis
           // to always bundle to know which modules are used
           setModulePathsCache(context.moduleFiles);
 
-          emit(EventType.FileChange, context, webpackConfig.output.path);
+          emit(EventType.FileChange, getOutputDest(context, webpackConfig));
 
           resolve();
         }

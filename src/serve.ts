@@ -13,16 +13,18 @@ import * as mime from 'mime-types';
 
 
 let httpServer: http.Server;
-
+let isListening: boolean = false;
 
 export function serve(context?: BuildContext) {
   context = generateContext(context);
 
+  createDevServer(context);
+
   return watch(context)
     .then(() => {
-      createDevServer(context);
+      serverReady();
     }, () => {
-      createDevServer(context);
+      serverReady();
     });
 }
 
@@ -30,28 +32,28 @@ export function serve(context?: BuildContext) {
 export function createDevServer(context: BuildContext) {
   const port = getHttpServerPort();
   const host = getHttpServerHost();
-  const address = host || 'localhost';
 
   function httpServerListen() {
     httpServer.listen(port, host, undefined, () => {
-      Logger.info(chalk.green(`dev server running: http://${address}:${port}/`));
-
-      if (liveReload.useLiveReload()) {
-        liveReload.createLiveReloadServer(host);
-      }
-
-      if (devLogger.useDevLogger()) {
-        devServer.createWebSocketServer();
-      }
+      isListening = true;
     });
   }
 
+  if (liveReload.useLiveReload()) {
+    liveReload.createLiveReloadServer(context, host);
+  }
+
+  if (devLogger.useDevLogger()) {
+    devServer.createDevServer();
+  }
+
   if (httpServer) {
+    isListening = false;
     httpServer.close();
   }
 
   httpServer = http.createServer((request, response) => {
-    devServerListener(context, request, response);
+    httpServerListener(context, request, response);
   });
 
   httpServer.on('error', (err: any) => {
@@ -59,6 +61,7 @@ export function createDevServer(context: BuildContext) {
       Logger.error(`server already in use, retrying....`);
 
       setTimeout(() => {
+        isListening = false;
         httpServer.close();
         httpServerListen();
       }, 1500);
@@ -69,9 +72,17 @@ export function createDevServer(context: BuildContext) {
 }
 
 
-export function devServerListener(context: BuildContext, request: http.IncomingMessage, response: http.ServerResponse) {
-  if (devLogger.isDevLoggerUrl(request.url)) {
-    devLogger.responseDevLogger(request, response);
+function serverReady() {
+  if (isListening) {
+    const port = getHttpServerPort();
+    const address = getHttpServerHost() || 'localhost';
+    Logger.info(chalk.green(`dev server running: http://${address}:${port}/`));
+  }
+}
+
+
+function httpServerListener(context: BuildContext, request: http.IncomingMessage, response: http.ServerResponse) {
+  if (devLogger.isDevLoggerUrl(request, response)) {
     return;
   }
 

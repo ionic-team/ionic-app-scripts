@@ -1,20 +1,42 @@
 // Ionic Dev Server: Server Side Logger
 
-import { BuildContext } from '../util/interfaces';
-import { on, EventType, TaskEvent } from '../util/events';
+import { Diagnostic, Logger, TaskEvent } from '../util/logger';
 import { getConfigValueDefault, hasConfigValue } from '../util/config';
-import { Logger } from '../util/logger';
+import { on, EventType } from '../util/events';
 import { Server as WebSocketServer } from 'ws';
 
 
-let wss: any;
+let wsServer: any;
+const msgToClient: WsMessage[] = [];
 
-export function createWebSocketServer() {
-  wss = new WebSocketServer({ port: getWsPort() });
+
+export function createDevServer() {
+
+  on(EventType.TaskEvent, (taskEvent: TaskEvent) => {
+    const msg: WsMessage = {
+      category: 'taskEvent',
+      type: taskEvent.scope,
+      data: taskEvent
+    };
+    queueMessageSend(msg);
+  });
+
+  on(EventType.TranspileDiagnostics, (diagnostic: Diagnostic) => {
+    const msg: WsMessage = {
+      category: 'transpileDiagnostics',
+      type: 'typescript',
+      data: diagnostic
+    };
+    queueMessageSend(msg);
+  });
+
+  // create web socket server
+  const wss = new WebSocketServer({ port: getWsPort() });
 
   wss.on('connection', (ws: any) => {
+    wsServer = ws;
 
-    ws.on('message', (incomingMessage: string) => {
+    wsServer.on('message', (incomingMessage: string) => {
       // incoming message from the client
       try {
         printClientMessage(JSON.parse(incomingMessage));
@@ -23,26 +45,28 @@ export function createWebSocketServer() {
       }
     });
 
-    on(EventType.TaskEvent, (context: BuildContext, val: any) => {
-      sendTaskEventToClient(ws, val);
-    });
-
+    drainMessageQueue();
   });
 
 }
 
 
-function sendTaskEventToClient(ws: any, taskEvent: TaskEvent) {
-  try {
-    const msg: WsMessage = {
-      category: 'taskEvent',
-      type: taskEvent.scope,
-      data: taskEvent
-    };
-    ws.send(JSON.stringify(msg));
+function queueMessageSend(msg: WsMessage) {
+  msgToClient.push(msg);
+  drainMessageQueue();
+}
 
-  } catch (e) {
-    Logger.error(`error sending client message: ${e}`);
+
+function drainMessageQueue() {
+  if (wsServer) {
+    var msg: any;
+    while (msg = msgToClient.shift()) {
+      try {
+        wsServer.send(JSON.stringify(msg));
+      } catch (e) {
+        Logger.error(`error sending client ws, ${e}`);
+      }
+    }
   }
 }
 

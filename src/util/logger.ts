@@ -1,4 +1,4 @@
-import { emit, EventType, TaskEvent } from './events';
+import { emit, EventType } from './events';
 import { join } from 'path';
 import { isDebugMode } from './config';
 import { readJSONSync } from 'fs-extra';
@@ -58,7 +58,7 @@ export class Logger {
       type: 'start',
       msg: `${scope} started ...`
     };
-    emit(EventType.TaskEvent, null, taskEvent);
+    emit(EventType.TaskEvent, taskEvent);
   }
 
   ready(chalkColor?: Function) {
@@ -91,7 +91,7 @@ export class Logger {
     }
 
     taskEvent.msg = `${this.scope} ${taskEvent.type} ${taskEvent.time}`;
-    emit(EventType.TaskEvent, null, taskEvent);
+    emit(EventType.TaskEvent, taskEvent);
 
     let msg = `${this.scope} ${type}`;
     if (chalkColor) {
@@ -110,9 +110,10 @@ export class Logger {
   fail(err: BuildError) {
     const taskEvent: TaskEvent = {
       scope: this.scope.split(' ')[0],
-      type: 'failed'
+      type: 'failed',
+      msg: this.scope + ' failed'
     };
-    emit(EventType.TaskEvent, null, taskEvent);
+    emit(EventType.TaskEvent, taskEvent);
 
     if (err) {
       if (err instanceof BuildError) {
@@ -213,14 +214,30 @@ export class Logger {
     }
   }
 
-  static printErrorLines(errorLines: PrintLine[]) {
-    removeWhitespaceIndent(errorLines);
+  static printDiagnostic(d: Diagnostic, level: string) {
+    if (level === 'warn') {
+      Logger.warn(d.header);
+    } else {
+      Logger.error(d.header);
+    }
 
-    errorLines.forEach(l => {
+    Logger.wordWrap([d.messageText]).forEach(m => {
+      console.log(m);
+    });
+    Logger.newLine();
+
+    Logger.removeWhitespaceIndent(d.printLines);
+
+    d.printLines.forEach(l => {
       let msg = 'L' + l.lineNumber + ':  ';
       while (msg.length < Logger.INDENT.length) {
         msg = ' ' + msg;
       }
+
+      if (l.errorCharStart > -1) {
+        l.text = Logger.highlightError(l.text, l.errorCharStart, l.errorLength);
+      }
+
       msg = chalk.dim(msg) + Logger.jsSyntaxHighlight(l.text);
       console.log(msg);
     });
@@ -228,10 +245,10 @@ export class Logger {
     Logger.newLine();
   }
 
-  static highlightError(errorLine: string, errorCharStart: number, errorCharLength: number) {
-    let rightSideChars = errorLine.length - errorCharStart + errorCharLength - 1;
+  static highlightError(errorLine: string, errorCharStart: number, errorLength: number) {
+    let rightSideChars = errorLine.length - errorCharStart + errorLength - 1;
     while (errorLine.length + Logger.INDENT.length > Logger.MAX_LEN) {
-      if (errorCharStart > (errorLine.length - errorCharStart + errorCharLength) && errorCharStart > 5) {
+      if (errorCharStart > (errorLine.length - errorCharStart + errorLength) && errorCharStart > 5) {
         // larger on left side
         errorLine = errorLine.substr(1);
         errorCharStart--;
@@ -246,14 +263,32 @@ export class Logger {
       }
     }
 
-    const lineChars = errorLine.split('');
-    for (var i = 0; i < lineChars.length; i++) {
-      if (i >= errorCharStart && i < errorCharStart + errorCharLength) {
-        lineChars[i] = chalk.bgRed(lineChars[i]);
+    const lineChars: string[] = [];
+    const lineLength = Math.max(errorLine.length, errorCharStart + errorLength);
+    for (var i = 0; i < lineLength; i++) {
+      var chr = errorLine.charAt(i);
+      if (i >= errorCharStart && i < errorCharStart + errorLength) {
+        chr = chalk.bgRed(chr === '' ? ' ' : chr);
       }
+      lineChars.push(chr);
     }
 
     return lineChars.join('');
+  }
+
+
+  static removeWhitespaceIndent(lines: PrintLine[]) {
+    for (var i = 0; i < 100; i++) {
+      if (!eachLineHasLeadingWhitespace(lines)) {
+        return;
+      }
+      for (var i = 0; i < lines.length; i++) {
+        lines[i].text = lines[i].text.substr(1);
+        if (!lines[i].text.length) {
+          return;
+        }
+      }
+    }
   }
 
   static wordWrap(msg: any[]) {
@@ -390,21 +425,6 @@ export class Logger {
 }
 
 
-function removeWhitespaceIndent(lines: PrintLine[]) {
-  for (var i = 0; i < 100; i++) {
-    if (!eachLineHasLeadingWhitespace(lines)) {
-      return;
-    }
-    for (var i = 0; i < lines.length; i++) {
-      lines[i].text = lines[i].text.substr(1);
-      if (!lines[i].text.length) {
-        return;
-      }
-    }
-  }
-}
-
-
 function eachLineHasLeadingWhitespace(lines: PrintLine[]) {
   if (!lines.length) {
     return false;
@@ -440,12 +460,6 @@ export function getAppScriptsVersion() {
     rtn = packageJson.version || '';
   } catch (e) {}
   return rtn;
-}
-
-
-export interface PrintLine {
-  lineNumber: number;
-  text: string;
 }
 
 
@@ -486,4 +500,32 @@ const JS_KEYWORDS = [
 ];
 
 const MEH_LINES = [';', ':', '{', '}', '(', ')', '/**', '/*', '*/', '*', '({', '})'];
+
+
+export interface TaskEvent {
+  scope: string;
+  type: string;
+  duration?: number;
+  time?: string;
+  msg?: string;
+}
+
+
+export interface Diagnostic {
+  type: string;
+  header: string;
+  code: string;
+  messageText: string;
+  fileName?: string;
+  printLines?: PrintLine[];
+}
+
+
+export interface PrintLine {
+  lineIndex: number;
+  lineNumber: number;
+  text: string;
+  errorCharStart: number;
+  errorLength: number;
+}
 

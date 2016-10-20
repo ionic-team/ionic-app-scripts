@@ -8,20 +8,18 @@ import * as tinylr from 'tiny-lr';
 let liveReloadServer: any;
 let liveReloadScript: string;
 
-export function createLiveReloadServer(host: string) {
+export function createLiveReloadServer(context: BuildContext, host: string) {
   if (liveReloadServer) {
     return;
   }
 
-  const port = getLiveReloadServerPort();
-
-  liveReloadScript = getLiveReloadScript(host, port);
+  liveReloadScript = getLiveReloadScript(host);
 
   liveReloadServer = tinylr();
 
-  liveReloadServer.listen(port, host);
+  liveReloadServer.listen(getLiveReloadServerPort(), host);
 
-  events.on(events.EventType.FileChange, (context: BuildContext, filePath: string) => {
+  events.on(events.EventType.FileChange, (filePath: string) => {
     fileChanged(context, filePath);
   });
 }
@@ -49,14 +47,14 @@ export function injectLiveReloadScript(content: any): any {
 }
 
 
-function getLiveReloadScript(host: string, port: number) {
+export function getLiveReloadScript(host: string) {
+  const port = getLiveReloadServerPort();
   if (!host) {
     host = 'localhost';
   }
   var src = `//${host}:${port}/livereload.js?snipver=1`;
   return `  <!-- Ionic Dev Server: Injected LiveReload Script -->\n  <script src="${src}" async="" defer=""></script>`;
 }
-
 
 function fileChanged(context: BuildContext, filePath: string|string[]) {
   if (liveReloadServer) {
@@ -78,6 +76,7 @@ function getLiveReloadServerPort() {
   }
   return LIVE_RELOAD_DEFAULT_PORT;
 }
+
 
 export function useLiveReload() {
   return !hasConfigValue('--nolivereload', '-d', 'ionic_livereload', false);

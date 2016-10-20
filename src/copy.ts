@@ -40,7 +40,7 @@ export function copyUpdate(event: string, filePath: string, context: BuildContex
         return copySrcToDest(context, copyOptions.src, copyOptions.dest, copyOptions.filter, true);
       });
       return Promise.all(promises).then(destFiles => {
-        emit(EventType.FileChange, context, destFiles);
+        emit(EventType.FileChange, destFiles);
       });
     }
 
@@ -53,9 +53,9 @@ export function copyUpdate(event: string, filePath: string, context: BuildContex
 
         } else {
           if (event === 'unlink') {
-            emit(EventType.FileDelete, context, destFile);
+            emit(EventType.FileDelete, destFile);
           } else if (event === 'unlinkDir') {
-            emit(EventType.DirectoryDelete, context, destFile);
+            emit(EventType.DirectoryDelete, destFile);
           }
 
           resolve();

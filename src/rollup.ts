@@ -98,7 +98,7 @@ export function rollupWorker(context: BuildContext, configFile: string): Promise
       })
       .then(() => {
         // clean up any references (overkill yes, but let's play it safe)
-        emit(EventType.FileChange, context, rollupConfig.dest);
+        emit(EventType.FileChange, rollupConfig.dest);
         rollupConfig = rollupConfig.cache = rollupConfig.onwarn = rollupConfig.plugins = null;
 
         resolve();

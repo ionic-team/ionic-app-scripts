@@ -403,7 +403,7 @@ function writeOutput(context: BuildContext, sassConfig: SassConfig, cssOutput: s
         }
 
         // notify a file has changed
-        emit(EventType.FileChange, context, sassConfig.outFile);
+        emit(EventType.FileChange, sassConfig.outFile);
 
         // css file all saved
         // note that we're not waiting on the css map to finish saving

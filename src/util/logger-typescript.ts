@@ -1,5 +1,6 @@
 import { BuildContext } from './interfaces';
-import { Logger, PrintLine } from './logger';
+import { Diagnostic, Logger, PrintLine } from './logger';
+import { objectAssign } from './helpers';
 import * as ts from 'typescript';
 
 
@@ -8,82 +9,70 @@ import * as ts from 'typescript';
  * error reporting within a terminal. So, yeah, let's code it up, shall we?
  */
 
-export function runDiagnostics(context: BuildContext, program: ts.Program) {
-  const diagnostics = program.getSyntacticDiagnostics()
-                        .concat(program.getSemanticDiagnostics())
-                        .concat(program.getOptionsDiagnostics());
-
-  diagnostics.forEach(d => {
-    printDiagnostic(context, d);
+export function runDiagnostics(context: BuildContext, tsDiagnostics: ts.Diagnostic[]) {
+  const diagnostics = tsDiagnostics.map(tsDiagnostic => {
+    return loadDiagnostic(context, tsDiagnostic);
   });
 
-  // returns true if there were diagnostics
-  return (diagnostics.length > 0);
+  if (diagnostics.length > 0) {
+    diagnostics.forEach(d => {
+      Logger.printDiagnostic(objectAssign({}, d), 'error');
+    });
+    return true;
+  }
+
+  return false;
 }
 
 
-export function printDiagnostic(context: BuildContext, d: ts.Diagnostic) {
-  let header = 'typescript error';
-
-  if (d.file) {
-    const { line } = d.file.getLineAndCharacterOfPosition(d.start);
-    header = Logger.formatHeader('typescript', d.file.fileName, context.rootDir, line + 1);
-  }
-
-  Logger.error(`${header}`);
-
-  const message = ts.flattenDiagnosticMessageText(d.messageText, '\n');
-  Logger.wordWrap([message]).forEach(m => {
-    console.log(m);
-  });
-
-  Logger.newLine();
-
-  if (d.file) {
-    printCodeHighlight(d);
-  }
-}
-
-
-function printCodeHighlight(d: ts.Diagnostic) {
-  const { line, character } = d.file.getLineAndCharacterOfPosition(d.start);
-  const srcLines = d.file.getText().replace(/\\r/g, '\n').split('\n');
-
-  const errorLine: PrintLine = {
-    lineNumber: line + 1,
-    text: srcLines[line]
+function loadDiagnostic(context: BuildContext, tsDiagnostic: ts.Diagnostic) {
+  const d: Diagnostic = {
+    type: 'typescript',
+    header: 'typescript error',
+    code: tsDiagnostic.code.toString(),
+    messageText: ts.flattenDiagnosticMessageText(tsDiagnostic.messageText, '\n'),
+    fileName: null,
+    printLines: []
   };
 
-  if (!errorLine.text || !errorLine.text.trim().length) {
-    return;
-  }
+  if (tsDiagnostic.file) {
+    const srcLines = tsDiagnostic.file.getText().replace(/\\r/g, '\n').split('\n');
+    const posData = tsDiagnostic.file.getLineAndCharacterOfPosition(tsDiagnostic.start);
 
-  const printLines: PrintLine[] = [];
-
-  if (line > 0 && Logger.meaningfulLine(srcLines[line - 1])) {
-    const beforeLine: PrintLine = {
-      lineNumber: line,
-      text: srcLines[line - 1]
+    const errorLine: PrintLine = {
+      lineIndex: posData.line,
+      lineNumber: posData.line + 1,
+      text: srcLines[posData.line],
+      errorCharStart: posData.character,
+      errorLength: Math.max(tsDiagnostic.length, 1)
     };
-    if (Logger.INDENT.length + beforeLine.text.length > Logger.MAX_LEN) {
-      beforeLine.text = beforeLine.text.substr(0, Logger.MAX_LEN - Logger.INDENT.length - 1);
+    d.printLines.push(errorLine);
+
+    d.header = Logger.formatHeader('typescript', tsDiagnostic.file.fileName, context.rootDir, errorLine.lineNumber);
+
+    if (errorLine.lineIndex > 0 && Logger.meaningfulLine(srcLines[errorLine.lineIndex - 1])) {
+      const previousLine: PrintLine = {
+        lineIndex: errorLine.lineIndex - 1,
+        lineNumber: errorLine.lineIndex,
+        text: srcLines[errorLine.lineIndex - 1],
+        errorCharStart: -1,
+        errorLength: -1
+      };
+      d.printLines.unshift(previousLine);
     }
-    printLines.push(beforeLine);
+
+    if (errorLine.lineIndex + 1 < srcLines.length && Logger.meaningfulLine(srcLines[errorLine.lineIndex + 1])) {
+      const nextLine: PrintLine = {
+        lineIndex: errorLine.lineIndex + 1,
+        lineNumber: errorLine.lineIndex + 2,
+        text: srcLines[errorLine.lineIndex + 1],
+        errorCharStart: -1,
+        errorLength: -1
+      };
+      d.printLines.push(nextLine);
+    }
   }
 
-  errorLine.text = Logger.highlightError(errorLine.text, character, d.length);
-  printLines.push(errorLine);
-
-  if (line + 1 < srcLines.length && Logger.meaningfulLine(srcLines[line + 1])) {
-    const afterLine: PrintLine = {
-      lineNumber: line + 2,
-      text: srcLines[line + 1]
-    };
-    if (Logger.INDENT.length + afterLine.text.length > Logger.MAX_LEN) {
-      afterLine.text = afterLine.text.substr(0, Logger.MAX_LEN - Logger.INDENT.length - 1);
-    }
-    printLines.push(afterLine);
-  }
-
-  Logger.printErrorLines(printLines);
+  return d;
 }
+
