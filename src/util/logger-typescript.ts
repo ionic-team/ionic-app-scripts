@@ -16,7 +16,7 @@ export function runDiagnostics(context: BuildContext, tsDiagnostics: ts.Diagnost
 
   if (diagnostics.length > 0) {
     diagnostics.forEach(d => {
-      Logger.printDiagnostic(objectAssign({}, d), 'error');
+      Logger.printDiagnostic(objectAssign({}, d));
     });
     return true;
   }
@@ -27,15 +27,19 @@ export function runDiagnostics(context: BuildContext, tsDiagnostics: ts.Diagnost
 
 function loadDiagnostic(context: BuildContext, tsDiagnostic: ts.Diagnostic) {
   const d: Diagnostic = {
+    level: 'error',
+    syntax: 'js',
     type: 'typescript',
     header: 'typescript error',
     code: tsDiagnostic.code.toString(),
     messageText: ts.flattenDiagnosticMessageText(tsDiagnostic.messageText, '\n'),
     fileName: null,
-    printLines: []
+    lines: []
   };
 
   if (tsDiagnostic.file) {
+    d.fileName = Logger.formatFileName(context.rootDir, tsDiagnostic.file.fileName);
+
     const srcLines = tsDiagnostic.file.getText().replace(/\\r/g, '\n').split('\n');
     const posData = tsDiagnostic.file.getLineAndCharacterOfPosition(tsDiagnostic.start);
 
@@ -46,30 +50,35 @@ function loadDiagnostic(context: BuildContext, tsDiagnostic: ts.Diagnostic) {
       errorCharStart: posData.character,
       errorLength: Math.max(tsDiagnostic.length, 1)
     };
-    d.printLines.push(errorLine);
+    d.lines.push(errorLine);
+
+    if (errorLine.errorLength === 0 && errorLine.errorCharStart > 0) {
+      errorLine.errorLength = 1;
+      errorLine.errorCharStart--;
+    }
 
     d.header = Logger.formatHeader('typescript', tsDiagnostic.file.fileName, context.rootDir, errorLine.lineNumber);
 
     if (errorLine.lineIndex > 0 && Logger.meaningfulLine(srcLines[errorLine.lineIndex - 1])) {
       const previousLine: PrintLine = {
         lineIndex: errorLine.lineIndex - 1,
-        lineNumber: errorLine.lineIndex,
+        lineNumber: errorLine.lineNumber - 1,
         text: srcLines[errorLine.lineIndex - 1],
         errorCharStart: -1,
         errorLength: -1
       };
-      d.printLines.unshift(previousLine);
+      d.lines.unshift(previousLine);
     }
 
     if (errorLine.lineIndex + 1 < srcLines.length && Logger.meaningfulLine(srcLines[errorLine.lineIndex + 1])) {
       const nextLine: PrintLine = {
         lineIndex: errorLine.lineIndex + 1,
-        lineNumber: errorLine.lineIndex + 2,
+        lineNumber: errorLine.lineNumber + 1,
         text: srcLines[errorLine.lineIndex + 1],
         errorCharStart: -1,
         errorLength: -1
       };
-      d.printLines.push(nextLine);
+      d.lines.push(nextLine);
     }
   }
 

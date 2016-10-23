@@ -10,7 +10,7 @@ export function runDiagnostics(context: BuildContext, failures: RuleFailure[]) {
 
   if (diagnostics.length) {
     diagnostics.forEach(d => {
-      Logger.printDiagnostic(objectAssign({}, d), 'warn');
+      Logger.printDiagnostic(objectAssign({}, d));
     });
     return true;
   }
@@ -24,11 +24,14 @@ function loadDiagnostic(context: BuildContext, f: RuleFailure) {
   const end: RuleFailurePosition = f.endPosition.toJson();
 
   const d: Diagnostic = {
+    level: 'warn',
+    syntax: 'js',
     type: 'tslint',
+    fileName: Logger.formatFileName(context.rootDir, f.fileName),
     header: Logger.formatHeader('tslint', f.fileName, context.rootDir, start.line + 1, end.line + 1),
     code: f.ruleName,
     messageText: f.failure,
-    printLines: []
+    lines: []
   };
 
   if (f.sourceFile && f.sourceFile.text) {
@@ -49,7 +52,13 @@ function loadDiagnostic(context: BuildContext, f: RuleFailure) {
           }
           errorLine.errorLength++;
         }
-        d.printLines.push(errorLine);
+
+        if (errorLine.errorLength === 0 && errorLine.errorCharStart > 0) {
+          errorLine.errorLength = 1;
+          errorLine.errorCharStart--;
+        }
+
+        d.lines.push(errorLine);
       }
     }
 
@@ -61,7 +70,7 @@ function loadDiagnostic(context: BuildContext, f: RuleFailure) {
         errorCharStart: -1,
         errorLength: -1
       };
-      d.printLines.unshift(beforeLine);
+      d.lines.unshift(beforeLine);
     }
 
     if (end.line < srcLines.length && Logger.meaningfulLine(srcLines[end.line + 1])) {
@@ -72,7 +81,7 @@ function loadDiagnostic(context: BuildContext, f: RuleFailure) {
         errorCharStart: -1,
         errorLength: -1
       };
-      d.printLines.push(afterLine);
+      d.lines.push(afterLine);
     }
   }
 

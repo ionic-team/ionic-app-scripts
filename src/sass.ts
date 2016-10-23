@@ -5,6 +5,7 @@ import { emit, EventType } from './util/events';
 import { ensureDirSync, readdirSync, writeFile } from 'fs-extra';
 import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars } from './util/config';
 import { getModulePathsCache } from './util/helpers';
+import { runDiagnostics } from './util/logger-sass';
 import { SassError, render as nodeSassRender, Result } from 'node-sass';
 import * as postcss from 'postcss';
 import * as autoprefixer from 'autoprefixer';
@@ -245,30 +246,14 @@ function render(context: BuildContext, sassConfig: SassConfig) {
       sassConfig.sourceMapContents = true;
     }
 
-    nodeSassRender(sassConfig, (renderErr: SassError, sassResult: Result) => {
-      if (renderErr) {
-        // sass render error!
-        if (renderErr.file) {
-          let sassFile: string = renderErr.file;
-          sassFile = sassFile.replace(context.rootDir, '');
-          if (/\/|\\/.test(sassFile.charAt(0))) {
-            sassFile = sassFile.substr(1);
-          }
-          if (sassFile.length > 80) {
-            sassFile = '...' + sassFile.substr(sassFile.length - 80);
-          }
-          Logger.error(`sass: ${sassFile}, line: ${renderErr.line}`);
-          Logger.log(renderErr.message);
-          console.log(''); // just for a new line
-
-        } else {
-          Logger.error(`sass error: ${renderErr}`);
-        }
-
-        reject();
+    nodeSassRender(sassConfig, (sassError: SassError, sassResult: Result) => {
+      const hasDiagnostics = runDiagnostics(context, sassError);
+      if (hasDiagnostics) {
+        // sass render error :(
+        reject(new BuildError());
 
       } else {
-        // sass render success!
+        // sass render success :)
         renderSassSuccess(context, sassResult, sassConfig).then(() => {
           lastRenderKey = getRenderCacheKey(sassConfig);
           resolve();

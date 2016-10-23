@@ -214,8 +214,8 @@ export class Logger {
     }
   }
 
-  static printDiagnostic(d: Diagnostic, level: string) {
-    if (level === 'warn') {
+  static printDiagnostic(d: Diagnostic) {
+    if (d.level === 'warn') {
       Logger.warn(d.header);
     } else {
       Logger.error(d.header);
@@ -226,23 +226,34 @@ export class Logger {
     });
     Logger.newLine();
 
-    Logger.removeWhitespaceIndent(d.printLines);
+    if (d.lines && d.lines.length) {
+      Logger.removeWhitespaceIndent(d.lines);
 
-    d.printLines.forEach(l => {
-      let msg = 'L' + l.lineNumber + ':  ';
-      while (msg.length < Logger.INDENT.length) {
-        msg = ' ' + msg;
-      }
+      d.lines.forEach(l => {
+        let msg = 'L' + l.lineNumber + ':  ';
+        while (msg.length < Logger.INDENT.length) {
+          msg = ' ' + msg;
+        }
 
-      if (l.errorCharStart > -1) {
-        l.text = Logger.highlightError(l.text, l.errorCharStart, l.errorLength);
-      }
+        if (l.errorCharStart > -1) {
+          l.text = Logger.highlightError(l.text, l.errorCharStart, l.errorLength);
+        }
 
-      msg = chalk.dim(msg) + Logger.jsSyntaxHighlight(l.text);
-      console.log(msg);
-    });
+        msg = chalk.dim(msg);
 
-    Logger.newLine();
+        if (d.syntax === 'js') {
+          msg += Logger.jsSyntaxHighlight(l.text);
+        } else if (d.syntax === 'css') {
+          msg += Logger.cssSyntaxHighlight(l.text, l.errorCharStart);
+        } else {
+          msg += l.text;
+        }
+
+        console.log(msg);
+      });
+
+      Logger.newLine();
+    }
   }
 
   static highlightError(errorLine: string, errorCharStart: number, errorLength: number) {
@@ -284,6 +295,7 @@ export class Logger {
       }
       for (var i = 0; i < lines.length; i++) {
         lines[i].text = lines[i].text.substr(1);
+        lines[i].errorCharStart--;
         if (!lines[i].text.length) {
           return;
         }
@@ -391,18 +403,51 @@ export class Logger {
   }
 
 
-  static formatHeader(task: string, filename: string, rootDir: string, startLineNumber: number = null, endLineNumber: number = null) {
-    let header = `${task}: `;
-    filename = filename.replace(rootDir, '');
-    if (/\/|\\/.test(filename.charAt(0))) {
-      filename = filename.substr(1);
-    }
-    if (filename.length > 80) {
-      filename = '...' + filename.substr(filename.length - 80);
+  static cssSyntaxHighlight(text: string, errorCharStart: number) {
+    let cssProp = true;
+    const safeChars = 'abcdefghijklmnopqrstuvwxyz-_';
+    const notProp = '.#,:}@$[]/*';
+
+    const chars: string[] = [];
+
+    for (var i = 0; i < text.length; i++) {
+      var c = text.charAt(i);
+
+      if (c === ';' || c === '{') {
+        cssProp = true;
+      } else if (notProp.indexOf(c) > -1) {
+        cssProp = false;
+      }
+      if (cssProp && safeChars.indexOf(c.toLowerCase()) > -1) {
+        chars.push(chalk.cyan(c));
+        continue;
+      }
+
+      chars.push(c);
     }
 
+    return chars.join('');
+  }
+
+
+  static formatFileName(rootDir: string, fileName: string) {
+    fileName = fileName.replace(rootDir, '');
+    if (/\/|\\/.test(fileName.charAt(0))) {
+      fileName = fileName.substr(1);
+    }
+    if (fileName.length > 80) {
+      fileName = '...' + fileName.substr(fileName.length - 80);
+    }
+    return fileName;
+  }
+
+
+  static formatHeader(task: string, fileName: string, rootDir: string, startLineNumber: number = null, endLineNumber: number = null) {
+    let header = `${task}: `;
+    fileName = Logger.formatFileName(rootDir, fileName);
+
     if (startLineNumber !== null && startLineNumber > 0) {
-      header += filename + ', ';
+      header += fileName + ', ';
 
       if (endLineNumber !== null && endLineNumber > startLineNumber) {
         header += `lines: ${startLineNumber} - ${endLineNumber}`;
@@ -512,12 +557,14 @@ export interface TaskEvent {
 
 
 export interface Diagnostic {
+  level: string;
+  syntax: string;
   type: string;
   header: string;
   code: string;
   messageText: string;
-  fileName?: string;
-  printLines?: PrintLine[];
+  fileName: string;
+  lines: PrintLine[];
 }
 
 
