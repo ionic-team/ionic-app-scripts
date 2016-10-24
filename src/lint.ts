@@ -22,19 +22,16 @@ export function lint(context?: BuildContext, configFile?: string) {
 
 
 export function lintWorker(context: BuildContext, configFile: string) {
+  const logger = new Logger('lint');
   return getLintConfig(context, configFile).then(configFile => {
     // there's a valid tslint config, let's continue
-    const logger = new Logger('lint');
-
-    return lintApp(context, configFile)
-      .then(() => {
-        // always finish and resolve
-        logger.finish();
-
-      }).catch(() => {
-        // always finish and resolve
-        logger.finish();
-      });
+    return lintApp(context, configFile);
+  }).then(() => {
+    // always finish and resolve
+    logger.finish();
+  }).catch(() => {
+    // always finish and resolve
+    logger.finish();
   });
 }
 
@@ -55,15 +52,11 @@ export function lintUpdate(event: string, filePath: string, context: BuildContex
 
 export function lintUpdateWorker(context: BuildContext, workerConfig: LintWorkerConfig) {
   return getLintConfig(context, workerConfig.configFile).then(configFile => {
-      // there's a valid tslint config, let's continue (but be quiet about it!)
-      const program = createProgram(configFile, context.srcDir);
-      return lintFile(context, program, workerConfig.filePath);
-
-    }, () => {
-      // rejected, but let's ignore
-    }).catch(() => {
-      // error, but whateves
-    });
+    // there's a valid tslint config, let's continue (but be quiet about it!)
+    const program = createProgram(configFile, context.srcDir);
+    return lintFile(context, program, workerConfig.filePath);
+  }).catch(() => {
+  });
 }
 
 

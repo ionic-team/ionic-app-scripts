@@ -89,7 +89,7 @@ export function sassWorker(context: BuildContext, configFile: string) {
         reject(reason);
       })
       .catch(err => {
-        throw new BuildError(err);
+        reject(new BuildError(err));
       });
   });
 }
