@@ -2,7 +2,7 @@ import { build } from './build';
 import { BuildContext, TaskInfo } from './util/interfaces';
 import { BuildError, Logger } from './util/logger';
 import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars, setIonicEnvironment } from './util/config';
-import { normalize } from 'path';
+import { join, normalize } from 'path';
 import * as chalk from 'chalk';
 import * as chokidar from 'chokidar';
 
@@ -61,13 +61,15 @@ function startWatcher(index: number, watcher: Watcher, context: BuildContext, wa
       return;
     }
 
-    let taskPromise = Promise.resolve();
-    let nextTask: any = null;
-
     const chokidarWatcher = chokidar.watch(<any>watcher.paths, watcher.options);
 
     chokidarWatcher.on('all', (event: string, filePath: string) => {
       setIonicEnvironment(context.isProd);
+
+      filePath = join(context.rootDir, filePath);
+
+      context.isUpdate = true;
+      context.fileChanged = filePath;
 
       Logger.debug(`watch callback start, id: ${watchCount}, isProd: ${context.isProd}, event: ${event}, path: ${filePath}`);
 
@@ -75,26 +77,18 @@ function startWatcher(index: number, watcher: Watcher, context: BuildContext, wa
         Logger.info(chalk.green('watch ready'));
       }
 
-      nextTask = watcher.callback.bind(null, event, filePath, context);
-      taskPromise.then(() => {
-        Logger.debug(`watch callback complete, id: ${watchCount}, isProd: ${context.isProd}, event: ${event}, path: ${filePath}`);
-        taskPromise = nextTask();
-        taskPromise
-          .then(taskDone, taskDone)
-          .catch(taskDone);
-        nextTask = null;
-        watchCount++;
-
-      }).catch(err => {
-        Logger.debug(`watch callback error, id: ${watchCount}, isProd: ${context.isProd}, event: ${event}, path: ${filePath}`);
-        Logger.debug(`${err}`);
-        taskPromise = nextTask();
-        taskPromise
-          .then(taskDone, taskDone)
-          .catch(taskDone);
-        nextTask = null;
-        watchCount++;
-      });
+      watcher.callback(event, filePath, context)
+        .then(() => {
+          Logger.debug(`watch callback complete, id: ${watchCount}, isProd: ${context.isProd}, event: ${event}, path: ${filePath}`);
+          watchCount++;
+          taskDone();
+        })
+        .catch(err => {
+          Logger.debug(`watch callback error, id: ${watchCount}, isProd: ${context.isProd}, event: ${event}, path: ${filePath}`);
+          Logger.debug(`${err}`);
+          watchCount++;
+          taskDone();
+        });
     });
 
     chokidarWatcher.on('ready', () => {
@@ -156,7 +150,7 @@ export interface Watcher {
     cwd?: string;
   };
   callback?: {
-    (event: string, filePath: string, context: BuildContext): void;
+    (event: string, filePath: string, context: BuildContext): Promise<any>;
   };
 }
 
