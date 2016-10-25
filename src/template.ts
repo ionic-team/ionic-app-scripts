@@ -7,8 +7,6 @@ import { sassUpdate } from './sass';
 
 
 export function templateUpdate(event: string, filePath: string, context: BuildContext) {
-  filePath = join(context.rootDir, filePath);
-
   const logger = new Logger('template update');
 
   return templateUpdateWorker(event, filePath, context)
