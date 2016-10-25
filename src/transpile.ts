@@ -212,6 +212,7 @@ function transpileUpdateWorker(event: string, filePath: string, context: BuildCo
     } catch (e) {
       // umm, oops. Yeah let's just do a full build then
       Logger.debug(`transpileModule error: ${e}`);
+      throw new BuildError(e);
     }
   }
 

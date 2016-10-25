@@ -7,6 +7,11 @@ import { basename, dirname, join } from 'path';
 import * as webpackApi from 'webpack';
 import { mkdirs } from 'fs-extra';
 
+import { EventEmitter } from 'events';
+
+const eventEmitter = new EventEmitter();
+const INCREMENTAL_BUILD_FAILED = 'incremental_build_failed';
+const INCREMENTAL_BUILD_SUCCESS = 'incremental_build_success';
 
 export function webpack(context: BuildContext, configFile: string) {
   context = generateContext(context);
@@ -31,10 +36,12 @@ export function webpackUpdate(event: string, path: string, context: BuildContext
   return writeFilesToDisk(files, context)
     .then(() => {
       Logger.debug('Wrote updated file to disk');
-      return runWebpackIncremental(false, webpackConfig);
+      return runWebpackIncrementalBuild(false, webpackConfig);
     }).then((stats: any) => {
       Logger.debug('Incremental Build Done');
       return webpackBuildComplete(stats, context, webpackConfig);
+    }).then(() => {
+      return logger.finish();
     }).catch(err => {
       throw logger.fail(err);
     });
@@ -53,7 +60,7 @@ export function webpackWorker(context: BuildContext, configFile: string): Promis
       if (context.isProd) {
         return runWebpackFullBuild(webpackConfig);
       } else {
-        return runWebpackIncremental(true, webpackConfig);
+        return runWebpackIncrementalBuild(true, webpackConfig);
       }
     }).then((stats: any) => {
       return webpackBuildComplete(stats, context, webpackConfig);
@@ -81,6 +88,7 @@ function webpackBuildComplete(stats: any, context: BuildContext, webpackConfig: 
   setModulePathsCache(context.moduleFiles);
 
   emit(EventType.FileChange, getOutputDest(context, webpackConfig));
+  return Promise.resolve();
 }
 
 function runWebpackFullBuild(config: WebpackConfig) {
@@ -98,25 +106,36 @@ function runWebpackFullBuild(config: WebpackConfig) {
   });
 }
 
-function runWebpackIncremental(initializeWatch: boolean, config: WebpackConfig) {
+function runWebpackIncrementalBuild(initializeWatch: boolean, config: WebpackConfig) {
   return new Promise((resolve, reject) => {
-    const callback = (err: Error, stats: any) => {
-      Logger.debug('Webpack incremental build done');
-      if (err) {
-        reject(new BuildError(err));
-      } else {
-        resolve(stats);
-      }
-    };
+    // start listening for events, remove listeners once an event is received
+    eventEmitter.on(INCREMENTAL_BUILD_FAILED, (err: Error) => {
+      eventEmitter.removeAllListeners();
+      reject(new BuildError(err));
+    });
+
+    eventEmitter.on(INCREMENTAL_BUILD_SUCCESS, (stats: any) => {
+      eventEmitter.removeAllListeners();
+      resolve(stats);
+    });
 
     if (initializeWatch) {
-      Logger.debug('Starting webpack watch');
-      const compiler = webpackApi(config);
-      compiler.watch({}, callback);
+      startWebpackWatch(config);
     }
+
   });
 }
 
+function startWebpackWatch(config: WebpackConfig) {
+  const compiler = webpackApi(config);
+  compiler.watch({}, (err: Error, stats: any) => {
+    if (err) {
+      eventEmitter.emit(INCREMENTAL_BUILD_FAILED, err);
+    } else {
+      eventEmitter.emit(INCREMENTAL_BUILD_SUCCESS, stats);
+    }
+  });
+}
 
 export function getWebpackConfig(context: BuildContext, configFile: string): WebpackConfig {
   configFile = getUserConfigFile(context, taskInfo, configFile);

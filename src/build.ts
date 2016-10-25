@@ -113,18 +113,19 @@ export function buildUpdate(event: string, filePath: string, context: BuildConte
     copy(context);
   }
 
+  const logger = new Logger(`build update`);
   return transpileUpdate(event, filePath, context)
     .then(() => {
       return bundleUpdate(event, filePath, context);
-    })
-    .then(() => {
+    }).then(() => {
       if (event !== 'change' || !context.successfulSass) {
         // if just the TS file changed, then there's no need to do a sass update
         // however, if a new TS file was added or was deleted, then we should do a sass update
         return sassUpdate(event, filePath, context);
       }
-    })
-    .catch(err => {
-      throw new BuildError(err);
+    }).then(() => {
+      logger.finish();
+    }).catch(err => {
+      throw logger.fail(err);
     });
 }
