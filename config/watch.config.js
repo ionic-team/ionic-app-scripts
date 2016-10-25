@@ -23,7 +23,6 @@ module.exports = {
       paths: [
         '{{SRC}}/**/*.html'
       ],
-      options: { ignored: /(index.html$)/ },
       callback: templateUpdate
     },
 
