@@ -9,11 +9,11 @@ function getEntryPoint() {
   if (process.env.IONIC_ENV === 'prod') {
     return '{{TMP}}/app/main.prod.js';
   }
-  return '{{SRC}}/app/main.dev.ts';
+  return '{{TMP}}/app/main.dev.js';
 }
 
 module.exports = {
-  devtool: 'cheap-module-source-map',
+  devtool: 'source-map',
   entry: getEntryPoint(),
   output: {
     path: '{{BUILD}}',
@@ -21,16 +21,11 @@ module.exports = {
   },
 
   resolve: {
-    //modules: [path.resolve(__dirname, 'src'), 'node_modules'],
-    extensions: ['.js', '.ts', '.json']
+    extensions: ['.js', '.json']
   },
 
   module: {
     loaders: [
-      {
-        test: /\.(ts|js)$/,
-        loader: path.resolve(path.join(__dirname, '..', 'dist', 'loaders', 'ionic-loader.js'))
-      },
       {
         test: /\.json$/,
         loader: 'json'

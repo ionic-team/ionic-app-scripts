@@ -3,8 +3,7 @@ import { BuildError, Logger } from './util/logger';
 import { emit, EventType } from './util/events';
 import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars } from './util/config';
 import * as fs from 'fs-extra';
-import * as path from 'path';
-
+import { join as pathJoin, resolve as pathResolve, sep as pathSep } from 'path';
 
 export function copy(context?: BuildContext, configFile?: string) {
   context = generateContext(context);
@@ -46,7 +45,7 @@ export function copyUpdate(event: string, filePath: string, context: BuildContex
 
   } else if (event === 'unlink' || event === 'unlinkDir') {
     return new Promise((resolve, reject) => {
-      const destFile = path.join(context.rootDir, filePath);
+      const destFile = pathJoin(context.rootDir, filePath);
       fs.remove(destFile, (err) => {
         if (err) {
           reject(new BuildError(err));
@@ -86,23 +85,23 @@ export function findFileCopyOptions(context: BuildContext, copyConfig: CopyConfi
     return copyOptions;
   }
 
-  filePath = path.join(context.rootDir, filePath);
+  filePath = pathJoin(context.rootDir, filePath);
 
-  const filePathSegments = filePath.split(path.sep);
+  const filePathSegments = filePath.split(pathSep);
   let srcPath: string;
   let srcLookupPath: string;
   let destCopyOption: string;
   let destPath: string;
 
   while (filePathSegments.length > 1) {
-    srcPath = filePathSegments.join(path.sep);
+    srcPath = filePathSegments.join(pathSep);
 
 
     for (var i = 0; i < copyConfig.include.length; i++) {
-      srcLookupPath = path.resolve(replacePathVars(context, copyConfig.include[i].src));
+      srcLookupPath = pathResolve(replacePathVars(context, copyConfig.include[i].src));
 
       if (srcPath === srcLookupPath) {
-        destCopyOption = path.resolve(replacePathVars(context, copyConfig.include[i].dest));
+        destCopyOption = pathResolve(replacePathVars(context, copyConfig.include[i].dest));
         destPath = filePath.replace(srcLookupPath, destCopyOption);
 
         copyOptions.push({
@@ -126,8 +125,8 @@ export function findFileCopyOptions(context: BuildContext, copyConfig: CopyConfi
 
 function copySrcToDest(context: BuildContext, src: string, dest: string, filter: any, clobber: boolean): Promise<string> {
   return new Promise((resolve, reject) => {
-    src = path.resolve(replacePathVars(context, src));
-    dest = path.resolve(replacePathVars(context, dest));
+    src = pathResolve(replacePathVars(context, src));
+    dest = pathResolve(replacePathVars(context, dest));
 
     const opts = {
       filter: filter,
