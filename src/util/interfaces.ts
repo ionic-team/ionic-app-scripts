@@ -10,6 +10,7 @@ export interface BuildContext {
   isProd?: boolean;
   isWatch?: boolean;
   isUpdate?: boolean;
+  fullBuildCompleted?: boolean;
   fileChanged?: string;
   bundler?: string;
   useTranspileCache?: boolean;

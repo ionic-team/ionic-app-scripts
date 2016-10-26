@@ -1,4 +1,4 @@
-import { build } from './build';
+import { build, fullBuildUpdate } from './build';
 import { BuildContext, TaskInfo } from './util/interfaces';
 import { BuildError, Logger } from './util/logger';
 import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars, setIonicEnvironment } from './util/config';
@@ -16,6 +16,7 @@ export function watch(context?: BuildContext, configFile?: string) {
   // force watch options
   context.isProd = false;
   context.isWatch = true;
+  context.fullBuildCompleted = false;
 
   const logger = new Logger('watch');
 
@@ -90,7 +91,14 @@ function startWatcher(index: number, watcher: Watcher, context: BuildContext, wa
         Logger.info(chalk.green('watch ready'));
       }
 
-      watcher.callback(event, filePath, context)
+      const callbackToExecute = function(event: string, filePath: string, context: BuildContext, watcher: Watcher) {
+        if (!context.fullBuildCompleted) {
+          return fullBuildUpdate(event, filePath, context);
+        }
+        return watcher.callback(event, filePath, context);
+      };
+
+      callbackToExecute(event, filePath, context, watcher)
         .then(() => {
           Logger.debug(`watch callback complete, id: ${watchCount}, isProd: ${context.isProd}, event: ${event}, path: ${filePath}`);
           watchCount++;
