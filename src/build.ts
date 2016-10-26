@@ -107,6 +107,22 @@ function buildDev(context: BuildContext) {
     });
 }
 
+export function fullBuildUpdate(event: string, filePath: string, context: BuildContext) {
+  if (!context.successfulCopy) {
+    copy(context);
+  }
+
+  const logger = new Logger(`build update`);
+
+  return buildWorker(context)
+    .then(() => {
+      // congrats, we did it!  (•_•) / ( •_•)>⌐■-■ / (⌐■_■)
+      logger.finish();
+    })
+    .catch(err => {
+      throw logger.fail(err);
+    });
+}
 
 export function buildUpdate(event: string, filePath: string, context: BuildContext) {
   if (!context.successfulCopy) {
