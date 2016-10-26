@@ -135,11 +135,10 @@ function copySrcToDest(context: BuildContext, src: string, dest: string, filter:
 
     fs.copy(src, dest, opts, (err) => {
       if (err) {
-        const msg = `Error copying "${src}" to "${dest}": ${err}`;
+        const msg = `Error copying "${src}" to "${dest}": ${err.message}`;
         Logger.debug(msg);
-
-        if (msg.indexOf('ENOENT') < 0 && msg.indexOf('EEXIST') < 0) {
-          reject(new BuildError(`Error copying "${src}" to "${dest}": ${err}`));
+        if (msg.indexOf('ENOENT') > -1 || msg.indexOf('EEXIST') > -1) {
+          reject(new BuildError(`Error copying "${src}" to "${dest}": ${err.message}`));
           return;
         }
       }

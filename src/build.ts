@@ -119,8 +119,9 @@ export function buildUpdate(event: string, filePath: string, context: BuildConte
 }
 
 function buildUpdateWorker(event: string, filePath: string, context: BuildContext, fullBuild: boolean) {
+  let copyPromise: Promise<void> = null;
   if (!context.successfulCopy) {
-    copy(context);
+    copyPromise = copy(context);
   }
 
   const logger = new Logger(`build update`);
@@ -144,6 +145,10 @@ function buildUpdateWorker(event: string, filePath: string, context: BuildContex
         // if just the TS file changed, then there's no need to do a sass update
         // however, if a new TS file was added or was deleted, then we should do a sass update
         return sassUpdate(event, filePath, context);
+      }
+    }).then(() => {
+      if (copyPromise) {
+        return copyPromise;
       }
     }).then(() => {
       logger.finish();
