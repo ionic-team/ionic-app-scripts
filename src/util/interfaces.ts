@@ -17,7 +17,6 @@ export interface BuildContext {
   useBundleCache?: boolean;
   useSassCache?: boolean;
   tsFiles?: TsFiles;
-  successfulCopy?: boolean;
   successfulSass?: boolean;
   inlineTemplates?: boolean;
 }
