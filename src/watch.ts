@@ -1,4 +1,4 @@
-import { build } from './build';
+import { build, fullBuildUpdate } from './build';
 import { BuildContext, TaskInfo } from './util/interfaces';
 import { BuildError, Logger } from './util/logger';
 import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars, setIonicEnvironment } from './util/config';
@@ -16,6 +16,7 @@ export function watch(context?: BuildContext, configFile?: string) {
   // force watch options
   context.isProd = false;
   context.isWatch = true;
+  context.fullBuildCompleted = false;
 
   const logger = new Logger('watch');
 
@@ -63,7 +64,20 @@ function startWatcher(index: number, watcher: Watcher, context: BuildContext, wa
 
     const chokidarWatcher = chokidar.watch(<any>watcher.paths, watcher.options);
 
-    chokidarWatcher.on('all', (event: string, filePath: string) => {
+    let eventName = 'all';
+    if (watcher.eventName) {
+      eventName = watcher.eventName;
+    }
+
+    chokidarWatcher.on(eventName, (event: string, filePath: string) => {
+      // if you're listening for a specific event vs 'all',
+      // the event is not included and the first param is the filePath
+      // go ahead and adjust it if filePath is null so it's uniform
+      if (!filePath) {
+        filePath = event;
+        event = watcher.eventName;
+      }
+
       setIonicEnvironment(context.isProd);
 
       filePath = join(context.rootDir, filePath);
@@ -77,7 +91,14 @@ function startWatcher(index: number, watcher: Watcher, context: BuildContext, wa
         Logger.info(chalk.green('watch ready'));
       }
 
-      watcher.callback(event, filePath, context)
+      const callbackToExecute = function(event: string, filePath: string, context: BuildContext, watcher: Watcher) {
+        if (!context.fullBuildCompleted) {
+          return fullBuildUpdate(event, filePath, context);
+        }
+        return watcher.callback(event, filePath, context);
+      };
+
+      callbackToExecute(event, filePath, context, watcher)
         .then(() => {
           Logger.debug(`watch callback complete, id: ${watchCount}, isProd: ${context.isProd}, event: ${event}, path: ${filePath}`);
           watchCount++;
@@ -149,6 +170,7 @@ export interface Watcher {
     followSymlinks?: boolean;
     cwd?: string;
   };
+  eventName?: string;
   callback?: {
     (event: string, filePath: string, context: BuildContext): Promise<any>;
   };

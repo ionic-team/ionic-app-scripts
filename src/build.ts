@@ -19,6 +19,7 @@ export function build(context: BuildContext) {
   return buildWorker(context)
     .then(() => {
       // congrats, we did it!  (•_•) / ( •_•)>⌐■-■ / (⌐■_■)
+      context.fullBuildCompleted = true;
       logger.finish();
     })
     .catch(err => {
@@ -107,18 +108,35 @@ function buildDev(context: BuildContext) {
     });
 }
 
+export function fullBuildUpdate(event: string, filePath: string, context: BuildContext) {
+  return buildUpdateWorker(event, filePath, context, true).then(() => {
+    context.fullBuildCompleted = true;
+  });
+}
 
 export function buildUpdate(event: string, filePath: string, context: BuildContext) {
-  if (!context.successfulCopy) {
-    copy(context);
-  }
+  return buildUpdateWorker(event, filePath, context, false);
+}
 
+function buildUpdateWorker(event: string, filePath: string, context: BuildContext, fullBuild: boolean) {
   const logger = new Logger(`build update`);
-  return transpileUpdate(event, filePath, context)
+
+  let transpilePromise: Promise<void> = null;
+  if (fullBuild) {
+    transpilePromise = transpile(context);
+  } else {
+    transpilePromise = transpileUpdate(event, filePath, context);
+  }
+  return transpilePromise
     .then(() => {
+      if (fullBuild) {
+        return bundle(context);
+      }
       return bundleUpdate(event, filePath, context);
     }).then(() => {
-      if (event !== 'change' || !context.successfulSass) {
+      if (fullBuild) {
+        return sass(context);
+      } else if (event !== 'change' || !context.successfulSass) {
         // if just the TS file changed, then there's no need to do a sass update
         // however, if a new TS file was added or was deleted, then we should do a sass update
         return sassUpdate(event, filePath, context);

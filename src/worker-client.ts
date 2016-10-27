@@ -84,7 +84,11 @@ export function createWorker(taskModule: string): any {
 
   try {
     const workerModule = join(__dirname, 'worker-process.js');
-    const worker = fork(workerModule);
+    const worker = fork(workerModule, [], {
+      env: {
+        FORCE_COLOR: true
+      }
+    });
 
     Logger.debug(`worker created, taskModule: ${taskModule}, pid: ${worker.pid}`);
 

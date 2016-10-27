@@ -11,11 +11,8 @@ export function copy(context?: BuildContext, configFile?: string) {
 
   const logger = new Logger('copy');
 
-  context.successfulCopy = false;
-
   return copyWorker(context, configFile)
     .then(() => {
-      context.successfulCopy = true;
       logger.finish();
     })
     .catch(err => {
@@ -33,12 +30,15 @@ export function copyUpdate(event: string, filePath: string, context: BuildContex
     // figure out which copy option(s) this one file/directory belongs to
     const copyConfig: CopyConfig = fillConfigDefaults(configFile, taskInfo.defaultConfigFile);
     const fileCopyOptions = findFileCopyOptions(context, copyConfig, filePath);
-
+    console.log('copyOptions: ', fileCopyOptions);
     if (fileCopyOptions.length) {
       const promises = fileCopyOptions.map(copyOptions => {
+
         return copySrcToDest(context, copyOptions.src, copyOptions.dest, copyOptions.filter, true);
       });
-      return Promise.all(promises).then(destFiles => {
+      return Promise.all(promises).then((copySrcToDestResults: CopySrcToDestResult[]) => {
+        printCopyErrorMessages('copy', copySrcToDestResults);
+        const destFiles = copySrcToDestResults.map(copySrcToDestResult => copySrcToDestResult.dest);
         emit(EventType.FileChange, destFiles);
       });
     }
@@ -74,9 +74,18 @@ export function copyWorker(context: BuildContext, configFile: string) {
     return copySrcToDest(context, copyOptions.src, copyOptions.dest, copyOptions.filter, true);
   });
 
-  return Promise.all(promises);
+  return Promise.all(promises).then((copySrcToDestResults: CopySrcToDestResult[]) => {
+    printCopyErrorMessages('copy', copySrcToDestResults);
+  });
 }
 
+function printCopyErrorMessages(prefix: string, copyResults: CopySrcToDestResult[]) {
+   copyResults.forEach(copyResult => {
+    if (!copyResult.success) {
+      Logger.warn(`${prefix}: ${copyResult.errorMessage}`);
+    }
+  });
+}
 
 export function findFileCopyOptions(context: BuildContext, copyConfig: CopyConfig, filePath: string) {
   const copyOptions: CopyOptions[] = [];
@@ -123,7 +132,7 @@ export function findFileCopyOptions(context: BuildContext, copyConfig: CopyConfi
 }
 
 
-function copySrcToDest(context: BuildContext, src: string, dest: string, filter: any, clobber: boolean): Promise<string> {
+function copySrcToDest(context: BuildContext, src: string, dest: string, filter: any, clobber: boolean): Promise<CopySrcToDestResult> {
   return new Promise((resolve, reject) => {
     src = pathResolve(replacePathVars(context, src));
     dest = pathResolve(replacePathVars(context, dest));
@@ -135,19 +144,24 @@ function copySrcToDest(context: BuildContext, src: string, dest: string, filter:
 
     fs.copy(src, dest, opts, (err) => {
       if (err) {
-        const msg = `Error copying "${src}" to "${dest}": ${err}`;
-        Logger.debug(msg);
-
-        if (msg.indexOf('ENOENT') < 0 && msg.indexOf('EEXIST') < 0) {
-          reject(new BuildError(`Error copying "${src}" to "${dest}": ${err}`));
-          return;
+        if (err.message.indexOf('ENOENT') > -1) {
+          resolve({ success: false, src: src, dest: dest, errorMessage: `Error copying "${src}" to "${dest}": File not found`});
+        } else {
+          resolve({ success: false, src: src, dest: dest, errorMessage: `Error copying "${src}" to "${dest}"`});
         }
+        return;
       }
-      resolve(dest);
+      resolve({ success: true, src: src, dest: dest});
     });
   });
 }
 
+interface CopySrcToDestResult {
+  success: boolean;
+  src: string;
+  dest: string;
+  errorMessage: string;
+}
 
 const taskInfo: TaskInfo = {
   fullArgConfig: '--copy',

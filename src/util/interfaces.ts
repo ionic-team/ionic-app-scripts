@@ -10,13 +10,13 @@ export interface BuildContext {
   isProd?: boolean;
   isWatch?: boolean;
   isUpdate?: boolean;
+  fullBuildCompleted?: boolean;
   fileChanged?: string;
   bundler?: string;
   useTranspileCache?: boolean;
   useBundleCache?: boolean;
   useSassCache?: boolean;
   tsFiles?: TsFiles;
-  successfulCopy?: boolean;
   successfulSass?: boolean;
   inlineTemplates?: boolean;
 }
