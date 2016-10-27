@@ -32,7 +32,6 @@ export function webpack(context: BuildContext, configFile: string) {
 export function webpackUpdate(event: string, path: string, context: BuildContext, configFile: string) {
   const logger = new Logger('webpack update');
   const extension = extname(path);
-  console.log(`PATH: ${path}, extension: ${extension}`);
 
   const webpackConfig = getWebpackConfig(context, configFile);
   return Promise.resolve().then(() => {

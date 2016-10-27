@@ -30,7 +30,6 @@ export function copyUpdate(event: string, filePath: string, context: BuildContex
     // figure out which copy option(s) this one file/directory belongs to
     const copyConfig: CopyConfig = fillConfigDefaults(configFile, taskInfo.defaultConfigFile);
     const fileCopyOptions = findFileCopyOptions(context, copyConfig, filePath);
-    console.log('copyOptions: ', fileCopyOptions);
     if (fileCopyOptions.length) {
       const promises = fileCopyOptions.map(copyOptions => {
 
