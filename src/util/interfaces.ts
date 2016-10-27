@@ -19,6 +19,7 @@ export interface BuildContext {
   tsFiles?: TsFiles;
   successfulSass?: boolean;
   inlineTemplates?: boolean;
+  webpackWatch?: any;
 }
 
 

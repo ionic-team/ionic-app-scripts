@@ -36,7 +36,7 @@ export function webpackUpdate(event: string, path: string, context: BuildContext
   return writeFilesToDisk(files, context)
     .then(() => {
       Logger.debug('Wrote updated file to disk');
-      return runWebpackIncrementalBuild(false, webpackConfig);
+      return runWebpackIncrementalBuild(false, context, webpackConfig);
     }).then((stats: any) => {
       Logger.debug('Incremental Build Done');
       return webpackBuildComplete(stats, context, webpackConfig);
@@ -60,7 +60,7 @@ export function webpackWorker(context: BuildContext, configFile: string): Promis
       if (context.isProd) {
         return runWebpackFullBuild(webpackConfig);
       } else {
-        return runWebpackIncrementalBuild(true, webpackConfig);
+        return runWebpackIncrementalBuild(!context.webpackWatch, context, webpackConfig);
       }
     }).then((stats: any) => {
       return webpackBuildComplete(stats, context, webpackConfig);
@@ -106,29 +106,32 @@ function runWebpackFullBuild(config: WebpackConfig) {
   });
 }
 
-function runWebpackIncrementalBuild(initializeWatch: boolean, config: WebpackConfig) {
+function runWebpackIncrementalBuild(initializeWatch: boolean, context: BuildContext, config: WebpackConfig) {
   return new Promise((resolve, reject) => {
     // start listening for events, remove listeners once an event is received
     eventEmitter.on(INCREMENTAL_BUILD_FAILED, (err: Error) => {
+      Logger.debug('Webpack Bundle Update Failed');
       eventEmitter.removeAllListeners();
       reject(new BuildError(err));
     });
 
     eventEmitter.on(INCREMENTAL_BUILD_SUCCESS, (stats: any) => {
+      Logger.debug('Webpack Bundle Updated');
       eventEmitter.removeAllListeners();
       resolve(stats);
     });
 
     if (initializeWatch) {
-      startWebpackWatch(config);
+      startWebpackWatch(context, config);
     }
 
   });
 }
 
-function startWebpackWatch(config: WebpackConfig) {
+function startWebpackWatch(context: BuildContext, config: WebpackConfig) {
+  Logger.debug('Starting Webpack watch');
   const compiler = webpackApi(config);
-  compiler.watch({}, (err: Error, stats: any) => {
+  context.webpackWatch = compiler.watch({}, (err: Error, stats: any) => {
     if (err) {
       eventEmitter.emit(INCREMENTAL_BUILD_FAILED, err);
     } else {
