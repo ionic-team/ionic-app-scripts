@@ -1,9 +1,9 @@
-import { BuildContext, TaskInfo, TsFiles, TsFile } from './util/interfaces';
+import { BuildContext, File, TaskInfo, TsFiles } from './util/interfaces';
 import { BuildError, Logger } from './util/logger';
-import { setModulePathsCache, writeFileAsync } from './util/helpers';
+import { readFileAsync, setModulePathsCache, writeFileAsync } from './util/helpers';
 import { emit, EventType } from './util/events';
 import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars } from './util/config';
-import { basename, dirname, join } from 'path';
+import { basename, dirname, extname, join } from 'path';
 import * as webpackApi from 'webpack';
 import { mkdirs } from 'fs-extra';
 
@@ -31,14 +31,34 @@ export function webpack(context: BuildContext, configFile: string) {
 
 export function webpackUpdate(event: string, path: string, context: BuildContext, configFile: string) {
   const logger = new Logger('webpack update');
-  const files = updateFile(context.fileChanged, context.tsFiles);
+  const extension = extname(path);
+  console.log(`PATH: ${path}, extension: ${extension}`);
+
   const webpackConfig = getWebpackConfig(context, configFile);
-  return writeFilesToDisk(files, context)
-    .then(() => {
-      Logger.debug('Wrote updated file to disk');
+  return Promise.resolve().then(() => {
+    if ( extension === '.ts') {
+      Logger.debug('webpackUpdate: Typescript File Changed');
+      return typescriptFileChanged(path, context.tsFiles);
+    } else {
+      Logger.debug('webpackUpdate: Non-Typescript File Changed');
+      return otherFileChanged(path).then((file: File) => {
+        return [file];
+      });
+    }
+  }).then((files: File[]) => {
+    // transform the paths
+    Logger.debug('webpackUpdate: Transforming paths');
+    const transformedPathFiles = files.map(file => {
+      file.path = transformPath(file.path, context);
+      return file;
+    });
+    Logger.debug('webpackUpdate: Writing Files to tmp');
+    return writeFilesToDisk(transformedPathFiles);
+  }).then(() => {
+      Logger.debug('webpackUpdate: Starting Incremental Build');
       return runWebpackIncrementalBuild(false, context, webpackConfig);
     }).then((stats: any) => {
-      Logger.debug('Incremental Build Done');
+      Logger.debug('webpackUpdate: Incremental Build Done, processing Data');
       return webpackBuildComplete(stats, context, webpackConfig);
     }).then(() => {
       return logger.finish();
@@ -53,8 +73,13 @@ export function webpackWorker(context: BuildContext, configFile: string): Promis
 
   // in order to use watch mode, we need to write the
   // transpiled files to disk, so go ahead and do that
-  let files = createFileList(context.tsFiles);
-  return writeFilesToDisk(files, context)
+  let files = typescriptFilesChanged(context.tsFiles);
+  // transform the paths
+  const transformedPathFiles = files.map(file => {
+    file.path = transformPath(file.path, context);
+    return file;
+  });
+  return writeFilesToDisk(transformedPathFiles)
     .then(() => {
       Logger.debug('Wrote .js files to disk');
       if (context.isProd) {
@@ -155,29 +180,24 @@ export function getOutputDest(context: BuildContext, webpackConfig: WebpackConfi
   return join(webpackConfig.output.path, webpackConfig.output.filename);
 }
 
-function writeFilesToDisk(files: TsFile[], context: BuildContext) {
+
+function writeFilesToDisk(files: File[]) {
   let promises: Promise<any>[] = [];
   for (const file of files) {
-    const filePath = transformPath(file.input, context);
-    promises.push(writeIndividualFile(filePath, file.output, file.map));
+    promises.push(writeIndividualFile(file));
   }
   return Promise.all(promises);
 }
 
-function writeIndividualFile(filePath: string, content: string, sourcemap: string) {
-  return ensureDirectoriesExist(filePath)
+function writeIndividualFile(file: File) {
+  return ensureDirectoriesExist(file.path)
     .then(() => {
-      return Promise.all([
-        writeFileAsync(filePath, content),
-        writeFileAsync(filePath + '.map', sourcemap)
-      ]);
+      return writeFileAsync(file.path, file.content);
     });
 }
 
 function transformPath(originalPath: string, context: BuildContext) {
-  const tmpPath = originalPath.replace(context.srcDir, context.tmpDir);
-  const fileName = basename(tmpPath, '.ts');
-  return join(dirname(tmpPath), fileName + '.js');
+  return originalPath.replace(context.srcDir, context.tmpDir);
 }
 
 function ensureDirectoriesExist(path: string) {
@@ -193,22 +213,29 @@ function ensureDirectoriesExist(path: string) {
   });
 }
 
-function createFileList(tsFiles: TsFiles) {
-  let files: TsFile[] = [];
-  for ( let key in tsFiles ) {
-    let file = tsFiles[key];
-    file.input = key;
-    files.push(file);
+function typescriptFilesChanged(tsFiles: TsFiles) {
+  let files: File[] = [];
+  for (const filePath in tsFiles) {
+    const sourceAndMapFileArray = typescriptFileChanged(filePath, tsFiles);
+    for ( const file of sourceAndMapFileArray) {
+      files.push(file);
+    }
   }
   return files;
 }
 
-function updateFile(fileChangedPath: string, tsFiles: TsFiles) {
-  let files: TsFile[] = [];
-  let file = tsFiles[fileChangedPath];
-  file.input = fileChangedPath;
-  files.push(file);
-  return files;
+function typescriptFileChanged(fileChangedPath: string, tsFiles: TsFiles): File[] {
+  const fileName = basename(fileChangedPath, '.ts');
+  const jsFilePath = join(dirname(fileChangedPath), fileName + '.js');
+  const sourceFile = { path: jsFilePath, content: tsFiles[fileChangedPath].output };
+  const mapFile = { path: jsFilePath + '.map', content: tsFiles[fileChangedPath].map};
+  return [sourceFile, mapFile];
+}
+
+function otherFileChanged(fileChangedPath: string) {
+  return readFileAsync(fileChangedPath).then((content: string) => {
+    return { path: fileChangedPath, content: content};
+  });
 }
 
 const taskInfo: TaskInfo = {

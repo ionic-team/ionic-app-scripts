@@ -55,7 +55,11 @@ export interface TsFile {
   map?: any;
 }
 
-
 export interface TsFiles {
   [sourcePath: string]: TsFile;
+}
+
+export interface File {
+  path: string;
+  content: string;
 }
