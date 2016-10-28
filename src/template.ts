@@ -1,5 +1,5 @@
 import { BuildContext } from './util/interfaces';
-import { BuildError, Logger } from './util/logger';
+import { BuildError, IgnorableError, Logger } from './util/logger';
 import { bundleUpdate, getJsOutputDest } from './bundle';
 import { join, parse, resolve } from 'path';
 import { readFileSync, writeFileSync } from 'fs';
@@ -14,6 +14,9 @@ export function templateUpdate(event: string, filePath: string, context: BuildCo
       logger.finish();
     })
     .catch(err => {
+      if (err instanceof IgnorableError) {
+        throw err;
+      }
       throw logger.fail(err);
     });
 }
@@ -37,6 +40,9 @@ function templateUpdateWorker(event: string, filePath: string, context: BuildCon
       return sassUpdate(event, filePath, context);
     })
     .catch(err => {
+      if (err instanceof IgnorableError) {
+        throw err;
+      }
       throw new BuildError(err);
     });
 }
