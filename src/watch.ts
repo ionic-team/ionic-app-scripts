@@ -1,6 +1,6 @@
 import { build, fullBuildUpdate } from './build';
 import { BuildContext, TaskInfo } from './util/interfaces';
-import { BuildError, Logger } from './util/logger';
+import { BuildError, IgnorableError, Logger } from './util/logger';
 import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars, setIonicEnvironment } from './util/config';
 import { join, normalize } from 'path';
 import * as chalk from 'chalk';
@@ -108,7 +108,9 @@ function startWatcher(index: number, watcher: Watcher, context: BuildContext, wa
           Logger.debug(`watch callback error, id: ${watchCount}, isProd: ${context.isProd}, event: ${event}, path: ${filePath}`);
           Logger.debug(`${err}`);
           watchCount++;
-          taskDone();
+          if (!(err instanceof IgnorableError)) {
+            taskDone();
+          }
         });
     });
 
