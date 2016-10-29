@@ -119,7 +119,7 @@ export class Logger {
 
   fail(err: Error) {
     if (err) {
-      if ( err instanceof IgnorableError) {
+      if (err instanceof IgnorableError) {
         return;
       }
 

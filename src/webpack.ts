@@ -46,7 +46,7 @@ export function webpackUpdate(event: string, path: string, context: BuildContext
 
   const webpackConfig = getWebpackConfig(context, configFile);
   return Promise.resolve().then(() => {
-    if ( extension === '.ts') {
+    if (extension === '.ts') {
       Logger.debug('webpackUpdate: Typescript File Changed');
       return typescriptFileChanged(path, context.tsFiles);
     } else {
@@ -259,7 +259,7 @@ function typescriptFilesChanged(tsFiles: TsFiles) {
   let files: File[] = [];
   for (const filePath in tsFiles) {
     const sourceAndMapFileArray = typescriptFileChanged(filePath, tsFiles);
-    for ( const file of sourceAndMapFileArray) {
+    for (const file of sourceAndMapFileArray) {
       files.push(file);
     }
   }
