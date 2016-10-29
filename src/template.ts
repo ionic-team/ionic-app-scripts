@@ -1,9 +1,11 @@
+import { BUNDLER_WEBPACK } from './util/config';
 import { BuildContext } from './util/interfaces';
 import { BuildError, IgnorableError, Logger } from './util/logger';
 import { bundleUpdate, getJsOutputDest } from './bundle';
-import { join, parse, resolve } from 'path';
-import { readFileSync, writeFileSync } from 'fs';
+import { dirname, extname, join, parse, resolve } from 'path';
+import { readdirSync, readFileSync, writeFileSync } from 'fs';
 import { sassUpdate } from './sass';
+import { buildUpdate } from './build';
 
 
 export function templateUpdate(event: string, filePath: string, context: BuildContext) {
@@ -26,12 +28,19 @@ function templateUpdateWorker(event: string, filePath: string, context: BuildCon
   Logger.debug(`templateUpdate, event: ${event}, path: ${filePath}`);
 
   if (event === 'change') {
-    if (updateBundledJsTemplate(context, filePath)) {
+    if (context.bundler === BUNDLER_WEBPACK) {
+      Logger.debug(`templateUpdate: updating webpack file`);
+      const typescriptFile = getTemplatesTypescriptFile(context, filePath);
+      if (typescriptFile && typescriptFile.length > 0) {
+        return buildUpdate(event, typescriptFile, context);
+      }
+    } else if (updateBundledJsTemplate(context, filePath)) {
       Logger.debug(`templateUpdate, updated js bundle, path: ${filePath}`);
       return Promise.resolve();
     }
   }
 
+  Logger.debug('templateUpdateWorker: Can\'t update template, doing a full rebuild');
   // not sure how it changed, just do a full rebuild without the bundle cache
   context.useBundleCache = false;
   return bundleUpdate(event, filePath, context)
@@ -120,6 +129,53 @@ function updateBundledJsTemplate(context: BuildContext, htmlFilePath: string) {
     Logger.debug(`updateBundledJsTemplate error: ${e}`);
   }
 
+  return false;
+}
+
+function getTemplatesTypescriptFile(context: BuildContext, templatePath: string) {
+  try {
+    const srcDirName = dirname(templatePath);
+    const files = readdirSync(srcDirName);
+    const typescriptFilesNames = files.filter(file => {
+      return extname(file) === '.ts';
+    });
+    for (const fileName of typescriptFilesNames) {
+      const fullPath = join(srcDirName, fileName);
+      const fileContent = readFileSync(fullPath).toString();
+      const isMatch = tryToMatchTemplateUrl(fileContent, fullPath, srcDirName, templatePath);
+      if (isMatch) {
+        return fullPath;
+      }
+    }
+    return null;
+  } catch (ex) {
+    Logger.debug('getTemplatesTypescriptFile: Error occurred - ', ex.message);
+    return null;
+  }
+}
+
+function tryToMatchTemplateUrl(fileContent: string, filePath: string, componentDirPath: string, templateFilePath: string) {
+  let lastMatch: string = null;
+  let match: TemplateUrlMatch;
+
+  while (match = getTemplateMatch(fileContent)) {
+    if (match.component === lastMatch) {
+      // panic! we don't want to melt any machines if there's a bug
+      Logger.debug(`Error matching component: ${match.component}`);
+      return false;
+    }
+    lastMatch = match.component;
+
+    if (!match.templateUrl || match.templateUrl === '') {
+      Logger.error(`Error @Component templateUrl missing in: "${filePath}"`);
+      return false;
+    }
+
+    const templatUrlPath = resolve(join(componentDirPath, match.templateUrl));
+    if (templatUrlPath === templateFilePath) {
+      return true;
+    }
+  }
   return false;
 }
 
