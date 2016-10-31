@@ -35,6 +35,7 @@ module.exports = {
     path: '{{BUILD}}',
     filename: 'main.js'
   },
+  devtool: 'source-map',
 
   resolve: {
     extensions: ['.js', '.json']
