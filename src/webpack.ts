@@ -98,10 +98,10 @@ export function webpackWorker(context: BuildContext, configFile: string): Promis
   return writeFilesToDisk(transformedPathFiles)
     .then(() => {
       Logger.debug('Wrote .js files to disk');
-      if (context.isProd) {
-        return runWebpackFullBuild(webpackConfig);
-      } else {
+      if (context.isWatch) {
         return runWebpackIncrementalBuild(!context.webpackWatch, context, webpackConfig);
+      } else {
+        return runWebpackFullBuild(webpackConfig);
       }
     }).then((stats: any) => {
       return webpackBuildComplete(stats, context, webpackConfig);
