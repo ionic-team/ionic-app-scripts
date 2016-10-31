@@ -20,7 +20,6 @@
     "build-and-test": "npm run build && npm run test",
     "clean": "rimraf ./dist",
     "lint": "tslint -c ./tslint.json --project ./tsconfig.json",
-    "prepublish": "jasmine JASMINE_CONFIG_PATH=src/spec/jasmine.config.json && npm run build",
     "test": "jasmine JASMINE_CONFIG_PATH=src/spec/jasmine.config.json || true",
     "watch": "npm run clean && tsc --watch"
   },
