@@ -1,3 +1,4 @@
+import { emit, EventType } from './util/events';
 import { BUNDLER_WEBPACK } from './util/config';
 import { BuildContext } from './util/interfaces';
 import { BuildError, IgnorableError, Logger } from './util/logger';
@@ -36,6 +37,8 @@ function templateUpdateWorker(event: string, filePath: string, context: BuildCon
       }
     } else if (updateBundledJsTemplate(context, filePath)) {
       Logger.debug(`templateUpdate, updated js bundle, path: ${filePath}`);
+      // technically, the bundle has changed so emit an event saying so
+      emit(EventType.FileChange, getJsOutputDest(context));
       return Promise.resolve();
     }
   }
