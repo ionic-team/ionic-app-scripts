@@ -1,7 +1,7 @@
 // Ionic Dev Server: Server Side Logger
-
+import { BuildContext } from '../util/interfaces';
 import { Diagnostic, Logger, TaskEvent } from '../util/logger';
-import { getConfigValueDefault, hasConfigValue } from '../util/config';
+import { getConfigValue, hasConfigValue } from '../util/config';
 import { on, EventType } from '../util/events';
 import { Server as WebSocketServer } from 'ws';
 
@@ -10,7 +10,7 @@ let wsServer: any;
 const msgToClient: WsMessage[] = [];
 
 
-export function createDevServer() {
+export function createDevServer(context: BuildContext) {
 
   on(EventType.TaskEvent, (taskEvent: TaskEvent) => {
     const msg: WsMessage = {
@@ -31,7 +31,7 @@ export function createDevServer() {
   });
 
   // create web socket server
-  const wss = new WebSocketServer({ port: getWsPort() });
+  const wss = new WebSocketServer({ port: getWsPort(context) });
 
   wss.on('connection', (ws: any) => {
     wsServer = ws;
@@ -115,13 +115,13 @@ function printException(msg: WsMessage) {
 }
 
 
-export function sendClientConsoleLogs() {
-  return hasConfigValue('--consolelogs', '-c', 'ionic_consolelogs', false);
+export function sendClientConsoleLogs(context: BuildContext) {
+  return hasConfigValue(context, '--consolelogs', '-c', 'ionic_consolelogs', false);
 }
 
 
-export function getWsPort() {
-  const port = getConfigValueDefault('--dev-logger-port', null, 'ionic_dev_logger_port', null);
+export function getWsPort(context: BuildContext) {
+  const port = getConfigValue(context, '--dev-logger-port', null, 'ionic_dev_logger_port', null);
   if (port) {
     return parseInt(port, 10);
   }

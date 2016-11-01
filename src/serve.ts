@@ -1,5 +1,5 @@
 import { BuildContext } from './util/interfaces';
-import { generateContext, getConfigValueDefault, hasConfigValue } from './util/config';
+import { generateContext, getConfigValue, hasConfigValue } from './util/config';
 import { Logger } from './util/logger';
 import { join } from 'path';
 import { readFile } from 'fs';
@@ -22,16 +22,16 @@ export function serve(context?: BuildContext) {
 
   return watch(context)
     .then(() => {
-      serverReady();
+      serverReady(context);
     }, () => {
-      serverReady();
+      serverReady(context);
     });
 }
 
 
 export function createDevServer(context: BuildContext) {
-  const port = getHttpServerPort();
-  const host = getHttpServerHost();
+  const port = getHttpServerPort(context);
+  const host = getHttpServerHost(context);
 
   function httpServerListen() {
     httpServer.listen(port, host, undefined, () => {
@@ -39,12 +39,12 @@ export function createDevServer(context: BuildContext) {
     });
   }
 
-  if (liveReload.useLiveReload()) {
+  if (liveReload.useLiveReload(context)) {
     liveReload.createLiveReloadServer(context, host);
   }
 
   if (devLogger.useDevLogger()) {
-    devServer.createDevServer();
+    devServer.createDevServer(context);
   }
 
   if (httpServer) {
@@ -72,10 +72,10 @@ export function createDevServer(context: BuildContext) {
 }
 
 
-function serverReady() {
+function serverReady(context: BuildContext) {
   if (isListening) {
-    const port = getHttpServerPort();
-    const address = getHttpServerHost() || 'localhost';
+    const port = getHttpServerPort(context);
+    const address = getHttpServerHost(context) || 'localhost';
     Logger.info(chalk.green(`dev server running: http://${address}:${port}/`));
   }
 }
@@ -113,12 +113,12 @@ function responseSuccess(context: BuildContext, filePath: string, content: Buffe
   response.writeHead(200, headers);
 
   if (isRootIndexFile(context, filePath)) {
-    if (liveReload.useLiveReload()) {
+    if (liveReload.useLiveReload(context)) {
       content = liveReload.injectLiveReloadScript(content);
     }
 
     if (devLogger.useDevLogger()) {
-      content = devLogger.injectDevLoggerScript(content);
+      content = devLogger.injectDevLoggerScript(context, content);
     }
   }
 
@@ -154,16 +154,16 @@ function response404(filePath: string, request: http.IncomingMessage, response: 
 }
 
 
-function getHttpServerPort() {
-  const port = getConfigValueDefault('--port', '-p', 'ionic_port', null);
+function getHttpServerPort(context: BuildContext) {
+  const port = getConfigValue(context, '--port', '-p', 'ionic_port', null);
   if (port) {
     return parseInt(port, 10);
   }
   return DEV_SERVER_DEFAULT_PORT;
 }
 
-function getHttpServerHost() {
-  const host = getConfigValueDefault('--address', '-h', 'ionic_address', null);
+function getHttpServerHost(context: BuildContext) {
+  const host = getConfigValue(context, '--address', '-h', 'ionic_address', null);
   if (host) {
     return host;
   }
@@ -174,24 +174,24 @@ function isRootIndexFile(context: BuildContext, filePath: string) {
   return (filePath === context.wwwIndex);
 }
 
-function useServerLogs() {
-  return hasConfigValue('--serverlogs', '-s', 'ionic_serverlogs', false);
+function useServerLogs(context: BuildContext) {
+  return hasConfigValue(context, '--serverlogs', '-s', 'ionic_serverlogs', false);
 }
 
-function launchBrowser() {
-  return !hasConfigValue('--nobrowser', '-b', 'ionic_launch_browser', false);
+function launchBrowser(context: BuildContext) {
+  return !hasConfigValue(context, '--nobrowser', '-b', 'ionic_launch_browser', false);
 }
 
-function browserToLaunch() {
-  return getConfigValueDefault('--browser', '-w', 'ionic_browser', null);
+function browserToLaunch(context: BuildContext) {
+  return getConfigValue(context, '--browser', '-w', 'ionic_browser', null);
 }
 
-function browserOption() {
-  return getConfigValueDefault('--browseroption', '-o', 'ionic_browseroption', null);
+function browserOption(context: BuildContext) {
+  return getConfigValue(context, '--browseroption', '-o', 'ionic_browseroption', null);
 }
 
-function launchLab() {
-  return hasConfigValue('--lab', '-l', 'ionic_lab', false);
+function launchLab(context: BuildContext) {
+  return hasConfigValue(context, '--lab', '-l', 'ionic_lab', false);
 }
 
 

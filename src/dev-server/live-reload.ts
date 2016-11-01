@@ -1,5 +1,5 @@
 import { BuildContext } from '../util/interfaces';
-import { getConfigValueDefault, hasConfigValue } from '../util/config';
+import { getConfigValue, hasConfigValue } from '../util/config';
 import { relative } from 'path';
 import * as events from '../util/events';
 import * as tinylr from 'tiny-lr';
@@ -13,11 +13,11 @@ export function createLiveReloadServer(context: BuildContext, host: string) {
     return;
   }
 
-  liveReloadScript = getLiveReloadScript(host);
+  liveReloadScript = getLiveReloadScript(context, host);
 
   liveReloadServer = tinylr();
 
-  liveReloadServer.listen(getLiveReloadServerPort(), host);
+  liveReloadServer.listen(getLiveReloadServerPort(context), host);
 
   events.on(events.EventType.FileChange, (filePath: string) => {
     fileChanged(context, filePath);
@@ -47,8 +47,8 @@ export function injectLiveReloadScript(content: any): any {
 }
 
 
-export function getLiveReloadScript(host: string) {
-  const port = getLiveReloadServerPort();
+export function getLiveReloadScript(context: BuildContext, host: string) {
+  const port = getLiveReloadServerPort(context);
   if (!host) {
     host = 'localhost';
   }
@@ -69,8 +69,8 @@ function fileChanged(context: BuildContext, filePath: string|string[]) {
 }
 
 
-function getLiveReloadServerPort() {
-  const port = getConfigValueDefault('--livereload-port', null, 'ionic_livereload_port', null);
+function getLiveReloadServerPort(context: BuildContext) {
+  const port = getConfigValue(context, '--livereload-port', null, 'ionic_livereload_port', null);
   if (port) {
     return parseInt(port, 10);
   }
@@ -78,8 +78,8 @@ function getLiveReloadServerPort() {
 }
 
 
-export function useLiveReload() {
-  return !hasConfigValue('--nolivereload', '-d', 'ionic_livereload', false);
+export function useLiveReload(context: BuildContext) {
+  return !hasConfigValue(context, '--nolivereload', '-d', 'ionic_livereload', false);
 }
 
 const LIVE_RELOAD_DEFAULT_PORT = 35729;

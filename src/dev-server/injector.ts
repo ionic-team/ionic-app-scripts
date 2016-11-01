@@ -1,3 +1,4 @@
+import { BuildContext } from '../util/interfaces';
 import { join } from 'path';
 import { readFile } from 'fs';
 import { sendClientConsoleLogs, getWsPort } from './dev-server';
@@ -5,10 +6,10 @@ import * as http from 'http';
 import * as mime from 'mime-types';
 
 
-function getConsoleLoggerScript() {
+function getConsoleLoggerScript(context: BuildContext) {
   const ionDevServer = JSON.stringify({
-    sendConsoleLogs: sendClientConsoleLogs(),
-    wsPort: getWsPort()
+    sendConsoleLogs: sendClientConsoleLogs(context),
+    wsPort: getWsPort(context)
   });
 
   return `
@@ -20,7 +21,7 @@ function getConsoleLoggerScript() {
 }
 
 
-export function injectDevLoggerScript(content: any): any {
+export function injectDevLoggerScript(context: BuildContext, content: any): any {
   let contentStr = content.toString();
 
   if (contentStr.indexOf(LOGGER_HEADER) > -1) {
@@ -33,9 +34,9 @@ export function injectDevLoggerScript(content: any): any {
     match = contentStr.match(/<body>(?![\s\S]*<body>)/i);
   }
   if (match) {
-    contentStr = contentStr.replace(match[0], `${match[0]}\n${getConsoleLoggerScript()}`);
+    contentStr = contentStr.replace(match[0], `${match[0]}\n${getConsoleLoggerScript(context)}`);
   } else {
-    contentStr = getConsoleLoggerScript() + contentStr;
+    contentStr = getConsoleLoggerScript(context) + contentStr;
   }
 
   return contentStr;
