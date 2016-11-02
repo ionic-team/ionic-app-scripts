@@ -31,7 +31,7 @@ function getSourcemapLoader() {
   return [
     {
       test: /\.js$/,
-      loader: path.resolve(path.join(process.cwd(), 'node_modules', '@ionic', 'app-scripts', 'dist', 'loaders', 'typescript-sourcemap-loader-memory.js'))
+      loader: path.join(process.env.IONIC_APP_SCRIPTS_DIR, 'dist', 'loaders', 'typescript-sourcemap-loader-memory.js')
     }
   ];
 }
