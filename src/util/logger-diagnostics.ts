@@ -130,11 +130,15 @@ function generateDiagnosticHtml(d: Diagnostic) {
 
   c.push(`<div class="diagnostic type-${d.syntax} ${d.level}-${d.type}">`);
 
+  c.push(`<div class="diagnostic-header">`);
+
   let header = `${d.type} ${d.level}`;
   header = header.charAt(0).toUpperCase() + header.substr(1);
   c.push(`<h2>${escapeHtml(header)}</h2>`);
 
   c.push(`<p data-error-code="${d.type}-${d.code}" class="message-text">${escapeHtml(d.messageText)}</p>`);
+
+  c.push(`</div>`);
 
   c.push(`<div class="file">`);
 
@@ -220,8 +224,14 @@ main {
 }
 
 h2 {
-  font-size: 18px;
   margin: 0;
+  font-size: 18px;
+  color: #222222;
+}
+
+p {
+  margin-top: 8px;
+  color: #666666;
 }
 
 table {
@@ -233,12 +243,20 @@ td, th {
   padding: 0;
 }
 
+.diagnostic {
+  margin-bottom: 40px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+}
+
+.diagnostic-header {
+  padding: 8px 12px 0 12px;
+}
+
 .file {
   position: relative;
   margin-top: 16px;
-  margin-bottom: 16px;
-  border: 1px solid #ddd;
-  border-radius: 3px;
+  border-top: 1px solid #ddd;
 }
 
 .file-header {
@@ -260,10 +278,6 @@ td, th {
   -moz-tab-size: 2;
   -o-tab-size: 2;
   tab-size: 2;
-}
-
-.diagnostic {
-  margin-bottom: 40px;
 }
 
 .blob-num {
@@ -561,8 +575,8 @@ export function getSystemInfo() {
   const systemData: string[] = [];
 
   try {
-    const ionicFramework = '2.0.0';
-    systemData.push(`Ionic Framework: ${ionicFramework}`);
+    // const ionicFramework = '2.0.0';
+    // systemData.push(`Ionic Framework: ${ionicFramework}`);
   } catch (e) {}
 
   return systemData;
