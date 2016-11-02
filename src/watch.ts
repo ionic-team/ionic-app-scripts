@@ -88,7 +88,6 @@ function startWatcher(index: number, watcher: Watcher, context: BuildContext, wa
       Logger.debug(`watch callback start, id: ${watchCount}, isProd: ${context.isProd}, event: ${event}, path: ${filePath}`);
 
       function taskDone() {
-        // TODO - why is this the way it is?
         Logger.newLine();
         Logger.info(chalk.green.bold('watch ready'));
         Logger.newLine();
