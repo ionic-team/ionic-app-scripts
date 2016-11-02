@@ -157,9 +157,10 @@ function isMpegFile(file: string) {
 
 
 const taskInfo: TaskInfo = {
-  fullArgConfig: '--tslint',
-  shortArgConfig: '-i',
-  envConfig: 'ionic_tslint',
+  fullArg: '--tslint',
+  shortArg: '-i',
+  envVar: 'ionic_tslint',
+  packageConfig: 'IONIC_TSLINT',
   defaultConfigFile: '../tslint'
 };
 

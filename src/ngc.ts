@@ -188,9 +188,10 @@ const EXCLUDE_DIRS = ['assets', 'theme'];
 
 
 const taskInfo: TaskInfo = {
-  fullArgConfig: '--ngc',
-  shortArgConfig: '-n',
-  envConfig: 'ionic_ngc',
+  fullArg: '--ngc',
+  shortArg: '-n',
+  envVar: 'IONIC_NGC',
+  packageConfig: 'ionic_ngc',
   defaultConfigFile: 'ngc.config'
 };
 

@@ -7,6 +7,7 @@ import * as chalk from 'chalk';
 
 export class BuildError extends Error {
   hasBeenLogged = false;
+  updatedDiagnostics = false;
 
   constructor(err?: any) {
     super();
@@ -25,6 +26,9 @@ export class BuildError extends Error {
       if (typeof err.hasBeenLogged === 'boolean') {
         this.hasBeenLogged = err.hasBeenLogged;
       }
+      if (typeof err.updatedDiagnostics === 'boolean') {
+        this.updatedDiagnostics = err.updatedDiagnostics;
+      }
     }
   }
 
@@ -33,7 +37,8 @@ export class BuildError extends Error {
       message: this.message,
       name: this.name,
       stack: this.stack,
-      hasBeenLogged: this.hasBeenLogged
+      hasBeenLogged: this.hasBeenLogged,
+      updatedDiagnostics: this.updatedDiagnostics
     };
   }
 }
@@ -229,95 +234,6 @@ export class Logger {
     }
   }
 
-  static printDiagnostic(d: Diagnostic) {
-    if (d.level === 'warn') {
-      Logger.warn(d.header);
-    } else {
-      Logger.error(d.header);
-    }
-
-    Logger.wordWrap([d.messageText]).forEach(m => {
-      console.log(m);
-    });
-    Logger.newLine();
-
-    if (d.lines && d.lines.length) {
-      Logger.removeWhitespaceIndent(d.lines);
-
-      d.lines.forEach(l => {
-        let msg = 'L' + l.lineNumber + ':  ';
-        while (msg.length < Logger.INDENT.length) {
-          msg = ' ' + msg;
-        }
-
-        if (l.errorCharStart > -1) {
-          l.text = Logger.highlightError(l.text, l.errorCharStart, l.errorLength);
-        }
-
-        msg = chalk.dim(msg);
-
-        if (d.syntax === 'js') {
-          msg += Logger.jsSyntaxHighlight(l.text);
-        } else if (d.syntax === 'css') {
-          msg += Logger.cssSyntaxHighlight(l.text, l.errorCharStart);
-        } else {
-          msg += l.text;
-        }
-
-        console.log(msg);
-      });
-
-      Logger.newLine();
-    }
-  }
-
-  static highlightError(errorLine: string, errorCharStart: number, errorLength: number) {
-    let rightSideChars = errorLine.length - errorCharStart + errorLength - 1;
-    while (errorLine.length + Logger.INDENT.length > Logger.MAX_LEN) {
-      if (errorCharStart > (errorLine.length - errorCharStart + errorLength) && errorCharStart > 5) {
-        // larger on left side
-        errorLine = errorLine.substr(1);
-        errorCharStart--;
-
-      } else if (rightSideChars > 1) {
-        // larger on right side
-        errorLine = errorLine.substr(0, errorLine.length - 1);
-        rightSideChars--;
-
-      } else {
-        break;
-      }
-    }
-
-    const lineChars: string[] = [];
-    const lineLength = Math.max(errorLine.length, errorCharStart + errorLength);
-    for (var i = 0; i < lineLength; i++) {
-      var chr = errorLine.charAt(i);
-      if (i >= errorCharStart && i < errorCharStart + errorLength) {
-        chr = chalk.bgRed(chr === '' ? ' ' : chr);
-      }
-      lineChars.push(chr);
-    }
-
-    return lineChars.join('');
-  }
-
-
-  static removeWhitespaceIndent(lines: PrintLine[]) {
-    for (var i = 0; i < 100; i++) {
-      if (!eachLineHasLeadingWhitespace(lines)) {
-        return;
-      }
-      for (var i = 0; i < lines.length; i++) {
-        lines[i].text = lines[i].text.substr(1);
-        lines[i].errorCharStart--;
-        if (!lines[i].text.length) {
-          return;
-        }
-      }
-    }
-  }
-
   static wordWrap(msg: any[]) {
     const output: string[] = [];
 
@@ -391,60 +307,6 @@ export class Logger {
   }
 
 
-  static meaningfulLine(line: string) {
-    if (line) {
-      line = line.trim();
-      if (line.length) {
-        return (MEH_LINES.indexOf(line) < 0);
-      }
-    }
-    return false;
-  }
-
-
-  static jsSyntaxHighlight(text: string) {
-    if (text.trim().startsWith('//')) {
-      return chalk.dim(text);
-    }
-
-    const words = text.split(' ').map(word => {
-      if (JS_KEYWORDS.indexOf(word) > -1) {
-        return chalk.cyan(word);
-      }
-      return word;
-    });
-
-    return words.join(' ');
-  }
-
-
-  static cssSyntaxHighlight(text: string, errorCharStart: number) {
-    let cssProp = true;
-    const safeChars = 'abcdefghijklmnopqrstuvwxyz-_';
-    const notProp = '.#,:}@$[]/*';
-
-    const chars: string[] = [];
-
-    for (var i = 0; i < text.length; i++) {
-      var c = text.charAt(i);
-
-      if (c === ';' || c === '{') {
-        cssProp = true;
-      } else if (notProp.indexOf(c) > -1) {
-        cssProp = false;
-      }
-      if (cssProp && safeChars.indexOf(c.toLowerCase()) > -1) {
-        chars.push(chalk.cyan(c));
-        continue;
-      }
-
-      chars.push(c);
-    }
-
-    return chars.join('');
-  }
-
-
   static formatFileName(rootDir: string, fileName: string) {
     fileName = fileName.replace(rootDir, '');
     if (/\/|\\/.test(fileName.charAt(0))) {
@@ -457,17 +319,14 @@ export class Logger {
   }
 
 
-  static formatHeader(task: string, fileName: string, rootDir: string, startLineNumber: number = null, endLineNumber: number = null) {
-    let header = `${task}: `;
-    fileName = Logger.formatFileName(rootDir, fileName);
+  static formatHeader(type: string, fileName: string, rootDir: string, startLineNumber: number = null, endLineNumber: number = null) {
+    let header = `${type}: ${Logger.formatFileName(rootDir, fileName)}`;
 
     if (startLineNumber !== null && startLineNumber > 0) {
-      header += fileName + ', ';
-
       if (endLineNumber !== null && endLineNumber > startLineNumber) {
-        header += `lines: ${startLineNumber} - ${endLineNumber}`;
+        header += `, lines: ${startLineNumber} - ${endLineNumber}`;
       } else {
-        header += `line: ${startLineNumber}`;
+        header += `, line: ${startLineNumber}`;
       }
     }
 
@@ -482,23 +341,6 @@ export class Logger {
   static INDENT = '            ';
   static MAX_LEN = 120;
 
-}
-
-
-function eachLineHasLeadingWhitespace(lines: PrintLine[]) {
-  if (!lines.length) {
-    return false;
-  }
-  for (var i = 0; i < lines.length; i++) {
-    if (lines[i].text.length < 1) {
-      return false;
-    }
-    var firstChar = lines[i].text.charAt(0);
-    if (firstChar !== ' ' && firstChar !== '\t') {
-      return false;
-    }
-  }
-  return true;
 }
 
 
@@ -523,45 +365,6 @@ export function getAppScriptsVersion() {
 }
 
 
-const JS_KEYWORDS = [
-  'as',
-  'break',
-  'case',
-  'catch',
-  'class',
-  'const',
-  'continue',
-  'debugger',
-  'default',
-  'delete',
-  'do',
-  'else',
-  'export',
-  'extends',
-  'finally',
-  'for',
-  'from',
-  'function',
-  'if',
-  'import',
-  'in',
-  'instanceof',
-  'new',
-  'return',
-  'super',
-  'switch',
-  'this',
-  'throw',
-  'try',
-  'typeof',
-  'var',
-  'void',
-  'while',
-];
-
-const MEH_LINES = [';', ':', '{', '}', '(', ')', '/**', '/*', '*/', '*', '({', '})'];
-
-
 export interface TaskEvent {
   scope: string;
   type: string;
@@ -578,7 +381,8 @@ export interface Diagnostic {
   header: string;
   code: string;
   messageText: string;
-  fileName: string;
+  absFileName: string;
+  relFileName: string;
   lines: PrintLine[];
 }
 

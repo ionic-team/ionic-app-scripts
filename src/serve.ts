@@ -21,7 +21,8 @@ export function serve(context?: BuildContext) {
   const config: ServeConfig = {
     httpPort: getHttpServerPort(context),
     host: getHttpServerHost(context),
-    rootDir: context.wwwDir,
+    wwwDir: context.wwwDir,
+    buildDir: context.buildDir,
     launchBrowser: launchBrowser(context),
     launchLab: launchLab(context),
     browserToLaunch: browserToLaunch(context),
@@ -34,14 +35,17 @@ export function serve(context?: BuildContext) {
     notifyOnConsoleLog: sendClientConsoleLogs(context)
   };
 
-  const HttpServer = createHttpServer(config);
-  const liveReloadServer = createLiveReloadServer(config);
-  const notificationServer = createNotificationServer(config);
+  createHttpServer(config);
+  createLiveReloadServer(config);
+  createNotificationServer(config);
 
   return watch(context)
     .then(() => {
       onReady(config, context);
     }, () => {
+      onReady(config, context);
+    })
+    .catch(() => {
       onReady(config, context);
     });
 }
@@ -59,7 +63,7 @@ function onReady(config: ServeConfig, context: BuildContext) {
 }
 
 function getHttpServerPort(context: BuildContext) {
-  const port = getConfigValue(context, '--port', '-p', 'ionic_port', null);
+  const port = getConfigValue(context, '--port', '-p', 'IONIC_PORT', 'ionic_port', null);
   if (port) {
     return parseInt(port, 10);
   }
@@ -67,7 +71,7 @@ function getHttpServerPort(context: BuildContext) {
 }
 
 function getHttpServerHost(context: BuildContext) {
-  const host = getConfigValue(context, '--address', '-h', 'ionic_address', null);
+  const host = getConfigValue(context, '--address', '-h', 'IONIC_ADDRESS', 'ionic_address', null);
   if (host) {
     return host;
   }
@@ -75,7 +79,7 @@ function getHttpServerHost(context: BuildContext) {
 }
 
 function getLiveReloadServerPort(context: BuildContext) {
-  const port = getConfigValue(context, '--livereload-port', null, 'ionic_livereload_port', null);
+  const port = getConfigValue(context, '--livereload-port', null, 'IONIC_LIVERELOAD_PORT', 'ionic_livereload_port', null);
   if (port) {
     return parseInt(port, 10);
   }
@@ -83,7 +87,7 @@ function getLiveReloadServerPort(context: BuildContext) {
 }
 
 export function getNotificationPort(context: BuildContext) {
-  const port = getConfigValue(context, '--dev-logger-port', null, 'ionic_dev_logger_port', null);
+  const port = getConfigValue(context, '--dev-logger-port', null, 'IONIC_DEV_LOGGER_PORT', 'ionic_dev_logger_port', null);
   if (port) {
     return parseInt(port, 10);
   }
@@ -99,11 +103,11 @@ function launchBrowser(context: BuildContext) {
 }
 
 function browserToLaunch(context: BuildContext) {
-  return getConfigValue(context, '--browser', '-w', 'ionic_browser', null);
+  return getConfigValue(context, '--browser', '-w', 'IONIC_BROWSER', 'ionic_browser', null);
 }
 
 function browserOption(context: BuildContext) {
-  return getConfigValue(context, '--browseroption', '-o', 'ionic_browseroption', null);
+  return getConfigValue(context, '--browseroption', '-o', 'IONIC_BROWSEROPTION', 'ionic_browseroption', null);
 }
 
 function launchLab(context: BuildContext) {
@@ -111,7 +115,7 @@ function launchLab(context: BuildContext) {
 }
 
 function platformOption(context: BuildContext) {
-  return getConfigValue(context, '--platform', '-t', 'ionic_platform_browser', null);
+  return getConfigValue(context, '--platform', '-t', 'IONIC_PLATFORM_BROWSER', 'ionic_platform_browser', null);
 }
 
 function useLiveReload(context: BuildContext) {

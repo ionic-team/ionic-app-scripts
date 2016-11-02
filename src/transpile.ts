@@ -7,7 +7,7 @@ import { inlineTemplate } from './template';
 import { join, normalize, resolve } from 'path';
 import { lintUpdate } from './lint';
 import { readFileSync } from 'fs';
-import { runDiagnostics } from './util/logger-typescript';
+import { runDiagnostics, clearTypeScriptDiagnostics } from './util/logger-typescript';
 import { runWorker } from './worker-client';
 import * as ts from 'typescript';
 
@@ -76,6 +76,8 @@ export function transpileWorker(context: BuildContext, workerConfig: TranspileWo
   // let's do this
   return new Promise((resolve, reject) => {
 
+    clearTypeScriptDiagnostics(context);
+
     // get the tsconfig data
     const tsConfig = getTsConfig(context, workerConfig.configFile);
 
@@ -111,12 +113,15 @@ export function transpileWorker(context: BuildContext, workerConfig: TranspileWo
                           .concat(program.getSemanticDiagnostics())
                           .concat(program.getOptionsDiagnostics());
 
-    const hasDiagnostics = runDiagnostics(context, tsDiagnostics);
+    const diagnostics = runDiagnostics(context, tsDiagnostics);
 
-    if (hasDiagnostics) {
+    if (diagnostics.length) {
       // transpile failed :(
       cachedProgram = cachedTsFiles = null;
-      reject(new BuildError());
+
+      const buildError = new BuildError();
+      buildError.updatedDiagnostics = true;
+      reject(buildError);
 
     } else {
       // transpile success :)
@@ -142,6 +147,8 @@ export function transpileWorker(context: BuildContext, workerConfig: TranspileWo
  * something errors out then it falls back to do the full build.
  */
 function transpileUpdateWorker(event: string, filePath: string, context: BuildContext, workerConfig: TranspileWorkerConfig) {
+  clearTypeScriptDiagnostics(context);
+
   filePath = resolve(filePath);
 
   // let's run tslint on this one file too, but run it in another
@@ -174,13 +181,16 @@ function transpileUpdateWorker(event: string, filePath: string, context: BuildCo
       // transpile this one module
       const transpileOutput = ts.transpileModule(sourceText, transpileOptions);
 
-      const hasDiagnostics = runDiagnostics(context, transpileOutput.diagnostics);
+      const diagnostics = runDiagnostics(context, transpileOutput.diagnostics);
 
-      if (hasDiagnostics) {
+      if (diagnostics.length) {
         // darn, we've got some errors with this transpiling :(
         // but at least we reported the errors like really really fast, so there's that
-        Logger.debug(`transpileUpdateWorker: transpileModule, diagnostics: ${transpileOutput.diagnostics.length}`);
-        return Promise.reject(new BuildError());
+        Logger.debug(`transpileUpdateWorker: transpileModule, diagnostics: ${diagnostics.length}`);
+
+        const buildError = new BuildError();
+        buildError.updatedDiagnostics = true;
+        return Promise.reject(buildError);
 
       } else if (!transpileOutput.outputText) {
         // derp, not sure how there's no output text, just do a full build
@@ -301,10 +311,12 @@ export function getTsConfig(context: BuildContext, tsConfigPath?: string): TsCon
                                 ts.sys, context.rootDir,
                                 {}, tsConfigPath);
 
-    const hasDiagnostics = runDiagnostics(context, parsedConfig.errors);
+    const diagnostics = runDiagnostics(context, parsedConfig.errors);
 
-    if (hasDiagnostics) {
-      throw new BuildError();
+    if (diagnostics.length) {
+      const buildError = new BuildError();
+      buildError.updatedDiagnostics = true;
+      throw buildError;
     }
 
     config = {

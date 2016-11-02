@@ -143,7 +143,7 @@ function webpackBuildComplete(stats: any, context: BuildContext, webpackConfig: 
   // to always bundle to know which modules are used
   setModulePathsCache(context.moduleFiles);
 
-  emit(EventType.FileChange, getOutputDest(context, webpackConfig));
+  emit(EventType.BundleFinished, getOutputDest(context, webpackConfig));
   return Promise.resolve();
 }
 
@@ -281,9 +281,10 @@ function otherFileChanged(fileChangedPath: string) {
 }
 
 const taskInfo: TaskInfo = {
-  fullArgConfig: '--webpack',
-  shortArgConfig: '-w',
-  envConfig: 'ionic_webpack',
+  fullArg: '--webpack',
+  shortArg: '-w',
+  envVar: 'IONIC_WEBPACK',
+  packageConfig: 'ionic_webpack',
   defaultConfigFile: 'webpack.config'
 };
 

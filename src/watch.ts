@@ -153,9 +153,10 @@ export function prepareWatcher(context: BuildContext, watcher: Watcher) {
 
 
 const taskInfo: TaskInfo = {
-  fullArgConfig: '--watch',
-  shortArgConfig: '-w',
-  envConfig: 'ionic_watch',
+  fullArg: '--watch',
+  shortArg: '-w',
+  envVar: 'IONIC_WATCH',
+  packageConfig: 'ionic_watch',
   defaultConfigFile: 'watch.config'
 };
 

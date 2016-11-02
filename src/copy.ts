@@ -163,9 +163,10 @@ interface CopySrcToDestResult {
 }
 
 const taskInfo: TaskInfo = {
-  fullArgConfig: '--copy',
-  shortArgConfig: '-y',
-  envConfig: 'ionic_copy',
+  fullArg: '--copy',
+  shortArg: '-y',
+  envVar: 'IONIC_COPY',
+  packageConfig: 'ionic_copy',
   defaultConfigFile: 'copy.config'
 };
 

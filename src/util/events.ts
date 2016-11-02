@@ -1,4 +1,3 @@
-import { BuildContext } from './interfaces';
 import { EventEmitter } from 'events';
 
 
@@ -16,11 +15,14 @@ export function emit(eventType: string, val?: any) {
 
 
 export const EventType = {
+  BuildFinished: 'BuildFinished',
+  SassFinished: 'SassFinished',
+  BundleFinished: 'BundleFinished',
   FileChange: 'FileChange',
   FileAdd: 'FileAdd',
   FileDelete: 'FileDelete',
   DirectoryAdd: 'DirectoryAdd',
   DirectoryDelete: 'DirectoryDelete',
   TaskEvent: 'TaskEvent',
-  TranspileDiagnostics: 'TranspileDiagnostics'
+  UpdatedDiagnostics: 'UpdatedDiagnostics'
 };

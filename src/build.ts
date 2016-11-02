@@ -3,6 +3,7 @@ import { BuildError, IgnorableError, Logger } from './util/logger';
 import { bundle, bundleUpdate } from './bundle';
 import { clean } from './clean';
 import { copy } from './copy';
+import { emit, EventType } from './util/events';
 import { generateContext } from './util/config';
 import { lint } from './lint';
 import { minifyCss, minifyJs } from './minify';
@@ -20,6 +21,7 @@ export function build(context: BuildContext) {
     .then(() => {
       // congrats, we did it!  (•_•) / ( •_•)>⌐■-■ / (⌐■_■)
       context.fullBuildCompleted = true;
+      emit(EventType.BuildFinished);
       logger.finish();
     })
     .catch(err => {
@@ -142,6 +144,7 @@ function buildUpdateWorker(event: string, filePath: string, context: BuildContex
         return sassUpdate(event, filePath, context);
       }
     }).then(() => {
+      emit(EventType.BuildFinished);
       logger.finish();
     }).catch(err => {
       if (err instanceof IgnorableError) {

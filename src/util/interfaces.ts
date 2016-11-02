@@ -42,9 +42,10 @@ export interface WorkerProcess {
 
 
 export interface TaskInfo {
-  fullArgConfig: string;
-  shortArgConfig: string;
-  envConfig: string;
+  fullArg: string;
+  shortArg: string;
+  envVar: string;
+  packageConfig: string;
   defaultConfigFile: string;
 }
 

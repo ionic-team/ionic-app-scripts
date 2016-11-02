@@ -98,7 +98,7 @@ export function rollupWorker(context: BuildContext, configFile: string): Promise
       })
       .then(() => {
         // clean up any references (overkill yes, but let's play it safe)
-        emit(EventType.FileChange, rollupConfig.dest);
+        emit(EventType.BundleFinished, rollupConfig.dest);
         rollupConfig = rollupConfig.cache = rollupConfig.onwarn = rollupConfig.plugins = null;
 
         resolve();
@@ -165,9 +165,10 @@ const IGNORE_WARNS = [
 
 
 const taskInfo: TaskInfo = {
-  fullArgConfig: '--rollup',
-  shortArgConfig: '-r',
-  envConfig: 'ionic_rollup',
+  fullArg: '--rollup',
+  shortArg: '-r',
+  envVar: 'IONIC_ROLLUP',
+  packageConfig: 'ionic_rollup',
   defaultConfigFile: 'rollup.config'
 };
 

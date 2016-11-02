@@ -2,6 +2,7 @@ import { BuildContext, WorkerProcess, WorkerMessage } from './util/interfaces';
 import { BuildError, Logger } from './util/logger';
 import { fork, ChildProcess } from 'child_process';
 import { join } from 'path';
+import { emit, EventType } from './util/events';
 
 
 export function runWorker(taskModule: string, taskWorker: string, context: BuildContext, workerConfig: any) {
@@ -29,9 +30,19 @@ export function runWorker(taskModule: string, taskWorker: string, context: Build
 
     worker.on('message', (msg: WorkerMessage) => {
       if (msg.error) {
-        reject(new BuildError(msg.error));
+        const buildErrorError = new BuildError(msg.error);
+        if (buildErrorError.updatedDiagnostics) {
+          emit(EventType.UpdatedDiagnostics);
+        }
+        reject(buildErrorError);
+
       } else if (msg.reject) {
-        reject(new BuildError(msg.reject));
+        const buildErrorReject = new BuildError(msg.reject);
+        if (buildErrorReject.updatedDiagnostics) {
+          emit(EventType.UpdatedDiagnostics);
+        }
+        reject(buildErrorReject);
+
       } else {
         resolve(msg.resolve);
       }

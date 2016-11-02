@@ -8,6 +8,7 @@ import { ServeConfig, LOGGER_DIR } from './serve-config';
 import { Logger } from '../util/logger';
 import { promisify } from '../util/promisify';
 import * as proxyMiddleware from 'proxy-middleware';
+import { readDiagnosticsHtmlSync } from '../util/logger-diagnostics';
 import { getProjectJson, IonicProject } from '../util/ionic-project';
 
 const readFilePromise = promisify<Buffer, string>(fs.readFile);
@@ -20,11 +21,11 @@ export function createHttpServer(config: ServeConfig): express.Application {
   const app = express();
   app.set('serveConfig', config);
   app.listen(config.httpPort, config.host, function() {
-    Logger.info(`listening on ${config.httpPort}`);
+    Logger.debug(`listening on ${config.httpPort}`);
   });
 
   app.get('/', serveIndex);
-  app.use('/', express.static(config.rootDir));
+  app.use('/', express.static(config.wwwDir));
   app.use(`/${LOGGER_DIR}`, express.static(path.join(__dirname, '..', '..', 'bin')));
   app.get('/cordova.js', serveCordovaJS);
 
@@ -57,9 +58,10 @@ function setupProxies(app: express.Application) {
  */
 function serveIndex(req: express.Request, res: express.Response)  {
   const config: ServeConfig = req.app.get('serveConfig');
-  let htmlFile = path.join(req.app.get('serveConfig').rootDir, 'index.html');
+  let htmlFile = path.join(config.wwwDir, 'index.html');
+  let diagnosticsHtml = readDiagnosticsHtmlSync(config.buildDir);
 
-  readFilePromise(htmlFile).then((content: Buffer) => {
+  function httpResponse(content: any) {
     if (config.useLiveReload) {
       content = injectLiveReloadScript(content, config.host, config.liveReloadPort);
     }
@@ -70,7 +72,13 @@ function serveIndex(req: express.Request, res: express.Response)  {
     // File found so lets send it back to the response
     res.set('Content-Type', 'text/html');
     res.send(content);
-  });
+  }
+
+  if (diagnosticsHtml) {
+    httpResponse(diagnosticsHtml);
+  } else {
+    readFilePromise(htmlFile).then(httpResponse);
+  }
 }
 
 /**

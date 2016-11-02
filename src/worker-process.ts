@@ -10,6 +10,8 @@ process.on('message', (msg: WorkerMessage) => {
     taskWorker(msg.context, msg.workerConfig)
       .then((val: any) => {
         taskResolve(msg.taskModule, msg.taskWorker, val);
+      }, (val: any) => {
+        taskReject(msg.taskModule, msg.taskWorker, val)
       })
       .catch((err: any) => {
         taskError(msg.taskModule, msg.taskWorker, err);

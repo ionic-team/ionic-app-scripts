@@ -16,18 +16,9 @@ export interface WsMessage {
 export function createNotificationServer(config: ServeConfig) {
   on(EventType.TaskEvent, (taskEvent: TaskEvent) => {
     const msg: WsMessage = {
-      category: 'taskEvent',
+      category: EventType.TaskEvent,
       type: taskEvent.scope,
       data: taskEvent
-    };
-    queueMessageSend(msg);
-  });
-
-  on(EventType.TranspileDiagnostics, (diagnostic: Diagnostic) => {
-    const msg: WsMessage = {
-      category: 'transpileDiagnostics',
-      type: 'typescript',
-      data: diagnostic
     };
     queueMessageSend(msg);
   });

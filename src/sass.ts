@@ -5,7 +5,7 @@ import { emit, EventType } from './util/events';
 import { ensureDirSync, readdirSync, writeFile } from 'fs-extra';
 import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars } from './util/config';
 import { getModulePathsCache } from './util/helpers';
-import { runDiagnostics } from './util/logger-sass';
+import { runDiagnostics, clearSassDiagnostics } from './util/logger-sass';
 import { SassError, render as nodeSassRender, Result } from 'node-sass';
 import * as postcss from 'postcss';
 import * as autoprefixer from 'autoprefixer';
@@ -57,6 +57,8 @@ export function sassWorker(context: BuildContext, configFile: string) {
         return;
       }
     }
+
+    clearSassDiagnostics(context);
 
     const sassConfig: SassConfig = fillConfigDefaults(configFile, taskInfo.defaultConfigFile);
 
@@ -247,10 +249,13 @@ function render(context: BuildContext, sassConfig: SassConfig) {
     }
 
     nodeSassRender(sassConfig, (sassError: SassError, sassResult: Result) => {
-      const hasDiagnostics = runDiagnostics(context, sassError);
-      if (hasDiagnostics) {
+      const diagnostics = runDiagnostics(context, sassError);
+
+      if (diagnostics.length) {
         // sass render error :(
-        reject(new BuildError());
+        const buildError = new BuildError();
+        buildError.updatedDiagnostics = true;
+        reject(buildError);
 
       } else {
         // sass render success :)
@@ -388,7 +393,7 @@ function writeOutput(context: BuildContext, sassConfig: SassConfig, cssOutput: s
         }
 
         // notify a file has changed
-        emit(EventType.FileChange, sassConfig.outFile);
+        emit(EventType.SassFinished, sassConfig.outFile);
 
         // css file all saved
         // note that we're not waiting on the css map to finish saving
@@ -453,9 +458,10 @@ let lastRenderKey: string = null;
 
 
 const taskInfo: TaskInfo = {
-  fullArgConfig: '--sass',
-  shortArgConfig: '-s',
-  envConfig: 'ionic_sass',
+  fullArg: '--sass',
+  shortArg: '-s',
+  envVar: 'IONIC_SASS',
+  packageConfig: 'ionic_sass',
   defaultConfigFile: 'sass.config'
 };
 

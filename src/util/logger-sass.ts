@@ -1,25 +1,27 @@
 import { BuildContext } from './interfaces';
 import { Diagnostic, Logger, PrintLine } from './logger';
-import { objectAssign } from './helpers';
-import { SassError } from 'node-sass';
+import { printDiagnostics, clearDiagnosticsHtmlSync } from './logger-diagnostics';
 import { readFileSync } from 'fs';
+import { SassError } from 'node-sass';
 
 
 export function runDiagnostics(context: BuildContext, sassError: SassError) {
-  const d = loadDiagnostic(context, sassError);
+  const diagnostics = loadDiagnostic(context, sassError);
 
-  if (d) {
-    Logger.printDiagnostic(objectAssign({}, d));
-    return true;
-  }
+  printDiagnostics(context, 'sass', diagnostics);
 
-  return false;
+  return diagnostics;
+}
+
+
+export function clearSassDiagnostics(context: BuildContext) {
+  clearDiagnosticsHtmlSync(context, 'sass');
 }
 
 
 function loadDiagnostic(context: BuildContext, sassError: SassError) {
   if (!sassError) {
-    return null;
+    return [];
   }
 
   const d: Diagnostic = {
@@ -28,18 +30,20 @@ function loadDiagnostic(context: BuildContext, sassError: SassError) {
     type: 'sass',
     header: 'sass error',
     code: sassError.status && sassError.status.toString(),
-    fileName: null,
+    relFileName: null,
+    absFileName: null,
     messageText: sassError.message,
     lines: []
   };
 
   if (sassError.file) {
-    d.fileName = Logger.formatFileName(context.rootDir, sassError.file);
-    d.header = Logger.formatHeader('sass', sassError.file, context.rootDir, sassError.line);
+    d.absFileName = sassError.file;
+    d.relFileName = Logger.formatFileName(context.rootDir, d.absFileName);
+    d.header = Logger.formatHeader('sass', d.absFileName, context.rootDir, sassError.line);
 
     if (sassError.line > -1) {
       try {
-        const srcLines = readFileSync(sassError.file, 'utf8').replace(/\\r/g, '\n').split('\n');
+        const srcLines = readFileSync(d.absFileName, 'utf8').replace(/\\r/g, '\n').split('\n');
 
         const errorLine: PrintLine = {
           lineIndex: sassError.line - 1,
@@ -70,7 +74,7 @@ function loadDiagnostic(context: BuildContext, sassError: SassError) {
 
         d.lines.push(errorLine);
 
-        if (errorLine.lineIndex > 0 && Logger.meaningfulLine(srcLines[errorLine.lineIndex - 1])) {
+        if (errorLine.lineIndex > 0) {
           const previousLine: PrintLine = {
             lineIndex: errorLine.lineIndex - 1,
             lineNumber: errorLine.lineNumber - 1,
@@ -81,7 +85,7 @@ function loadDiagnostic(context: BuildContext, sassError: SassError) {
           d.lines.unshift(previousLine);
         }
 
-        if (errorLine.lineIndex + 1 < srcLines.length && Logger.meaningfulLine(srcLines[errorLine.lineIndex + 1])) {
+        if (errorLine.lineIndex + 1 < srcLines.length) {
           const nextLine: PrintLine = {
             lineIndex: errorLine.lineIndex + 1,
             lineNumber: errorLine.lineNumber + 1,
@@ -99,7 +103,7 @@ function loadDiagnostic(context: BuildContext, sassError: SassError) {
 
   }
 
-  return d;
+  return [d];
 }
 
 const STOP_CHARS = ['', '\n', '\r', '\t', ' ', ':', ';', ',', '{', '}', '.', '#', '@', '!', '[', ']', '(', ')', '&', '+', '~', '^', '*', '$'];
