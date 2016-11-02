@@ -1,15 +1,17 @@
 import { EventEmitter } from 'events';
-
+import { Logger } from './logger';
 
 const emmitter = new EventEmitter();
 
 
 export function on(eventType: string, listener: {(data?: any): void}) {
+  Logger.debug(`An ${eventType} event occurred`);
   return emmitter.on(eventType, listener);
 }
 
 
 export function emit(eventType: string, val?: any) {
+  Logger.debug(`Emitting event ${eventType}`);
   return emmitter.emit(eventType, val);
 }
 
