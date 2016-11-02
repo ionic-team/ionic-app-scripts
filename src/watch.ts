@@ -89,9 +89,9 @@ function startWatcher(index: number, watcher: Watcher, context: BuildContext, wa
 
       function taskDone() {
         // TODO - why is this the way it is?
-        console.log('');
+        Logger.newLine();
         Logger.info(chalk.green.bold('watch ready'));
-        console.log('');
+        Logger.newLine();
       }
 
       const callbackToExecute = function(event: string, filePath: string, context: BuildContext, watcher: Watcher) {
