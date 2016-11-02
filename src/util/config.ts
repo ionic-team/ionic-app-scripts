@@ -131,37 +131,47 @@ export function bundlerStrategy(context: BuildContext): string {
     return BUNDLER_ROLLUP;
   }
 
-  // 2) User provided a rollup config env var
+  // 2) User provided both a rollup config and webpack config in package.json config
+  val = getPackageJsonConfig(context, 'ionic_rollup');
+  const webpackVal = getPackageJsonConfig(context, 'ionic_webpack');
+  if (val && webpackVal) {
+    let bundler = getPackageJsonConfig(context, 'ionic_bundler');
+    if (isValidBundler(bundler)) {
+      return bundler;
+    }
+  }
+
+  // 3) User provided a rollup config env var
   val = getProcessEnvVar('ionic_rollup');
   if (val) {
     return BUNDLER_ROLLUP;
   }
 
-  // 3) User provided a rollup config in package.json config
+  // 4) User provided a rollup config in package.json config
   val = getPackageJsonConfig(context, 'ionic_rollup');
   if (val) {
     return BUNDLER_ROLLUP;
   }
 
-  // 4) User set bundler through full arg
+  // 5) User set bundler through full arg
   val = getArgValue('--bundler', null);
   if (isValidBundler(val)) {
     return val;
   }
 
-  // 5) User set bundler through package.json config
+  // 6) User set bundler through package.json config
   val = getPackageJsonConfig(context, 'ionic_bundler');
   if (isValidBundler(val)) {
     return val;
   }
 
-  // 6) User set to use rollup at the bundler
+  // 7) User set to use rollup at the bundler
   val = getProcessEnvVar('ionic_bundler');
   if (isValidBundler(val)) {
     return val;
   }
 
-  // 6) Default to use webpack
+  // 8) Default to use webpack
   return BUNDLER_WEBPACK;
 }
 
