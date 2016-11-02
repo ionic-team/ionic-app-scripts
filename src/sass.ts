@@ -255,6 +255,7 @@ function render(context: BuildContext, sassConfig: SassConfig) {
         // sass render error :(
         const buildError = new BuildError();
         buildError.updatedDiagnostics = true;
+        emit(EventType.UpdatedDiagnostics);
         reject(buildError);
 
       } else {

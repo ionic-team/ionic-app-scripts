@@ -32,6 +32,11 @@ export function endsWith(str: string, tail: string) {
 }
 
 
+export function titleCase(str: string) {
+  return str.charAt(0).toUpperCase() + str.substr(1);
+}
+
+
 export function writeFileAsync(filePath: string, content: string): Promise<any> {
   return new Promise((resolve, reject) => {
     writeFile(filePath, content, (err) => {

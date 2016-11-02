@@ -2,7 +2,7 @@ import { BuildContext } from './interfaces';
 import { Diagnostic, Logger, PrintLine } from './logger';
 import { join } from 'path';
 import { readFileSync, writeFileSync, unlinkSync } from 'fs';
-import { LOGGER_DIR } from '../dev-server/serve-config';
+import { titleCase } from './helpers';
 import * as chalk from 'chalk';
 
 
@@ -132,8 +132,7 @@ function generateDiagnosticHtml(d: Diagnostic) {
 
   c.push(`<div class="diagnostic-header">`);
 
-  let header = `${d.type} ${d.level}`;
-  header = header.charAt(0).toUpperCase() + header.substr(1);
+  const header = `${titleCase(d.type)} ${titleCase(d.level)}`;
   c.push(`<h2>${escapeHtml(header)}</h2>`);
 
   c.push(`<p data-error-code="${d.type}-${d.code}" class="message-text">${escapeHtml(d.messageText)}</p>`);
