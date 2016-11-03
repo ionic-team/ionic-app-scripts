@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+import { run } from '../src/index';
 
 if (process.argv.length > 2) {
 
@@ -12,11 +12,11 @@ if (process.argv.length > 2) {
         }
       }
     } catch (e) {
-      console.log(e)
+      console.log(e);
     }
   }
 
-  require('../dist/rolled/index').run(process.argv[2]);
+  run(process.argv[2]);
 
 } else {
   console.error('Missing ionic app script task name');

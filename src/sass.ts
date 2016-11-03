@@ -7,8 +7,8 @@ import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars
 import { getModulePathsCache } from './util/helpers';
 import { runDiagnostics } from './util/logger-sass';
 import { SassError, render as nodeSassRender, Result } from 'node-sass';
-import * as postcss from 'postcss';
-import * as autoprefixer from 'autoprefixer';
+import postcss from 'postcss';
+import autoprefixer from 'autoprefixer';
 
 
 export function sass(context?: BuildContext, configFile?: string) {

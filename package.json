@@ -67,6 +67,9 @@
     "jasmine": "2.5.2",
     "mock-fs": "^3.11.0",
     "rimraf": "^2.5.4",
+    "rollup-plugin-json": "^2.0.2",
+    "rollup-plugin-node-builtins": "^2.0.0",
+    "rollup-plugin-typescript": "^0.8.1",
     "tslint": "3.15.1",
     "tslint-ionic-rules": "0.0.5"
   },
