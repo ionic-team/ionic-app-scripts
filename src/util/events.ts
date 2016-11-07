@@ -28,6 +28,5 @@ export const EventType = {
   TaskEvent: 'TaskEvent',
   UpdatedDiagnostics: 'UpdatedDiagnostics',
 
-  WebpackFilesChanged: 'DanFileChanged',
-  DanFileDeleted: 'DanFileDeleted'
+  WebpackFilesChanged: 'WebpackFilesChanged'
 };
