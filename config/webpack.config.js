@@ -49,7 +49,7 @@ module.exports = {
     path: '{{BUILD}}',
     filename: 'main.js'
   },
-  devtool: 'eval',
+  devtool: process.env.IONIC_SOURCE_MAP,
 
   resolve: {
     extensions: ['.js', '.ts', '.json']

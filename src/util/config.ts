@@ -44,6 +44,9 @@ export function generateContext(context?: BuildContext): BuildContext {
 
   setProcessEnvVar(ENV_VAR_APP_SCRIPTS_DIR, join(__dirname, '..', '..'));
 
+  const sourceMapValue = getConfigValue(context, '--sourceMap', null, ENV_VAR_SOURCE_MAP, ENV_VAR_SOURCE_MAP.toLowerCase(), 'eval');
+  setProcessEnvVar(ENV_VAR_SOURCE_MAP, sourceMapValue);
+
   if (!isValidBundler(context.bundler)) {
     context.bundler = bundlerStrategy(context);
   }
@@ -386,6 +389,7 @@ const ENV_VAR_SRC_DIR = 'IONIC_SRC_DIR';
 const ENV_VAR_WWW_DIR = 'IONIC_WWW_DIR';
 const ENV_VAR_BUILD_DIR = 'IONIC_BUILD_DIR';
 const ENV_VAR_APP_SCRIPTS_DIR = 'IONIC_APP_SCRIPTS_DIR';
+const ENV_VAR_SOURCE_MAP = 'IONIC_SOURCE_MAP';
 
 export const BUNDLER_ROLLUP = 'rollup';
 export const BUNDLER_WEBPACK = 'webpack';
