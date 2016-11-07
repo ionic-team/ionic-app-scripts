@@ -2,6 +2,7 @@ import { accessSync, readJSONSync, statSync } from 'fs-extra';
 import { BuildContext, TaskInfo } from './interfaces';
 import { join, resolve } from 'path';
 import { objectAssign } from './helpers';
+import { FileCache } from './file-cache';
 
 
 /**
@@ -21,6 +22,7 @@ import { objectAssign } from './helpers';
 export function generateContext(context?: BuildContext): BuildContext {
   if (!context) {
     context = {};
+    context.fileCache = new FileCache();
   }
 
   context.rootDir = resolve(context.rootDir || getConfigValue(context, '--rootDir', null, ENV_VAR_ROOT_DIR, ENV_VAR_ROOT_DIR.toLowerCase(), processCwd));

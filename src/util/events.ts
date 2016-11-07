@@ -26,5 +26,8 @@ export const EventType = {
   DirectoryAdd: 'DirectoryAdd',
   DirectoryDelete: 'DirectoryDelete',
   TaskEvent: 'TaskEvent',
-  UpdatedDiagnostics: 'UpdatedDiagnostics'
+  UpdatedDiagnostics: 'UpdatedDiagnostics',
+
+  WebpackFilesChanged: 'DanFileChanged',
+  DanFileDeleted: 'DanFileDeleted'
 };
