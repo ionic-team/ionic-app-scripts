@@ -4,7 +4,6 @@ import commonjs from 'rollup-plugin-commonjs';
 import json from 'rollup-plugin-json';
 
 export default {
-	entry: 'bin/ionic-app-scripts.ts',
 	plugins: [
     typescript({
       typescript: require('typescript')
@@ -19,17 +18,20 @@ export default {
     }),
     commonjs({
       namedExports: {
-        'node_modules/fs-extra/lib/index.js': [
+        fs: [
+          'realpath', 'default'
+        ],
+        'fs-extra': [
           'readJSONSync', 'statSync', 'accessSync', 'writeFile', 'readFile', 'outputJson', 'readJsonSync',
           'mkdirs', 'emptyDirSync', 'createProgram', 'readFileSync', 'outputJsonSync', 'copy', 'readdirSync',
           'ensureDirSync', 'remove'
         ],
-        'node_modules/minimatch/minimatch.js': [
+        minimatch: [
           'Minimatch'
         ],
-        'node_modules/tslint/lib/tslint.js': [
+        tslint: [
           'createProgram', 'getFileNames', 'findConfiguration'
-        ],
+        ], 
         chalk: [ 'red', 'cyan', 'grey', 'dim', 'green', 'yellow', 'bgRed' ] 
       }
     }),
@@ -37,6 +39,7 @@ export default {
 	targets: [
 		{ dest: 'dist/bundle.js', format: 'cjs' }
   ],
+  entry: 'bin/ionic-app-scripts.ts',
   moduleName: 'ionic-app-scripts',
-	sourceMap: true
+	sourceMap: false
 };

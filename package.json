@@ -64,6 +64,7 @@
     "@types/uglify-js": "2.0.27",
     "@types/webpack": "^1.12.35",
     "@types/ws": "0.0.34",
+    "awesome-typescript-loader": "^2.2.4",
     "jasmine": "2.5.2",
     "mock-fs": "^3.11.0",
     "rimraf": "^2.5.4",
