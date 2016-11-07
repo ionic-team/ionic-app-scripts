@@ -1,3 +1,13 @@
+<a name="0.0.41"></a>
+## [0.0.41](https://github.com/driftyco/ionic-app-scripts/compare/v0.0.40...v0.0.41) (2016-11-07)
+
+
+### Bug Fixes
+
+* **webpack:** use source-maps instead of eval for prod builds ([fdd86be](https://github.com/driftyco/ionic-app-scripts/commit/fdd86be))
+
+
+
 <a name="0.0.40"></a>
 ## 0.0.40 (2016-11-07)
 
