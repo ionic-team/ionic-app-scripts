@@ -43,13 +43,22 @@ function getSourcemapLoader() {
   ];
 }
 
+function getDevtool() {
+  if (process.env.IONIC_ENV === 'prod') {
+    // for now, just force source-map for prod builds
+    return 'source-map';
+  }
+
+  return process.env.IONIC_SOURCE_MAP;
+}
+
 module.exports = {
   entry: getEntryPoint(),
   output: {
     path: '{{BUILD}}',
     filename: 'main.js'
   },
-  devtool: process.env.IONIC_SOURCE_MAP,
+  devtool: getDevtool(),
 
   resolve: {
     extensions: ['.js', '.ts', '.json']
