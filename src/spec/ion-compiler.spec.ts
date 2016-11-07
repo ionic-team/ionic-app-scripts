@@ -35,7 +35,6 @@ describe('ion-compiler', () => {
       // arrange
       let context: BuildContext = {};
       context.fileCache = new FileCache();
-      context.fileCache.put(importer, null);
 
       // act
       const result = resolveId('importee', importer, context);
@@ -44,11 +43,30 @@ describe('ion-compiler', () => {
       expect(result).toEqual(null);
     });
 
-    it('should return null when importer content lacks output property', () => {
+    it('should return null when importer content is null', () => {
       // arrange
       let context: BuildContext = {};
       context.fileCache = new FileCache();
-      context.fileCache.put(importer, null);
+      context.fileCache.put(importer, {
+        path: importer,
+        content: null
+      });
+
+      // act
+      const result = resolveId('importee', importer, context);
+
+      // assert
+      expect(result).toEqual(null);
+    });
+
+    it('should return null when importer content is empty', () => {
+      // arrange
+      let context: BuildContext = {};
+      context.fileCache = new FileCache();
+      context.fileCache.put(importer, {
+        path: importer,
+        content: ''
+      });
 
       // act
       const result = resolveId('importee', importer, context);
