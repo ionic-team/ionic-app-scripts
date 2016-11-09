@@ -7,23 +7,30 @@ To use this version of `@ionic/app-scripts`, follow these steps to upgrade:
 1. Install the latest version of the ionic cli
 
   ```
-    npm install ionic@latest
+    npm install ionic@latest -g
   ```
 
   Note: sudo may be required depending on your workstation set-up
 
 2. Update the project's `package.json` file's `script` section to look like this:
 
-```
-...
-"scripts" : {
-  "ionic:build": "ionic-app-scripts build",
-  "ionic:serve": "ionic-app-scripts serve"
-}
-...
-```
+  ```
+  ...
+  "scripts" : {
+    "ionic:build": "ionic-app-scripts build",
+    "ionic:serve": "ionic-app-scripts serve"
+  }
+  ...
+  ```
 
-Note: This is removing several deprecated Ionic scripts. If you have any of your own custom scripts, don't remove them!
+  Note: This is removing several deprecated Ionic scripts. If you have any of your own custom scripts, don't remove them.
+
+
+3. Install the latest version of `@ionic/app-scripts`
+
+  ```
+  npm install @ionic/app-scripts@latest --save-dev
+  ```
 
 ### Bug Fixes
 
