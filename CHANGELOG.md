@@ -10,7 +10,7 @@ To use this version of `@ionic/app-scripts`, follow these steps to upgrade:
     npm install ionic@latest
   ```
 
-  Note: sudo may be required dependending on your workstation set-up
+  Note: sudo may be required depending on your workstation set-up
 
 2. Update the project's `package.json` file's `script` section to look like this:
 
