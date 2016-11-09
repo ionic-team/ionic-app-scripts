@@ -180,7 +180,7 @@ Example NPM Script:
 
 ## Contributing
 
-We welcome any PRs, issues, and feedback! Please be respectful and follow the [Code of Conduct]().
+We welcome any PRs, issues, and feedback! Please be respectful and follow the [Code of Conduct](https://github.com/driftyco/ionic/blob/master/CODE_OF_CONDUCT.md).
 
 ### Publish a release
 
