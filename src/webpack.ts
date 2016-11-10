@@ -228,7 +228,7 @@ const taskInfo: TaskInfo = {
   shortArg: '-w',
   envVar: 'IONIC_WEBPACK',
   packageConfig: 'ionic_webpack',
-  defaultConfig: require('../config/webpack.config.js')
+  defaultConfig: require('./util/commonjs-loader')('../../config/webpack.config.js')
 };
 
 

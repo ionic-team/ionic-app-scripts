@@ -164,7 +164,7 @@ const taskInfo: TaskInfo = {
   shortArg: '-r',
   envVar: 'IONIC_ROLLUP',
   packageConfig: 'ionic_rollup',
-  defaultConfig: require('../config/rollup.config.js')
+  defaultConfig: require('./util/commonjs-loader')('../../config/rollup.config.js')
 };
 
 

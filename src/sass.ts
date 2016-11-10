@@ -431,7 +431,7 @@ const taskInfo: TaskInfo = {
   shortArg: '-s',
   envVar: 'IONIC_SASS',
   packageConfig: 'ionic_sass',
-  defaultConfig: require('../config/sass.config.js')
+  defaultConfig: require('./util/commonjs-loader')('../../config/sass.config.js')
 };
 
 

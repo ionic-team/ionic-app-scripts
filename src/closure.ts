@@ -39,7 +39,7 @@ const taskInfo: TaskInfo = {
   shortArg: '-l',
   envVar: 'IONIC_CLOSURE',
   packageConfig: 'ionic_closure',
-  defaultConfig: require('../config/closure.config.js')
+  defaultConfig: require('./util/commonjs-loader')('../../config/closure.config.js')
 };
 
 

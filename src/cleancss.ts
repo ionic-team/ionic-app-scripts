@@ -62,7 +62,7 @@ const taskInfo: TaskInfo = {
   shortArg: '-e',
   envVar: 'IONIC_CLEANCSS',
   packageConfig: 'ionic_cleancss',
-  defaultConfig: require('../config/cleancss.config.js')
+  defaultConfig: require('./util/commonjs-loader')('../../config/cleancss.config.js')
 };
 
 

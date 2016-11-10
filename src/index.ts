@@ -16,6 +16,7 @@ export * from './util/interfaces';
 
 import { getAppScriptsVersion } from './util/helpers';
 import { Logger } from './util/logger';
+import * as tasks from './tasks';
 
 
 export function run(task: string) {

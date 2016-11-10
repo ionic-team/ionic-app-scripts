@@ -192,7 +192,7 @@ const taskInfo: TaskInfo = {
   shortArg: '-n',
   envVar: 'IONIC_NGC',
   packageConfig: 'ionic_ngc',
-  defaultConfig: require('../config/ngc.config.js')
+  defaultConfig: require('./util/commonjs-loader')('../../config/ngc.config.js')
 };
 
 

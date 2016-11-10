@@ -167,7 +167,7 @@ const taskInfo: TaskInfo = {
   shortArg: '-y',
   envVar: 'IONIC_COPY',
   packageConfig: 'ionic_copy',
-  defaultConfig: require('../config/copy.config.js')
+  defaultConfig: require('./util/commonjs-loader')('../../config/copy.config.js')
 };
 
 

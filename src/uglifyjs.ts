@@ -65,7 +65,7 @@ const taskInfo: TaskInfo = {
   shortArg: '-u',
   envVar: 'IONIC_UGLIFYJS',
   packageConfig: 'ionic_uglifyjs',
-  defaultConfig: require('../config/uglifyjs.config.js')
+  defaultConfig: require('./util/commonjs-loader')('../../config/uglifyjs.config.js')
 };
 
 

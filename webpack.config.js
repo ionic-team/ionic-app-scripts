@@ -3,9 +3,12 @@ var path = require('path');
 var fs = require('fs');
 var ForkCheckerPlugin = require('awesome-typescript-loader').ForkCheckerPlugin;
 var packageJSON = require('./package.json');
+var configFiles = fs.readdirSync('./bin')
+  .filter(file => file.indexOf('.') !== 0)
+  .map(file => './bin/' + file);
 
 var nodeModules = Object.keys(packageJSON.dependencies)
-  .reduce(function(all, mod) {
+  .reduce((all, mod) => {
     all[mod] = 'commonjs ' + mod;
     return all;
   }, {});

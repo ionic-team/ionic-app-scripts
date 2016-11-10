@@ -265,7 +265,7 @@ const taskInfo: TaskInfo = {
   shortArg: null,
   envVar: 'IONIC_WATCH',
   packageConfig: 'ionic_watch',
-  defaultConfig: require('../config/watch.config.js')
+  defaultConfig: require('./util/commonjs-loader')('../../config/watch.config.js')
 };
 
 
