@@ -83,8 +83,8 @@ export function createWorker(taskModule: string): any {
   }
 
   try {
-    const workerModule = join(__dirname, 'worker-process.js');
-    const worker = fork(workerModule, [], {
+    const workerPath = join(__dirname, '..', 'dist', 'worker-process.js');
+    const worker = fork(workerPath, [], {
       env: {
         FORCE_COLOR: true
       }

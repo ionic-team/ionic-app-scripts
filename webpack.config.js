@@ -3,25 +3,31 @@ var path = require('path');
 var fs = require('fs');
 var ForkCheckerPlugin = require('awesome-typescript-loader').ForkCheckerPlugin;
 
-var nodeModules = {};
-fs.readdirSync('node_modules')
-  .filter(function(x) {
-    return ['.bin'].indexOf(x) === -1;
-  })
-  .forEach(function(mod) {
-    nodeModules[mod] = 'commonjs ' + mod;
-  });
+var nodeModules = [
+  'typescript', 'tslint', 'webpack', 'rollup', 'node-sass', 'fsevents', 'fs-extra', 'uglify-js',
+  'rollup-plugin-node-resolve', 'rollup-plugin-commonjs', 'rollup-plugin-node-globals', 'rollup-plugin-node-builtins',
+  'rollup-plugin-json', 'tiny-lr'
+]
+  .reduce(function(all, mod) {
+    all[mod] = 'commonjs ' + mod;
+    return all;
+  }, {});
 
 module.exports = {
   entry: {
-    main: './bin/ionic-app-scripts.ts'
+    main: './src/index.ts',
+    'worker-process': './src/worker-process.ts'
   },
 
   module: {
     loaders: [
       {
         test: /\.ts$/,
-        loaders: ['awesome-typescript-loader'],
+        loaders: ['awesome-typescript-loader']
+      },
+      {
+        test: /\.json$/,
+        loaders: ['json-loader']
       }
     ]
   },
@@ -39,10 +45,15 @@ module.exports = {
   target: 'node',
 
   output: {
-    path: path.join(__dirname, 'build'),
-    filename: '[name].js'
+    path: path.join(__dirname, 'dist'),
+    filename: '[name].js',
+    libraryTarget: 'commonjs'
   },
 
   externals: nodeModules,
-  devtool: 'sourcemap'
+  devtool: 'sourcemap',
+  node: {
+    __dirname: false,
+    __filename: false
+  }
 };

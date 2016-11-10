@@ -1,8 +1,8 @@
-var fullBuildUpdate = require('../dist/build').fullBuildUpdate;
-var buildUpdate = require('../dist/build').buildUpdate;
-var templateUpdate = require('../dist/template').templateUpdate;
-var copyUpdate = require('../dist/copy').copyUpdate;
-var sassUpdate = require('../dist/sass').sassUpdate;
+var fullBuildUpdate = require('../src/build').fullBuildUpdate;
+var buildUpdate = require('../src/build').buildUpdate;
+var templateUpdate = require('../src/template').templateUpdate;
+var copyUpdate = require('../src/copy').copyUpdate;
+var sassUpdate = require('../src/sass').sassUpdate;
 var copyConfig = require('./copy.config').include;
 
 

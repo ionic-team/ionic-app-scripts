@@ -45,7 +45,7 @@ export interface TaskInfo {
   fullArgConfig: string;
   shortArgConfig: string;
   envConfig: string;
-  defaultConfigFile: string;
+  defaultConfig: any;
 }
 
 export interface File {

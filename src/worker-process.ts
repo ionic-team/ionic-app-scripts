@@ -1,11 +1,11 @@
 import { BuildError, Logger } from './util/logger';
 import { WorkerMessage } from './util/interfaces';
+import * as wrkrs from './workers';
 
 
 process.on('message', (msg: WorkerMessage) => {
   try {
-    const modulePath = `./${msg.taskModule}`;
-    const taskWorker = require(modulePath)[msg.taskWorker];
+    const taskWorker: Function = (<any>wrkrs)[msg.taskWorker];
 
     taskWorker(msg.context, msg.workerConfig)
       .then((val: any) => {

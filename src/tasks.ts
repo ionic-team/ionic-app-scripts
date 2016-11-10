@@ -1,0 +1,16 @@
+export { build } from './build';
+export { bundle } from './bundle';
+export { clean } from './clean';
+export { cleancss } from './cleancss';
+export { closure } from './closure';
+export { copy } from './copy';
+export { lint } from './lint';
+export { minify } from './minify';
+export { ngc } from './ngc';
+export { rollup } from './rollup';
+export { sass } from './sass';
+export { serve } from './serve';
+export { transpile } from './transpile';
+export { uglifyjs } from './uglifyjs';
+export { watch } from './watch';
+export { webpack } from './webpack';

@@ -160,7 +160,7 @@ const taskInfo: TaskInfo = {
   fullArgConfig: '--tslint',
   shortArgConfig: '-i',
   envConfig: 'ionic_tslint',
-  defaultConfigFile: '../tslint'
+  defaultConfig: require('../tslint.json')
 };
 
 export interface LintWorkerConfig {

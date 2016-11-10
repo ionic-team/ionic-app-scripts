@@ -25,7 +25,7 @@ export function createHttpServer(config: ServeConfig): express.Application {
 
   app.get('/', serveIndex);
   app.use('/', express.static(config.rootDir));
-  app.use(`/${LOGGER_DIR}`, express.static(path.join(__dirname, '..', '..', 'bin')));
+  app.use(`/${LOGGER_DIR}`, express.static(path.join(__dirname, '..', 'bin')));
   app.get('/cordova.js', serveCordovaJS);
 
   if (config.useProxy) {

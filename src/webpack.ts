@@ -225,7 +225,7 @@ function startWebpackWatch(context: BuildContext, config: WebpackConfig) {
 export function getWebpackConfig(context: BuildContext, configFile: string): WebpackConfig {
   configFile = getUserConfigFile(context, taskInfo, configFile);
 
-  let webpackConfig: WebpackConfig = fillConfigDefaults(configFile, taskInfo.defaultConfigFile);
+  let webpackConfig: WebpackConfig = fillConfigDefaults(configFile, taskInfo.defaultConfig);
   webpackConfig.entry = replacePathVars(context, webpackConfig.entry);
   webpackConfig.output.path = replacePathVars(context, webpackConfig.output.path);
 
@@ -284,7 +284,7 @@ const taskInfo: TaskInfo = {
   fullArgConfig: '--webpack',
   shortArgConfig: '-w',
   envConfig: 'ionic_webpack',
-  defaultConfigFile: 'webpack.config'
+  defaultConfig: require('../config/webpack.config.js')
 };
 
 

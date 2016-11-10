@@ -58,7 +58,7 @@ export function sassWorker(context: BuildContext, configFile: string) {
       }
     }
 
-    const sassConfig: SassConfig = fillConfigDefaults(configFile, taskInfo.defaultConfigFile);
+    const sassConfig: SassConfig = fillConfigDefaults(configFile, taskInfo.defaultConfig);
 
     // where the final css output file is saved
     if (!sassConfig.outFile) {
@@ -456,7 +456,7 @@ const taskInfo: TaskInfo = {
   fullArgConfig: '--sass',
   shortArgConfig: '-s',
   envConfig: 'ionic_sass',
-  defaultConfigFile: 'sass.config'
+  defaultConfig: require('../config/sass.config.js')
 };
 
 

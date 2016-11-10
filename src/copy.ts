@@ -28,7 +28,7 @@ export function copyUpdate(event: string, filePath: string, context: BuildContex
 
   if (event === 'change' || event === 'add' || event === 'addDir') {
     // figure out which copy option(s) this one file/directory belongs to
-    const copyConfig: CopyConfig = fillConfigDefaults(configFile, taskInfo.defaultConfigFile);
+    const copyConfig: CopyConfig = fillConfigDefaults(configFile, taskInfo.defaultConfig);
     const fileCopyOptions = findFileCopyOptions(context, copyConfig, filePath);
     if (fileCopyOptions.length) {
       const promises = fileCopyOptions.map(copyOptions => {
@@ -67,7 +67,7 @@ export function copyUpdate(event: string, filePath: string, context: BuildContex
 
 
 export function copyWorker(context: BuildContext, configFile: string) {
-  const copyConfig: CopyConfig = fillConfigDefaults(configFile, taskInfo.defaultConfigFile);
+  const copyConfig: CopyConfig = fillConfigDefaults(configFile, taskInfo.defaultConfig);
 
   const promises = copyConfig.include.map(copyOptions => {
     return copySrcToDest(context, copyOptions.src, copyOptions.dest, copyOptions.filter, true);
@@ -166,7 +166,7 @@ const taskInfo: TaskInfo = {
   fullArgConfig: '--copy',
   shortArgConfig: '-y',
   envConfig: 'ionic_copy',
-  defaultConfigFile: 'copy.config'
+  defaultConfig: require('../config/copy.config.js')
 };
 
 

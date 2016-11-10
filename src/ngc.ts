@@ -35,7 +35,7 @@ export function ngcWorker(context: BuildContext, configFile: string) {
 
 function runNgc(context: BuildContext, configFile: string) {
   return new Promise((resolve, reject) => {
-    const ngcConfig: NgcConfig = fillConfigDefaults(configFile, taskInfo.defaultConfigFile);
+    const ngcConfig: NgcConfig = fillConfigDefaults(configFile, taskInfo.defaultConfig);
 
     // make a copy of the users src tsconfig file
     // and save the modified copy into the tmp directory
@@ -191,7 +191,7 @@ const taskInfo: TaskInfo = {
   fullArgConfig: '--ngc',
   shortArgConfig: '-n',
   envConfig: 'ionic_ngc',
-  defaultConfigFile: 'ngc.config'
+  defaultConfig: require('../config/ngc.config.js')
 };
 
 

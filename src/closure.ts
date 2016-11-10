@@ -38,7 +38,7 @@ const taskInfo: TaskInfo = {
   fullArgConfig: '--closure',
   shortArgConfig: '-l',
   envConfig: 'ionic_closure',
-  defaultConfigFile: 'closure.config'
+  defaultConfig: require('../config/closure.config.js')
 };
 
 

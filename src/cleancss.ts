@@ -25,7 +25,7 @@ export function cleancss(context?: BuildContext, configFile?: string) {
 
 export function cleancssWorker(context: BuildContext, configFile: string): Promise<any> {
   return new Promise((resolve, reject) => {
-    const cleanCssConfig: CleanCssConfig = fillConfigDefaults(configFile, taskInfo.defaultConfigFile);
+    const cleanCssConfig: CleanCssConfig = fillConfigDefaults(configFile, taskInfo.defaultConfig);
     const srcFile = join(context.buildDir, cleanCssConfig.sourceFileName);
     const destFile = join(context.buildDir, cleanCssConfig.destFileName);
 
@@ -61,7 +61,7 @@ const taskInfo: TaskInfo = {
   fullArgConfig: '--cleancss',
   shortArgConfig: '-e',
   envConfig: 'ionic_cleancss',
-  defaultConfigFile: 'cleancss.config'
+  defaultConfig: require('../config/cleancss.config.js')
 };
 
 

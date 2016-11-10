@@ -97,7 +97,7 @@ export function getUserConfigFile(context: BuildContext, task: TaskInfo, userCon
 }
 
 
-export function fillConfigDefaults(userConfigFile: string, defaultConfigFile: string): any {
+export function fillConfigDefaults(userConfigFile: string, defaultConfig: any): any {
   let userConfig: any = null;
 
   if (userConfigFile) {
@@ -106,7 +106,8 @@ export function fillConfigDefaults(userConfigFile: string, defaultConfigFile: st
       // since required config could also throw MODULE_NOT_FOUND
       statSync(userConfigFile);
       // create a fresh copy of the config each time
-      userConfig = require(userConfigFile);
+      // node loader
+      userConfig = require('node!' + userConfigFile);
     } catch (e) {
       if (e.code === 'ENOENT') {
         console.error(`Config file "${userConfigFile}" not found. Using defaults instead.`);
@@ -116,8 +117,6 @@ export function fillConfigDefaults(userConfigFile: string, defaultConfigFile: st
       }
     }
   }
-
-  const defaultConfig = require(join('..', '..', 'config', defaultConfigFile));
 
   // create a fresh copy of the config each time
   // always assign any default values which were not already supplied by the user
