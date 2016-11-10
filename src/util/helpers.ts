@@ -67,6 +67,13 @@ export function getSystemInfo(userRootDir: string) {
 }
 
 
+export function splitLineBreaks(sourceText: string) {
+  if (!sourceText) return [];
+  sourceText = sourceText.replace(/\\r/g, '\n');
+  return sourceText.split('\n');
+}
+
+
 export const objectAssign = (Object.assign) ? Object.assign : function (target: any, source: any) {
   const output = Object(target);
 

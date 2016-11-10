@@ -1,5 +1,6 @@
 import { BuildContext } from './interfaces';
 import { Diagnostic, Logger, PrintLine } from './logger';
+import { splitLineBreaks } from './helpers';
 
 
 export function runTsLintDiagnostics(context: BuildContext, failures: RuleFailure[]) {
@@ -26,7 +27,7 @@ function loadDiagnostic(context: BuildContext, f: RuleFailure) {
   };
 
   if (f.sourceFile && f.sourceFile.text) {
-    const srcLines: string[] = f.sourceFile.text.replace(/\\r/g, '\n').split('\n');
+    const srcLines = splitLineBreaks(f.sourceFile.text);
 
     for (var i = start.line; i <= end.line; i++) {
       if (srcLines[i].trim().length) {
