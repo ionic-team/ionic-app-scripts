@@ -262,7 +262,7 @@ export function runBuildUpdate(context: BuildContext, changedFiles: ChangedFile[
 
 const taskInfo: TaskInfo = {
   fullArg: '--watch',
-  shortArg: '-w',
+  shortArg: null,
   envVar: 'IONIC_WATCH',
   packageConfig: 'ionic_watch',
   defaultConfigFile: 'watch.config'
