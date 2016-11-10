@@ -107,7 +107,7 @@ export function fillConfigDefaults(userConfigFile: string, defaultConfig: any): 
       statSync(userConfigFile);
       // create a fresh copy of the config each time
       // node loader
-      userConfig = require('node!' + userConfigFile);
+      userConfig = require('./commonjs-loader')(userConfigFile);
     } catch (e) {
       if (e.code === 'ENOENT') {
         console.error(`Config file "${userConfigFile}" not found. Using defaults instead.`);

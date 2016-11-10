@@ -2,12 +2,9 @@ var webpack = require('webpack');
 var path = require('path');
 var fs = require('fs');
 var ForkCheckerPlugin = require('awesome-typescript-loader').ForkCheckerPlugin;
+var packageJSON = require('./package.json');
 
-var nodeModules = [
-  'typescript', 'tslint', 'webpack', 'rollup', 'node-sass', 'fsevents', 'fs-extra', 'uglify-js',
-  'rollup-plugin-node-resolve', 'rollup-plugin-commonjs', 'rollup-plugin-node-globals', 'rollup-plugin-node-builtins',
-  'rollup-plugin-json', 'tiny-lr'
-]
+var nodeModules = Object.keys(packageJSON.dependencies)
   .reduce(function(all, mod) {
     all[mod] = 'commonjs ' + mod;
     return all;
@@ -29,7 +26,8 @@ module.exports = {
         test: /\.json$/,
         loaders: ['json-loader']
       }
-    ]
+    ],
+    noParse: [/commonjs-loader.js/]
   },
 
   resolve: {
@@ -39,7 +37,7 @@ module.exports = {
   },
 
   plugins: [
-    new ForkCheckerPlugin(),
+    new ForkCheckerPlugin()
   ],
 
   target: 'node',

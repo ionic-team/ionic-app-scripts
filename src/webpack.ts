@@ -4,7 +4,7 @@ import { changeExtension, readFileAsync, setContext, setModulePathsCache, transf
 import { emit, EventType } from './util/events';
 import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars } from './util/config';
 import { dirname, extname, join } from 'path';
-import webpackApi from 'webpack';
+import * as webpackApi from 'webpack';
 import { mkdirs } from 'fs-extra';
 
 import { EventEmitter } from 'events';
