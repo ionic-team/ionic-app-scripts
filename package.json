@@ -25,8 +25,10 @@
     "lint": "tslint -c ./tslint.json --project ./tsconfig.json",
     "nightly": "npm run build && node ./scripts/publish-nightly.js",
     "release": "npm run build && npm run test && npm run changelog-and-commit && npm version patch && npm run github-release && npm publish",
+    "sass": "node-sass ./src/sass/ion-dev.scss --output ./bin/ --output-style compressed",
+    "sass-watch": "npm run sass && node-sass ./src/sass/ion-dev.scss --watch --output ./bin/ --output-style compressed",
     "test": "jasmine JASMINE_CONFIG_PATH=src/spec/jasmine.config.json || true",
-    "watch": "npm run clean && tsc --watch"
+    "watch": "npm run clean && tsc --watch & npm run sass-watch"
   },
   "main": "dist/index.js",
   "dependencies": {
@@ -75,6 +77,7 @@
     "ionic-cz-conventional-changelog": "^1.0.0",
     "jasmine": "2.5.2",
     "mock-fs": "^3.11.0",
+    "node-sass": "^3.10.1",
     "rimraf": "^2.5.4",
     "tslint": "3.15.1",
     "tslint-ionic-rules": "0.0.5"
