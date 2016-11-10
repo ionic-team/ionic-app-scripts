@@ -58,9 +58,10 @@ export function cleancssWorker(context: BuildContext, configFile: string): Promi
 
 
 const taskInfo: TaskInfo = {
-  fullArgConfig: '--cleancss',
-  shortArgConfig: '-e',
-  envConfig: 'ionic_cleancss',
+  fullArg: '--cleancss',
+  shortArg: '-e',
+  envVar: 'IONIC_CLEANCSS',
+  packageConfig: 'ionic_cleancss',
   defaultConfig: require('../config/cleancss.config.js')
 };
 

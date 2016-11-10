@@ -6,11 +6,10 @@ import * as fs from 'fs';
 import * as url from 'url';
 import { ServeConfig, LOGGER_DIR } from './serve-config';
 import { Logger } from '../util/logger';
-import { promisify } from '../util/promisify';
 import * as proxyMiddleware from 'proxy-middleware';
+import { injectDiagnosticsHtml } from '../util/logger-diagnostics';
 import { getProjectJson, IonicProject } from '../util/ionic-project';
 
-const readFilePromise = promisify<Buffer, string>(fs.readFile);
 
 /**
  * Create HTTP server
@@ -20,12 +19,12 @@ export function createHttpServer(config: ServeConfig): express.Application {
   const app = express();
   app.set('serveConfig', config);
   app.listen(config.httpPort, config.host, function() {
-    Logger.info(`listening on ${config.httpPort}`);
+    Logger.debug(`listening on ${config.httpPort}`);
   });
 
   app.get('/', serveIndex);
-  app.use('/', express.static(config.rootDir));
-  app.use(`/${LOGGER_DIR}`, express.static(path.join(__dirname, '..', 'bin')));
+  app.use('/', express.static(config.wwwDir));
+  app.use(`/${LOGGER_DIR}`, express.static(path.join(__dirname, '..', 'bin'), { maxAge: 31536000 }));
   app.get('/cordova.js', serveCordovaJS);
 
   if (config.useProxy) {
@@ -57,24 +56,25 @@ function setupProxies(app: express.Application) {
  */
 function serveIndex(req: express.Request, res: express.Response)  {
   const config: ServeConfig = req.app.get('serveConfig');
-  let htmlFile = path.join(req.app.get('serveConfig').rootDir, 'index.html');
 
-  readFilePromise(htmlFile).then((content: Buffer) => {
+  // respond with the index.html file
+  const indexFileName = path.join(config.wwwDir, 'index.html');
+  fs.readFile(indexFileName, (err, indexHtml) => {
     if (config.useLiveReload) {
-      content = injectLiveReloadScript(content, config.host, config.liveReloadPort);
-    }
-    if (config.useNotifier) {
-      content = injectNotificationScript(content, config.notifyOnConsoleLog, config.notificationPort);
+      indexHtml = injectLiveReloadScript(indexHtml, config.host, config.liveReloadPort);
     }
 
-    // File found so lets send it back to the response
+    indexHtml = injectNotificationScript(config.rootDir, indexHtml, config.notifyOnConsoleLog, config.notificationPort);
+
+    indexHtml = injectDiagnosticsHtml(config.buildDir, indexHtml);
+
     res.set('Content-Type', 'text/html');
-    res.send(content);
+    res.send(indexHtml);
   });
 }
 
 /**
- * http responder for cordova.js fiel
+ * http responder for cordova.js file
  */
 function serveCordovaJS(req: express.Request, res: express.Response) {
   res.set('Content-Type', 'application/javascript');

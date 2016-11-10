@@ -1,21 +1,11 @@
 import { BuildContext } from './interfaces';
 import { Diagnostic, Logger, PrintLine } from './logger';
-import { objectAssign } from './helpers';
 
 
-export function runDiagnostics(context: BuildContext, failures: RuleFailure[]) {
-  const diagnostics = failures.map(failure => {
+export function runTsLintDiagnostics(context: BuildContext, failures: RuleFailure[]) {
+  return failures.map(failure => {
     return loadDiagnostic(context, failure);
   });
-
-  if (diagnostics.length) {
-    diagnostics.forEach(d => {
-      Logger.printDiagnostic(objectAssign({}, d));
-    });
-    return true;
-  }
-
-  return false;
 }
 
 
@@ -27,7 +17,8 @@ function loadDiagnostic(context: BuildContext, f: RuleFailure) {
     level: 'warn',
     syntax: 'js',
     type: 'tslint',
-    fileName: Logger.formatFileName(context.rootDir, f.fileName),
+    absFileName: f.fileName,
+    relFileName: Logger.formatFileName(context.rootDir, f.fileName),
     header: Logger.formatHeader('tslint', f.fileName, context.rootDir, start.line + 1, end.line + 1),
     code: f.ruleName,
     messageText: f.failure,
@@ -62,7 +53,7 @@ function loadDiagnostic(context: BuildContext, f: RuleFailure) {
       }
     }
 
-    if (start.line > 0 && Logger.meaningfulLine(srcLines[start.line - 1])) {
+    if (start.line > 0) {
       const beforeLine: PrintLine = {
         lineIndex: start.line - 1,
         lineNumber: start.line,
@@ -73,7 +64,7 @@ function loadDiagnostic(context: BuildContext, f: RuleFailure) {
       d.lines.unshift(beforeLine);
     }
 
-    if (end.line < srcLines.length && Logger.meaningfulLine(srcLines[end.line + 1])) {
+    if (end.line < srcLines.length) {
       const afterLine: PrintLine = {
         lineIndex: end.line + 1,
         lineNumber: end.line + 2,

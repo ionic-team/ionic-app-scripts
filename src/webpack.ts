@@ -1,11 +1,11 @@
-import { BuildContext, File, TaskInfo } from './util/interfaces';
+import { FileCache } from './util/file-cache';
+import { BuildContext, BuildState, File, TaskInfo } from './util/interfaces';
 import { BuildError, IgnorableError, Logger } from './util/logger';
-import { changeExtension, readFileAsync, setContext, setModulePathsCache, transformSrcPathToTmpPath, writeFileAsync } from './util/helpers';
+import { changeExtension, readFileAsync, setContext } from './util/helpers';
 import { emit, EventType } from './util/events';
 import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars } from './util/config';
-import { dirname, extname, join } from 'path';
+import { extname, join } from 'path';
 import * as webpackApi from 'webpack';
-import { mkdirs } from 'fs-extra';
 
 import { EventEmitter } from 'events';
 
@@ -34,9 +34,11 @@ export function webpack(context: BuildContext, configFile: string) {
 
   return webpackWorker(context, configFile)
     .then(() => {
+      context.bundleState = BuildState.SuccessfulBuild;
       logger.finish();
     })
     .catch(err => {
+      context.bundleState = BuildState.RequiresBuild;
       throw logger.fail(err);
     });
 }
@@ -57,26 +59,22 @@ export function webpackUpdate(event: string, path: string, context: BuildContext
         return [file];
       });
     }
-  }).then((files: File[]) => {
-    // transform the paths
-    Logger.debug('webpackUpdate: Transforming paths');
-    const transformedPathFiles = files.map(file => {
-      file.path = transformSrcPathToTmpPath(file.path, context);
-      return file;
-    });
-    Logger.debug('webpackUpdate: Writing Files to tmp');
-    return writeFilesToDisk(transformedPathFiles);
-  }).then(() => {
+  })
+    .then((files: File[]) => {
       Logger.debug('webpackUpdate: Starting Incremental Build');
-      return runWebpackIncrementalBuild(false, context, webpackConfig);
+      const promisetoReturn = runWebpackIncrementalBuild(false, context, webpackConfig);
+      emit(EventType.WebpackFilesChanged, [path]);
+      return promisetoReturn;
     }).then((stats: any) => {
       // the webpack incremental build finished, so reset the list of pending promises
       pendingPromises = [];
       Logger.debug('webpackUpdate: Incremental Build Done, processing Data');
       return webpackBuildComplete(stats, context, webpackConfig);
     }).then(() => {
+      context.bundleState = BuildState.SuccessfulBuild;
       return logger.finish();
     }).catch(err => {
+      context.bundleState = BuildState.RequiresBuild;
       if (err instanceof IgnorableError) {
         throw err;
       }
@@ -89,38 +87,17 @@ export function webpackUpdate(event: string, path: string, context: BuildContext
 export function webpackWorker(context: BuildContext, configFile: string): Promise<any> {
   const webpackConfig = getWebpackConfig(context, configFile);
 
-  return webpackWorkerPrepare(context)
-    .then(() => {
-      if (context.isWatch) {
-        return runWebpackIncrementalBuild(!context.webpackWatch, context, webpackConfig);
-      } else {
-        return runWebpackFullBuild(webpackConfig);
-      }
-    }).then((stats: any) => {
+  let promise: Promise<void> = null;
+  if (context.isWatch) {
+    promise = runWebpackIncrementalBuild(!context.webpackWatch, context, webpackConfig);
+  } else {
+    promise = runWebpackFullBuild(webpackConfig);
+  }
+
+  return promise
+    .then((stats: any) => {
       return webpackBuildComplete(stats, context, webpackConfig);
     });
-}
-
-function webpackWorkerPrepare(context: BuildContext) {
-  if (context.isProd) {
-    Logger.debug('webpackWorkerBefore: Prod build - skipping');
-    return Promise.resolve();
-  } else {
-    // in order to use watch mode, we need to write the
-    // transpiled files to disk, so go ahead and do that
-    let files: File[] = [];
-    context.fileCache.forEach(file => {
-      files.push(file);
-    });
-    // transform the paths
-    const transformedPathFiles = files.map(file => {
-      file.path = transformSrcPathToTmpPath(file.path, context);
-      return file;
-    });
-    return writeFilesToDisk(transformedPathFiles).then(() => {
-      Logger.debug('Wrote .js files to disk');
-    });
-  }
 }
 
 function webpackBuildComplete(stats: any, context: BuildContext, webpackConfig: WebpackConfig) {
@@ -139,11 +116,6 @@ function webpackBuildComplete(stats: any, context: BuildContext, webpackConfig: 
 
   context.moduleFiles = files;
 
-  // async cache all the module paths so we don't need
-  // to always bundle to know which modules are used
-  setModulePathsCache(context.moduleFiles);
-
-  emit(EventType.FileChange, getOutputDest(context, webpackConfig));
   return Promise.resolve();
 }
 
@@ -237,36 +209,7 @@ export function getOutputDest(context: BuildContext, webpackConfig: WebpackConfi
   return join(webpackConfig.output.path, webpackConfig.output.filename);
 }
 
-
-function writeFilesToDisk(files: File[]) {
-  let promises: Promise<any>[] = [];
-  for (const file of files) {
-    promises.push(writeIndividualFile(file));
-  }
-  return Promise.all(promises);
-}
-
-function writeIndividualFile(file: File) {
-  return ensureDirectoriesExist(file.path)
-    .then(() => {
-      return writeFileAsync(file.path, file.content);
-    });
-}
-
-function ensureDirectoriesExist(path: string) {
-  return new Promise((resolve, reject) => {
-    const directoryName = dirname(path);
-    mkdirs(directoryName, err => {
-      if (err) {
-        reject(new BuildError(err));
-      } else {
-        resolve();
-      }
-    });
-  });
-}
-
-function typescriptFileChanged(fileChangedPath: string, fileCache: Map<String, File>): File[] {
+function typescriptFileChanged(fileChangedPath: string, fileCache: FileCache): File[] {
   // convert to the .js file because those are the transpiled files in memory
   const jsFilePath = changeExtension(fileChangedPath, '.js');
   const sourceFile = fileCache.get(jsFilePath);
@@ -281,9 +224,10 @@ function otherFileChanged(fileChangedPath: string) {
 }
 
 const taskInfo: TaskInfo = {
-  fullArgConfig: '--webpack',
-  shortArgConfig: '-w',
-  envConfig: 'ionic_webpack',
+  fullArg: '--webpack',
+  shortArg: '-w',
+  envVar: 'IONIC_WEBPACK',
+  packageConfig: 'ionic_webpack',
   defaultConfig: require('../config/webpack.config.js')
 };
 

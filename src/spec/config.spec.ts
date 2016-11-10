@@ -53,7 +53,7 @@ describe('config', () => {
 
     it('should set isProd false with env var', () => {
       context = {};
-      setProcessEnvVar('ionic_dev', 'true');
+      setProcessEnvVar('IONIC_DEV', 'true');
       expect(getIsProd(context)).toEqual(false);
     });
 
@@ -102,36 +102,36 @@ describe('config', () => {
       addArgv('fullArgValue');
       addArgv('-s');
       addArgv('shortArgValue');
-      setProcessEnvVar('envVar', 'myProcessEnvVar');
-      setAppPackageJsonData({ config: { envVar: 'myPackageConfigVal' } });
-      const val = getConfigValue(context, '--full', '-s', 'envVar', 'defaultValue');
+      setProcessEnvVar('ENV_VAR', 'myProcessEnvVar');
+      setAppPackageJsonData({ config: { config_prop: 'myPackageConfigVal' } });
+      const val = getConfigValue(context, '--full', '-s', 'ENV_VAR', 'config_prop', 'defaultValue');
       expect(val).toEqual('fullArgValue');
     });
 
     it('should get arg short value', () => {
       addArgv('-s');
       addArgv('shortArgValue');
-      setProcessEnvVar('envVar', 'myProcessEnvVar');
-      setAppPackageJsonData({ config: { envVar: 'myPackageConfigVal' } });
-      const val = getConfigValue(context, '--full', '-s', 'envVar', 'defaultValue');
+      setProcessEnvVar('ENV_VAR', 'myProcessEnvVar');
+      setAppPackageJsonData({ config: { config_prop: 'myPackageConfigVal' } });
+      const val = getConfigValue(context, '--full', '-s', 'ENV_VAR', 'config_prop', 'defaultValue');
       expect(val).toEqual('shortArgValue');
     });
 
     it('should get envVar value', () => {
-      setProcessEnvVar('envVar', 'myProcessEnvVar');
-      setAppPackageJsonData({ config: { envVar: 'myPackageConfigVal' } });
-      const val = getConfigValue(context, '--full', '-s', 'envVar', 'defaultValue');
+      setProcessEnvVar('ENV_VAR', 'myProcessEnvVar');
+      setAppPackageJsonData({ config: { config_prop: 'myPackageConfigVal' } });
+      const val = getConfigValue(context, '--full', '-s', 'ENV_VAR', 'config_prop', 'defaultValue');
       expect(val).toEqual('myProcessEnvVar');
     });
 
     it('should get package.json config value', () => {
-      setAppPackageJsonData({ config: { envVar: 'myPackageConfigVal' } });
-      const val = getConfigValue(context, '--full', '-s', 'envVar', 'defaultValue');
+      setAppPackageJsonData({ config: { config_prop: 'myPackageConfigVal' } });
+      const val = getConfigValue(context, '--full', '-s', 'ENV_VAR', 'config_prop', 'defaultValue');
       expect(val).toEqual('myPackageConfigVal');
     });
 
     it('should get default value', () => {
-      const val = getConfigValue(context, '--full', '-s', 'envVar', 'defaultValue');
+      const val = getConfigValue(context, '--full', '-s', 'ENV_VAR', 'config_prop', 'defaultValue');
       expect(val).toEqual('defaultValue');
     });
 
@@ -214,19 +214,19 @@ describe('config', () => {
 
       const userConfigFile: string = null;
       const context = { rootDir: process.cwd() };
-      const taskInfo = { fullArgConfig: '--full', shortArgConfig: '-s', defaultConfigFile: 'default.config.js', envConfig: 'ionic_config' };
+      const taskInfo = { fullArg: '--full', shortArg: '-s', defaultConfigFile: 'default.config.js', envVar: 'IONIC_CONFIG', packageConfig: 'ionic_config' };
       const rtn = getUserConfigFile(context, taskInfo, userConfigFile);
       expect(rtn).toEqual(resolve('myconfig.js'));
     });
 
     it('should get config from env var', () => {
       setProcessEnv({
-        ionic_config: 'myconfig.js'
+        IONIC_CONFIG: 'myconfig.js'
       });
 
       const userConfigFile: string = null;
       const context = { rootDir: process.cwd() };
-      const taskInfo = { fullArgConfig: '--full', shortArgConfig: '-s', defaultConfigFile: 'default.config.js', envConfig: 'ionic_config' };
+      const taskInfo = { fullArg: '--full', shortArg: '-s', defaultConfigFile: 'default.config.js', envVar: 'IONIC_CONFIG', packageConfig: 'ionic_config' };
       const rtn = getUserConfigFile(context, taskInfo, userConfigFile);
       expect(rtn).toEqual(resolve('myconfig.js'));
     });
@@ -237,7 +237,7 @@ describe('config', () => {
 
       const userConfigFile: string = null;
       const context = { rootDir: process.cwd() };
-      const taskInfo = { fullArgConfig: '--full', shortArgConfig: '-s', defaultConfigFile: 'default.config.js', envConfig: 'ionic_config' };
+      const taskInfo = { fullArg: '--full', shortArg: '-s', defaultConfigFile: 'default.config.js', envVar: 'IONIC_CONFIG', packageConfig: 'ionic_config' };
       const rtn = getUserConfigFile(context, taskInfo, userConfigFile);
       expect(rtn).toEqual(resolve('myconfig.js'));
     });
@@ -248,7 +248,7 @@ describe('config', () => {
 
       const userConfigFile: string = null;
       const context = { rootDir: process.cwd() };
-      const taskInfo = { fullArgConfig: '--full', shortArgConfig: '-s', defaultConfigFile: 'default.config.js', envConfig: 'ionic_config' };
+      const taskInfo = { fullArg: '--full', shortArg: '-s', defaultConfigFile: 'default.config.js', envVar: 'IONIC_CONFIG', packageConfig: 'ionic_config' };
       const rtn = getUserConfigFile(context, taskInfo, userConfigFile);
       expect(rtn).toEqual(resolve('myconfig.js'));
     });
@@ -256,7 +256,7 @@ describe('config', () => {
     it('should get userConfigFile', () => {
       const userConfigFile = 'myconfig.js';
       const context = { rootDir: process.cwd() };
-      const taskInfo = { fullArgConfig: '--full', shortArgConfig: '-s', defaultConfigFile: 'default.config.js', envConfig: 'env.config.js' };
+      const taskInfo = { fullArg: '--full', shortArg: '-s', defaultConfigFile: 'default.config.js', envVar: 'IONIC_CONFIG', packageConfig: 'ionic_config' };
       const rtn = getUserConfigFile(context, taskInfo, userConfigFile);
       expect(rtn).toEqual(resolve('myconfig.js'));
     });
@@ -264,7 +264,7 @@ describe('config', () => {
     it('should not get a user config', () => {
       const userConfigFile: string = null;
       const context = { rootDir: process.cwd() };
-      const taskInfo = { fullArgConfig: '--full', shortArgConfig: '-s', defaultConfigFile: 'default.config.js', envConfig: 'ionic_config' };
+      const taskInfo = { fullArg: '--full', shortArg: '-s', defaultConfigFile: 'default.config.js', envVar: 'IONIC_CONFIG', packageConfig: 'ionic_config' };
       const rtn = getUserConfigFile(context, taskInfo, userConfigFile);
       expect(rtn).toEqual(null);
     });

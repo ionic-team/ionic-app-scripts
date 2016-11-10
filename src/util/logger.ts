@@ -1,4 +1,3 @@
-import { emit, EventType } from './events';
 import { join } from 'path';
 import { isDebugMode } from './config';
 import { readJSONSync } from 'fs-extra';
@@ -62,53 +61,41 @@ export class Logger {
       msg += memoryUsage();
     }
     Logger.info(msg);
-
-    const taskEvent: TaskEvent = {
-      scope: this.scope.split(' ')[0],
-      type: 'start',
-      msg: `${scope} started ...`
-    };
-    emit(EventType.TaskEvent, taskEvent);
   }
 
-  ready(chalkColor?: Function) {
-    this.completed('ready', chalkColor);
+  ready(color?: string, bold?: boolean) {
+    this.completed('ready', color, bold);
   }
 
-  finish(chalkColor?: Function) {
-    this.completed('finished', chalkColor);
+  finish(color?: string, bold?: boolean) {
+    this.completed('finished', color, bold);
   }
 
-  private completed(type: string, chalkColor: Function) {
+  private completed(type: string, color: string, bold: boolean) {
+    const duration = Date.now() - this.start;
+    let time: string;
 
-    const taskEvent: TaskEvent = {
-      scope: this.scope.split(' ')[0],
-      type: type
-    };
-
-    taskEvent.duration = Date.now() - this.start;
-
-    if (taskEvent.duration > 1000) {
-      taskEvent.time = 'in ' + (taskEvent.duration / 1000).toFixed(2) + ' s';
+    if (duration > 1000) {
+      time = 'in ' + (duration / 1000).toFixed(2) + ' s';
 
     } else {
-      let ms = parseFloat((taskEvent.duration).toFixed(3));
+      let ms = parseFloat((duration).toFixed(3));
       if (ms > 0) {
-        taskEvent.time = 'in ' + taskEvent.duration + ' ms';
+        time = 'in ' + duration + ' ms';
       } else {
-        taskEvent.time = 'in less than 1 ms';
+        time = 'in less than 1 ms';
       }
     }
 
-    taskEvent.msg = `${this.scope} ${taskEvent.type} ${taskEvent.time}`;
-    emit(EventType.TaskEvent, taskEvent);
-
     let msg = `${this.scope} ${type}`;
-    if (chalkColor) {
-      msg = chalkColor(msg);
+    if (color) {
+      msg = (<any>chalk)[color](msg);
+    }
+    if (bold) {
+      msg = chalk.bold(msg);
     }
 
-    msg += ' ' + chalk.dim(taskEvent.time);
+    msg += ' ' + chalk.dim(time);
 
     if (isDebugMode()) {
       msg += memoryUsage();
@@ -122,14 +109,6 @@ export class Logger {
       if (err instanceof IgnorableError) {
         return;
       }
-
-      // only emit the event if it's a valid error
-      const taskEvent: TaskEvent = {
-        scope: this.scope.split(' ')[0],
-        type: 'failed',
-        msg: this.scope + ' failed'
-      };
-      emit(EventType.TaskEvent, taskEvent);
 
       if (err instanceof BuildError) {
         let failedMsg = `${this.scope} failed`;
@@ -156,6 +135,10 @@ export class Logger {
     return err;
   }
 
+  setStartTime(startTime: number) {
+    this.start = startTime;
+  }
+
   /**
    * Does not print out a time prefix or color any text. Only prefix
    * with whitespace so the message is lined up with timestamped logs.
@@ -167,15 +150,31 @@ export class Logger {
   }
 
   /**
-   * Prints out a dim colored timestamp prefix.
+   * Prints out a dim colored timestamp prefix, with optional color
+   * and bold message.
    */
-  static info(...msg: any[]) {
-    const lines = Logger.wordWrap(msg);
+  static info(msg: string, color?: string, bold?: boolean) {
+    const lines = Logger.wordWrap([msg]);
     if (lines.length) {
       let prefix = timePrefix();
-      lines[0] = chalk.dim(prefix) + lines[0].substr(prefix.length);
+      let lineOneMsg = lines[0].substr(prefix.length);
+      if (color) {
+        lineOneMsg = (<any>chalk)[color](lineOneMsg);
+      }
+      if (bold) {
+        lineOneMsg = chalk.bold(lineOneMsg);
+      }
+      lines[0] = chalk.dim(prefix) + lineOneMsg;
     }
-    lines.forEach(line => {
+    lines.forEach((line, lineIndex) => {
+      if (lineIndex > 0) {
+        if (color) {
+          line = (<any>chalk)[color](line);
+        }
+        if (bold) {
+          line = chalk.bold(line);
+        }
+      }
       console.log(line);
     });
   }
@@ -226,95 +225,6 @@ export class Logger {
       lines.forEach(line => {
         console.log(chalk.cyan(line));
       });
-    }
-  }
-
-  static printDiagnostic(d: Diagnostic) {
-    if (d.level === 'warn') {
-      Logger.warn(d.header);
-    } else {
-      Logger.error(d.header);
-    }
-
-    Logger.wordWrap([d.messageText]).forEach(m => {
-      console.log(m);
-    });
-    Logger.newLine();
-
-    if (d.lines && d.lines.length) {
-      Logger.removeWhitespaceIndent(d.lines);
-
-      d.lines.forEach(l => {
-        let msg = 'L' + l.lineNumber + ':  ';
-        while (msg.length < Logger.INDENT.length) {
-          msg = ' ' + msg;
-        }
-
-        if (l.errorCharStart > -1) {
-          l.text = Logger.highlightError(l.text, l.errorCharStart, l.errorLength);
-        }
-
-        msg = chalk.dim(msg);
-
-        if (d.syntax === 'js') {
-          msg += Logger.jsSyntaxHighlight(l.text);
-        } else if (d.syntax === 'css') {
-          msg += Logger.cssSyntaxHighlight(l.text, l.errorCharStart);
-        } else {
-          msg += l.text;
-        }
-
-        console.log(msg);
-      });
-
-      Logger.newLine();
-    }
-  }
-
-  static highlightError(errorLine: string, errorCharStart: number, errorLength: number) {
-    let rightSideChars = errorLine.length - errorCharStart + errorLength - 1;
-    while (errorLine.length + Logger.INDENT.length > Logger.MAX_LEN) {
-      if (errorCharStart > (errorLine.length - errorCharStart + errorLength) && errorCharStart > 5) {
-        // larger on left side
-        errorLine = errorLine.substr(1);
-        errorCharStart--;
-
-      } else if (rightSideChars > 1) {
-        // larger on right side
-        errorLine = errorLine.substr(0, errorLine.length - 1);
-        rightSideChars--;
-
-      } else {
-        break;
-      }
-    }
-
-    const lineChars: string[] = [];
-    const lineLength = Math.max(errorLine.length, errorCharStart + errorLength);
-    for (var i = 0; i < lineLength; i++) {
-      var chr = errorLine.charAt(i);
-      if (i >= errorCharStart && i < errorCharStart + errorLength) {
-        chr = chalk.bgRed(chr === '' ? ' ' : chr);
-      }
-      lineChars.push(chr);
-    }
-
-    return lineChars.join('');
-  }
-
-
-  static removeWhitespaceIndent(lines: PrintLine[]) {
-    for (var i = 0; i < 100; i++) {
-      if (!eachLineHasLeadingWhitespace(lines)) {
-        return;
-      }
-      for (var i = 0; i < lines.length; i++) {
-        lines[i].text = lines[i].text.substr(1);
-        lines[i].errorCharStart--;
-        if (!lines[i].text.length) {
-          return;
-        }
-      }
     }
   }
 
@@ -391,60 +301,6 @@ export class Logger {
   }
 
 
-  static meaningfulLine(line: string) {
-    if (line) {
-      line = line.trim();
-      if (line.length) {
-        return (MEH_LINES.indexOf(line) < 0);
-      }
-    }
-    return false;
-  }
-
-
-  static jsSyntaxHighlight(text: string) {
-    if (text.trim().startsWith('//')) {
-      return chalk.dim(text);
-    }
-
-    const words = text.split(' ').map(word => {
-      if (JS_KEYWORDS.indexOf(word) > -1) {
-        return chalk.cyan(word);
-      }
-      return word;
-    });
-
-    return words.join(' ');
-  }
-
-
-  static cssSyntaxHighlight(text: string, errorCharStart: number) {
-    let cssProp = true;
-    const safeChars = 'abcdefghijklmnopqrstuvwxyz-_';
-    const notProp = '.#,:}@$[]/*';
-
-    const chars: string[] = [];
-
-    for (var i = 0; i < text.length; i++) {
-      var c = text.charAt(i);
-
-      if (c === ';' || c === '{') {
-        cssProp = true;
-      } else if (notProp.indexOf(c) > -1) {
-        cssProp = false;
-      }
-      if (cssProp && safeChars.indexOf(c.toLowerCase()) > -1) {
-        chars.push(chalk.cyan(c));
-        continue;
-      }
-
-      chars.push(c);
-    }
-
-    return chars.join('');
-  }
-
-
   static formatFileName(rootDir: string, fileName: string) {
     fileName = fileName.replace(rootDir, '');
     if (/\/|\\/.test(fileName.charAt(0))) {
@@ -457,17 +313,14 @@ export class Logger {
   }
 
 
-  static formatHeader(task: string, fileName: string, rootDir: string, startLineNumber: number = null, endLineNumber: number = null) {
-    let header = `${task}: `;
-    fileName = Logger.formatFileName(rootDir, fileName);
+  static formatHeader(type: string, fileName: string, rootDir: string, startLineNumber: number = null, endLineNumber: number = null) {
+    let header = `${type}: ${Logger.formatFileName(rootDir, fileName)}`;
 
     if (startLineNumber !== null && startLineNumber > 0) {
-      header += fileName + ', ';
-
       if (endLineNumber !== null && endLineNumber > startLineNumber) {
-        header += `lines: ${startLineNumber} - ${endLineNumber}`;
+        header += `, lines: ${startLineNumber} - ${endLineNumber}`;
       } else {
-        header += `line: ${startLineNumber}`;
+        header += `, line: ${startLineNumber}`;
       }
     }
 
@@ -485,23 +338,6 @@ export class Logger {
 }
 
 
-function eachLineHasLeadingWhitespace(lines: PrintLine[]) {
-  if (!lines.length) {
-    return false;
-  }
-  for (var i = 0; i < lines.length; i++) {
-    if (lines[i].text.length < 1) {
-      return false;
-    }
-    var firstChar = lines[i].text.charAt(0);
-    if (firstChar !== ' ' && firstChar !== '\t') {
-      return false;
-    }
-  }
-  return true;
-}
-
-
 function timePrefix() {
   const date = new Date();
   return '[' + ('0' + date.getHours()).slice(-2) + ':' + ('0' + date.getMinutes()).slice(-2) + ':' + ('0' + date.getSeconds()).slice(-2) + ']';
@@ -513,64 +349,6 @@ function memoryUsage() {
 }
 
 
-export function getAppScriptsVersion() {
-  let rtn = '';
-  try {
-    const packageJson = readJSONSync(join(__dirname, '..', '..', 'package.json'));
-    rtn = packageJson.version || '';
-  } catch (e) {}
-  return rtn;
-}
-
-
-const JS_KEYWORDS = [
-  'as',
-  'break',
-  'case',
-  'catch',
-  'class',
-  'const',
-  'continue',
-  'debugger',
-  'default',
-  'delete',
-  'do',
-  'else',
-  'export',
-  'extends',
-  'finally',
-  'for',
-  'from',
-  'function',
-  'if',
-  'import',
-  'in',
-  'instanceof',
-  'new',
-  'return',
-  'super',
-  'switch',
-  'this',
-  'throw',
-  'try',
-  'typeof',
-  'var',
-  'void',
-  'while',
-];
-
-const MEH_LINES = [';', ':', '{', '}', '(', ')', '/**', '/*', '*/', '*', '({', '})'];
-
-
-export interface TaskEvent {
-  scope: string;
-  type: string;
-  duration?: number;
-  time?: string;
-  msg?: string;
-}
-
-
 export interface Diagnostic {
   level: string;
   syntax: string;
@@ -578,7 +356,8 @@ export interface Diagnostic {
   header: string;
   code: string;
   messageText: string;
-  fileName: string;
+  absFileName: string;
+  relFileName: string;
   lines: PrintLine[];
 }
 

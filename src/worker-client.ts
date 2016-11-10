@@ -30,8 +30,10 @@ export function runWorker(taskModule: string, taskWorker: string, context: Build
     worker.on('message', (msg: WorkerMessage) => {
       if (msg.error) {
         reject(new BuildError(msg.error));
+
       } else if (msg.reject) {
         reject(new BuildError(msg.reject));
+
       } else {
         resolve(msg.resolve);
       }

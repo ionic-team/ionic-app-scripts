@@ -2,6 +2,7 @@ import { accessSync, readJSONSync, statSync } from 'fs-extra';
 import { BuildContext, TaskInfo } from './interfaces';
 import { join, resolve } from 'path';
 import { objectAssign } from './helpers';
+import { FileCache } from './file-cache';
 
 
 /**
@@ -21,24 +22,30 @@ import { objectAssign } from './helpers';
 export function generateContext(context?: BuildContext): BuildContext {
   if (!context) {
     context = {};
+    context.fileCache = new FileCache();
   }
 
-  context.rootDir = resolve(context.rootDir || getConfigValue(context, '--rootDir', null, ENV_VAR_ROOT_DIR, processCwd));
+  context.rootDir = resolve(context.rootDir || getConfigValue(context, '--rootDir', null, ENV_VAR_ROOT_DIR, ENV_VAR_ROOT_DIR.toLowerCase(), processCwd));
   setProcessEnvVar(ENV_VAR_ROOT_DIR, context.rootDir);
 
-  context.tmpDir = resolve(context.tmpDir || getConfigValue(context, '--tmpDir', null, ENV_VAR_TMP_DIR, join(context.rootDir, TMP_DIR)));
+  context.tmpDir = resolve(context.tmpDir || getConfigValue(context, '--tmpDir', null, ENV_VAR_TMP_DIR, ENV_VAR_TMP_DIR.toLowerCase(), join(context.rootDir, TMP_DIR)));
   setProcessEnvVar(ENV_VAR_TMP_DIR, context.tmpDir);
 
-  context.srcDir = resolve(context.srcDir || getConfigValue(context, '--srcDir', null, ENV_VAR_SRC_DIR, join(context.rootDir, SRC_DIR)));
+  context.srcDir = resolve(context.srcDir || getConfigValue(context, '--srcDir', null, ENV_VAR_SRC_DIR, ENV_VAR_SRC_DIR.toLowerCase(), join(context.rootDir, SRC_DIR)));
   setProcessEnvVar(ENV_VAR_SRC_DIR, context.srcDir);
 
-  context.wwwDir = resolve(context.wwwDir || getConfigValue(context, '--wwwDir', null, ENV_VAR_WWW_DIR, join(context.rootDir, WWW_DIR)));
+  context.wwwDir = resolve(context.wwwDir || getConfigValue(context, '--wwwDir', null, ENV_VAR_WWW_DIR, ENV_VAR_WWW_DIR.toLowerCase(), join(context.rootDir, WWW_DIR)));
   setProcessEnvVar(ENV_VAR_WWW_DIR, context.wwwDir);
 
   context.wwwIndex = join(context.wwwDir, WWW_INDEX_FILENAME);
 
-  context.buildDir = resolve(context.buildDir || getConfigValue(context, '--buildDir', null, ENV_VAR_BUILD_DIR, join(context.wwwDir, BUILD_DIR)));
+  context.buildDir = resolve(context.buildDir || getConfigValue(context, '--buildDir', null, ENV_VAR_BUILD_DIR, ENV_VAR_BUILD_DIR.toLowerCase(), join(context.wwwDir, BUILD_DIR)));
   setProcessEnvVar(ENV_VAR_BUILD_DIR, context.buildDir);
+
+  setProcessEnvVar(ENV_VAR_APP_SCRIPTS_DIR, join(__dirname, '..', '..'));
+
+  const sourceMapValue = getConfigValue(context, '--sourceMap', null, ENV_VAR_SOURCE_MAP, ENV_VAR_SOURCE_MAP.toLowerCase(), 'eval');
+  setProcessEnvVar(ENV_VAR_SOURCE_MAP, sourceMapValue);
 
   if (!isValidBundler(context.bundler)) {
     context.bundler = bundlerStrategy(context);
@@ -48,7 +55,7 @@ export function generateContext(context?: BuildContext): BuildContext {
   setIonicEnvironment(context.isProd);
 
   if (typeof context.isWatch !== 'boolean') {
-    context.isWatch = hasArg('--watch', '-w');
+    context.isWatch = hasArg('--watch');
   }
 
   context.inlineTemplates = true;
@@ -69,7 +76,7 @@ export function getIsProd(context: BuildContext) {
     return false;
   }
 
-  let val = getPackageJsonConfig(context, ENV_VAR_IONIC_DEV);
+  let val = getPackageJsonConfig(context, ENV_VAR_IONIC_DEV.toLowerCase());
   if (typeof val === 'boolean') {
     return !val;
   }
@@ -88,7 +95,7 @@ export function getUserConfigFile(context: BuildContext, task: TaskInfo, userCon
     return resolve(userConfigFile);
   }
 
-  const defaultConfig = getConfigValue(context, task.fullArgConfig, task.shortArgConfig, task.envConfig, null);
+  const defaultConfig = getConfigValue(context, task.fullArg, task.shortArg, task.envVar, task.packageConfig, null);
   if (defaultConfig) {
     return join(context.rootDir, defaultConfig);
   }
@@ -180,7 +187,7 @@ function isValidBundler(bundler: any) {
 }
 
 
-export function getConfigValue(context: BuildContext, argFullName: string, argShortName: string, envVarName: string, defaultValue: string) {
+export function getConfigValue(context: BuildContext, argFullName: string, argShortName: string, envVarName: string, packageConfigProp: string, defaultValue: string) {
   // first see if the value was set in the command-line args
   const argVal = getArgValue(argFullName, argShortName);
   if (argVal !== null) {
@@ -194,7 +201,7 @@ export function getConfigValue(context: BuildContext, argFullName: string, argSh
     return envVar;
   }
 
-  const packageConfig = getPackageJsonConfig(context, envVarName);
+  const packageConfig = getPackageJsonConfig(context, packageConfigProp);
   if (packageConfig !== null) {
     return packageConfig;
   }
@@ -374,12 +381,14 @@ const ENV_VAR_PROD = 'prod';
 const ENV_VAR_DEV = 'dev';
 
 const ENV_VAR_IONIC_ENV = 'IONIC_ENV';
-const ENV_VAR_IONIC_DEV = 'ionic_dev';
-const ENV_VAR_ROOT_DIR = 'ionic_root_dir';
-const ENV_VAR_TMP_DIR = 'ionic_tmp_dir';
-const ENV_VAR_SRC_DIR = 'ionic_src_dir';
-const ENV_VAR_WWW_DIR = 'ionic_www_dir';
-const ENV_VAR_BUILD_DIR = 'ionic_build_dir';
+const ENV_VAR_IONIC_DEV = 'IONIC_DEV';
+const ENV_VAR_ROOT_DIR = 'IONIC_ROOT_DIR';
+const ENV_VAR_TMP_DIR = 'IONIC_TMP_DIR';
+const ENV_VAR_SRC_DIR = 'IONIC_SRC_DIR';
+const ENV_VAR_WWW_DIR = 'IONIC_WWW_DIR';
+const ENV_VAR_BUILD_DIR = 'IONIC_BUILD_DIR';
+const ENV_VAR_APP_SCRIPTS_DIR = 'IONIC_APP_SCRIPTS_DIR';
+const ENV_VAR_SOURCE_MAP = 'IONIC_SOURCE_MAP';
 
 export const BUNDLER_ROLLUP = 'rollup';
 export const BUNDLER_WEBPACK = 'webpack';

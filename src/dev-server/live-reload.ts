@@ -1,27 +1,34 @@
+import { hasDiagnostics } from '../util/logger-diagnostics';
 import * as path from 'path';
 import * as tinylr from 'tiny-lr';
 import { ServeConfig } from './serve-config';
 import * as events from '../util/events';
 
+
 export function createLiveReloadServer(config: ServeConfig) {
-
   const liveReloadServer = tinylr();
-  liveReloadServer.listen(config.liveReloadPort , config.host);
+  liveReloadServer.listen(config.liveReloadPort, config.host);
 
-  events.on(events.EventType.FileChange, broadcastChange);
-
-  function broadcastChange(filePath: string | string[]) {
-    const files = Array.isArray(filePath) ? filePath : [filePath];
-    const msg = {
-      body: {
-        files: files.map(f => '/' + path.relative(config.rootDir, f))
-      }
-    };
-    liveReloadServer.changed(msg);
+  function fileChange(filePath: string | string[]) {
+    // only do a live reload if there are no diagnostics
+    // the notification server takes care of showing diagnostics
+    if (!hasDiagnostics(config.buildDir)) {
+      const files = Array.isArray(filePath) ? filePath : [filePath];
+      liveReloadServer.changed({
+        body: {
+          files: files.map(f => '/' + path.relative(config.wwwDir, f))
+        }
+      });
+    }
   }
 
-  return liveReloadServer;
+  events.on(events.EventType.FileChange, fileChange);
+
+  events.on(events.EventType.ReloadApp, () => {
+    fileChange('index.html');
+  });
 }
+
 
 export function injectLiveReloadScript(content: any, host: string, port: Number): any {
   let contentStr = content.toString();

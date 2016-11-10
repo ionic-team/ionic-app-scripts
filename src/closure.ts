@@ -35,9 +35,10 @@ export function isClosureSupported(context: BuildContext) {
 
 
 const taskInfo: TaskInfo = {
-  fullArgConfig: '--closure',
-  shortArgConfig: '-l',
-  envConfig: 'ionic_closure',
+  fullArg: '--closure',
+  shortArg: '-l',
+  envVar: 'IONIC_CLOSURE',
+  packageConfig: 'ionic_closure',
   defaultConfig: require('../config/closure.config.js')
 };
 

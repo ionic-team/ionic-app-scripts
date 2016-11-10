@@ -143,7 +143,7 @@ function copySrcToDest(context: BuildContext, src: string, dest: string, filter:
 
     fs.copy(src, dest, opts, (err) => {
       if (err) {
-        if (err.message.indexOf('ENOENT') > -1) {
+        if (err.message && err.message.indexOf('ENOENT') > -1) {
           resolve({ success: false, src: src, dest: dest, errorMessage: `Error copying "${src}" to "${dest}": File not found`});
         } else {
           resolve({ success: false, src: src, dest: dest, errorMessage: `Error copying "${src}" to "${dest}"`});
@@ -163,9 +163,10 @@ interface CopySrcToDestResult {
 }
 
 const taskInfo: TaskInfo = {
-  fullArgConfig: '--copy',
-  shortArgConfig: '-y',
-  envConfig: 'ionic_copy',
+  fullArg: '--copy',
+  shortArg: '-y',
+  envVar: 'IONIC_COPY',
+  packageConfig: 'ionic_copy',
   defaultConfig: require('../config/copy.config.js')
 };
 

@@ -1,3 +1,4 @@
+import { FileCache } from './file-cache';
 
 export interface BuildContext {
   rootDir?: string;
@@ -9,17 +10,23 @@ export interface BuildContext {
   moduleFiles?: string[];
   isProd?: boolean;
   isWatch?: boolean;
-  isUpdate?: boolean;
-  fullBuildCompleted?: boolean;
-  fileChanged?: string;
+
   bundler?: string;
-  useTranspileCache?: boolean;
-  useBundleCache?: boolean;
-  useSassCache?: boolean;
-  fileCache?: Map<string, File>;
-  successfulSass?: boolean;
+  fileCache?: FileCache;
   inlineTemplates?: boolean;
   webpackWatch?: any;
+
+  sassState?: BuildState;
+  transpileState?: BuildState;
+  templateState?: BuildState;
+  bundleState?: BuildState;
+}
+
+
+export enum BuildState {
+  SuccessfulBuild,
+  RequiresUpdate,
+  RequiresBuild
 }
 
 
@@ -42,13 +49,16 @@ export interface WorkerProcess {
 
 
 export interface TaskInfo {
-  fullArgConfig: string;
-  shortArgConfig: string;
-  envConfig: string;
+  fullArg: string;
+  shortArg: string;
+  envVar: string;
+  packageConfig: string;
   defaultConfig: any;
 }
+
 
 export interface File {
   path: string;
   content: string;
+  timestamp?: number;
 }

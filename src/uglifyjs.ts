@@ -61,9 +61,10 @@ function runUglifyInternal(uglifyJsConfig: UglifyJsConfig): uglify.MinifyOutput 
 
 
 const taskInfo: TaskInfo = {
-  fullArgConfig: '--uglifyjs',
-  shortArgConfig: '-u',
-  envConfig: 'ionic_uglifyjs',
+  fullArg: '--uglifyjs',
+  shortArg: '-u',
+  envVar: 'IONIC_UGLIFYJS',
+  packageConfig: 'ionic_uglifyjs',
   defaultConfig: require('../config/uglifyjs.config.js')
 };
 
