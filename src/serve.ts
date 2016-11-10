@@ -51,7 +51,7 @@ export function serve(context?: BuildContext) {
 
 function onReady(config: ServeConfig, context: BuildContext) {
   if (config.launchBrowser || config.launchLab) {
-    const openOptions: string[] = [`http://${config.host}:${config.httpPort}/`]
+    const openOptions: string[] = [`http://${config.host}:${config.httpPort}`]
       .concat(launchLab(context) ? [IONIC_LAB_URL] : [])
       .concat(browserOption(context) ? [browserOption(context)] : [])
       .concat(platformOption(context) ? ['?ionicplatform=', platformOption(context)] : []);
