@@ -15,7 +15,7 @@ export * from './util/helpers';
 export * from './util/interfaces';
 
 import { getAppScriptsVersion } from './util/helpers';
-import { Logger } from './util/logger';
+import { Logger } from './logger/logger';
 import * as tasks from './tasks';
 
 
