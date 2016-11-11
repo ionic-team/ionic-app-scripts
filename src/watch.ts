@@ -65,7 +65,6 @@ function startWatcher(index: number, watcher: Watcher, context: BuildContext, wa
       } else if (Array.isArray(watcher.paths)) {
         filesWatchedString = watcher.paths.join(', ');
       }
-      //Logger.error(`A watch configured to watch the following paths failed to start. It likely that a file referenced does not exist: ${filesWatchedString}`);
       reject(new BuildError(`A watch configured to watch the following paths failed to start. It likely that a file referenced does not exist: ${filesWatchedString}`));
     }, 3000);
     prepareWatcher(context, watcher);
