@@ -1,6 +1,4 @@
-import { join } from 'path';
 import { isDebugMode } from './config';
-import { readJSONSync } from 'fs-extra';
 import * as chalk from 'chalk';
 
 
