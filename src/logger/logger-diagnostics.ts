@@ -1,8 +1,8 @@
-import { BuildContext } from './interfaces';
+import { BuildContext } from '../util/interfaces';
 import { Diagnostic, Logger, PrintLine } from './logger';
 import { join, resolve , normalize} from 'path';
 import { readFileSync, unlinkSync, writeFileSync } from 'fs';
-import { splitLineBreaks, titleCase } from './helpers';
+import { splitLineBreaks, titleCase } from '../util/helpers';
 import * as chalk from 'chalk';
 
 

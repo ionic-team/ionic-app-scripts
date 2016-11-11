@@ -1,6 +1,6 @@
-import { BuildContext } from './interfaces';
+import { BuildContext } from '../util/interfaces';
 import { Diagnostic, Logger, PrintLine } from './logger';
-import { splitLineBreaks } from './helpers';
+import { splitLineBreaks } from '../util/helpers';
 import * as ts from 'typescript';
 
 

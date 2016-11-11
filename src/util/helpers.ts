@@ -1,11 +1,11 @@
-import { BuildContext } from './interfaces';
-import { readFile, readJsonSync, writeFile } from 'fs-extra';
-import { BuildError } from './logger';
 import { basename, dirname, extname, join } from 'path';
+import { BuildContext } from './interfaces';
+import { BuildError } from './errors';
+import { readFile, readJsonSync, writeFile } from 'fs-extra';
 import * as osName from 'os-name';
 
-let _context: BuildContext;
 
+let _context: BuildContext;
 
 
 let cachedAppScriptsPackageJson: any;

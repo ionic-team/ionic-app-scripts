@@ -1,8 +1,9 @@
 import { BuildContext, BuildState, TaskInfo } from './util/interfaces';
-import { BuildError, Logger } from './util/logger';
+import { BuildError } from './util/errors';
 import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars } from './util/config';
 import { ionCompiler } from './plugins/ion-compiler';
 import { join, isAbsolute, normalize, sep } from 'path';
+import { Logger } from './logger/logger';
 import * as rollupBundler from 'rollup';
 
 

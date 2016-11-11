@@ -1,6 +1,6 @@
 import { BuildContext } from './util/interfaces';
 import { generateContext, getConfigValue, hasConfigValue } from './util/config';
-import { Logger } from './util/logger';
+import { Logger } from './logger/logger';
 import { watch } from './watch';
 import open from './util/open';
 import { createNotificationServer } from './dev-server/notification-server';
