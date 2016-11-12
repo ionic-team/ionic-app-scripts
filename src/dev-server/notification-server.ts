@@ -1,6 +1,7 @@
 // Ionic Dev Server: Server Side Logger
 import { Logger } from '../logger/logger';
-import { hasDiagnostics, getDiagnosticsHtmlContent, generateRuntimeDiagnosticContent } from '../logger/logger-diagnostics';
+import { generateRuntimeDiagnosticContent } from '../logger/logger-runtime';
+import { hasDiagnostics, getDiagnosticsHtmlContent } from '../logger/logger-diagnostics';
 import { on, EventType } from '../util/events';
 import { Server as WebSocketServer } from 'ws';
 import { ServeConfig } from './serve-config';
