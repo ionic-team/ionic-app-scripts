@@ -216,9 +216,14 @@ window.IonicDevServer = {
       }, 50);
 
     } else {
-      status = msg.data.diagnosticsHtml ? 'error' : 'success';
-
       clearTimeout(this.toastTimerId);
+
+      if (msg.data.reloadApp) {
+        this.reloadApp();
+        return;
+      }
+
+      status = msg.data.diagnosticsHtml ? 'error' : 'success';
 
       var toastEle = document.getElementById('ion-diagnostics-toast');
       if (toastEle) {

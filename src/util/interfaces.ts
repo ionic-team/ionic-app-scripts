@@ -86,3 +86,16 @@ export interface PrintLine {
   errorCharStart: number;
   errorLength: number;
 }
+
+
+export interface WsMessage {
+  category: string;
+  type: string;
+  data: any;
+}
+
+
+export interface BuildUpdateMessage {
+  buildId: number;
+  reloadApp: boolean;
+}
