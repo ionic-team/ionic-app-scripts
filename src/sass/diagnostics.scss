@@ -7,9 +7,11 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
   z-index: 99999;
+
+  width: 100%;
+  height: auto;
+  min-height: 100%;
 
   margin: 0;
   padding: 0;
@@ -38,7 +40,7 @@
 }
 
 #ion-diagnostics .ion-diagnostic-masthead {
-  padding: 8px 12px 10px 12px;
+  padding: 8px 12px 12px 12px;
 }
 
 #ion-diagnostics .ion-diagnostic-title {

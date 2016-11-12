@@ -1,6 +1,7 @@
-import { BuildContext } from '../util/interfaces';
-import { Diagnostic, Logger, PrintLine } from './logger';
+import { BuildContext, Diagnostic, PrintLine } from '../util/interfaces';
+import { Logger } from './logger';
 import { join, resolve , normalize} from 'path';
+import { highlight, highlightError } from '../highlight/highlight';
 import { readFileSync, unlinkSync, writeFileSync } from 'fs';
 import { splitLineBreaks, titleCase } from '../util/helpers';
 import * as chalk from 'chalk';
@@ -35,7 +36,7 @@ function consoleLogDiagnostic(d: Diagnostic) {
   console.log('');
 
   if (d.lines && d.lines.length) {
-    const lines = removeWhitespaceIndent(d.lines);
+    const lines = prepareLines(d.lines, 'text');
 
     lines.forEach(l => {
       if (!isMeaningfulLine(l.text)) {
@@ -54,9 +55,9 @@ function consoleLogDiagnostic(d: Diagnostic) {
 
       msg = chalk.dim(msg);
 
-      if (d.syntax === 'js') {
+      if (d.language === 'javascript') {
         msg += jsConsoleSyntaxHighlight(text);
-      } else if (d.syntax === 'css') {
+      } else if (d.language === 'scss') {
         msg += cssConsoleSyntaxHighlight(text, l.errorCharStart);
       } else {
         msg += text;
@@ -231,30 +232,19 @@ function generateCodeBlock(d: Diagnostic) {
 
   c.push(`<div class="ion-diagnostic-file">`);
 
-  c.push(`<div class="ion-diagnostic-file-header">${escapeHtml(d.relFileName)}</div>`);
+  c.push(`<div class="ion-diagnostic-file-header" title="${escapeHtml(d.absFileName)}">${escapeHtml(d.relFileName)}</div>`);
 
   if (d.lines && d.lines.length) {
     c.push(`<div class="ion-diagnostic-blob">`);
 
     c.push(`<table class="ion-diagnostic-table">`);
 
-    const lines = removeWhitespaceIndent(d.lines);
-
-    lines.forEach(l => {
-
-      let trCssClass = '';
-      let code = l.text;
-
-      if (l.errorCharStart > -1) {
-        code = htmlHighlightError(code, l.errorCharStart, l.errorLength);
-        trCssClass = ' class="ion-diagnostic-error-line"';
-      }
-
-      c.push(`<tr${trCssClass}>`);
+    prepareLines(d.lines, 'html').forEach(l => {
+      c.push(`<tr${(l.errorCharStart > -1) ? ' class="ion-diagnostic-error-line"' : ''}>`);
 
       c.push(`<td class="ion-diagnostic-blob-num" data-line-number="${l.lineNumber}"></td>`);
 
-      c.push(`<td class="ion-diagnostic-blob-code">${code}</td>`);
+      c.push(`<td class="ion-diagnostic-blob-code">${highlightError(l.html, l.errorCharStart, l.errorLength)}</td>`);
 
       c.push(`</tr>`);
     });
@@ -273,13 +263,17 @@ function generateCodeBlock(d: Diagnostic) {
 export function generateRuntimeDiagnosticContent(rootDir: string, buildDir: string, runtimeErrorMessage: string, runtimeErrorStack: string) {
   let c: string[] = [];
 
-  c.push('<div class="ion-diagnostic">');
-  c.push('<div class="ion-diagnostic-masthead">');
-  c.push('<div class="ion-diagnostic-header">Runtime Error</div>');
+  c.push(`<div class="ion-diagnostic">`);
+  c.push(`<div class="ion-diagnostic-masthead">`);
+  c.push(`<div class="ion-diagnostic-header">Runtime Error</div>`);
+
   if (runtimeErrorMessage) {
-    c.push('<div class="ion-diagnostic-message">' + escapeHtml(runtimeErrorMessage) + '</div>');
+    runtimeErrorMessage = runtimeErrorMessage.replace(/inline template:\d+:\d+/g, '');
+    runtimeErrorMessage = runtimeErrorMessage.replace('inline template', '');
+
+    c.push(`<div class="ion-diagnostic-message">${escapeHtml(runtimeErrorMessage)}</div>`);
   }
-  c.push('</div>'); // .ion-diagnostic-masthead
+  c.push(`</div>`); // .ion-diagnostic-masthead
 
   const diagnosticsHtmlCache = generateRuntimeStackDiagnostics(rootDir, runtimeErrorStack);
   diagnosticsHtmlCache.forEach(d => {
@@ -287,11 +281,11 @@ export function generateRuntimeDiagnosticContent(rootDir: string, buildDir: stri
   });
 
   if (runtimeErrorStack) {
-    c.push('<div class="ion-diagnostic-stack-header">Stack</div>');
-    c.push('<div class="ion-diagnostic-stack">' + escapeHtml(runtimeErrorStack) + '</div>');
+    c.push(`<div class="ion-diagnostic-stack-header">Stack</div>`);
+    c.push(`<div class="ion-diagnostic-stack">${escapeHtml(runtimeErrorStack)}</div>`);
   }
 
-  c.push('</div>'); // .ion-diagnostic
+  c.push(`</div>`); // .ion-diagnostic
 
   return getDiagnosticsHtmlContent(buildDir, c.join('\n'));
 }
@@ -313,12 +307,14 @@ export function generateRuntimeStackDiagnostics(rootDir: string, stack: string) 
         if (linesSplit.length !== 3) return;
 
         const fileName = fileSplit[0];
-        const errorLineIndex = parseInt(linesSplit[1], 10);
-        const errorCharIndex = parseInt(linesSplit[2], 10);
+        if (fileName.indexOf('~') > -1) return;
+
+        const errorLineNumber = parseInt(linesSplit[1], 10);
+        const errorCharNumber = parseInt(linesSplit[2], 10);
 
         const d: Diagnostic = {
           level: 'error',
-          syntax: 'js',
+          language: 'typescript',
           type: 'runtime',
           header: '',
           code: 'runtime',
@@ -328,38 +324,69 @@ export function generateRuntimeStackDiagnostics(rootDir: string, stack: string) 
           lines: []
         };
 
-        const srcLines = splitLineBreaks(readFileSync(d.absFileName, 'utf8'));
-        if (!srcLines.length || errorLineIndex >= srcLines.length) return;
+        const sourceText = readFileSync(d.absFileName, 'utf8');
+        const srcLines = splitLineBreaks(sourceText);
+        if (!srcLines.length || errorLineNumber >= srcLines.length) return;
+
+        let htmlLines = srcLines;
+
+        try {
+          htmlLines = splitLineBreaks(highlight(d.language, sourceText, true).value);
+        } catch (e) {}
 
         const errorLine: PrintLine = {
-          lineIndex: errorLineIndex,
-          lineNumber: errorLineIndex + 1,
-          text: srcLines[errorLineIndex],
-          errorCharStart: errorCharIndex,
+          lineIndex: errorLineNumber - 1,
+          lineNumber: errorLineNumber,
+          text: srcLines[errorLineNumber - 1],
+          html: htmlLines[errorLineNumber - 1],
+          errorCharStart: errorCharNumber + 1,
           errorLength: 1
         };
+
+        if (errorLine.html.indexOf('class="hljs') === -1) {
+          try {
+            errorLine.html = highlight(d.language, errorLine.text, true).value;
+          } catch (e) {}
+        }
+
         d.lines.push(errorLine);
 
         if (errorLine.lineIndex > 0) {
-          const beforeLine: PrintLine = {
+          const previousLine: PrintLine = {
             lineIndex: errorLine.lineIndex - 1,
             lineNumber: errorLine.lineNumber - 1,
             text: srcLines[errorLine.lineIndex - 1],
+            html: htmlLines[errorLine.lineIndex - 1],
             errorCharStart: -1,
             errorLength: -1
           };
-          d.lines.unshift(beforeLine);
+
+          if (previousLine.html.indexOf('class="hljs') === -1) {
+            try {
+              previousLine.html = highlight(d.language, previousLine.text, true).value;
+            } catch (e) {}
+          }
+
+          d.lines.unshift(previousLine);
         }
 
         if (errorLine.lineIndex < srcLines.length) {
-          const beforeLine: PrintLine = {
+          const nextLine: PrintLine = {
             lineIndex: errorLine.lineIndex + 1,
             lineNumber: errorLine.lineNumber + 1,
             text: srcLines[errorLine.lineIndex + 1],
+            html: htmlLines[errorLine.lineIndex + 1],
             errorCharStart: -1,
             errorLength: -1
           };
-          d.lines.push(beforeLine);
+
+          if (nextLine.html.indexOf('class="hljs') === -1) {
+            try {
+              nextLine.html = highlight(d.language, nextLine.text, true).value;
+            } catch (e) {}
+          }
+
+          d.lines.push(nextLine);
         }
 
         diagnostics.push(d);
@@ -372,21 +399,6 @@ export function generateRuntimeStackDiagnostics(rootDir: string, stack: string) 
 };
 
 const WEBPACK_FILE_REGEX = /\(webpack:\/\/\/(.*?)\)/;
-
-
-function htmlHighlightError(errorLine: string, errorCharStart: number, errorLength: number) {
-  const lineChars: string[] = [];
-  const lineLength = Math.max(errorLine.length, errorCharStart + errorLength);
-  for (var i = 0; i < lineLength; i++) {
-    var chr = errorLine.charAt(i);
-    if (i >= errorCharStart && i < errorCharStart + errorLength) {
-      chr = `<span class="ion-diagnostics-error-chr">${chr === '' ? ' ' : chr}</span>`;
-    }
-    lineChars.push(chr);
-  }
-
-  return lineChars.join('');
-}
 
 
 function jsConsoleSyntaxHighlight(text: string) {
@@ -442,17 +454,17 @@ function escapeHtml(unsafe: string) {
 }
 
 
-function removeWhitespaceIndent(orgLines: PrintLine[]) {
-  const lines = orgLines.slice();
+function prepareLines(orgLines: PrintLine[], code: 'text'|'html') {
+  const lines: PrintLine[] = JSON.parse(JSON.stringify(orgLines));
 
   for (var i = 0; i < 100; i++) {
-    if (!eachLineHasLeadingWhitespace(lines)) {
+    if (!eachLineHasLeadingWhitespace(lines, code)) {
       return lines;
     }
     for (var i = 0; i < lines.length; i++) {
-      lines[i].text = lines[i].text.substr(1);
+      (<any>lines[i])[code] = (<any>lines[i])[code].substr(1);
       lines[i].errorCharStart--;
-      if (!lines[i].text.length) {
+      if (!(<any>lines[i])[code].length) {
         return lines;
       }
     }
@@ -462,15 +474,15 @@ function removeWhitespaceIndent(orgLines: PrintLine[]) {
 }
 
 
-function eachLineHasLeadingWhitespace(lines: PrintLine[]) {
+function eachLineHasLeadingWhitespace(lines: PrintLine[], code: 'text'|'html') {
   if (!lines.length) {
     return false;
   }
   for (var i = 0; i < lines.length; i++) {
-    if (lines[i].text.length < 1) {
+    if ((<any>lines[i])[code].length < 1) {
       return false;
     }
-    var firstChar = lines[i].text.charAt(0);
+    var firstChar = (<any>lines[i])[code].charAt(0);
     if (firstChar !== ' ' && firstChar !== '\t') {
       return false;
     }
@@ -480,39 +492,14 @@ function eachLineHasLeadingWhitespace(lines: PrintLine[]) {
 
 
 const JS_KEYWORDS = [
-  'as',
-  'break',
-  'case',
-  'catch',
-  'class',
-  'const',
-  'continue',
-  'debugger',
-  'default',
-  'delete',
-  'do',
-  'else',
-  'export',
-  'extends',
-  'finally',
-  'for',
-  'from',
-  'function',
-  'if',
-  'import',
-  'in',
-  'instanceof',
-  'new',
-  'return',
-  'super',
-  'switch',
-  'this',
-  'throw',
-  'try',
-  'typeof',
-  'var',
-  'void',
-  'while',
+  'abstract', 'any', 'as', 'break', 'boolean', 'case', 'catch', 'class',
+  'console', 'const', 'continue', 'debugger', 'declare', 'default', 'delete',
+  'do', 'else', 'enum', 'export', 'extends', 'false', 'finally', 'for', 'from',
+  'function', 'get', 'if', 'import', 'in', 'implements', 'Infinity',
+  'instanceof', 'let', 'module', 'namespace', 'NaN', 'new', 'number', 'null',
+  'public', 'private', 'protected', 'require', 'return', 'static', 'set',
+  'string', 'super', 'switch', 'this', 'throw', 'try', 'true', 'type',
+  'typeof', 'undefined', 'var', 'void', 'with', 'while', 'yield',
 ];
 
 

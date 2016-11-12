@@ -74,7 +74,6 @@
     "@types/ws": "^0.0.34",
     "conventional-changelog-cli": "1.2.0",
     "github": "0.2.4",
-    "highlight.js": "9.8.0",
     "ionic-cz-conventional-changelog": "1.0.0",
     "jasmine": "2.5.2",
     "mock-fs": "3.11.0",

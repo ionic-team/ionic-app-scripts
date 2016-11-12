@@ -9,7 +9,7 @@ $code-font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 // -----------------------------
 $ionic-blue:                  #478aff;
 $background-color:            #fff;
-$code-error-background:       rgba(255, 221, 221, 0.3);
+$code-error-background:       rgba(255, 221, 221, 0.25);
 $code-error-highlight:        #ffdddd;
 
 $header-background:           #f8f8f8;
@@ -19,7 +19,7 @@ $header-text-color:           #333;
 $diagnostics-header-background: $header-background;
 $diagnostics-title-color:     #222;
 $diagnostics-message-color:   #666;
-$diagnostics-border:          $header-border-color;
+$diagnostics-border:            $header-border-color;
 
 
 // Miscellaneous
@@ -35,3 +35,4 @@ $tab-size: 2;
 @import './toast';
 @import './header';
 @import './system-info';
+@import '../highlight/github-gist';
