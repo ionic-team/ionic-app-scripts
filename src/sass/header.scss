@@ -1,5 +1,15 @@
 
 .ion-diagnostics-header {
+  background: $header-background;
+  border-bottom: 0.5px solid $header-border-color;
+  color: $header-text-color;
+}
+
+.ion-diagnostics-cordova-ios .ion-diagnostics-header {
+  padding-top: 20px;
+}
+
+.ion-diagnostics-header-content {
   display: flex;
   overflow: hidden;
 
@@ -9,10 +19,6 @@
 
   width: 100%;
   min-height: 44px;
-
-  background: $header-background;
-  border-bottom: 0.5px solid $header-border-color;
-  color: $header-text-color;
 }
 
 .ion-diagnostics-header-inner {

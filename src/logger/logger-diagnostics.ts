@@ -181,9 +181,11 @@ export function getDiagnosticsHtmlContent(buildDir: string, includeDiagnosticsHt
   // diagnostics header
   c.push(`
     <div class="ion-diagnostics-header">
-      <div class="ion-diagnostics-header-inner">Error</div>
-      <div class="ion-diagnostics-buttons">
-        <button class="ion-diagnostic-close">Close</button>
+      <div class="ion-diagnostics-header-content">
+        <div class="ion-diagnostics-header-inner">Error</div>
+        <div class="ion-diagnostics-buttons">
+          <button class="ion-diagnostic-close">Close</button>
+        </div>
       </div>
     </div>
   `);
