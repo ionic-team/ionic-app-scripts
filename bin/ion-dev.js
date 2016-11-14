@@ -59,7 +59,7 @@ window.IonicDevServer = {
       c.push(' <div class="ion-diagnostics-header-content">');
       c.push('  <div class="ion-diagnostics-header-inner">Error</div>');
       c.push('  <div class="ion-diagnostics-buttons">');
-      c.push('   <button class="ion-diagnostic-close">Close</button>');
+      c.push('   <button id="ion-diagnostic-close">Close</button>');
       c.push('  </div>');
       c.push(' </div>');
       c.push('</div>');
