@@ -22,10 +22,22 @@ $diagnostics-message-color:   #666;
 $diagnostics-border:            $header-border-color;
 
 
+// z-index
+// -----------------------------
+$z-index-diagnostics:         100000;
+$z-index-menu:                100001;
+$z-index-toast:               100002;
+
+
 // Miscellaneous
 // -----------------------------
 $tab-size: 2;
 
+a,
+button {
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+}
 
 // Imports
 // -----------------------------
@@ -34,5 +46,6 @@ $tab-size: 2;
 @import './stack-block';
 @import './toast';
 @import './header';
+@import './options-menu';
 @import './system-info';
-@import '../highlight/github-gist';
+@import '../../highlight/github-gist';

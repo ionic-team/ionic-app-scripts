@@ -12,7 +12,7 @@ import { ServeConfig, IONIC_LAB_URL } from './dev-server/serve-config';
 const DEV_LOGGER_DEFAULT_PORT = 53703;
 const LIVE_RELOAD_DEFAULT_PORT = 35729;
 const DEV_SERVER_DEFAULT_PORT = 8100;
-const DEV_SERVER_DEFAULT_HOST = 'localhost';
+const DEV_SERVER_DEFAULT_HOST = '0.0.0.0';
 
 export function serve(context?: BuildContext) {
   context = generateContext(context);
@@ -58,7 +58,8 @@ function onReady(config: ServeConfig, context: BuildContext) {
 
     open(openOptions.join(''), browserToLaunch(context));
   }
-  Logger.info(`dev server running: http://${config.host}:${config.httpPort}/`, 'green', true);
+  const host = config.host === '0.0.0.0' ? 'localhost' : config.host;
+  Logger.info(`dev server running: http://${host}:${config.httpPort}/`, 'green', true);
   Logger.newLine();
 }
 

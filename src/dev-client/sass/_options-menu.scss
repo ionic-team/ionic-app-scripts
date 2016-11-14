@@ -1,0 +1,164 @@
+
+$action-sheet-width:                             100% !default;
+$action-sheet-max-width:                         500px !default;
+
+
+#ion-diagnostics-options {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: $z-index-menu;
+
+  width: $action-sheet-width;
+  height: $action-sheet-width;
+
+  font-family: $body-font-family;
+}
+
+.ion-diagnostics-sheet-wrapper {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 10;
+  display: block;
+
+  margin: auto;
+
+  width: $action-sheet-width;
+  max-width: $action-sheet-max-width;
+
+  transition: transform 300ms cubic-bezier(.36,.66,.04,1);
+  transform: translate3d(0, 100%, 0);
+}
+
+#ion-diagnostics-backdrop {
+  width: 100%;
+  height: 100%;
+  opacity: 0.01;
+  background: black;
+  transition: opacity 300ms cubic-bezier(.36,.66,.04,1);
+}
+
+.ion-diagnostics-options-show .ion-diagnostics-sheet-wrapper {
+  transform: translate3d(0, 0, 0);
+}
+
+.ion-diagnostics-options-show #ion-diagnostics-backdrop {
+  opacity: 0.4;
+}
+
+/// @prop - Text align of the action sheet
+$action-sheet-ios-text-align:                           center !default;
+
+/// @prop - Padding of the action sheet
+$action-sheet-ios-padding:                              0 10px !default;
+
+/// @prop - Bottom margin of the action sheet button group
+$action-sheet-ios-group-margin-bottom:                  10px !default;
+
+/// @prop - Background color of the action sheet
+$action-sheet-ios-background:                           #f9f9f9 !default;
+
+/// @prop - Border color of the action sheet
+$action-sheet-ios-border-color:                         #d6d6da !default;
+
+/// @prop - Border radius of the action sheet
+$action-sheet-ios-border-radius:                        13px !default;
+
+/// @prop - Padding of the action sheet title
+$action-sheet-ios-title-padding:                        1.5rem !default;
+
+/// @prop - Color of the action sheet title
+$action-sheet-ios-title-color:                          #8f8f8f !default;
+
+/// @prop - Font size of the action sheet title
+$action-sheet-ios-title-font-size:                      1.3rem !default;
+
+/// @prop - Font weight of the action sheet title
+$action-sheet-ios-title-font-weight:                    400 !default;
+
+/// @prop - Border radius of the action sheet title
+$action-sheet-ios-title-border-radius:                  0 !default;
+
+/// @prop - Min height of the action sheet button
+$action-sheet-ios-button-min-height:                    5.6rem !default;
+
+/// @prop - Padding of the action sheet button
+$action-sheet-ios-button-padding:                       18px !default;
+
+/// @prop - Text color of the action sheet button
+$action-sheet-ios-button-text-color:                    #007aff !default;
+
+/// @prop - Font size of the action sheet button
+$action-sheet-ios-button-font-size:                     2rem !default;
+
+/// @prop - Border width of the action sheet button
+$action-sheet-ios-button-border-width:                  0.34px !default;
+
+/// @prop - Border style of the action sheet button
+$action-sheet-ios-button-border-style:                  solid !default;
+
+/// @prop - Border color of the action sheet button
+$action-sheet-ios-button-border-color:                  #d1d3d6 !default;
+
+/// @prop - Background color of the action sheet button
+$action-sheet-ios-button-background:                    transparent !default;
+
+/// @prop - Background color of the activated action sheet button
+$action-sheet-ios-button-background-activated:          #ebebeb !default;
+
+/// @prop - Destructive text color of the action sheet button
+$action-sheet-ios-button-destructive-text-color:        #f53d3d !default;
+
+/// @prop - Background color of the action sheet cancel button
+$action-sheet-ios-button-cancel-background:             #fff !default;
+
+/// @prop - Font weight of the action sheet cancel button
+$action-sheet-ios-button-cancel-font-weight:            600 !default;
+
+
+.ion-diagnostics-sheet-container {
+  padding: $action-sheet-ios-padding;
+}
+
+.ion-diagnostics-sheet-group {
+  overflow: hidden;
+
+  margin-bottom: $action-sheet-ios-group-margin-bottom - 2;
+
+  border-radius: $action-sheet-ios-border-radius;
+  background: $action-sheet-ios-background;
+}
+
+.ion-diagnostics-sheet-group:last-child {
+  margin-bottom: $action-sheet-ios-group-margin-bottom;
+}
+
+.ion-diagnostics-sheet-title {
+  padding: $action-sheet-ios-title-padding;
+
+  border-bottom: $action-sheet-ios-button-border-width $action-sheet-ios-button-border-style $action-sheet-ios-border-color;
+  border-radius: $action-sheet-ios-title-border-radius;
+  font-size: $action-sheet-ios-title-font-size;
+  font-weight: $action-sheet-ios-title-font-weight;
+  text-align: $action-sheet-ios-text-align;
+  color: $action-sheet-ios-title-color;
+}
+
+.ion-diagnostics-sheet-button {
+  margin: 0;
+  padding: $action-sheet-ios-button-padding;
+
+  width: $action-sheet-width;
+  min-height: $action-sheet-ios-button-min-height;
+
+  border-bottom: $action-sheet-ios-button-border-width $action-sheet-ios-button-border-style $action-sheet-ios-border-color;
+  font-size: $action-sheet-ios-button-font-size;
+  color: $action-sheet-ios-button-text-color;
+  background: $action-sheet-ios-button-background;
+}
+
+.ion-diagnostics-sheet-button:last-child {
+  border-bottom: 0;
+}

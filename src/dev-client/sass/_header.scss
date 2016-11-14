@@ -34,7 +34,7 @@
   display: flex;
 }
 
-.ion-diagnostic-close {
+#ion-diagnostic-close {
   margin: 0;
   padding: 10px 20px;
   border: 0;
@@ -51,6 +51,6 @@
   cursor: pointer;
 }
 
-.ion-diagnostic-close:hover {
+#ion-diagnostic-close:hover {
   opacity: 0.7;
 }
