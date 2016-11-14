@@ -336,8 +336,8 @@ window.IonicDevServer = {
       if (ev.metaKey || ev.ctrlKey) {
         // cmd or ctrl key held down
 
-        if (key == 49) {
-          // (cmd/ctrl + 1)
+        if (key == 56) {
+          // holding down cmd or ctrl, and 8
           self.toggleOptionsMenu();
         }
       }

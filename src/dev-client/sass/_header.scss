@@ -1,7 +1,7 @@
 
 .ion-diagnostics-header {
   background: $header-background;
-  border-bottom: 0.5px solid $header-border-color;
+  border-bottom: $hairlines-width solid $header-border-color;
   color: $header-text-color;
 }
 
