@@ -333,6 +333,7 @@ window.IonicDevServer = {
       var key = ev.keyCode || ev.charCode;
 
       if (key == 27) {
+        // escape key
         self.optionsMenu(false);
       }
     });
@@ -340,13 +341,10 @@ window.IonicDevServer = {
     document.addEventListener('keydown', function(ev) {
       var key = ev.keyCode || ev.charCode;
 
-      if (ev.metaKey || ev.ctrlKey) {
-        // cmd or ctrl key held down
-
-        if (key == 56) {
-          // holding down cmd or ctrl, and 8
-          self.toggleOptionsMenu();
-        }
+      if ((ev.metaKey || ev.ctrlKey) && ev.shiftKey && key == 56) {
+        // mac: command + shift + 8
+        // win: ctrl + shift + 8
+        self.toggleOptionsMenu();
       }
     });
 
