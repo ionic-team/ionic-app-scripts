@@ -173,31 +173,9 @@ window.IonicDevServer = {
 
     if (msg.type === 'started') {
       status = 'active';
-
-      var toastEle = document.getElementById('ion-diagnostics-toast');
-      if (!toastEle) {
-        toastEle = document.createElement('div');
-        toastEle.id = 'ion-diagnostics-toast';
-        var c = []
-        c.push('<div class="ion-diagnostics-toast-content">');
-        c.push(' <div class="ion-diagnostics-toast-message">Building...</div>');
-        c.push(' <div class="ion-diagnostics-toast-spinner">');
-        c.push('  <svg viewBox="0 0 64 64"><circle transform="translate(32,32)" r="26"></circle></svg>');
-        c.push(' </div>');
-        c.push('</div>');
-        toastEle.innerHTML = c.join('');
-        document.body.insertBefore(toastEle, document.body.firstChild);
-      }
-
-      this.toastTimerId = setTimeout(function() {
-        var toastEle = document.getElementById('ion-diagnostics-toast');
-        if (toastEle) {
-          toastEle.classList.add('ion-diagnostics-toast-active');
-        }
-      }, 50);
+      this.buildingNotification(true);
 
     } else {
-      clearTimeout(this.toastTimerId);
 
       if (msg.data.reloadApp) {
         this.reloadApp();
@@ -206,10 +184,7 @@ window.IonicDevServer = {
 
       status = msg.data.diagnosticsHtml ? 'error' : 'success';
 
-      var toastEle = document.getElementById('ion-diagnostics-toast');
-      if (toastEle) {
-        toastEle.classList.remove('ion-diagnostics-toast-active');
-      }
+      this.buildingNotification(false);
 
       var diagnosticsEle = document.getElementById('ion-diagnostics');
       if (diagnosticsEle && !msg.data.diagnosticsHtml) {
@@ -269,6 +244,38 @@ window.IonicDevServer = {
           diagnosticsEle.querySelector('.ion-diagnostics-content').appendChild(systemInfoEle);
         }
       }
+    }
+  },
+
+  buildingNotification: function(showToast) {
+    clearTimeout(this.toastTimerId);
+
+    var toastEle = document.getElementById('ion-diagnostics-toast');
+
+    if (showToast) {
+      if (!toastEle) {
+        toastEle = document.createElement('div');
+        toastEle.id = 'ion-diagnostics-toast';
+        var c = []
+        c.push('<div class="ion-diagnostics-toast-content">');
+        c.push(' <div class="ion-diagnostics-toast-message">Building...</div>');
+        c.push(' <div class="ion-diagnostics-toast-spinner">');
+        c.push('  <svg viewBox="0 0 64 64"><circle transform="translate(32,32)" r="26"></circle></svg>');
+        c.push(' </div>');
+        c.push('</div>');
+        toastEle.innerHTML = c.join('');
+        document.body.insertBefore(toastEle, document.body.firstChild);
+      }
+
+      this.toastTimerId = setTimeout(function() {
+        var toastEle = document.getElementById('ion-diagnostics-toast');
+        if (toastEle) {
+          toastEle.classList.add('ion-diagnostics-toast-active');
+        }
+      }, 16);
+
+    } else if (!showToast && toastEle) {
+      toastEle.classList.remove('ion-diagnostics-toast-active');
     }
   },
 
