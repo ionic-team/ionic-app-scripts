@@ -29,8 +29,14 @@
   background-color: $background-color;
 
   box-sizing: border-box;
-  overflow: auto;
+  overflow: hidden;
   user-select: auto;
+}
+
+.ion-diagnostics-content {
+  overflow-x: hidden;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
 }
 
 #ion-diagnostics .ion-diagnostic {

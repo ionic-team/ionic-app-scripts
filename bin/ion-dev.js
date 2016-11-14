@@ -64,13 +64,15 @@ window.IonicDevServer = {
       c.push(' </div>');
       c.push('</div>');
 
-      c.push('<div class="ion-diagnostic">');
-      c.push(' <div class="ion-diagnostic-masthead">');
-      c.push('  <div class="ion-diagnostic-header">Runtime Error</div>');
-      c.push('  <div class="ion-diagnostic-message">' + err.message + '</div>');
+      c.push('<div class="ion-diagnostics-content">');
+      c.push(' <div class="ion-diagnostic">');
+      c.push('  <div class="ion-diagnostic-masthead">');
+      c.push('   <div class="ion-diagnostic-header">Runtime Error</div>');
+      c.push('   <div class="ion-diagnostic-message">' + err.message + '</div>');
+      c.push('  </div>');
+      c.push('  <div class="ion-diagnostic-stack-header">Stack</div>');
+      c.push('  <div class="ion-diagnostic-stack">' + err.stack + '</div>');
       c.push(' </div>');
-      c.push(' <div class="ion-diagnostic-stack-header">Stack</div>');
-      c.push(' <div class="ion-diagnostic-stack">' + err.stack + '</div>');
       c.push('</div>');
 
       this.buildUpdate({
@@ -264,7 +266,7 @@ window.IonicDevServer = {
           systemInfoEle = document.createElement('div');
           systemInfoEle.id = 'ion-diagnostics-system-info';
           systemInfoEle.innerHTML = IonicDevServerConfig.systemInfo.join('\n');
-          diagnosticsEle.appendChild(systemInfoEle);
+          diagnosticsEle.querySelector('.ion-diagnostics-content').appendChild(systemInfoEle);
         }
       }
     }

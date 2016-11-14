@@ -190,6 +190,8 @@ export function getDiagnosticsHtmlContent(buildDir: string, includeDiagnosticsHt
     </div>
   `);
 
+  c.push(`<div class="ion-diagnostics-content">`);
+
   if (includeDiagnosticsHtml) {
     c.push(includeDiagnosticsHtml);
   }
@@ -202,6 +204,8 @@ export function getDiagnosticsHtmlContent(buildDir: string, includeDiagnosticsHt
       c.push(diagnosticsHtmlCache[keys[i]]);
     }
   }
+
+  c.push(`</div>`);
 
   return c.join('\n');
 }

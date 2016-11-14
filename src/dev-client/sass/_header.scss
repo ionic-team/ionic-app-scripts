@@ -10,11 +10,18 @@
 }
 
 .ion-diagnostics-header-content {
+  display: -webkit-flex;
   display: flex;
+
   overflow: hidden;
 
+  -webkit-flex-direction: row;
   flex-direction: row;
+
+  -webkit-align-items: center;
   align-items: center;
+
+  -webkit-justify-content: space-between;
   justify-content: space-between;
 
   width: 100%;
@@ -22,16 +29,21 @@
 }
 
 .ion-diagnostics-header-inner {
+  -webkit-flex: 1;
   flex: 1;
+
+  display: -webkit-flex;
   display: flex;
+
   padding: 0 20px;
   font-size: 20px;
 }
 
 .ion-diagnostics-buttons {
-  flex: 0;
-  padding: 0 0 0 20px;
+  display: -webkit-flex;
   display: flex;
+
+  padding: 0 0 0 20px;
 }
 
 #ion-diagnostic-close {
