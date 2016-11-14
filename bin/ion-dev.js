@@ -369,6 +369,8 @@ window.IonicDevServer = {
           break;
       }
     });
+
+    this.enableShake();
   },
 
   enableShake: function() {
