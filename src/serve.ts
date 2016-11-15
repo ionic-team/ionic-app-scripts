@@ -50,15 +50,15 @@ export function serve(context?: BuildContext) {
 }
 
 function onReady(config: ServeConfig, context: BuildContext) {
+  const host = config.host === '0.0.0.0' ? 'localhost' : config.host;
   if (config.launchBrowser || config.launchLab) {
-    const openOptions: string[] = [`http://${config.host}:${config.httpPort}`]
+    const openOptions: string[] = [`http://${host}:${config.httpPort}`]
       .concat(launchLab(context) ? [IONIC_LAB_URL] : [])
       .concat(browserOption(context) ? [browserOption(context)] : [])
       .concat(platformOption(context) ? ['?ionicplatform=', platformOption(context)] : []);
 
     open(openOptions.join(''), browserToLaunch(context));
   }
-  const host = config.host === '0.0.0.0' ? 'localhost' : config.host;
   Logger.info(`dev server running: http://${host}:${config.httpPort}/`, 'green', true);
   Logger.newLine();
 }
