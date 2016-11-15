@@ -39,8 +39,8 @@ Instead of depending on external task runners, Ionic App Scripts now prefers bei
 
 ```
   "scripts": {
-    "build": "ionic-app-scripts build",
-    "watch": "ionic-app-scripts watch"
+    "ionic:build": "ionic-app-scripts build",
+    "ionic:serve": "ionic-app-scripts serve"
   },
 ```
 
