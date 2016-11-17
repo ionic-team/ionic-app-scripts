@@ -26,7 +26,7 @@ export function createHttpServer(config: ServeConfig): express.Application {
   app.use('/', express.static(config.wwwDir));
   app.use(`/${LOGGER_DIR}`, express.static(path.join(__dirname, '..', '..', 'bin'), { maxAge: 31536000 }));
   app.get(IONIC_LAB_URL, (req, res) =>
-    res.sendfile('ionic-lab.html', {root: path.join(__dirname, '..', '..', 'bin')}));
+    res.sendFile('ionic-lab.html', {root: path.join(__dirname, '..', '..', 'bin')}));
   app.get('/cordova.js', serveCordovaJS);
 
   if (config.useProxy) {
