@@ -191,7 +191,7 @@ Execute the following steps to publish a release:
 2. Run `npm run test` to validate the `dist` works
 3. Temporarily tick the `package.json` version
 4. Run `npm run changelog` to append the latest additions to the changelog
-5. Manually verify the changelog content. Often times you'll want to manually add content/instructions
+5. Manually verify and commit the changelog changes. Often times you'll want to manually add content/instructions
 6. Revert the `package.json` version to the original version
 7. Run `npm version patch` to tick the version and generate a git tag
 8. Run `npm run github-release` to create the github release entry
