@@ -16,7 +16,7 @@
     "ionic-app-scripts": "./bin/ionic-app-scripts.js"
   },
   "scripts": {
-    "build": "npm run clean && tsc",
+    "build": "npm run clean && tsc && npm run sass",
     "build-and-test": "npm run build && npm run test",
     "changelog": "./node_modules/.bin/conventional-changelog -p angular -i CHANGELOG.md -s",
     "changelog-and-commit": "npm run changelog && node ./scripts/commit-changelog.js",
