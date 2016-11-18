@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+var path = require('path');
+
 if (process.argv.length > 2) {
 
   if (process.env.npm_config_argv) {
@@ -15,7 +17,7 @@ if (process.argv.length > 2) {
       console.log(e)
     }
   }
-
+  process.env.IONIC_APP_SCRIPTS_DIR = path.join(__dirname, '..');
   require('../dist/main').run(process.argv[2]);
 
 } else {

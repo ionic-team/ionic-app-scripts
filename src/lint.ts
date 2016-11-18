@@ -157,7 +157,7 @@ const taskInfo: TaskInfo = {
   shortArg: '-i',
   envVar: 'ionic_tslint',
   packageConfig: 'IONIC_TSLINT',
-  defaultConfig: require('./util/commonjs-loader')('../../tslint.json')
+  defaultConfigPath: '../../tslint.json'
 };
 
 export interface LintWorkerConfig {

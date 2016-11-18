@@ -53,7 +53,7 @@ export interface TaskInfo {
   shortArg: string;
   envVar: string;
   packageConfig: string;
-  defaultConfig: any;
+  defaultConfigPath: any;
 }
 
 

@@ -13,6 +13,7 @@ export { watch } from './watch';
 export * from './util/config';
 export * from './util/helpers';
 export * from './util/interfaces';
+export { getIonicEnvironmentPlugin } from './webpack/ionic-webpack-factory';
 
 import { getAppScriptsVersion } from './util/helpers';
 import { Logger } from './logger/logger';

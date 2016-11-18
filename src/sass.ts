@@ -60,7 +60,8 @@ export function sassWorker(context: BuildContext, configFile: string) {
   return Promise.all(bundlePromise).then(() => {
     clearDiagnostics(context, DiagnosticsType.Sass);
 
-    const sassConfig: SassConfig = fillConfigDefaults(configFile, taskInfo.defaultConfig);
+    const defaultConfigData = require('./util/commonjs-loader')(taskInfo.defaultConfigPath);
+    const sassConfig: SassConfig = fillConfigDefaults(configFile, defaultConfigData);
 
     // where the final css output file is saved
     if (!sassConfig.outFile) {
@@ -432,7 +433,7 @@ const taskInfo: TaskInfo = {
   shortArg: '-s',
   envVar: 'IONIC_SASS',
   packageConfig: 'ionic_sass',
-  defaultConfig: require('./util/commonjs-loader')('../../config/sass.config.js')
+  defaultConfigPath: '../config/sass.config.js'
 };
 
 

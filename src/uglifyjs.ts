@@ -28,7 +28,8 @@ export function uglifyjsWorker(context: BuildContext, configFile: string): Promi
   return new Promise((resolve, reject) => {
     try {
       // provide a full path for the config options
-      const uglifyJsConfig: UglifyJsConfig = fillConfigDefaults(configFile, taskInfo.defaultConfig);
+      const defaultConfigData = require('./util/commonjs-loader')(taskInfo.defaultConfigPath);
+      const uglifyJsConfig: UglifyJsConfig = fillConfigDefaults(configFile, defaultConfigData);
       uglifyJsConfig.sourceFile = join(context.buildDir, uglifyJsConfig.sourceFile);
       uglifyJsConfig.inSourceMap = join(context.buildDir, uglifyJsConfig.inSourceMap);
       uglifyJsConfig.destFileName = join(context.buildDir, uglifyJsConfig.destFileName);
@@ -66,7 +67,7 @@ const taskInfo: TaskInfo = {
   shortArg: '-u',
   envVar: 'IONIC_UGLIFYJS',
   packageConfig: 'ionic_uglifyjs',
-  defaultConfig: require('./util/commonjs-loader')('../../config/uglifyjs.config.js')
+  defaultConfigPath: '../config/uglifyjs.config.js'
 };
 
 

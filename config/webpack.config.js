@@ -1,9 +1,6 @@
 var path = require('path');
 var webpack = require('webpack');
 
-var ionicWebpackFactoryPath = path.join(process.env.IONIC_APP_SCRIPTS_DIR, 'dist', 'webpack', 'ionic-webpack-factory.js');
-var ionicWebpackFactory = require(ionicWebpackFactoryPath);
-
 function getEntryPoint() {
   if (process.env.IONIC_ENV === 'prod') {
     return '{{TMP}}/app/main.prod.js';
@@ -22,10 +19,12 @@ function getPlugins() {
       //new DedupePlugin()
     ];
   }
+  var mainPath = path.join(process.env.IONIC_APP_SCRIPTS_DIR, 'dist', 'main.js');
+  var getIonicEnvironmentPlugin = require(mainPath).getIonicEnvironmentPlugin;
 
   // for dev builds, use our custom environment
   return [
-    ionicWebpackFactory.getIonicEnvironmentPlugin()
+    getIonicEnvironmentPlugin()
   ];
 }
 

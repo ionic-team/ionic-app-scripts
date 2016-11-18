@@ -36,7 +36,8 @@ export function ngcWorker(context: BuildContext, configFile: string) {
 
 function runNgc(context: BuildContext, configFile: string) {
   return new Promise((resolve, reject) => {
-    const ngcConfig: NgcConfig = fillConfigDefaults(configFile, taskInfo.defaultConfig);
+    const defaultConfigData = require('./util/commonjs-loader')(taskInfo.defaultConfigPath);
+    const ngcConfig: NgcConfig = fillConfigDefaults(configFile, defaultConfigData);
 
     // make a copy of the users src tsconfig file
     // and save the modified copy into the tmp directory
@@ -193,7 +194,7 @@ const taskInfo: TaskInfo = {
   shortArg: '-n',
   envVar: 'IONIC_NGC',
   packageConfig: 'ionic_ngc',
-  defaultConfig: require('./util/commonjs-loader')('../../config/ngc.config.js')
+  defaultConfigPath: '../config/ngc.config.js'
 };
 
 

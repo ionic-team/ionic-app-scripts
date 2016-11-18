@@ -42,7 +42,7 @@ export function generateContext(context?: BuildContext): BuildContext {
   context.buildDir = resolve(context.buildDir || getConfigValue(context, '--buildDir', null, ENV_VAR_BUILD_DIR, ENV_VAR_BUILD_DIR.toLowerCase(), join(context.wwwDir, BUILD_DIR)));
   setProcessEnvVar(ENV_VAR_BUILD_DIR, context.buildDir);
 
-  setProcessEnvVar(ENV_VAR_APP_SCRIPTS_DIR, join(__dirname, '..', '..'));
+  //setProcessEnvVar(ENV_VAR_APP_SCRIPTS_DIR, join(__dirname, '..', '..'));
 
   const sourceMapValue = getConfigValue(context, '--sourceMap', null, ENV_VAR_SOURCE_MAP, ENV_VAR_SOURCE_MAP.toLowerCase(), 'eval');
   setProcessEnvVar(ENV_VAR_SOURCE_MAP, sourceMapValue);

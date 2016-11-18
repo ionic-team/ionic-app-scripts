@@ -39,7 +39,8 @@ export function watch(context?: BuildContext, configFile?: string) {
 
 
 function startWatchers(context: BuildContext, configFile: string) {
-  const watchConfig: WatchConfig = fillConfigDefaults(configFile, taskInfo.defaultConfig);
+  const defaultConfigData = require('./util/commonjs-loader')(taskInfo.defaultConfigPath);
+  const watchConfig: WatchConfig = fillConfigDefaults(configFile, defaultConfigData);
 
   const promises = watchConfig
     .watchers
@@ -266,7 +267,7 @@ const taskInfo: TaskInfo = {
   shortArg: null,
   envVar: 'IONIC_WATCH',
   packageConfig: 'ionic_watch',
-  defaultConfig: require('./util/commonjs-loader')('../../config/watch.config.js')
+  defaultConfigPath: '../config/watch.config.js'
 };
 
 

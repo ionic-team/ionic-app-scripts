@@ -198,7 +198,8 @@ function startWebpackWatch(context: BuildContext, config: WebpackConfig) {
 export function getWebpackConfig(context: BuildContext, configFile: string): WebpackConfig {
   configFile = getUserConfigFile(context, taskInfo, configFile);
 
-  let webpackConfig: WebpackConfig = fillConfigDefaults(configFile, taskInfo.defaultConfig);
+  const defaultConfigData = require('./util/commonjs-loader')(taskInfo.defaultConfigPath);
+  let webpackConfig: WebpackConfig = fillConfigDefaults(configFile, defaultConfigData);
   webpackConfig.entry = replacePathVars(context, webpackConfig.entry);
   webpackConfig.output.path = replacePathVars(context, webpackConfig.output.path);
 
@@ -229,7 +230,7 @@ const taskInfo: TaskInfo = {
   shortArg: '-w',
   envVar: 'IONIC_WEBPACK',
   packageConfig: 'ionic_webpack',
-  defaultConfig: require('./util/commonjs-loader')('../../config/webpack.config.js')
+  defaultConfigPath: '../config/webpack.config.js'
 };
 
 

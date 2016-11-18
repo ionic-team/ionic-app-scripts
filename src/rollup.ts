@@ -117,7 +117,8 @@ export function rollupWorker(context: BuildContext, configFile: string): Promise
 
 export function getRollupConfig(context: BuildContext, configFile: string): RollupConfig {
   configFile = getUserConfigFile(context, taskInfo, configFile);
-  return fillConfigDefaults(configFile, taskInfo.defaultConfig);
+  const defaultConfigData = require('./util/commonjs-loader')(taskInfo.defaultConfigPath);
+  return fillConfigDefaults(configFile, defaultConfigData);
 }
 
 
@@ -172,7 +173,7 @@ const taskInfo: TaskInfo = {
   shortArg: '-r',
   envVar: 'IONIC_ROLLUP',
   packageConfig: 'ionic_rollup',
-  defaultConfig: require('./util/commonjs-loader')('../../config/rollup.config.js')
+  defaultConfigPath: '../config/rollup.config.js'
 };
 
 

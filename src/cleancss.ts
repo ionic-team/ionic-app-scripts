@@ -26,7 +26,8 @@ export function cleancss(context?: BuildContext, configFile?: string) {
 
 export function cleancssWorker(context: BuildContext, configFile: string): Promise<any> {
   return new Promise((resolve, reject) => {
-    const cleanCssConfig: CleanCssConfig = fillConfigDefaults(configFile, taskInfo.defaultConfig);
+    const defaultConfigData = require('./util/commonjs-loader')(taskInfo.defaultConfigPath);
+    const cleanCssConfig: CleanCssConfig = fillConfigDefaults(configFile, defaultConfigData);
     const srcFile = join(context.buildDir, cleanCssConfig.sourceFileName);
     const destFile = join(context.buildDir, cleanCssConfig.destFileName);
 
@@ -63,7 +64,7 @@ const taskInfo: TaskInfo = {
   shortArg: '-e',
   envVar: 'IONIC_CLEANCSS',
   packageConfig: 'ionic_cleancss',
-  defaultConfig: require('./util/commonjs-loader')('../../config/cleancss.config.js')
+  defaultConfigPath: '../config/cleancss.config.js'
 };
 
 
