@@ -3,6 +3,7 @@ export { bundle, bundleUpdate } from './bundle';
 export { clean } from './clean';
 export { cleancss } from './cleancss';
 export { copy, copyUpdate } from './copy';
+export { cordovaBrowser } from './cordova-browser';
 export { lint } from './lint';
 export { minify } from './minify';
 export { ngc } from './ngc';

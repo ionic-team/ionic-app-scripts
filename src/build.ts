@@ -3,6 +3,7 @@ import { BuildError } from './util/errors';
 import { bundle, bundleUpdate } from './bundle';
 import { clean } from './clean';
 import { copy } from './copy';
+import { cordovaBrowser } from './cordova-browser';
 import { emit, EventType } from './util/events';
 import { generateContext } from './util/config';
 import { lint, lintUpdate } from './lint';
@@ -91,6 +92,8 @@ function buildProd(context: BuildContext) {
 function buildDev(context: BuildContext) {
   // sync empty the www/build directory
   clean(context);
+
+  cordovaBrowser(context);
 
   buildId++;
 
