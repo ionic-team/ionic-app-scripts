@@ -144,6 +144,9 @@ function checkDeprecations(context: BuildContext, rollupConfig: RollupConfig) {
   }
 }
 
+export function invalidateCache() {
+  cachedBundle = null;
+}
 
 let cachedBundle: RollupBundle = null;
 

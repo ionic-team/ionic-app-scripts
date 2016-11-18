@@ -39,8 +39,8 @@ Instead of depending on external task runners, Ionic App Scripts now prefers bei
 
 ```
   "scripts": {
-    "build": "ionic-app-scripts build",
-    "watch": "ionic-app-scripts watch"
+    "ionic:build": "ionic-app-scripts build",
+    "ionic:serve": "ionic-app-scripts serve"
   },
 ```
 
@@ -108,7 +108,7 @@ npm run build --rollup ./config/rollup.config.js
 | Config Values   | package.json Config | Cmd-line Flag | Defaults        | Details        |
 |-----------------|---------------------|---------------|-----------------|----------------|
 | bundler         | `ionic_bundler`     | `--bundler`   | `webpack`       | Chooses which bundler to use: `webpack` or `rollup` |
-| source map type | `ionic_source_map`  | `--sourceMap` | `eval`          | Chooses the webpack `devtool` option. We recommend `eval` or `source-map` |
+| source map type | `ionic_source_map`  | `--sourceMap` | `eval`          | Chooses the webpack `devtool` option. We only support `eval` or `source-map` for now |
 | root directory  | `ionic_root_dir`    | `--rootDir`   | `process.cwd()` | The directory path of the Ionic app |
 | tmp directory   | `ionic_tmp_dir`     | `--tmpDir`    | `.tmp`          | A temporary directory for codegen'd files using the Angular `ngc` AoT compiler |
 | src directory   | `ionic_src_dir`     | `--srcDir`    | `src`           | The directory holding the Ionic src code |
@@ -151,7 +151,7 @@ These tasks are available within `ionic-app-scripts` and can be added to NPM scr
 | `minify`   | Minifies the output JS bundle and compresses the compiled CSS.                                      |
 | `ngc`      | Runs just the `ngc` portion of the production build.                                                |
 | `sass`     | Sass compilation of used modules. Bundling must have as least ran once before Sass compilation.     |
-| `tsc`      | Runs just the `tsc` portion of the dev build.                                                       |
+| `transpile`| Runs just the `tsc` portion of the dev build.                                                       |
 | `watch`    | Runs watch for dev builds.                                                                          |
 
 Example NPM Script:
@@ -163,7 +163,7 @@ Example NPM Script:
 ```
 
 ## Tips
-1. The Webpack `devtool` setting is driven by the `ionic_source_map` variable. It defaults to `eval` for fast builds, but can provide the original source map by changing the value to `source-map`.
+1. The Webpack `devtool` setting is driven by the `ionic_source_map` variable. It defaults to `eval` for fast builds, but can provide the original source map by changing the value to `source-map`. There are additional values that Webpack supports, but we only support `eval` and `source-maps` for now.
 
 
 ## The Stack
@@ -187,4 +187,12 @@ We welcome any PRs, issues, and feedback! Please be respectful and follow the [C
 
 Execute the following steps to publish a release:
 
-1. Run `npm run release`
+1. Run `npm run build` to generate the `dist` directory
+2. Run `npm run test` to validate the `dist` works
+3. Temporarily tick the `package.json` version
+4. Run `npm run changelog` to append the latest additions to the changelog
+5. Manually verify and commit the changelog changes. Often times you'll want to manually add content/instructions
+6. Revert the `package.json` version to the original version
+7. Run `npm version patch` to tick the version and generate a git tag
+8. Run `npm run github-release` to create the github release entry
+9. Run `npm publish` to publish the package to npm
