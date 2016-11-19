@@ -209,9 +209,15 @@ export interface WebpackConfig {
   devtool: string;
   entry: string;
   output: WebpackOutputObject;
+  resolve: WebpackResolveObject;
 }
 
 export interface WebpackOutputObject {
   path: string;
   filename: string;
+}
+
+export interface WebpackResolveObject {
+  extensions: string[];
+  modules: string[];
 }
