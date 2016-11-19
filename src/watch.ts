@@ -197,7 +197,7 @@ export function buildUpdate(event: string, filePath: string, context: BuildConte
 
 export function runBuildUpdate(context: BuildContext, changedFiles: ChangedFile[]) {
   if (!changedFiles || !changedFiles.length) {
-    return [];
+    return null;
   }
 
   const jsFiles = changedFiles.filter(f => f.ext === '.js');
