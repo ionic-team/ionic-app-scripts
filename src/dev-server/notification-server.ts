@@ -26,7 +26,9 @@ export function createNotificationServer(config: ServeConfig) {
         try {
           wsServer.send(JSON.stringify(msg));
         } catch (e) {
-          Logger.error(`error sending client ws, ${e}`);
+          if (e.message !== 'not opened') {
+            Logger.error(`error sending client ws - ${e.message}`);
+          }
         }
       }
     }

@@ -38,7 +38,7 @@ export function copyUpdate(event: string, filePath: string, context: BuildContex
         return copySrcToDest(context, copyOptions.src, copyOptions.dest, copyOptions.filter, true);
       });
       return Promise.all(promises).then((copySrcToDestResults: CopySrcToDestResult[]) => {
-        printCopyErrorMessages('copy', copySrcToDestResults);
+        printCopyErrorMessages(copySrcToDestResults);
         const destFiles = copySrcToDestResults.map(copySrcToDestResult => copySrcToDestResult.dest);
         emit(EventType.FileChange, destFiles);
       });
@@ -76,14 +76,14 @@ export function copyWorker(context: BuildContext, configFile: string) {
   });
 
   return Promise.all(promises).then((copySrcToDestResults: CopySrcToDestResult[]) => {
-    printCopyErrorMessages('copy', copySrcToDestResults);
+    printCopyErrorMessages(copySrcToDestResults);
   });
 }
 
-function printCopyErrorMessages(prefix: string, copyResults: CopySrcToDestResult[]) {
+function printCopyErrorMessages(copyResults: CopySrcToDestResult[]) {
    copyResults.forEach(copyResult => {
     if (!copyResult.success) {
-      Logger.warn(`${prefix}: ${copyResult.errorMessage}`);
+      Logger.warn(copyResult.errorMessage);
     }
   });
 }
