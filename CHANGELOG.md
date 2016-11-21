@@ -1,3 +1,24 @@
+<a name="0.0.46"></a>
+## [0.0.46](https://github.com/driftyco/ionic-app-scripts/compare/v0.0.44...v0.0.46) (2016-11-21)
+
+
+### Bug Fixes
+
+* **build:** better support for saving multiple files at a time ([254bb6c](https://github.com/driftyco/ionic-app-scripts/commit/254bb6c))
+* **copy:** ionicons copied from ionicons ([69f89a8](https://github.com/driftyco/ionic-app-scripts/commit/69f89a8))
+* **errors:** skip HTTP errors ([5906167](https://github.com/driftyco/ionic-app-scripts/commit/5906167))
+* **proxies:** Wrong parameter in Logger.info, in setupProxies function causing proxies not to load ([#395](https://github.com/driftyco/ionic-app-scripts/issues/395)) ([316b1de](https://github.com/driftyco/ionic-app-scripts/commit/316b1de))
+* **typescript:** lock typescript version to 2.0.x for now due to build error with 2.1.x ([ef7203b](https://github.com/driftyco/ionic-app-scripts/commit/ef7203b))
+* **webpack:** fix path resolution ([97c23f9](https://github.com/driftyco/ionic-app-scripts/commit/97c23f9))
+* **webpack:** reference json-loader to account for webpack breaking change ([d6fe709](https://github.com/driftyco/ionic-app-scripts/commit/d6fe709))
+* **webpack:** resolve modules to rootDir ([#365](https://github.com/driftyco/ionic-app-scripts/issues/365)) ([64eb845](https://github.com/driftyco/ionic-app-scripts/commit/64eb845))
+
+
+### Features
+
+* **options:** allow users to pass their own cleanCss Options ([#377](https://github.com/driftyco/ionic-app-scripts/issues/377)) ([20df6d4](https://github.com/driftyco/ionic-app-scripts/commit/20df6d4))
+
+
 <a name="0.0.45"></a>
 ## [0.0.45](https://github.com/driftyco/ionic-app-scripts/compare/v0.0.44...v0.0.45) (2016-11-17)
 
