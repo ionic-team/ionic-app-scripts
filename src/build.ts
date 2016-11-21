@@ -1,7 +1,7 @@
 import { FILE_CHANGE_EVENT, FILE_DELETE_EVENT } from './util/constants';
 import { BuildContext, BuildState, BuildUpdateMessage, ChangedFile } from './util/interfaces';
 import { BuildError } from './util/errors';
-import { readFileAsync } from './util/helpers';
+import { readFileAsync, setContext } from './util/helpers';
 import { bundle, bundleUpdate } from './bundle';
 import { clean } from './clean';
 import { copy } from './copy';
@@ -18,6 +18,8 @@ import { transpile, transpileUpdate, transpileDiagnosticsOnly } from './transpil
 
 export function build(context: BuildContext) {
   context = generateContext(context);
+
+  setContext(context);
 
   const logger = new Logger(`build ${(context.isProd ? 'prod' : 'dev')}`);
 
