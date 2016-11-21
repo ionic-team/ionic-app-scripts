@@ -1,5 +1,7 @@
-import { BuildContext, BuildState, ChangedFile, TaskInfo } from './util/interfaces';
+import { FileCache } from './util/file-cache';
+import { BuildContext, BuildState, ChangedFile, File, TaskInfo } from './util/interfaces';
 import { BuildError, IgnorableError } from './util/errors';
+import { changeExtension, readFileAsync, setContext } from './util/helpers';
 import { emit, EventType } from './util/events';
 import { join } from 'path';
 import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars } from './util/config';
@@ -28,6 +30,7 @@ export function webpack(context: BuildContext, configFile: string) {
   configFile = getUserConfigFile(context, taskInfo, configFile);
 
   Logger.debug('Webpack: Setting Context on shared singleton');
+  setContext(context);
   const logger = new Logger('webpack');
 
   return webpackWorker(context, configFile)

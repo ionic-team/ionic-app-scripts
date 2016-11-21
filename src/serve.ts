@@ -1,6 +1,5 @@
 import { BuildContext } from './util/interfaces';
 import { generateContext, getConfigValue, hasConfigValue } from './util/config';
-import { setContext } from './util/helpers';
 import { Logger } from './logger/logger';
 import { watch } from './watch';
 import open from './util/open';
@@ -17,8 +16,6 @@ const DEV_SERVER_DEFAULT_HOST = '0.0.0.0';
 
 export function serve(context?: BuildContext) {
   context = generateContext(context);
-
-  setContext(context);
 
   const config: ServeConfig = {
     httpPort: getHttpServerPort(context),

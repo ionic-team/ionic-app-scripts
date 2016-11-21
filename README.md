@@ -114,8 +114,6 @@ npm run build --rollup ./config/rollup.config.js
 | src directory   | `ionic_src_dir`     | `--srcDir`    | `src`           | The directory holding the Ionic src code |
 | www directory   | `ionic_www_dir`     | `--wwwDir`    | `www`           | The deployable directory containing everything needed to run the app |
 | build directory | `ionic_build_dir`   | `--buildDir`  | `build`         | The build process uses this directory to store generated files, etc |
-| Pre-Bundle hook | `ionic_pre_bundle_hook`   | `--preBundleHook`  | `null`         | Path to file that implements the hook |
-| Post-Bundle hook | `ionic_post_bundle_hook`   | `--postBundleHook`  | `null`         | Path to file that implements the hook |
 
 
 ### Ionic Environment Variables
@@ -132,8 +130,6 @@ These environment variables are automatically set to [Node's `process.env`](http
 | `IONIC_BUILD_DIR`       | The absolute path to the app's bundled js and css files.             |
 | `IONIC_APP_SCRIPTS_DIR` | The absolute path to the `@ionic/app-scripts` node_module directory. |
 | `IONIC_SOURCE_MAP`      | The Webpack `devtool` setting. We recommend `eval` or `source-map`.  |
-| `IONIC_PRE_BUNDLE_HOOK` | The absolute path to the file that implements the hook.              |
-| `IONIC_POST_BUNDLE_HOOK`| The absolute path to the file that implements the hook.              |
 
 The `process.env.IONIC_ENV` environment variable can be used to test whether it is a `prod` or `dev` build, which automatically gets set by any command. By default the `build` task is `prod`, and the `watch` and `serve` tasks are `dev`. Additionally, using the `--dev` command line flag will force the build to use `dev`.
 
@@ -164,67 +160,6 @@ Example NPM Script:
   "scripts": {
     "minify": "ionic-app-scripts minify"
   },
-```
-
-## Hooks
-Injecting dynamic data into the build is accomplished via hooks. Hooks are functions for performing actions like string replacements. Hooks *must* return a `Promise` or the build process will not work correctly.
-
-For now, two hooks exist: the `pre-bundle` and `post-bundle` hooks.
-
-To get started with a hook, add an entry to the `package.json` config section
-
-```
-...
-"config": {
-  "ionic_pre_bundle_hook": "./path/to/some/file.js"
-}
-...
-```
-
-The hook itself has a very simple api
-
-```
-module.exports = function(context, isUpdate, changedFiles, configFile) {
-  return new Promise(function(resolve, reject) {
-    // do something interesting and resolve the promise
-  });
-}
-```
-
-`context` is the app-scripts [BuildContext](https://github.com/driftyco/ionic-app-scripts/blob/master/src/util/interfaces.ts#L4-L24) object. It contains all of the paths and information about the application.
-
-`isUpdate` is a boolean informing the user whether it is the initial full build (false), or a subsequent, incremental build (true).
-
-`changedFiles` is a list of [File](https://github.com/driftyco/ionic-app-scripts/blob/master/src/util/interfaces.ts#L61-L65) objects for any files that changed as part of an update. `changedFiles` is null for full builds, and a populated list when `isUpdate` is true.
-
-`configFile` is the config file corresponding to the hook's utility. For example, it could be the rollup config file, or the webpack config file depending on what the value of `ionic_bundler` is set to.
-
-### Example Hooks
-
-Here is an example of doing string replacement. We're injecting the git commit hash into our application using the `ionic_pre_bundle_hook`.
-
-```
-var execSync = require('child_process').execSync;
-
-// the pre-bundle hook happens after the TypeScript code has been transpiled, but before it has been bundled together.
-// this means that if you want to modify code, you're going to want to do so on the in-memory javascript
-// files instead of the typescript files
-
-module.exports = function(context, isUpdate, changedFiles, configFile) {
-  return new Promise(function(resolve, reject) {
-    // get the git hash
-    var gitHash = execSync('git rev-parse --short HEAD').toString().trim();
-    // get all files, and loop over them
-    const files =  context.fileCache.getAll();
-    // find the transpiled javascript file we're looking for
-   files.forEach(function(file) {
-      if (file.path.indexOf('about.js') >= 0) {
-        file.content = file.content.replace('$GIT_COMMIT_HASH', gitHash);
-      }
-    });
-    resolve();
-  });
-}
 ```
 
 ## Tips

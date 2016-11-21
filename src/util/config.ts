@@ -47,16 +47,6 @@ export function generateContext(context?: BuildContext): BuildContext {
   const sourceMapValue = getConfigValue(context, '--sourceMap', null, ENV_VAR_SOURCE_MAP, ENV_VAR_SOURCE_MAP.toLowerCase(), 'eval');
   setProcessEnvVar(ENV_VAR_SOURCE_MAP, sourceMapValue);
 
-  const preBundleHook = getConfigValue(context, '--preBundleHook', null, ENV_VAR_PRE_BUNDLE_HOOK, ENV_VAR_PRE_BUNDLE_HOOK.toLowerCase(), null);
-  if (preBundleHook && preBundleHook.length) {
-    setProcessEnvVar(ENV_VAR_PRE_BUNDLE_HOOK, preBundleHook);
-  }
-
-  const postBundleHook = getConfigValue(context, '--postBundleHook', null, ENV_VAR_POST_BUNDLE_HOOK, ENV_VAR_POST_BUNDLE_HOOK.toLowerCase(), null);
-  if (postBundleHook && postBundleHook.length) {
-    setProcessEnvVar(ENV_VAR_POST_BUNDLE_HOOK, postBundleHook);
-  }
-
   if (!isValidBundler(context.bundler)) {
     context.bundler = bundlerStrategy(context);
   }
@@ -135,6 +125,7 @@ export function fillConfigDefaults(userConfigFile: string, defaultConfigFile: st
   }
 
   const defaultConfig = require(join('..', '..', 'config', defaultConfigFile));
+
   // create a fresh copy of the config each time
   // always assign any default values which were not already supplied by the user
   return objectAssign({}, defaultConfig, userConfig);
@@ -399,8 +390,6 @@ const ENV_VAR_WWW_DIR = 'IONIC_WWW_DIR';
 const ENV_VAR_BUILD_DIR = 'IONIC_BUILD_DIR';
 const ENV_VAR_APP_SCRIPTS_DIR = 'IONIC_APP_SCRIPTS_DIR';
 const ENV_VAR_SOURCE_MAP = 'IONIC_SOURCE_MAP';
-const ENV_VAR_PRE_BUNDLE_HOOK = 'IONIC_PRE_BUNDLE_HOOK';
-const ENV_VAR_POST_BUNDLE_HOOK = 'IONIC_POST_BUNDLE_HOOK';
 
 export const BUNDLER_ROLLUP = 'rollup';
 export const BUNDLER_WEBPACK = 'webpack';
