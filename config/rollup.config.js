@@ -13,7 +13,7 @@ var rollupConfig = {
    * be included, along with the minimum necessary code
    * from its dependencies
    */
-  entry: '{{SRC}}/app/main.dev.ts',
+  entry: '{{SRC}}/app/main.ts',
 
   /**
    * sourceMap: If true, a separate sourcemap file will
@@ -53,8 +53,6 @@ var rollupConfig = {
 
 
 if (process.env.IONIC_ENV === 'prod') {
-  // production mode
-  rollupConfig.entry = '{{TMP}}/app/main.prod.ts';
   rollupConfig.sourceMap = false;
 }
 
