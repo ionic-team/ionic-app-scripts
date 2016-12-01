@@ -1,7 +1,7 @@
 import { BuildContext, BuildState, ChangedFile, TaskInfo } from './util/interfaces';
 import { BuildError } from './util/errors';
 import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars } from './util/config';
-import { ionCompiler } from './plugins/ion-compiler';
+import { ionicRollupResolverPlugin, PLUGIN_NAME } from './rollup/ionic-rollup-resolver-plugin';
 import { join, isAbsolute, normalize, sep } from 'path';
 import { Logger } from './logger/logger';
 import * as rollupBundler from 'rollup';
@@ -52,16 +52,7 @@ export function rollupWorker(context: BuildContext, configFile: string): Promise
     rollupConfig.entry = replacePathVars(context, normalize(rollupConfig.entry));
     rollupConfig.dest = replacePathVars(context, normalize(rollupConfig.dest));
 
-    if (!context.isProd) {
-      // ngc does full production builds itself and the bundler
-      // will already have receive transpiled and AoT templates
-
-      // dev mode auto-adds the ion-compiler plugin, which will inline
-      // templates and transpile source typescript code to JS before bundling
-      rollupConfig.plugins.unshift(
-        ionCompiler(context)
-      );
-    }
+    addRollupPluginIfNecessary(context, rollupConfig.plugins);
 
     // tell rollup to use a previous bundle as its starting point
     rollupConfig.cache = cachedBundle;
@@ -72,8 +63,6 @@ export function rollupWorker(context: BuildContext, configFile: string): Promise
     }
 
     Logger.debug(`entry: ${rollupConfig.entry}, dest: ${rollupConfig.dest}, cache: ${rollupConfig.cache}, format: ${rollupConfig.format}`);
-
-    checkDeprecations(context, rollupConfig);
 
     // bundle the app then create create css
     rollupBundler.rollup(rollupConfig)
@@ -114,6 +103,20 @@ export function rollupWorker(context: BuildContext, configFile: string): Promise
   });
 }
 
+function addRollupPluginIfNecessary(context: BuildContext, plugins: any[]) {
+  let found = false;
+  for (const plugin of plugins) {
+    if (plugin.name === PLUGIN_NAME) {
+      found = true;
+      break;
+    }
+  }
+  if (!found) {
+    // always add the Ionic plugin to the front of the list
+    plugins.unshift(ionicRollupResolverPlugin(context));
+  }
+}
+
 
 export function getRollupConfig(context: BuildContext, configFile: string): RollupConfig {
   configFile = getUserConfigFile(context, taskInfo, configFile);
@@ -128,19 +131,6 @@ export function getOutputDest(context: BuildContext, rollupConfig: RollupConfig)
     return join(context.buildDir, rollupConfig.dest);
   }
   return rollupConfig.dest;
-}
-
-
-function checkDeprecations(context: BuildContext, rollupConfig: RollupConfig) {
-  if (!context.isProd) {
-    if (rollupConfig.entry.indexOf('.tmp') > -1 || rollupConfig.entry.endsWith('.js')) {
-      // warning added 2016-10-05, v0.0.29
-      throw new BuildError('\nDev builds no longer use the ".tmp" directory. Please update your rollup config\'s\n' +
-                           'entry to use your "src" directory\'s "main.dev.ts" TypeScript file.\n' +
-                           'For example, the entry for dev builds should be: "src/app/main.dev.ts"');
-
-    }
-  }
 }
 
 export function invalidateCache() {

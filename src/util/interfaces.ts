@@ -1,5 +1,5 @@
 import { FileCache } from './file-cache';
-
+import { VirtualDirStats, VirtualFileStats } from './virtual-file-utils';
 
 export interface BuildContext {
   rootDir?: string;
@@ -100,8 +100,31 @@ export interface BuildUpdateMessage {
   reloadApp: boolean;
 }
 
+
 export interface ChangedFile {
   event: string;
   filePath: string;
   ext: string;
 }
+
+
+export interface FileSystem {
+  isSync(): boolean;
+  stat(path: string, callback: Function): any;
+  readdir(path: string, callback: Function): any;
+  readFile(path: string, callback: Function): any;
+  readJson(path: string, callback: Function): any;
+  readlink(path: string, callback: Function): any;
+  purge(what: any): void;
+};
+
+
+export interface VirtualFileSystem {
+  addVirtualFile(filePath: string, fileContent: string): void;
+  getFileContent(filePath: string): string;
+  getDirectoryStats(path: string): VirtualDirStats;
+  getSubDirs(directoryPath: string): string[];
+  getFileNamesInDirectory(directoryPath: string): string[];
+  getAllFileStats():  { [filePath: string]: VirtualFileStats };
+  getAllDirStats():  { [filePath: string]: VirtualDirStats };
+};

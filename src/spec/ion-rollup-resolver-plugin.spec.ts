@@ -1,11 +1,11 @@
 import { FileCache } from '../util/file-cache';
 import { BuildContext } from '../util/interfaces';
 import { dirname, join, resolve } from 'path';
-import { resolveId } from '../plugins/ion-compiler';
+import { resolveId } from '../rollup/ionic-rollup-resolver-plugin';
 
 const importer = '/Users/dan/Dev/ionic-conference-app/src/app/app.module.ts';
 
-describe('ion-compiler', () => {
+describe('ion-rollup-resolver', () => {
 
   describe('resolveId', () => {
 

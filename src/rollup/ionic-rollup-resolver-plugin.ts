@@ -1,34 +1,68 @@
+import { readFileSync } from 'fs';
 import { changeExtension } from '../util/helpers';
 import { BuildContext } from '../util/interfaces';
 import { Logger } from '../logger/logger';
 import { dirname, join, resolve } from 'path';
 import * as pluginutils from 'rollup-pluginutils';
+import { optimizeJavascript } from '../aot/optimization';
 
+export const PLUGIN_NAME = 'ion-rollup-resolver';
 
-export function ionCompiler(context: BuildContext) {
+export function ionicRollupResolverPlugin(context: BuildContext) {
   const filter = pluginutils.createFilter(INCLUDE, EXCLUDE);
 
-
   return {
-    name: 'ion-compiler',
+    name: PLUGIN_NAME,
 
     transform(sourceText: string, sourcePath: string): any {
+
       if (!filter(sourcePath)) {
         return null;
       }
 
       const jsSourcePath = changeExtension(sourcePath, '.js');
+      const mapPath = jsSourcePath + '.map';
+
 
       if (context.fileCache) {
-        const file = context.fileCache.get(jsSourcePath);
-        const map = context.fileCache.get(jsSourcePath + '.map');
+        let file = context.fileCache.get(jsSourcePath);
+        let map = context.fileCache.get(mapPath);
+
+        // if the file and map aren't in memory, load them and cache them for future use
+        try {
+          if (!file) {
+            const content = readFileSync(jsSourcePath).toString();
+            file = { path: jsSourcePath, content: content};
+            context.fileCache.set(jsSourcePath, file);
+          }
+        } catch (ex) {
+          Logger.debug(`transform: Failed to load ${jsSourcePath} from disk`);
+        }
+
+        try {
+          if (!map) {
+            const content = readFileSync(mapPath).toString();
+            map = { path: mapPath, content: content};
+            context.fileCache.set(mapPath, map);
+          }
+        } catch (ex) {
+          Logger.debug(`transform: Failed to load source map ${mapPath} from disk`);
+          // just return null and fallback to the default behavior
+          return null;
+        }
+
         if (!file || !file.content) {
           Logger.debug(`transform: unable to find ${jsSourcePath}`);
           return null;
         }
 
-        let mapContent: any = null;
-        if (map.content) {
+        // remove decorators if prod build
+        if (context.isProd) {
+          file.content = optimizeJavascript(jsSourcePath, file.content);
+        }
+
+        let mapContent: string = null;
+        if (map && map.content) {
           try {
             mapContent = JSON.parse(map.content);
           } catch (ex) {
@@ -55,7 +89,6 @@ export function ionCompiler(context: BuildContext) {
           return file.content;
         }
       }
-
       return null;
     }
   };
@@ -94,5 +127,5 @@ export function resolveId(importee: string, importer: string, context: BuildCont
 }
 
 
-const INCLUDE = ['*.ts+(|x)', '**/*.ts+(|x)'];
+const INCLUDE = ['*.ts+(|x)', '*.js+(|x)', '**/*.ts+(|x)', '**/*.js+(|x)'];
 const EXCLUDE = ['*.d.ts', '**/*.d.ts'];

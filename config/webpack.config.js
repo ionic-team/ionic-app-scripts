@@ -6,41 +6,13 @@ var ionicWebpackFactory = require(ionicWebpackFactoryPath);
 
 function getEntryPoint() {
   if (process.env.IONIC_ENV === 'prod') {
-    return '{{TMP}}/app/main.prod.js';
+    return '{{SRC}}/app/main.ts';
   }
-  return '{{SRC}}/app/main.dev.ts';
+  return '{{SRC}}/app/main.ts';
 }
 
 function getPlugins() {
-  if (process.env.IONIC_ENV === 'prod') {
-    return [
-      // This helps ensure the builds are consistent if source hasn't changed:
-      new webpack.optimize.OccurrenceOrderPlugin(),
-
-      // Try to dedupe duplicated modules, if any:
-      // Add this back in when Angular fixes the issue: https://github.com/angular/angular-cli/issues/1587
-      //new DedupePlugin()
-    ];
-  }
-
-  // for dev builds, use our custom environment
-  return [
-    ionicWebpackFactory.getIonicEnvironmentPlugin()
-  ];
-}
-
-function getSourcemapLoader() {
-  if (process.env.IONIC_ENV === 'prod') {
-    // TODO figure out the disk loader, it's not working yet
-    return [];
-  }
-
-  return [
-    {
-      test: /\.ts$/,
-      loader: path.join(process.env.IONIC_APP_SCRIPTS_DIR, 'dist', 'webpack', 'typescript-sourcemap-loader-memory.js')
-    }
-  ];
+  return [ionicWebpackFactory.getIonicEnvironmentPlugin()];
 }
 
 function getDevtool() {
@@ -53,6 +25,7 @@ function getDevtool() {
 }
 
 module.exports = {
+  bail: true,
   entry: getEntryPoint(),
   output: {
     path: '{{BUILD}}',
@@ -71,8 +44,12 @@ module.exports = {
       {
         test: /\.json$/,
         loader: 'json-loader'
+      },
+      {
+        test: /\.(ts|ngfactory.js)$/,
+        loader: path.join(process.env.IONIC_APP_SCRIPTS_DIR, 'dist', 'webpack', 'typescript-sourcemap-loader-memory.js')
       }
-    ].concat(getSourcemapLoader())
+    ]
   },
 
   plugins: getPlugins(),

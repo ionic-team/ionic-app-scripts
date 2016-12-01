@@ -47,6 +47,12 @@ export function generateContext(context?: BuildContext): BuildContext {
   const sourceMapValue = getConfigValue(context, '--sourceMap', null, ENV_VAR_SOURCE_MAP, ENV_VAR_SOURCE_MAP.toLowerCase(), 'eval');
   setProcessEnvVar(ENV_VAR_SOURCE_MAP, sourceMapValue);
 
+  const tsConfigPathValue = getConfigValue(context, '--tsconfigPath', null, ENV_TS_CONFIG_PATH, ENV_TS_CONFIG_PATH.toLowerCase(), join(context.rootDir, 'tsconfig.json'));
+  setProcessEnvVar(ENV_TS_CONFIG_PATH, tsConfigPathValue);
+
+  const appEntryPointPathValue = getConfigValue(context, '--appEntryPointPath', null, ENV_APP_ENTRY_POINT_PATH, ENV_APP_ENTRY_POINT_PATH.toLowerCase(), join(context.srcDir, 'app', 'main.ts'));
+  setProcessEnvVar(ENV_APP_ENTRY_POINT_PATH, appEntryPointPathValue);
+
   if (!isValidBundler(context.bundler)) {
     context.bundler = bundlerStrategy(context);
   }
@@ -401,6 +407,8 @@ const ENV_VAR_WWW_DIR = 'IONIC_WWW_DIR';
 const ENV_VAR_BUILD_DIR = 'IONIC_BUILD_DIR';
 const ENV_VAR_APP_SCRIPTS_DIR = 'IONIC_APP_SCRIPTS_DIR';
 const ENV_VAR_SOURCE_MAP = 'IONIC_SOURCE_MAP';
+const ENV_TS_CONFIG_PATH = 'IONIC_TS_CONFIG_PATH';
+const ENV_APP_ENTRY_POINT_PATH = 'IONIC_APP_ENTRY_POINT_PATH';
 
 export const BUNDLER_ROLLUP = 'rollup';
 export const BUNDLER_WEBPACK = 'webpack';
