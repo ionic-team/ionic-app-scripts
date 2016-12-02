@@ -28,6 +28,9 @@ function showDevice(device, isShowing) {
 function setCordovaInfo(data) {
   let el = $('#app-info');
   el.innerHTML = data.name + ' - v' + data.version;
+  if(data.name) {
+    document.title = data.name + ' - Ionic Lab';
+  }
 }
 
 function loadCordova() {
