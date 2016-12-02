@@ -159,6 +159,7 @@ h2 a {
 .phone {
   display: inline-block;
   margin: 20px 20px 0 20px;
+  vertical-align: middle;
 }
 .phone h2 {
   text-align: left;
@@ -190,7 +191,7 @@ h2 a {
   width: 375px;
   height: 667px;
   border-radius: 3px;
-  box-shadow: 0 6px 10px rgba(0,0,0,.08), 0 0px 6px rgba(0,0,0,.05);
+  box-shadow: 0 8px 24px rgba(0,0,0,.08), 0 0px 6px rgba(0,0,0,.1);
   overflow: hidden;
 }
 .phone-frame-wrap iframe {
@@ -226,15 +227,49 @@ h2 a {
 }
 preview {
   flex: 1;
+  width: 100%;
   display: block;
-  margin: 0px auto 0 auto;
+  vertical-align: middle;
   overflow: auto;
   text-align: center;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  flex-direction: row;
 }
 
 
-@media screen and (min-height: 700px) {
+@media screen and (max-height: 800px) {
+  #header {
+    height: 40px;
+  }
+  #header-left {
+    line-height: 40px;
+  }
+  #logo {
+    width: 50px;
+    height: 22px;
+  }
+  #footer-left {
+    float: left;
+    padding: 7px 0 7px 15px;
+    font-size: 12px;
+  }
+  #app-info {
+    color: #828080;
+  }
+  #footer-right {
+    float: right;
+    padding: 7px 15px 7px 5px;
+    font-size: 13px;
+  }
   .phone-frame h2 {
     display: none;
+  }
+
+  @media screen and (max-width: 500px) {
+    #footer {
+      display: none;
+    }
   }
 }
