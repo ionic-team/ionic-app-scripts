@@ -6,3 +6,4 @@ declare module 'rollup-pluginutils';
 declare module 'rollup';
 declare module 'tiny-lr';
 declare module 'ws';
+declare module 'xml2js';

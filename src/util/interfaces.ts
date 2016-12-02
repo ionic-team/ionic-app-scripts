@@ -21,6 +21,7 @@ export interface BuildContext {
   transpileState?: BuildState;
   templateState?: BuildState;
   bundleState?: BuildState;
+  cordova?: any;
 }
 
 

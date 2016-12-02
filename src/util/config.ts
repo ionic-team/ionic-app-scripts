@@ -3,8 +3,6 @@ import { BuildContext, TaskInfo } from './interfaces';
 import { join, resolve } from 'path';
 import { objectAssign } from './helpers';
 import { FileCache } from './file-cache';
-
-
 /**
  * Create a context object which is used by all the build tasks.
  * Filling the config data uses the following hierarchy, which will

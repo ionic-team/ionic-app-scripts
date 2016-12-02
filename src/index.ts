@@ -17,7 +17,6 @@ export * from './util/interfaces';
 import { getAppScriptsVersion } from './util/helpers';
 import { Logger } from './logger/logger';
 
-
 export function run(task: string) {
   try {
     Logger.info(`ionic-app-scripts ${getAppScriptsVersion()}`, 'cyan');
