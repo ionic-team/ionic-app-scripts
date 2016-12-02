@@ -199,6 +199,7 @@ h2 a {
   height: 100%;
 }
 .statusbar {
+  display: none;
   position: absolute;
   top: 0;
   width: 375px;
@@ -222,8 +223,10 @@ h2 a {
 
 /* Android and windows don't make space for the statusbar like iOS does */
 #android-frame iframe, #windows-frame iframe {
+  /*
   height: 647px;
   margin-top: 20px;
+  */
 }
 preview {
   flex: 1;
