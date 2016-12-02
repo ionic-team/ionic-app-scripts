@@ -54,7 +54,8 @@
     "tslint-eslint-rules": "1.5.0",
     "uglify-js": "2.7.3",
     "webpack": "^2.1.0-beta.27",
-    "ws": "1.1.1"
+    "ws": "1.1.1",
+    "xml2js": "^0.4.17"
   },
   "devDependencies": {
     "@angular/common": "2.2.1",
