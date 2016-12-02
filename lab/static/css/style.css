@@ -263,6 +263,17 @@ preview {
     padding: 7px 15px 7px 5px;
     font-size: 13px;
   }
+  .statusbar {
+    width: 325px;
+  }
+  .phone-frame-wrap {
+    width: 325px;
+    height: 578px;
+  }
+  #android-frame iframe, #windows-frame iframe {
+    height: 558px;
+    margin-top: 20px;
+  }
   .phone-frame h2 {
     display: none;
   }
