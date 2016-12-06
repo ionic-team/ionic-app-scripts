@@ -9,6 +9,7 @@
     "bin/",
     "config/",
     "dist/",
+    "lab",
     "LICENSE",
     "README.md"
   ],
