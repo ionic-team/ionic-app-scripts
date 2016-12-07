@@ -2,6 +2,24 @@ var $ = document.querySelector.bind(document);
 
 var API_ROOT = '/ionic-lab/api/v1';
 
+function tryShowViewPopup() {
+  var view = window.localStorage.getItem('ionic_viewpop');
+
+  if(!view) {
+    $('#view-popup').style.display = 'block';
+    $('#view-popup .close').addEventListener('click', function(e) {
+      window.localStorage.setItem('ionic_viewpop', true);
+      $('#view-popup').style.opacity = 0;
+      setTimeout(function() {
+        $('#view-popup').style.display = 'none';
+      }, 200);
+    });
+    window.requestAnimationFrame(function() {
+      $('#view-popup').style.opacity = 1;
+    });
+  }
+}
+
 // Bind the dropdown platform toggles
 function bindToggles() {
   // Watch for changes on the checkboxes in the device dropdown
@@ -44,3 +62,4 @@ function loadCordova() {
 
 loadCordova();
 bindToggles();
+tryShowViewPopup();

@@ -225,6 +225,60 @@ h2 a {
   height: 647px;
   margin-top: 20px;
 }
+
+#view-popup {
+  display: none;
+  opacity: 0;
+  transition: 400ms linear opacity;
+  position: fixed;
+  bottom: 15px;
+  left: 15px;
+}
+#view-popup .view-popup-wrapper {
+  position: relative;
+}
+#view-popup .ionitron {
+  background: url('../img/popup-ionitron.png') no-repeat transparent;
+  width: 90px;
+  height: 90px;
+  background-size: 100%;
+}
+#view-popup .content {
+  box-sizing: border-box;
+  background: url('../img/popup-view-bubble.png') no-repeat transparent;
+  width: 350px;
+  height: 350px;
+  background-size: 100%;
+  margin-bottom: -50px;
+  padding-top: 25px;
+  text-align: center;
+  color: white;
+}
+#view-popup .content a {
+  color: #fff;
+  font-weight: bold;
+}
+#view-popup .content h2 {
+  margin-bottom: 5px;
+}
+#view-popup .content p {
+  font-size: 13px;
+  max-width: 220px;
+  margin: auto;
+}
+
+#view-popup .close {
+  cursor: pointer;
+  background: url('../img/popup-close.png') no-repeat transparent;
+  position: absolute;
+  right: 35px;
+  top: 20px;
+  width: 60px;
+  height: 60px;
+  background-size: 100%;
+  position: absolute;
+}
+
 preview {
   flex: 1;
   width: 100%;
@@ -262,6 +316,9 @@ preview {
     float: right;
     padding: 7px 15px 7px 5px;
     font-size: 13px;
+  }
+  #footer-right .view-link {
+    color: #4D82E9;
   }
   .phone-frame h2 {
     display: none;
