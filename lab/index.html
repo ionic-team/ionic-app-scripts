@@ -18,23 +18,14 @@
           <div class="dropdown">
             <button class="dropdown-toggle" type="button">Platforms <span class="dropdown-caret"></span></button>
             <ul class="dropdown-menu">
-              <li><input type="checkbox" id="device-iphone" name="iphone" checked><label for="device-iphone">iPhone</label></li>
-              <li><input type="checkbox" id="device-android" name="android" checked><label for="device-android">Android</label></li>
+              <li><input type="checkbox" id="device-iphone" name="iphone"><label for="device-iphone">iPhone</label></li>
+              <li><input type="checkbox" id="device-android" name="android"><label for="device-android">Android</label></li>
               <li><input type="checkbox" id="device-windows" name="windows"><label for="device-windows">Windows</label></li>
             </ul>
           </div>
         </div>
       </div>
       <preview>
-        <div class="phone" id="iphone">
-          <div class="phone-frame">
-            <h2><div class="phone-icon"></div> <a href="/?ionicplatform=ios" target="_blank">iOS</a></h2>
-            <div id="iphone-frame" class="phone-frame-wrap">
-              <div class="statusbar"></div>
-              <iframe src="/?ionicplatform=ios&amp;ionicstatusbarpadding=true" class="frame"></iframe>
-            </div>
-          </div>
-        </div>
       </preview>
       <div id="footer">
         <div id="footer-left">
@@ -63,6 +54,17 @@
         </div>
       </div>
     </div>
+    <template id="iphone-frame-template">
+      <div class="phone" id="iphone">
+        <div class="phone-frame">
+          <h2><div class="phone-icon"></div> <a href="/?ionicplatform=ios" target="_blank">iOS</a></h2>
+          <div id="iphone-frame" class="phone-frame-wrap">
+            <div class="statusbar"></div>
+            <iframe src="/?ionicplatform=ios&amp;ionicstatusbarpadding=true" class="frame"></iframe>
+          </div>
+        </div>
+      </div>
+    </template>
     <template id="android-frame-template">
       <div class="phone" id="android">
         <div class="phone-frame">

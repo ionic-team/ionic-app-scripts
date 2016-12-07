@@ -34,13 +34,52 @@ function bindToggles() {
       console.log('Device changed', device, this.checked);
 
       showDevice(device, this.checked);
+      saveLastDevices(device, this.checked);
     })
   }
 }
 
 // Show one of the devices
 function showDevice(device, isShowing) {
-  $('#' + device).style.display = isShowing ? '' : 'none';
+  $('#device-' + device).checked = isShowing;
+
+  var rendered = $('#' + device);
+  if(!rendered) {
+    var template = $('#' + device + '-frame-template');
+    var clone = document.importNode(template, true);
+    $('preview').appendChild(clone.content);
+  } else {
+    rendered.style.display = isShowing ? '' : 'none';
+  }
+}
+
+function saveLastDevices(newDevice, didAdd) {
+  var last = window.localStorage.getItem('ionic_lastdevices');
+  if(!last && didAdd) {
+    window.localStorage.setItem('ionic_lastdevices', newDevice);
+    return;
+  }
+  var devices = last.split(',');
+  var di = devices.indexOf(newDevice);
+  if(di == -1 && didAdd) {
+    window.localStorage.setItem('ionic_lastdevices', devices.join(',') + ',' + newDevice);
+  } else if(di >= 0) {
+    devices.splice(di, 1);
+    window.localStorage.setItem('ionic_lastdevices', devices.join(','));
+  }
+}
+
+function showLastDevices() {
+  var last = window.localStorage.getItem('ionic_lastdevices');
+  if(!last) {
+    showDevice('iphone', true);
+    return;
+  }
+
+  var devices = last.split(',');
+  for(var i = 0; i < devices.length; i++) {
+    showDevice(devices[i], true);
+  }
 }
 
 function setCordovaInfo(data) {
@@ -60,6 +99,7 @@ function loadCordova() {
   req.send(null);
 }
 
+showLastDevices();
 loadCordova();
 bindToggles();
 tryShowViewPopup();
