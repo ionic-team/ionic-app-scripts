@@ -13,7 +13,7 @@ var rollupConfig = {
    * be included, along with the minimum necessary code
    * from its dependencies
    */
-  entry: '{{SRC}}/app/main.ts',
+  entry: process.env.IONIC_APP_ENTRY_POINT_PATH,
 
   /**
    * sourceMap: If true, a separate sourcemap file will
