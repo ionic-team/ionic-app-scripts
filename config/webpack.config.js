@@ -4,17 +4,6 @@ var webpack = require('webpack');
 var ionicWebpackFactoryPath = path.join(process.env.IONIC_APP_SCRIPTS_DIR, 'dist', 'webpack', 'ionic-webpack-factory.js');
 var ionicWebpackFactory = require(ionicWebpackFactoryPath);
 
-function getEntryPoint() {
-  if (process.env.IONIC_ENV === 'prod') {
-    return '{{SRC}}/app/main.ts';
-  }
-  return '{{SRC}}/app/main.ts';
-}
-
-function getPlugins() {
-  return [ionicWebpackFactory.getIonicEnvironmentPlugin()];
-}
-
 function getDevtool() {
   if (process.env.IONIC_ENV === 'prod') {
     // for now, just force source-map for prod builds
@@ -26,7 +15,7 @@ function getDevtool() {
 
 module.exports = {
   bail: true,
-  entry: getEntryPoint(),
+  entry: process.env.IONIC_APP_ENTRY_POINT_PATH,
   output: {
     path: '{{BUILD}}',
     filename: 'main.js',
@@ -52,7 +41,9 @@ module.exports = {
     ]
   },
 
-  plugins: getPlugins(),
+  plugins: [
+    ionicWebpackFactory.getIonicEnvironmentPlugin()
+  ],
 
   // Some libraries import Node modules but don't use them in the browser.
   // Tell Webpack to provide empty mocks for them so importing them works.
