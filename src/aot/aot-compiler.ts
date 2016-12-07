@@ -46,38 +46,46 @@ export class AotCompiler {
   }
 
   compile() {
-    clearDiagnostics(this.context, DiagnosticsType.TypeScript);
-    const i18nOptions: NgcCliOptions = {
-      i18nFile: undefined,
-      i18nFormat: undefined,
-      locale: undefined,
-      basePath: this.options.rootDir
-    };
+    return Promise.resolve().then(() => {
+      clearDiagnostics(this.context, DiagnosticsType.TypeScript);
+      const i18nOptions: NgcCliOptions = {
+        i18nFile: undefined,
+        i18nFormat: undefined,
+        locale: undefined,
+        basePath: this.options.rootDir
+      };
 
-    // Create the Code Generator.
-    const codeGenerator = CodeGenerator.create(
-      this.angularCompilerOptions,
-      i18nOptions,
-      this.program,
-      this.compilerHost,
-      new NodeReflectorHostContext(this.compilerHost)
-    );
+      // Create the Code Generator.
+      const codeGenerator = CodeGenerator.create(
+        this.angularCompilerOptions,
+        i18nOptions,
+        this.program,
+        this.compilerHost,
+        new NodeReflectorHostContext(this.compilerHost)
+      );
 
-    // We need to temporarily patch the CodeGenerator until either it's patched or allows us
-    // to pass in our own ReflectorHost.
-    patchReflectorHost(codeGenerator);
-    return codeGenerator.codegen({transitiveModules: true})
-    .then(() => {
+      // We need to temporarily patch the CodeGenerator until either it's patched or allows us
+      // to pass in our own ReflectorHost.
+      patchReflectorHost(codeGenerator);
+      return codeGenerator.codegen({transitiveModules: true})
+    }).then(() => {
       // Create a new Program, based on the old one. This will trigger a resolution of all
       // transitive modules, which include files that might just have been generated.
       this.program = createProgram(this.tsConfig.parsed.fileNames, this.tsConfig.parsed.options, this.compilerHost, this.program);
-
+      const globalDiagnostics = this.program.getGlobalDiagnostics();
       const tsDiagnostics = this.program.getSyntacticDiagnostics()
                         .concat(this.program.getSemanticDiagnostics())
                         .concat(this.program.getOptionsDiagnostics());
 
+      if (globalDiagnostics.length) {
+        const diagnostics = runTypeScriptDiagnostics(this.context, globalDiagnostics);
+        printDiagnostics(this.context, DiagnosticsType.TypeScript, diagnostics, true, false);
+        throw new BuildError(new Error('Failed to transpile TypeScript'));
+      }
       if (tsDiagnostics.length) {
-        throw tsDiagnostics;
+        const diagnostics = runTypeScriptDiagnostics(this.context, tsDiagnostics);
+        printDiagnostics(this.context, DiagnosticsType.TypeScript, diagnostics, true, false);
+        throw new BuildError(new Error('Failed to transpile TypeScript'));
       }
     })
     .then(() => {
@@ -111,14 +119,6 @@ export class AotCompiler {
   }
 
   transpileFileContent(fileName: string, sourceText: string, options: CompilerOptions): TranspileOutput {
-    const sourceFile = this.program.getSourceFile(fileName);
-    const diagnostics = this.program.getSyntacticDiagnostics(sourceFile)
-                  .concat(this.program.getSemanticDiagnostics(sourceFile))
-                  .concat(this.program.getDeclarationDiagnostics(sourceFile));
-    if (diagnostics.length) {
-      throw diagnostics;
-    }
-
     const transpileOptions: TranspileOptions = {
       compilerOptions: options,
       fileName: fileName,
