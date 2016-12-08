@@ -11,6 +11,10 @@ export interface BuildContext {
   moduleFiles?: string[];
   isProd?: boolean;
   isWatch?: boolean;
+  runAot?: boolean;
+  runMinifyJs?: boolean;
+  runMinifyCss?: boolean;
+  optimizeJs?: boolean;
 
   bundler?: string;
   fileCache?: FileCache;

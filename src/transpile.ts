@@ -246,7 +246,6 @@ function runDiagnosticsWorker(context: BuildContext) {
   const msg: TranspileWorkerMessage = {
     rootDir: context.rootDir,
     buildDir: context.buildDir,
-    isProd: context.isProd,
     configFile: getTsConfigPath(context)
   };
   diagnosticsWorker.send(msg);
@@ -256,7 +255,6 @@ function runDiagnosticsWorker(context: BuildContext) {
 export interface TranspileWorkerMessage {
   rootDir?: string;
   buildDir?: string;
-  isProd?: boolean;
   configFile?: string;
   transpileSuccess?: boolean;
 }
@@ -264,8 +262,7 @@ export interface TranspileWorkerMessage {
 
 function cleanFileNames(context: BuildContext, fileNames: string[]) {
   // make sure we're not transpiling the prod when dev and stuff
-  const removeFileName = (context.isProd) ? 'main.dev.ts' : 'main.prod.ts';
-  return fileNames.filter(f => (f.indexOf(removeFileName) === -1));
+  return fileNames;
 }
 
 function writeSourceFiles(fileCache: FileCache, sourceFiles: ts.SourceFile[]) {

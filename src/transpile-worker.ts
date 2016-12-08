@@ -7,7 +7,6 @@ const context: BuildContext = {};
 process.on('message', (incomingMsg: TranspileWorkerMessage) => {
   context.rootDir = incomingMsg.rootDir;
   context.buildDir = incomingMsg.buildDir;
-  context.isProd = incomingMsg.isProd;
 
   const workerConfig: TranspileWorkerConfig = {
     configFile: incomingMsg.configFile,

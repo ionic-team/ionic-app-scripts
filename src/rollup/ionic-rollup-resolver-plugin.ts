@@ -57,7 +57,7 @@ export function ionicRollupResolverPlugin(context: BuildContext) {
         }
 
         // remove decorators if prod build
-        if (context.isProd) {
+        if (context.optimizeJs) {
           file.content = optimizeJavascript(jsSourcePath, file.content);
         }
 

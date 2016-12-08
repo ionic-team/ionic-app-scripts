@@ -1,5 +1,5 @@
 import { BuildContext } from '../util/interfaces';
-import { bundlerStrategy, generateContext, getConfigValue, getUserConfigFile, getIsProd, replacePathVars } from '../util/config';
+import { bundlerStrategy, generateContext, getConfigValue, getUserConfigFile, replacePathVars } from '../util/config';
 import { addArgv, setAppPackageJsonData, setProcessEnvVar, setProcessArgs, setProcessEnv, setCwd } from '../util/config';
 import { resolve } from 'path';
 
@@ -39,7 +39,7 @@ describe('config', () => {
 
     it('should set isProd by default', () => {
       const context = generateContext();
-      expect(context.isProd).toEqual(true);
+      expect(context.isProd).toEqual(false);
     });
 
     it('should create an object when passed nothing', () => {
@@ -47,52 +47,27 @@ describe('config', () => {
       expect(context).toBeDefined();
     });
 
-  });
-
-  describe('getIsProd', () => {
-
-    it('should set isProd false with env var', () => {
-      context = {};
-      setProcessEnvVar('IONIC_DEV', 'true');
-      expect(getIsProd(context)).toEqual(false);
+    it('should set default prod specific build flag defaults to false', () => {
+      const context = generateContext({
+        isProd: false
+      });
+      expect(context.isProd).toEqual(false);
+      expect(context.runAot).toEqual(false);
+      expect(context.runMinifyJs).toEqual(false);
+      expect(context.runMinifyCss).toEqual(false);
+      expect(context.optimizeJs).toEqual(false);
     });
 
-    it('should set isProd false with package.json string config', () => {
-      context = {};
-      setAppPackageJsonData({ config: { ionic_dev: 'true' }});
-      expect(getIsProd(context)).toEqual(false);
+    it('should set default prod specific build flags to true when isProd is true', () => {
+      const context = generateContext({
+        isProd: true
+      });
+      expect(context.isProd).toEqual(true);
+      expect(context.runAot).toEqual(true);
+      expect(context.runMinifyJs).toEqual(true);
+      expect(context.runMinifyCss).toEqual(true);
+      expect(context.optimizeJs).toEqual(true);
     });
-
-    it('should set isProd false with package.json config', () => {
-      context = {};
-      setAppPackageJsonData({ config: { ionic_dev: true }});
-      expect(getIsProd(context)).toEqual(false);
-    });
-
-    it('should not reassign isProd when already set', () => {
-      context = {};
-      context.isProd = true;
-      addArgv('--dev');
-      expect(getIsProd(context)).toEqual(true);
-    });
-
-    it('should set isProd false with short --d arg', () => {
-      context = {};
-      addArgv('-d');
-      expect(getIsProd(context)).toEqual(false);
-    });
-
-    it('should set isProd false with full --dev arg', () => {
-      context = {};
-      addArgv('--dev');
-      expect(getIsProd(context)).toEqual(false);
-    });
-
-    it('should default to isProd true', () => {
-      context = {};
-      expect(getIsProd(context)).toEqual(true);
-    });
-
   });
 
   describe('replacePathVars', () => {

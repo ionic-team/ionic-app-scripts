@@ -3,7 +3,7 @@ import { copyUpdate as copyUpdateHandler} from './copy';
 import { BuildContext, BuildState, ChangedFile, TaskInfo } from './util/interfaces';
 import { BuildError } from './util/errors';
 import { canRunTranspileUpdate } from './transpile';
-import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars, setIonicEnvironment } from './util/config';
+import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars } from './util/config';
 import { extname, join, normalize, resolve as pathResolve } from 'path';
 import { Logger } from './logger/logger';
 import * as chokidar from 'chokidar';
@@ -12,11 +12,19 @@ import * as chokidar from 'chokidar';
 // https://github.com/paulmillr/chokidar
 
 export function watch(context?: BuildContext, configFile?: string) {
+
   context = generateContext(context);
+
   configFile = getUserConfigFile(context, taskInfo, configFile);
 
-  // force watch options
+  // Override all build options if watch is ran.
   context.isProd = false;
+  context.optimizeJs = false;
+  context.runMinifyJs = false;
+  context.runMinifyCss = false;
+  context.runAot = false;
+
+  // Ensure that watch is true in context
   context.isWatch = true;
 
   context.sassState = BuildState.RequiresBuild;
@@ -102,8 +110,6 @@ function startWatcher(name: string, watcher: Watcher, context: BuildContext) {
         filePath = event;
         event = watcher.eventName;
       }
-
-      setIonicEnvironment(context.isProd);
 
       filePath = normalize(pathResolve(join(context.rootDir, filePath)));
 

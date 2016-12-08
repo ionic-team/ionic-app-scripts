@@ -48,13 +48,7 @@ function buildWorker(context: BuildContext) {
     // load any 100% required files to ensure they exist
     return validateRequiredFilesExist();
   }).then(() => {
-    if (context.isProd) {
-      // production build
-      return buildProd(context);
-    }
-
-    // dev build
-    return buildDev(context);
+    return buildProject(context);
   });
 }
 
@@ -64,34 +58,22 @@ function validateRequiredFilesExist() {
   return readFileAsync(process.env.IONIC_APP_ENTRY_POINT_PATH);
 }
 
-function buildProd(context: BuildContext) {
-  // sync empty the www/build directory
-  clean(context);
+function buildProject(context: BuildContext) {
+  var compilePromise = (context.runAot) ? ngc(context) : transpile(context);
 
-  buildId++;
-
-  // async tasks
-  // these can happen all while other tasks are running
-  const copyPromise = copy(context);
-
-  // kick off ngc to run the Ahead of Time compiler
-  return ngc(context)
+  return compilePromise
     .then(() => {
-      // ngc has finished, now let's bundle it all together
       return bundle(context);
     })
     .then(() => {
-      // js minify can kick off right away
-      const jsPromise = minifyJs(context);
-
-      // sass needs to finish, then css minify can run when sass is done
+      const minPromise = (context.runMinifyJs) ? minifyJs(context) : Promise.resolve();
       const sassPromise = sass(context)
         .then(() => {
-          return minifyCss(context);
+          return (context.runMinifyCss) ? minifyCss(context) : Promise.resolve()
         });
 
       return Promise.all([
-        jsPromise,
+        minPromise,
         sassPromise
       ]);
     })
@@ -99,50 +81,11 @@ function buildProd(context: BuildContext) {
       // kick off the tslint after everything else
       // nothing needs to wait on its completion
       lint(context);
-
-      // ensure the async tasks have fully completed before resolving
-      return Promise.all([
-        copyPromise
-      ]);
     })
     .catch(err => {
       throw new BuildError(err);
     });
 }
-
-
-function buildDev(context: BuildContext) {
-  // sync empty the www/build directory
-  clean(context);
-
-  buildId++;
-
-  // async tasks
-  // these can happen all while other tasks are running
-  const copyPromise = copy(context);
-
-  // just bundle, and if that passes then do the rest at the same time
-  return transpile(context)
-    .then(() => {
-      return bundle(context);
-    })
-    .then(() => {
-      return Promise.all([
-        sass(context),
-        copyPromise
-      ]);
-    })
-    .then(() => {
-      // kick off the tslint after everything else
-      // nothing needs to wait on its completion
-      lint(context);
-      return Promise.resolve();
-    })
-    .catch(err => {
-      throw new BuildError(err);
-    });
-}
-
 
 export function buildUpdate(changedFiles: ChangedFile[], context: BuildContext) {
   return new Promise(resolve => {

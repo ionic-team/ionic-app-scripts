@@ -61,8 +61,31 @@ export function generateContext(context?: BuildContext): BuildContext {
     context.bundler = bundlerStrategy(context);
   }
 
-  context.isProd = getIsProd(context);
-  setIonicEnvironment(context.isProd);
+  context.isProd = [
+    context.isProd,
+    hasArg('--prod')
+  ].find(val => typeof val === 'boolean');
+
+  // If context is prod then the following flags must be set to true
+  context.runAot = [
+    context.runAot,
+    context.isProd || hasArg('--aot'),
+  ].find(val => typeof val === 'boolean');
+
+  context.runMinifyJs = [
+    context.runMinifyJs,
+    context.isProd || hasArg('--minifyJs')
+  ].find(val => typeof val === 'boolean');
+
+  context.runMinifyCss = [
+    context.runMinifyCss,
+    context.isProd || hasArg('--minifyCss')
+  ].find(val => typeof val === 'boolean');
+
+  context.optimizeJs = [
+    context.optimizeJs,
+    context.isProd || hasArg('--optimizeJs')
+  ].find(val => typeof val === 'boolean');
 
   if (typeof context.isWatch !== 'boolean') {
     context.isWatch = hasArg('--watch');
@@ -74,31 +97,6 @@ export function generateContext(context?: BuildContext): BuildContext {
 
   return context;
 }
-
-
-export function getIsProd(context: BuildContext) {
-  // only check if isProd hasn't already been manually set
-  if (typeof context.isProd === 'boolean') {
-    return context.isProd;
-  }
-  if (hasArg('--dev', '-d')) {
-    // not production: has a --dev or -d cmd line arg
-    return false;
-  }
-
-  let val = getPackageJsonConfig(context, ENV_VAR_IONIC_DEV.toLowerCase());
-  if (typeof val === 'boolean') {
-    return !val;
-  }
-
-  val = getProcessEnvVar(ENV_VAR_IONIC_DEV);
-  if (typeof val === 'boolean') {
-    return !val;
-  }
-
-  return true;
-}
-
 
 export function getUserConfigFile(context: BuildContext, task: TaskInfo, userConfigFile: string) {
   if (userConfigFile) {
@@ -311,12 +309,6 @@ export function isDebugMode() {
   return (processEnv.ionic_debug_mode === 'true');
 }
 
-
-export function setIonicEnvironment(isProd: boolean) {
-  setProcessEnvVar(ENV_VAR_IONIC_ENV, (isProd ? ENV_VAR_PROD : ENV_VAR_DEV));
-}
-
-
 let processArgv: string[];
 export function setProcessArgs(argv: string[]) {
   processArgv = argv;
@@ -401,11 +393,6 @@ const TMP_DIR = '.tmp';
 const WWW_DIR = 'www';
 const WWW_INDEX_FILENAME = 'index.html';
 
-const ENV_VAR_PROD = 'prod';
-const ENV_VAR_DEV = 'dev';
-
-const ENV_VAR_IONIC_ENV = 'IONIC_ENV';
-const ENV_VAR_IONIC_DEV = 'IONIC_DEV';
 const ENV_VAR_ROOT_DIR = 'IONIC_ROOT_DIR';
 const ENV_VAR_TMP_DIR = 'IONIC_TMP_DIR';
 const ENV_VAR_SRC_DIR = 'IONIC_SRC_DIR';
