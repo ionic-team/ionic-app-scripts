@@ -59,7 +59,13 @@ function validateRequiredFilesExist() {
 }
 
 function buildProject(context: BuildContext) {
-  var compilePromise = (context.runAot) ? ngc(context) : transpile(context);
+  // sync empty the www/build directory
+  clean(context);
+
+  buildId++;
+
+  const copyPromise = copy(context);
+  const compilePromise = (context.runAot) ? ngc(context) : transpile(context);
 
   return compilePromise
     .then(() => {
@@ -74,7 +80,8 @@ function buildProject(context: BuildContext) {
 
       return Promise.all([
         minPromise,
-        sassPromise
+        sassPromise,
+        copyPromise
       ]);
     })
     .then(() => {
