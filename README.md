@@ -93,6 +93,7 @@ npm run build --rollup ./config/rollup.config.js
 |-------------|---------------------|-----------------------|
 | CleanCss    | `ionic_cleancss`    | `--cleancss` or `-e`  |
 | Copy        | `ionic_copy`        | `--copy` or `-y`      |
+| Closure     | `ionic_closure`     | `--closure` or `-l`   |
 | Generator   | `ionic_generator`   | `--generator` or `-g` |
 | NGC         | `ionic_ngc`         | `--ngc` or `-n`       |
 | Rollup      | `ionic_rollup`      | `--rollup` or `-r`    |
@@ -107,13 +108,24 @@ npm run build --rollup ./config/rollup.config.js
 
 | Config Values   | package.json Config | Cmd-line Flag | Defaults        | Details        |
 |-----------------|---------------------|---------------|-----------------|----------------|
-| bundler         | `ionic_bundler`     | `--bundler`   | `webpack`       | Chooses which bundler to use: `webpack` or `rollup` |
-| source map type | `ionic_source_map`  | `--sourceMap` | `eval`          | Chooses the webpack `devtool` option. We only support `eval` or `source-map` for now |
 | root directory  | `ionic_root_dir`    | `--rootDir`   | `process.cwd()` | The directory path of the Ionic app |
-| tmp directory   | `ionic_tmp_dir`     | `--tmpDir`    | `.tmp`          | A temporary directory for codegen'd files using the Angular `ngc` AoT compiler |
 | src directory   | `ionic_src_dir`     | `--srcDir`    | `src`           | The directory holding the Ionic src code |
 | www directory   | `ionic_www_dir`     | `--wwwDir`    | `www`           | The deployable directory containing everything needed to run the app |
 | build directory | `ionic_build_dir`   | `--buildDir`  | `build`         | The build process uses this directory to store generated files, etc |
+| bundler         | `ionic_bundler`     | `--bundler`   | `webpack`       | Chooses which bundler to use: `webpack` or `rollup` |
+| source map type | `ionic_source_map_type`  | `--sourceMapType` | `source-map` | Chooses the webpack `devtool` option. `eval` and `source-map` are supported |
+| generate source map | `ionic_generate_source_map`  | `--generateSourceMap` | `true` | Determines whether to generate a source map or not |
+| tsconfig path | `ionic_ts_config`  | `--tsconfig` | `{{rootDir}}/tsconfig.json` | absolute path to tsconfig.json |
+| app entry point | `ionic_app_entry_point`  | `--appEntryPoint` | `{{srcDir}}/app/main.ts` | absolute path to app's entrypoint bootstrap file |
+| clean before copy | `ionic_clean_before_copy`  | `--cleanBeforeCopy` | `false` | clean out existing files before copy task runs |
+| output js file | `ionic_output_js_file_name`  | `--outputJsFileName` | `main.js` | name of js file generated in `buildDir` |
+| output js map file | `ionic_output_js_map_file_name`  | `--outputJsMapFileName` | `main.js.map` | name of js source map file generated in `buildDir` |
+| output css file | `ionic_output_css_file_name`  | `--outputCssFileName` | `main.css` | name of css file generated in `buildDir` |
+| output css map file | `ionic_output_css_map_file_name`  | `--outputCssMapFileName` | `main.css.map` | name of css source map file generated in `buildDir` |
+
+
+
+
 
 
 ### Ionic Environment Variables
@@ -124,14 +136,25 @@ These environment variables are automatically set to [Node's `process.env`](http
 |----------------------------|----------------------------------------------------------------------|
 | `IONIC_ENV`                | Value can be either `prod` or `dev`.                                 |
 | `IONIC_ROOT_DIR`           | The absolute path to the project's root directory.                   |
-| `IONIC_TMP_DIR`            | The absolute path to the project's temporary directory.              |
 | `IONIC_SRC_DIR`            | The absolute path to the app's source directory.                     |
 | `IONIC_WWW_DIR`            | The absolute path to the app's public distribution directory.        |
 | `IONIC_BUILD_DIR`          | The absolute path to the app's bundled js and css files.             |
 | `IONIC_APP_SCRIPTS_DIR`    | The absolute path to the `@ionic/app-scripts` node_module directory. |
-| `IONIC_SOURCE_MAP`         | The Webpack `devtool` setting. We recommend `eval` or `source-map`.  |
-| `IONIC_PATH_TO_GLOB_UTILS` | The path to Ionic's `glob-util` script. Used within configs.         |
+| `IONIC_SOURCE_MAP_TYPE`    | The Webpack `devtool` setting. `eval` and `source-map` are supported.|
+| `IONIC_GENERATE_SOURCE_MAP`| Determines whether to generate a sourcemap or not.                   |
+| `IONIC_TS_CONFIG`          | The absolute path to the project's `tsconfig.json` file              |
+| `IONIC_APP_ENTRY_POINT`    | The absolute path to the project's `main.ts` entry point file        |
+| `IONIC_GLOB_UTIL`          | The path to Ionic's `glob-util` script. Used within configs.         |
 | `IONIC_CLEAN_BEFORE_COPY`  | Attempt to clean existing directories before copying files.          |
+| `IONIC_CLOSURE_JAR`        | The absolute path ot the closure compiler jar file                   |
+| `IONIC_OUTPUT_JS_FILE_NAME` | The file name of the generated javascript file                      |
+| `IONIC_OUTPUT_JS_MAP_FILE_NAME` | The file name of the generated javascript source map file       |
+| `IONIC_OUTPUT_CSS_FILE_NAME` | The file name of the generated css file                            |
+| `IONIC_OUTPUT_CSS_MAP_FILE_NAME` | The file name of the generated css source map file             |
+| `IONIC_WEBPACK_FACTORY`    | The absolute path to Ionic's `webpack-factory` script                |
+| `IONIC_WEBPACK_LOADER`     | The absolute path to Ionic's custom webpack loader                   |
+
+
 
 The `process.env.IONIC_ENV` environment variable can be used to test whether it is a `prod` or `dev` build, which automatically gets set by any command. By default the `build` task is `prod`, and the `watch` and `serve` tasks are `dev`. Additionally, using the `--dev` command line flag will force the build to use `dev`.
 

@@ -58,9 +58,6 @@ export function generateContext(context?: BuildContext): BuildContext {
   context.rootDir = resolve(context.rootDir || getConfigValue(context, '--rootDir', null, ENV_VAR_ROOT_DIR, ENV_VAR_ROOT_DIR.toLowerCase(), processCwd));
   setProcessEnvVar(ENV_VAR_ROOT_DIR, context.rootDir);
 
-  context.tmpDir = resolve(context.tmpDir || getConfigValue(context, '--tmpDir', null, ENV_VAR_TMP_DIR, ENV_VAR_TMP_DIR.toLowerCase(), join(context.rootDir, TMP_DIR)));
-  setProcessEnvVar(ENV_VAR_TMP_DIR, context.tmpDir);
-
   context.srcDir = resolve(context.srcDir || getConfigValue(context, '--srcDir', null, ENV_VAR_SRC_DIR, ENV_VAR_SRC_DIR.toLowerCase(), join(context.rootDir, SRC_DIR)));
   setProcessEnvVar(ENV_VAR_SRC_DIR, context.srcDir);
 
@@ -86,14 +83,12 @@ export function generateContext(context?: BuildContext): BuildContext {
   const appEntryPointPathValue = getConfigValue(context, '--appEntryPoint', null, ENV_APP_ENTRY_POINT, ENV_APP_ENTRY_POINT.toLowerCase(), join(context.srcDir, 'app', 'main.ts'));
   setProcessEnvVar(ENV_APP_ENTRY_POINT, appEntryPointPathValue);
 
-  const pathToGlobUtils = getConfigValue(context, '--pathToGlobUtils', null, ENV_GLOB_UTIL, ENV_GLOB_UTIL.toLowerCase(), join(getProcessEnvVar(ENV_VAR_APP_SCRIPTS_DIR), 'dist', 'util', 'glob-util.js'));
-  setProcessEnvVar(ENV_GLOB_UTIL, pathToGlobUtils);
+  setProcessEnvVar(ENV_GLOB_UTIL, join(getProcessEnvVar(ENV_VAR_APP_SCRIPTS_DIR), 'dist', 'util', 'glob-util.js'));
 
   const cleanBeforeCopy = getConfigValue(context, '--cleanBeforeCopy', null, ENV_CLEAN_BEFORE_COPY, ENV_CLEAN_BEFORE_COPY.toLowerCase(), null);
   setProcessEnvVar(ENV_CLEAN_BEFORE_COPY, cleanBeforeCopy);
 
-  const pathToClosureJar = getConfigValue(context, '--pathToClosureJar', null, ENV_CLOSURE_JAR, ENV_CLOSURE_JAR.toLowerCase(), join(getProcessEnvVar(ENV_VAR_APP_SCRIPTS_DIR), 'bin', 'closure-compiler.jar'));
-  setProcessEnvVar(ENV_CLOSURE_JAR, pathToClosureJar);
+  setProcessEnvVar(ENV_CLOSURE_JAR, join(getProcessEnvVar(ENV_VAR_APP_SCRIPTS_DIR), 'bin', 'closure-compiler.jar'));
 
   const outputJsFileName = getConfigValue(context, '--outputJsFileName', null, ENV_OUTPUT_JS_FILE_NAME, ENV_OUTPUT_JS_FILE_NAME.toLowerCase(), 'main.js');
   setProcessEnvVar(ENV_OUTPUT_JS_FILE_NAME, outputJsFileName);
@@ -107,11 +102,9 @@ export function generateContext(context?: BuildContext): BuildContext {
   const outputCssMapFileName = getConfigValue(context, '--outputCssMapFileName', null, ENV_OUTPUT_CSS_MAP_FILE_NAME, ENV_OUTPUT_CSS_MAP_FILE_NAME.toLowerCase(), 'main.css.map');
   setProcessEnvVar(ENV_OUTPUT_CSS_MAP_FILE_NAME, outputCssMapFileName);
 
-  const webpackFactoryPath = getConfigValue(context, '--webpackFactoryPath', null, ENV_WEBPACK_FACTORY, ENV_WEBPACK_FACTORY.toLowerCase(), join(getProcessEnvVar(ENV_VAR_APP_SCRIPTS_DIR), 'dist', 'webpack', 'ionic-webpack-factory.js'));
-  setProcessEnvVar(ENV_WEBPACK_FACTORY, webpackFactoryPath);
+  setProcessEnvVar(ENV_WEBPACK_FACTORY, join(getProcessEnvVar(ENV_VAR_APP_SCRIPTS_DIR), 'dist', 'webpack', 'ionic-webpack-factory.js'));
 
-  const ionicTypescriptLoaderPath = getConfigValue(context, '--ionicTypescriptLoaderPath', null, ENV_WEBPACK_LOADER, ENV_WEBPACK_LOADER.toLowerCase(), join(getProcessEnvVar(ENV_VAR_APP_SCRIPTS_DIR), 'dist', 'webpack', 'typescript-sourcemap-loader-memory.js'));
-  setProcessEnvVar(ENV_WEBPACK_LOADER, ionicTypescriptLoaderPath);
+  setProcessEnvVar(ENV_WEBPACK_LOADER, join(getProcessEnvVar(ENV_VAR_APP_SCRIPTS_DIR), 'dist', 'webpack', 'typescript-sourcemap-loader-memory.js'));
 
   if (!isValidBundler(context.bundler)) {
     context.bundler = bundlerStrategy(context);
@@ -421,7 +414,6 @@ const WWW_DIR = 'www';
 const WWW_INDEX_FILENAME = 'index.html';
 
 const ENV_VAR_ROOT_DIR = 'IONIC_ROOT_DIR';
-const ENV_VAR_TMP_DIR = 'IONIC_TMP_DIR';
 const ENV_VAR_SRC_DIR = 'IONIC_SRC_DIR';
 const ENV_VAR_WWW_DIR = 'IONIC_WWW_DIR';
 const ENV_VAR_BUILD_DIR = 'IONIC_BUILD_DIR';
