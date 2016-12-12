@@ -1,7 +1,7 @@
 import { join } from 'path';
 import { BuildContext, TaskInfo } from './util/interfaces';
 import { BuildError } from './util/errors';
-import { fillConfigDefaults, getUserConfigFile } from './util/config';
+import { fillConfigDefaults, generateContext, getUserConfigFile } from './util/config';
 import { Logger } from './logger/logger';
 import { readFileAsync, writeFileAsync } from './util/helpers';
 import { runWorker } from './worker-client';
@@ -25,6 +25,7 @@ export function cleancss(context: BuildContext, configFile?: string) {
 
 export function cleancssWorker(context: BuildContext, configFile: string): Promise<any> {
   return new Promise((resolve, reject) => {
+    context = generateContext(context);
     const cleanCssConfig: CleanCssConfig = fillConfigDefaults(configFile, taskInfo.defaultConfigFile);
     const srcFile = join(context.buildDir, cleanCssConfig.sourceFileName);
     const destFile = join(context.buildDir, cleanCssConfig.destFileName);

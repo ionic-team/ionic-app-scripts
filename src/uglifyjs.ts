@@ -1,6 +1,6 @@
 import { BuildContext, TaskInfo } from './util/interfaces';
 import { BuildError } from './util/errors';
-import { fillConfigDefaults, getUserConfigFile } from './util/config';
+import { fillConfigDefaults, generateContext, getUserConfigFile } from './util/config';
 import { join } from 'path';
 import { Logger } from './logger/logger';
 import { runWorker } from './worker-client';
@@ -27,6 +27,7 @@ export function uglifyjsWorker(context: BuildContext, configFile: string): Promi
   return new Promise((resolve, reject) => {
     try {
       // provide a full path for the config options
+      context = generateContext(context);
       const uglifyJsConfig: UglifyJsConfig = fillConfigDefaults(configFile, taskInfo.defaultConfigFile);
       uglifyJsConfig.sourceFile = join(context.buildDir, uglifyJsConfig.sourceFile);
       uglifyJsConfig.inSourceMap = join(context.buildDir, uglifyJsConfig.inSourceMap);

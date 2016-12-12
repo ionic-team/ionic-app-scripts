@@ -1,6 +1,6 @@
 import { execSync } from 'child_process';
 import { BuildContext, TaskInfo } from './util/interfaces';
-import { fillConfigDefaults, getUserConfigFile } from './util/config';
+import { fillConfigDefaults, generateContext, getUserConfigFile } from './util/config';
 import { Logger } from './logger/logger';
 import { runWorker } from './worker-client';
 
@@ -20,6 +20,7 @@ export function closure(context: BuildContext, configFile?: string) {
 
 export function closureWorker(context: BuildContext, configFile: string): Promise<any> {
   return new Promise((resolve, reject) => {
+    context = generateContext(context);
     Logger.warn('Closer Compiler unsupported at this time.');
     resolve();
   });
