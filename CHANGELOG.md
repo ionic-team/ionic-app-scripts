@@ -3,6 +3,7 @@
 
 ### Upgrade Instructions
 
+#### Entry Point Changes
 Delete `main.dev.ts` and `main.prod.ts` and create a `main.ts` file with the following content:
 
 ```
@@ -13,10 +14,35 @@ import { AppModule } from './app.module';
 platformBrowserDynamic().bootstrapModule(AppModule);
 ```
 
+#### Dev Builds By Default Changes
+All builds are now development (non-AoT) builds by default. This allows for a better development experience when testing on a device. To get started, please follow the steps below.
+
+Make sure the `script` section of `package.json` looks like this:
+
+```
+  "scripts": {
+    "ionic:build": "ionic-app-scripts build",
+    "ionic:serve": "ionic-app-scripts serve"
+  }
+```
+
+`ionic run android --prod` will do a production build that utilizes AoT compiling and minifaction.
+`ionic emulate ios --prod` will do a production build that utilizes AoT compiling and minifaction.
+`ionic run android` will do a development build
+`ionic emulate ios` will do a development build
+
+If you wish to run AoT but disable minifaction, do the following
+`ionic run android --aot`
+`ionic emulate ios --aot`
+
+
+#### Source Map Changes
 Change `ionic_source_map` to `ionic_source_map_type` in package.json if it is overridden.
 
+#### Config Changes
 There were significant improvements/changes to most configs. Please review the changes and make sure any custom configs are up to date.
 
+#### Validate TSConfig settings
 Verify that `tsconfig.json` is up to date with recommended settings:
 
 ```
@@ -48,12 +74,14 @@ Verify that `tsconfig.json` is up to date with recommended settings:
 }
 ```
 
+
 ### Breaking Changes
 1. `main.dev.ts` and `main.prod.ts` have been deprecated in favor of `main.ts` with the content of `main.dev.ts`. The content of `main.ts` will be optimized at build time for production builds.
-2. `copy.config` and `watch.config` have breaking changes moving to an easier-to-extend configuration style.
-3. `copy.config` uses `node-glob` instead of `fs-extra` to do the copy. Migrate from directory/files to globs in any custom configs.
-4. `ionic_source_map` configuration has been changed to `ionic_source_map_type`.
-5. Source maps now use `source-map` devtool option by default instead of `eval`. Change `ionic_source_map_type` option to return to the faster building `eval`.
+2. Builds are now always development (non-AoT) by default. To enable `prod` builds, use the `--prod` option.
+3. `copy.config` and `watch.config` have breaking changes moving to an easier-to-extend configuration style.
+4. `copy.config` uses `node-glob` instead of `fs-extra` to do the copy. Migrate from directory/files to globs in any custom configs.
+5. `ionic_source_map` configuration has been changed to `ionic_source_map_type`.
+6. Source maps now use `source-map` devtool option by default instead of `eval`. Change `ionic_source_map_type` option to return to the faster building `eval`.
 
 ### Bug Fixes
 
