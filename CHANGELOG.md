@@ -1,3 +1,57 @@
+<a name="0.0.47"></a>
+## [0.0.47](https://github.com/driftyco/ionic-app-scripts/compare/v0.0.46...v0.0.47) (2016-12-12)
+
+### Upgrade Instructions
+
+Delete `main.dev.ts` and `main.prod.ts` and create a `main.ts` file with the following content:
+
+```
+import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+
+import { AppModule } from './app.module';
+
+platformBrowserDynamic().bootstrapModule(AppModule);
+```
+
+Change `ionic_source_map` to `ionic_source_map_type` in package.json if it is overridden.
+
+There were significant improvements/changes to most configs. Please review the changes and make sure any custom configs are up to date.
+
+### Breaking Changes
+1. `main.dev.ts` and `main.prod.ts` have been deprecated in favor of `main.ts` with the content of `main.dev.ts`. The content of `main.ts` will be optimized at build time for production builds.
+2. `copy.config` and `watch.config` have breaking changes moving to an easier-to-extend configuration style.
+3. `copy.config` uses `node-glob` instead of `fs-extra` to do the copy. Migrate from directory/files to globs in any custom configs.
+4. `ionic_source_map` configuration has been changed to `ionic_source_map_type`.
+5. Source maps now use `source-map` devtool option by default instead of `eval`. Change `ionic_source_map_type` option to return to the faster building `eval`.
+
+### Bug Fixes
+
+* **AoT:** dynamically enable prod mode for AoT builds ([0594803](https://github.com/driftyco/ionic-app-scripts/commit/0594803))
+* **AoT:** use in-memory data store instead of .tmp directory for AoT codegen ([93106ff](https://github.com/driftyco/ionic-app-scripts/commit/93106ff))
+* **build:** every build should run clean sync and copy async. ([6d4eb6e](https://github.com/driftyco/ionic-app-scripts/commit/6d4eb6e))
+* **copy:** Resolve race condition in copy task, move to glob config ([cc99a73](https://github.com/driftyco/ionic-app-scripts/commit/cc99a73))
+* **lab:** add lab to files ([f42c980](https://github.com/driftyco/ionic-app-scripts/commit/f42c980))
+* **livereload:** livereload now correctly serves cordova plugins on run and emulate. ([a0c3f5d](https://github.com/driftyco/ionic-app-scripts/commit/a0c3f5d))
+* **livereload:** on project build all pages connected should reload. ([#513](https://github.com/driftyco/ionic-app-scripts/issues/513)) ([62d6b23](https://github.com/driftyco/ionic-app-scripts/commit/62d6b23))
+* **livereload:** use localhost instead of 0.0.0.0 when injecting live reload script ([#450](https://github.com/driftyco/ionic-app-scripts/issues/450)) ([7f8a0c3](https://github.com/driftyco/ionic-app-scripts/commit/7f8a0c3))
+* **logging:** remove unnecessary websocket error msg, clean up copy error msg ([1517b06](https://github.com/driftyco/ionic-app-scripts/commit/1517b06))
+* **ngc:** simpler AoT error reporting ([1b0f163](https://github.com/driftyco/ionic-app-scripts/commit/1b0f163))
+* **serve:** add flag to indicate to serve for a cordova app ([93782e7](https://github.com/driftyco/ionic-app-scripts/commit/93782e7))
+* **source-maps:** use detailed source-map as default, fix windows path issue ([19464b3](https://github.com/driftyco/ionic-app-scripts/commit/19464b3))
+* **workers:** generate context in worker threads ([af036ec](https://github.com/driftyco/ionic-app-scripts/commit/af036ec))
+
+
+### Features
+
+* **build:** replace --dev flag with --prod and add flags --aot, --minifyJs, --minifyCss, --optimizeJs ([99922ce](https://github.com/driftyco/ionic-app-scripts/commit/99922ce))
+* **bundle:** pre and post bundle hooks ([4835550](https://github.com/driftyco/ionic-app-scripts/commit/4835550))
+* **copy:** update copy config to move web workers ([a909fc4](https://github.com/driftyco/ionic-app-scripts/commit/a909fc4))
+* **lab:** fresh coat of paint ([edb6f09](https://github.com/driftyco/ionic-app-scripts/commit/edb6f09))
+* **replacePathVars:** support interpolation of objects and arrays ([#449](https://github.com/driftyco/ionic-app-scripts/issues/449)) ([e039d46](https://github.com/driftyco/ionic-app-scripts/commit/e039d46))
+* all arguments passed should be compared as case insensitive ([085c897](https://github.com/driftyco/ionic-app-scripts/commit/085c897))
+
+
+
 <a name="0.0.46"></a>
 ## [0.0.46](https://github.com/driftyco/ionic-app-scripts/compare/v0.0.44...v0.0.46) (2016-11-21)
 
