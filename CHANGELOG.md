@@ -17,6 +17,37 @@ Change `ionic_source_map` to `ionic_source_map_type` in package.json if it is ov
 
 There were significant improvements/changes to most configs. Please review the changes and make sure any custom configs are up to date.
 
+Verify that `tsconfig.json` is up to date with recommended settings:
+
+```
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "declaration": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "lib": [
+      "dom",
+      "es2015"
+    ],
+    "module": "es2015",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "target": "es5"
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ],
+  "compileOnSave": false,
+  "atom": {
+    "rewriteTsconfig": false
+  }
+}
+```
+
 ### Breaking Changes
 1. `main.dev.ts` and `main.prod.ts` have been deprecated in favor of `main.ts` with the content of `main.dev.ts`. The content of `main.ts` will be optimized at build time for production builds.
 2. `copy.config` and `watch.config` have breaking changes moving to an easier-to-extend configuration style.
