@@ -17,9 +17,5 @@ module.exports = {
   copyPolyfills: {
     src: ['{{ROOT}}/node_modules/ionic-angular/polyfills/polyfills.js'],
     dest: '{{BUILD}}'
-  },
-  copyWorkers: {
-    src: ['{{ROOT}}/node_modules/ionic-angular/workers/*.js'],
-    dest: '{{BUILD}}'
   }
 }
