@@ -3,6 +3,13 @@
 
 ### Upgrade Instructions
 
+#### Install latest Ionic CLI
+Install the latest ionic cli. `sudo` may be required depending upon your `npm` set-up.
+
+```
+npm install -g ionic@latest
+```
+
 #### Entry Point Changes
 Delete `main.dev.ts` and `main.prod.ts` and create a `main.ts` file with the following content:
 
