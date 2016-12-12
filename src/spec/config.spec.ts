@@ -1,5 +1,5 @@
 import { BuildContext } from '../util/interfaces';
-import { bundlerStrategy, generateContext, getConfigValue, getUserConfigFile, replacePathVars } from '../util/config';
+import { bundlerStrategy, generateContext, getConfigValue, getUserConfigFile, replacePathVars, hasArg } from '../util/config';
 import { addArgv, setAppPackageJsonData, setProcessEnvVar, setProcessArgs, setProcessEnv, setCwd } from '../util/config';
 import { resolve } from 'path';
 
@@ -285,6 +285,47 @@ describe('config', () => {
       expect(rtn).toEqual(null);
     });
 
+  });
+
+  describe('hasArg function', () => {
+    it('should return false when a match is not found', () => {
+      const result = hasArg('--full', '-f');
+      expect(result).toBeFalsy();
+    });
+
+    it('should match on a fullname arg', () => {
+      addArgv('--full');
+
+      const result = hasArg('--full');
+      expect(result).toBeTruthy();
+    });
+
+    it('should match on a shortname arg', () => {
+      addArgv('-f');
+
+      const result = hasArg('--full', '-f');
+      expect(result).toBeTruthy();
+    });
+
+    it('should compare fullnames as case insensitive', () => {
+      addArgv('--full');
+      addArgv('--TEST');
+
+      const result = hasArg('--Full');
+      const result2 = hasArg('--test');
+      expect(result).toBeTruthy();
+      expect(result2).toBeTruthy();
+    });
+
+    it('should compare shortnames as case insensitive', () => {
+      addArgv('-f');
+      addArgv('-T');
+
+      const result = hasArg('-F');
+      const result2 = hasArg('-t');
+      expect(result).toBeTruthy();
+      expect(result2).toBeTruthy();
+    })
   });
 
   let context: BuildContext;

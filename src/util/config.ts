@@ -283,7 +283,8 @@ export function hasConfigValue(context: BuildContext, argFullName: string, argSh
 
 
 export function hasArg(fullName: string, shortName: string = null): boolean {
-  return !!(processArgv.some(a => a === fullName) || (shortName !== null && processArgv.some(a => a === shortName)));
+  return !!(processArgv.some(a => a.toLowerCase() === fullName.toLowerCase()) ||
+    (shortName !== null && processArgv.some(a => a.toLowerCase() === shortName.toLowerCase())));
 }
 
 
