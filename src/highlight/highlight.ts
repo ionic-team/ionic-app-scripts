@@ -154,7 +154,7 @@ function compileLanguage(language: any) {
 
 
 export function highlightError(htmlInput: string, errorCharStart: number, errorLength: number) {
-  if (errorCharStart < 0 || errorLength < 1) return htmlInput;
+  if (errorCharStart < 0 || errorLength < 1 || htmlInput == undefined) return htmlInput;
 
   const chars = htmlInput.split('');
   let inTag = false;

@@ -53,7 +53,7 @@ function loadDiagnostic(context: BuildContext, tsDiagnostic: ts.Diagnostic) {
       errorLength: Math.max(tsDiagnostic.length, 1)
     };
 
-    if (errorLine.html.indexOf('class="hljs') === -1) {
+    if (errorLine.html && errorLine.html.indexOf('class="hljs') === -1) {
       try {
         errorLine.html = highlight(d.language, errorLine.text, true).value;
       } catch (e) {}
@@ -78,7 +78,7 @@ function loadDiagnostic(context: BuildContext, tsDiagnostic: ts.Diagnostic) {
         errorLength: -1
       };
 
-      if (previousLine.html.indexOf('class="hljs') === -1) {
+      if (previousLine.html && previousLine.html.indexOf('class="hljs') === -1) {
         try {
           previousLine.html = highlight(d.language, previousLine.text, true).value;
         } catch (e) {}
@@ -97,7 +97,7 @@ function loadDiagnostic(context: BuildContext, tsDiagnostic: ts.Diagnostic) {
         errorLength: -1
       };
 
-      if (nextLine.html.indexOf('class="hljs') === -1) {
+      if (nextLine.html && nextLine.html.indexOf('class="hljs') === -1) {
         try {
           nextLine.html = highlight(d.language, nextLine.text, true).value;
         } catch (e) {}

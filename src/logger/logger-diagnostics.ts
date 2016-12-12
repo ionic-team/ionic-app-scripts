@@ -334,7 +334,7 @@ function eachLineHasLeadingWhitespace(lines: PrintLine[], code: 'text'|'html') {
     return false;
   }
   for (var i = 0; i < lines.length; i++) {
-    if ((<any>lines[i])[code].length < 1) {
+    if (lines[i][code] == undefined || (<any>lines[i])[code].length < 1) {
       return false;
     }
     var firstChar = (<any>lines[i])[code].charAt(0);
