@@ -1,5 +1,7 @@
 import {
+  CallExpression,
   createSourceFile,
+  Identifier,
   ImportClause,
   ImportDeclaration,
   ImportSpecifier,
@@ -58,12 +60,17 @@ export function appendAfter(source: string, node: Node, toAppend: string): strin
   return stringSplice(source, node.getEnd(), 0, toAppend);
 }
 
-export function insertNamedImport(filePath: string, fileContent: string, namedImport: string, fromPath: string) {
+export function appendBefore(filePath: string, fileContent: string, node: Node, toAppend: string): string {
+  const sourceFile = getTypescriptSourceFile(filePath, fileContent, ScriptTarget.Latest, false);
+  return stringSplice(fileContent, node.getStart(sourceFile), 0, toAppend);
+}
+
+export function insertNamedImportIfNeeded(filePath: string, fileContent: string, namedImport: string, fromModule: string) {
   const sourceFile = getTypescriptSourceFile(filePath, fileContent, ScriptTarget.Latest, false);
   const allImports = findNodes(sourceFile, sourceFile, SyntaxKind.ImportDeclaration);
   const maybeImports = allImports.filter((node: ImportDeclaration) => {
     return node.moduleSpecifier.kind === SyntaxKind.StringLiteral
-            && (node.moduleSpecifier as StringLiteral).text === fromPath;
+            && (node.moduleSpecifier as StringLiteral).text === fromModule;
   }).filter((node: ImportDeclaration) => {
     // Remove import statements that are either `import 'XYZ'` or `import * as X from 'XYZ'`.
         const clause = node.importClause as ImportClause;
@@ -93,7 +100,7 @@ export function insertNamedImport(filePath: string, fileContent: string, namedIm
   } else {
     // Find the last import and insert after.
     fileContent = appendAfter(fileContent, allImports[allImports.length - 1],
-        `import {${namedImport}} from '${fromPath}';`);
+        `\nimport { ${namedImport} } from '${fromModule}';`);
   }
 
   return fileContent;
@@ -130,4 +137,11 @@ export function replaceImportModuleSpecifier(filePath: string, fileContent: stri
     }
   });
   return modifiedContent;
+}
+
+export function checkIfFunctionIsCalled(filePath: string, fileContent: string, functionName: string) {
+  const sourceFile = getTypescriptSourceFile(filePath, fileContent, ScriptTarget.Latest, false);
+  const allCalls = findNodes(sourceFile, sourceFile, SyntaxKind.CallExpression, true) as CallExpression[];
+  const functionCallList = allCalls.filter(call => call.expression && call.expression.kind === SyntaxKind.Identifier && (call.expression as Identifier).text === functionName);
+  return functionCallList.length > 0;
 }

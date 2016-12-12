@@ -111,6 +111,7 @@ export class AotCompiler {
       try {
         modifiedFileContent = replaceBootstrap(mainFile.path, mainFile.content, AppNgModuleTokens[0], AppNgModuleTokens[1]);
       } catch (ex) {
+        Logger.debug(`Failed to parse bootstrap: `, ex.message);
         Logger.warn(`Failed to parse and update ${this.options.entryPoint} content for AoT compilation.
                     For now, the default fallback content will be used instead.
                     Please consider updating ${this.options.entryPoint} with the content from the following link:

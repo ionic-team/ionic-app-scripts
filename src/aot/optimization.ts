@@ -3,7 +3,8 @@ import { removeDecorators } from '../util/typescript-utils';
 export function optimizeJavascript(filePath: string, fileContent: string) {
   fileContent = removeDecorators(filePath, fileContent);
   fileContent = purgeDecoratorStatements(filePath, fileContent, ['@angular']);
-  fileContent = purgeCtorStatements(filePath, fileContent, ['@angular']);
+  // TODO - needs more testing to fully understand
+  // fileContent = purgeCtorStatements(filePath, fileContent, ['@angular']);
   fileContent = purgeKnownContent(filePath, fileContent, ['@angular']);
 
   return fileContent;

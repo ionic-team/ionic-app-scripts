@@ -7,7 +7,7 @@ import {
   ScriptTarget
 } from 'typescript';
 
-import { getTypescriptSourceFile, findNodes, replaceImportModuleSpecifier, replaceNamedImport, replaceNode } from '../util/typescript-utils';
+import { appendBefore, checkIfFunctionIsCalled, getTypescriptSourceFile, findNodes, insertNamedImportIfNeeded, replaceImportModuleSpecifier, replaceNamedImport, replaceNode } from '../util/typescript-utils';
 
 export function getFallbackMainContent() {
   return `
@@ -86,6 +86,34 @@ function replaceBootstrapModuleFactory(filePath: string, fileContent: string) {
   return modifiedContent;
 }
 
+function getPlatformBrowserFunctionNode(filePath: string, fileContent: string) {
+  let modifiedFileContent = fileContent;
+  const sourceFile = getTypescriptSourceFile(filePath, modifiedFileContent, ScriptTarget.Latest, false);
+  const allCalls = findNodes(sourceFile, sourceFile, SyntaxKind.CallExpression, true) as CallExpression[];
+  const callsToPlatformBrowser = allCalls.filter(call => call.expression && call.expression.kind === SyntaxKind.Identifier && (call.expression as Identifier).text === 'platformBrowser');
+  const toAppend = `enableProdMode();\n`;
+  if (callsToPlatformBrowser.length) {
+    modifiedFileContent = appendBefore(filePath, modifiedFileContent, callsToPlatformBrowser[0].expression, toAppend);
+  } else {
+    // just throw it at the bottom
+    modifiedFileContent + toAppend;
+  }
+  return modifiedFileContent;
+}
+
+function importAndEnableProdMode(filePath: string, fileContent: string) {
+  let modifiedFileContent = fileContent;
+  modifiedFileContent = insertNamedImportIfNeeded(filePath, modifiedFileContent, 'enableProdMode', '@angular/core');
+
+  const isCalled = checkIfFunctionIsCalled(filePath, modifiedFileContent, 'enableProdMode');
+  if (!isCalled) {
+    // go ahead and insert this
+    modifiedFileContent = getPlatformBrowserFunctionNode(filePath, modifiedFileContent);
+  }
+
+  return modifiedFileContent;
+}
+
 export function replaceBootstrap(filePath: string, fileContent: string, appNgModulePath: string, appNgModuleClassName: string) {
   if (!fileContent.match(/\bbootstrapModule\b/)) {
     throw new Error(`Could not find bootstrapModule in ${filePath}`);
@@ -103,7 +131,6 @@ export function replaceBootstrap(filePath: string, fileContent: string, appNgMod
 
   let modifiedFileContent = fileContent;
   modifiedFileContent = replaceNgModuleClassName(filePath, modifiedFileContent, appNgModuleClassName);
-
   modifiedFileContent = replacePlatformBrowser(filePath, modifiedFileContent);
   modifiedFileContent = replaceBootstrapModuleFactory(filePath, modifiedFileContent);
 
@@ -111,6 +138,9 @@ export function replaceBootstrap(filePath: string, fileContent: string, appNgMod
   modifiedFileContent = replaceNamedImport(filePath, modifiedFileContent, appNgModuleClassName, appNgModuleClassName + 'NgFactory');
   modifiedFileContent = replaceImportModuleSpecifier(filePath, modifiedFileContent, '@angular/platform-browser-dynamic', '@angular/platform-browser');
   modifiedFileContent = replaceImportModuleSpecifier(filePath, modifiedFileContent, originalImport, ngFactryImport);
+
+  // check if prod mode is imported and enabled
+  modifiedFileContent = importAndEnableProdMode(filePath, modifiedFileContent);
 
   return modifiedFileContent;
 }
