@@ -9,6 +9,7 @@ import { createNotificationServer } from './dev-server/notification-server';
 import { createHttpServer } from './dev-server/http-server';
 import { createLiveReloadServer } from './dev-server/live-reload';
 import { ServeConfig, IONIC_LAB_URL } from './dev-server/serve-config';
+import { findClosestOpenPort } from './util/network';
 
 const DEV_LOGGER_DEFAULT_PORT = 53703;
 const LIVE_RELOAD_DEFAULT_PORT = 35729;
@@ -17,29 +18,38 @@ const DEV_SERVER_DEFAULT_HOST = '0.0.0.0';
 
 export function serve(context: BuildContext) {
   setContext(context);
-  const config: ServeConfig = {
-    httpPort: getHttpServerPort(context),
-    host: getHttpServerHost(context),
-    rootDir: context.rootDir,
-    wwwDir: context.wwwDir,
-    buildDir: context.buildDir,
-    isCordovaServe: isCordovaServe(context),
-    launchBrowser: launchBrowser(context),
-    launchLab: launchLab(context),
-    browserToLaunch: browserToLaunch(context),
-    useLiveReload: useLiveReload(context),
-    liveReloadPort: getLiveReloadServerPort(context),
-    notificationPort: getNotificationPort(context),
-    useServerLogs: useServerLogs(context),
-    useProxy: useProxy(context),
-    notifyOnConsoleLog: sendClientConsoleLogs(context)
-  };
 
-  createNotificationServer(config);
-  createLiveReloadServer(config);
-  createHttpServer(config);
+  let config: ServeConfig;
+  const notificationPort = getNotificationPort(context);
+  const host = getHttpServerHost(context);
 
-  return watch(context)
+  return findClosestOpenPort(host, notificationPort)
+    .then((notificationPortFound) => {
+
+      config = {
+        httpPort: getHttpServerPort(context),
+        host: host,
+        rootDir: context.rootDir,
+        wwwDir: context.wwwDir,
+        buildDir: context.buildDir,
+        isCordovaServe: isCordovaServe(context),
+        launchBrowser: launchBrowser(context),
+        launchLab: launchLab(context),
+        browserToLaunch: browserToLaunch(context),
+        useLiveReload: useLiveReload(context),
+        liveReloadPort: getLiveReloadServerPort(context),
+        notificationPort: notificationPortFound,
+        useServerLogs: useServerLogs(context),
+        useProxy: useProxy(context),
+        notifyOnConsoleLog: sendClientConsoleLogs(context)
+      };
+
+      createNotificationServer(config);
+      createLiveReloadServer(config);
+      createHttpServer(config);
+
+      return watch(context);
+    })
     .then(() => {
       onReady(config, context);
     }, (err: BuildError) => {
