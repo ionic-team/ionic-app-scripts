@@ -9,7 +9,8 @@
     "noImplicitAny": true,
     "types": [
       "jasmine",
-      "node"
+      "node",
+      "jest"
     ]
   },
   "include": [

@@ -6,7 +6,7 @@ describe('clean task', () => {
   describe('clean', () => {
     it('should empty the build directory', (done: Function) => {
       // arrage
-      spyOn(fs, fs.emptyDirSync.name).and.returnValue('hurray');
+      spyOn(fs, fs.emptyDirSync.name).and.returnValue('things');
       const context = { buildDir: 'something' };
 
       // act
@@ -17,7 +17,7 @@ describe('clean task', () => {
       });
     });
 
-    it('should throw when failing to empty dir', (done: Function) => {
+    it('should throw when failing to empty dir', async () => {
       // arrage
       spyOn(fs, fs.emptyDirSync.name).and.throwError('Simulating an error');
       const context = { buildDir: 'something' };
@@ -25,16 +25,14 @@ describe('clean task', () => {
       // act
       let error: Error = null;
       try {
-        clean.clean(context);
+        await clean.clean(context);
       } catch (ex) {
         error = ex;
       }
 
       // assert
-      expect(error).toBeTruthy('Error is null');
       expect(error instanceof Error).toBe(true, 'Error is not an instance of type Error');
       expect(typeof error.message).toBe('string', 'error.message is not a string');
-      done();
     });
   });
 });

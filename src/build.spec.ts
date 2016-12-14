@@ -1,6 +1,7 @@
-/*import { BuildContext } from './util/interfaces';
+import { BuildContext } from './util/interfaces';
 
 import * as helpers from './util/helpers';
+import * as clean  from './clean';
 import * as build  from './build';
 import * as bundle from './bundle';
 import * as copy from './copy';
@@ -12,6 +13,7 @@ import * as transpile from './transpile';
 
 describe('build', () => {
   beforeEach(() => {
+    spyOn(clean, 'clean');
     spyOn(helpers, 'readFileAsync').and.returnValue(Promise.resolve());
     spyOn(copy, 'copy').and.returnValue(Promise.resolve());
     spyOn(ngc, 'ngc').and.returnValue(Promise.resolve());
@@ -23,7 +25,7 @@ describe('build', () => {
     spyOn(transpile, 'transpile').and.returnValue(Promise.resolve());
   });
 
-  it('should do a prod build', (done: Function) => {
+  it('should do a prod build', () => {
       let context: BuildContext = {
         isProd: true,
         optimizeJs: true,
@@ -32,7 +34,7 @@ describe('build', () => {
         runAot: true
       };
 
-      build.build(context).then(() => {
+      return build.build(context).then(() => {
         expect(helpers.readFileAsync).toHaveBeenCalled();
         expect(copy.copy).toHaveBeenCalled();
         expect(ngc.ngc).toHaveBeenCalled();
@@ -43,7 +45,6 @@ describe('build', () => {
         expect(lint.lint).toHaveBeenCalled();
 
         expect(transpile.transpile).not.toHaveBeenCalled();
-        done();
       }).catch(err => {
         console.log(`err.message: `, err.message);
         expect(true).toEqual(false);
@@ -78,4 +79,3 @@ describe('build', () => {
     });
 
 });
-*/
