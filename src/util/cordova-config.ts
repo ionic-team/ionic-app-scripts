@@ -1,8 +1,6 @@
 import * as fs from 'fs';
 import * as xml2js from 'xml2js';
 
-import { BuildContext } from './interfaces';
-
 export interface CordovaProject {
   name?: string;
   id?: string;
@@ -46,7 +44,7 @@ export let parseConfig = (parsedConfig: any) : CordovaProject => {
     name: widget.name[0]
   };
 
-  if(widgetAttrs) {
+  if (widgetAttrs) {
     config.id = widgetAttrs.id;
     config.version = widgetAttrs.version;
   }
