@@ -88,6 +88,7 @@
     "github": "0.2.4",
     "ionic-cz-conventional-changelog": "1.0.0",
     "jasmine": "2.5.2",
+    "jest": "^17.0.3",
     "mock-fs": "3.11.0",
     "node-sass": "3.10.1",
     "rewire": "^2.5.2",
@@ -118,5 +119,15 @@
       "path": "node_modules/ionic-cz-conventional-changelog"
     }
   },
-  "typings": "dist/index.d.ts"
+  "typings": "dist/index.d.ts",
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
+    "transform": {
+      "^.+\\.(ts)$": "<rootDir>/preprocessor.js"
+    },
+    "testRegex": "/src/.*\\.spec\\.(ts|js)$"
+  }
 }
