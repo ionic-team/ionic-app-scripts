@@ -188,7 +188,7 @@ Example NPM Script:
 ```
 
 ## Tips
-1. The Webpack `devtool` setting is driven by the `ionic_source_map` variable. It defaults to `eval` for fast builds, but can provide the original source map by changing the value to `source-map`. There are additional values that Webpack supports, but we only support `eval` and `source-maps` for now.
+1. The Webpack `devtool` setting is driven by the `ionic_source_map_type` variable. It defaults to `source-map` for the best quality source map. Developers can enable significantly faster builds by setting `ionic_source_map_type` to `eval`.
 
 
 ## The Stack
