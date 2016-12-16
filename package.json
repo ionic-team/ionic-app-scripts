@@ -76,7 +76,6 @@
     "@types/express": "^4.0.33",
     "@types/fs-extra": "^0.0.33",
     "@types/glob": "^5.0.30",
-    "@types/jasmine": "^2.2.33",
     "@types/jest": "^16.0.1",
     "@types/mock-fs": "^3.6.29",
     "@types/node": "^6.0.38",
@@ -89,7 +88,7 @@
     "github": "0.2.4",
     "ionic-cz-conventional-changelog": "1.0.0",
     "jasmine": "2.5.2",
-    "jest": "^17.0.3",
+    "jest": "^18.0.0",
     "mock-fs": "3.11.0",
     "node-sass": "3.10.1",
     "rewire": "^2.5.2",
@@ -122,7 +121,8 @@
   },
   "typings": "dist/index.d.ts",
   "jest": {
-    "moduleFileExtensions": [
+    "testEnvironment": "node",
+        "moduleFileExtensions": [
       "ts",
       "js"
     ],

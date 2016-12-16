@@ -5,17 +5,18 @@ import { Logger } from './logger/logger';
 
 
 export function clean(context: BuildContext) {
-  const logger = new Logger('clean');
+  return new Promise((resolve, reject) => {
+    const logger = new Logger('clean');
 
-  try {
-    Logger.debug(`[Clean] clean: cleaning ${context.buildDir}`);
+    try {
+      Logger.debug(`[Clean] clean: cleaning ${context.buildDir}`);
 
-    emptyDirSync(context.buildDir);
-    logger.finish();
+      emptyDirSync(context.buildDir);
+      logger.finish();
 
-  } catch (ex) {
-    throw logger.fail(new BuildError(`Failed to clean directory ${context.buildDir} - ${ex.message}`));
-  }
-
-  return Promise.resolve();
+    } catch (ex) {
+      reject(logger.fail(new BuildError(`Failed to clean directory ${context.buildDir} - ${ex.message}`)));
+    }
+    resolve();
+  });
 }

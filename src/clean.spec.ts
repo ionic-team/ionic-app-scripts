@@ -4,35 +4,28 @@ import * as clean from './clean';
 describe('clean task', () => {
 
   describe('clean', () => {
-    it('should empty the build directory', (done: Function) => {
+    it('should empty the build directory', () => {
       // arrage
       spyOn(fs, fs.emptyDirSync.name).and.returnValue('things');
       const context = { buildDir: 'something' };
 
       // act
-      clean.clean(context).then(() => {
+      return clean.clean(context).then(() => {
         // assert
         expect(fs.emptyDirSync).toHaveBeenCalledWith(context.buildDir);
-        done();
       });
     });
 
-    it('should throw when failing to empty dir', async () => {
+    it('should throw when failing to empty dir', () => {
       // arrage
       spyOn(fs, fs.emptyDirSync.name).and.throwError('Simulating an error');
       const context = { buildDir: 'something' };
 
       // act
-      let error: Error = null;
-      try {
-        await clean.clean(context);
-      } catch (ex) {
-        error = ex;
-      }
-
-      // assert
-      expect(error instanceof Error).toBe(true, 'Error is not an instance of type Error');
-      expect(typeof error.message).toBe('string', 'error.message is not a string');
+      return clean.clean(context).catch((ex) => {
+        expect(ex instanceof Error).toBe(true);
+        expect(typeof ex.message).toBe('string');
+      });
     });
   });
 });
