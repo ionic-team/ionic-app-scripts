@@ -19,7 +19,7 @@
   "scripts": {
     "build": "npm run clean && tsc && npm run sass",
     "test-watch": "tsc --watch --target es2015",
-    "build-and-test": "npm run build && npm run test",
+    "build-and-test": "jest",
     "changelog": "./node_modules/.bin/conventional-changelog -p angular -i CHANGELOG.md -s",
     "clean": "rimraf ./dist",
     "github-release": "node ./scripts/create-github-release.js",
@@ -27,7 +27,7 @@
     "nightly": "npm run build && node ./scripts/publish-nightly.js",
     "sass": "node-sass ./src/dev-client/sass/ion-dev.scss --output ./bin/ --output-style compressed",
     "sass-watch": "npm run sass && node-sass ./src/dev-client/sass/ion-dev.scss --watch --output ./bin/ --output-style compressed",
-    "test": "jasmine JASMINE_CONFIG_PATH=scripts/jasmine.config.json || true",
+    "test": "jest",
     "watch": "npm run clean &&  & npm run sass-watch"
   },
   "main": "dist/index.js",
@@ -87,7 +87,6 @@
     "conventional-changelog-cli": "1.2.0",
     "github": "0.2.4",
     "ionic-cz-conventional-changelog": "1.0.0",
-    "jasmine": "2.5.2",
     "jest": "^18.0.0",
     "mock-fs": "3.11.0",
     "node-sass": "3.10.1",
