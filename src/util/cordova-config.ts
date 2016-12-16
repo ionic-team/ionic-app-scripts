@@ -16,22 +16,22 @@ let lastConfig: CordovaProject;
 export let buildCordovaConfig = (errCb: Function, cb: Function) => {
   var parser = new xml2js.Parser();
   fs.readFile('config.xml', (err: any, data: any) => {
-    if(err) {
+    if (err) {
       errCb(err);
       return;
     }
     parser.parseString(data, (err: any, result: any) => {
-      if(err) {
+      if (err) {
         errCb(err);
         return;
       }
       cb(parseConfig(result));
     });
   });
-}
+};
 
 export let parseConfig = (parsedConfig: any) : CordovaProject => {
-  if(!parsedConfig.widget) {
+  if (!parsedConfig.widget) {
     return {};
   }
 
@@ -52,4 +52,4 @@ export let parseConfig = (parsedConfig: any) : CordovaProject => {
   lastConfig = config;
 
   return config;
-}
+};
