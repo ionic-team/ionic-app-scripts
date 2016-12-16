@@ -9,7 +9,7 @@ var copyConfig = require('./copy.config');
 
 module.exports = {
   srcFiles: {
-    paths: ['{{SRC}}/**/*.(ts|html|scss)'],
+    paths: ['{{SRC}}/**/*.(ts|html|s(c|a)ss)'],
     options: { ignored: ['{{SRC}}/**/*.spec.ts', '{{SRC}}/**/*.e2e.ts', '**/*.DS_Store'] },
     callback: watch.buildUpdate
   },
