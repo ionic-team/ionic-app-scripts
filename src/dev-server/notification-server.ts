@@ -32,7 +32,7 @@ export function createNotificationServer(config: ServeConfig) {
         try {
           sendMethod(JSON.stringify(msg));
         } catch (e) {
-          if (e.message !== 'not opened') {
+          if (e.message !== 'not opened' && e.message !== `Cannot read property 'readyState' of undefined`) {
             Logger.error(`error sending client ws - ${e.message}`);
           }
         }
