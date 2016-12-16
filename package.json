@@ -18,7 +18,6 @@
   },
   "scripts": {
     "build": "npm run clean && tsc && npm run sass",
-    "test-watch": "tsc --watch --target es2015",
     "build-and-test": "jest",
     "changelog": "./node_modules/.bin/conventional-changelog -p angular -i CHANGELOG.md -s",
     "clean": "rimraf ./dist",
