@@ -167,16 +167,13 @@ These tasks are available within `ionic-app-scripts` and can be added to npm scr
 
 | Task       | Description                                                                                         |
 |------------|-----------------------------------------------------------------------------------------------------|
-| `build`    | Full production build. Use `--dev` flag for dev build.                                              |
-| `bundle`   | Bundle JS modules.                                                                                  |
-| `clean`    | Empty the `www` directory.                                                                          |
+| `build`    | A complete build of the application. It uses `development` settings by default. Use `--prod` to create an optimized build |
+| `clean`    | Empty the `www/build` directory.                                                                          |
 | `cleancss` | Compress the output CSS with [CleanCss](https://github.com/jakubpawlowicz/clean-css)                |
 | `copy`     | Run the copy tasks, which by defaults copies the `src/assets/` and `src/index.html` files to `www`. |
 | `lint`     | Run the linter against the source `.ts` files, using the `tslint.json` config file at the root.     |
 | `minify`   | Minifies the output JS bundle and compresses the compiled CSS.                                      |
-| `ngc`      | Runs just the `ngc` portion of the production build.                                                |
 | `sass`     | Sass compilation of used modules. Bundling must have as least ran once before Sass compilation.     |
-| `transpile`| Runs just the `tsc` portion of the dev build.                                                       |
 | `watch`    | Runs watch for dev builds.                                                                          |
 
 Example NPM Script:
