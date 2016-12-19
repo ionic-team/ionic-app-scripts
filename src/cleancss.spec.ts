@@ -2,7 +2,6 @@ import { join } from 'path';
 import * as cleanCss from './cleancss';
 
 import * as cleanCssFactory from './util/clean-css-factory';
-import { CleanCssConfig, getCleanCssInstance } from './util/clean-css-factory'
 import * as config from './util/config';
 import * as helpers from './util/helpers';
 import * as workerClient from './worker-client';
