@@ -32,7 +32,7 @@ describe('bundle task', () => {
       }).catch(err => {
         // assert
         expect(rollup.rollup).toHaveBeenCalled();
-        expect(err.message).toBe(errorText, `Received ${err.message} instead of expected ${errorText}`);
+        expect(err.message).toBe(errorText);
         done();
       });
     });
@@ -62,7 +62,7 @@ describe('bundle task', () => {
       }).catch(err => {
         // assert
         expect(webpack.webpack).toHaveBeenCalled();
-        expect(err.message).toBe(errorText, `Received ${err.message} instead of expected ${errorText}`);
+        expect(err.message).toBe(errorText);
         done();
       });
     });
@@ -96,7 +96,7 @@ describe('bundle task', () => {
       }).catch(err => {
         // assert
         expect(rollup.rollupUpdate).toHaveBeenCalled();
-        expect(err.message).toBe(errorText, `Received ${err.message} instead of expected ${errorText}`);
+        expect(err.message).toBe(errorText);
         done();
       });
     });
@@ -129,7 +129,7 @@ describe('bundle task', () => {
         }).catch(err => {
           // assert
           expect(webpack.webpackUpdate).toHaveBeenCalled();
-          expect(err.message).toBe(errorText, `Received ${err.message} instead of expected ${errorText}`);
+          expect(err.message).toBe(errorText);
           done();
         });
 
@@ -152,7 +152,7 @@ describe('bundle task', () => {
 
       // assert
       expect(rollup.getRollupConfig).toHaveBeenCalledWith(context, null);
-      expect(result).toEqual(config.sourceMap, `Expected result ${result} to equal ${config.sourceMap}`);
+      expect(result).toEqual(config.sourceMap);
     });
 
     it('should get false when devtool is null for webpack', () => {
@@ -165,7 +165,7 @@ describe('bundle task', () => {
 
       // assert
       expect(webpack.getWebpackConfig).toHaveBeenCalledWith(context, null);
-      expect(result).toEqual(false, `Expected result ${result} to equal false`);
+      expect(result).toEqual(false);
     });
 
     it('should get false when devtool is valid', () => {
@@ -178,7 +178,7 @@ describe('bundle task', () => {
 
       // assert
       expect(webpack.getWebpackConfig).toHaveBeenCalledWith(context, null);
-      expect(result).toEqual(true, `Expected result ${result} to equal true`);
+      expect(result).toEqual(true);
     });
   });
 
@@ -196,7 +196,7 @@ describe('bundle task', () => {
       // assert
       expect(rollup.getRollupConfig).toHaveBeenCalledWith(context, null);
       expect(rollup.getOutputDest).toHaveBeenCalledWith(context, config);
-      expect(result).toEqual(returnValue, `Expected result ${result} to equal ${returnValue}`);
+      expect(result).toEqual(returnValue);
     });
 
     it('should get the value from webpack', () => {
@@ -209,7 +209,7 @@ describe('bundle task', () => {
 
       // assert
       expect(webpack.getOutputDest).toHaveBeenCalledWith(context);
-      expect(result).toEqual(returnValue, `Expected result ${result} to equal ${returnValue}`);
+      expect(result).toEqual(returnValue);
     });
   });
 });
