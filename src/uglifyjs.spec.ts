@@ -1,5 +1,5 @@
 import * as uglifyjs from './uglifyjs';
-import * as configUtil from './util/config'
+import * as configUtil from './util/config';
 import * as workerClient from './worker-client';
 
 describe('uglifyjs function', () => {
@@ -13,7 +13,7 @@ describe('uglifyjs function', () => {
     const configFile = 'configFileContents';
 
     return uglifyjs.uglifyjs(context, configFile).then(() => {
-      expect(configUtil.getUserConfigFile).toHaveBeenCalledWith(context, expect.any(Object), configFile);
+      expect(configUtil.getUserConfigFile).toHaveBeenCalledWith(context, uglifyjs.taskInfo, configFile);
       expect(workerClient.runWorker).toHaveBeenCalledWith('uglifyjs', 'uglifyjsWorker', context, 'fileContents');
     });
   });
