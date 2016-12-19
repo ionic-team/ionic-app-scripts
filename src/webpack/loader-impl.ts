@@ -14,22 +14,10 @@ export function webpackLoader(source: string, map: any, webpackContex: any) {
   const javascriptPath = changeExtension(absolutePath, '.js');
   const sourceMapPath = javascriptPath + '.map';
 
-  let javascriptFile: File = null;
-  let mapFile: File = null;
-
-  const promises: Promise<File>[] = [];
-  let readJavascriptFilePromise = readFile(context.fileCache, javascriptPath);
-  promises.push(readJavascriptFilePromise);
-  readJavascriptFilePromise.then(file => {
-    javascriptFile = file;
-  });
-  let readJavascriptMapFilePromise = readFile(context.fileCache, sourceMapPath);
-  promises.push(readJavascriptMapFilePromise);
-  readJavascriptMapFilePromise.then(file => {
-    mapFile = file;
-  });
-
-  Promise.all(promises).then(() => {
+  Promise.all([
+   readFile(context.fileCache, javascriptPath),
+   readFile(context.fileCache, sourceMapPath)
+  ]).then(([javascriptFile, mapFile]) => {
     let sourceMapObject = map;
     if (mapFile) {
       try {
@@ -58,6 +46,7 @@ function readFile(fileCache: FileCache, filePath: string) {
     return Promise.resolve(file);
   }
   Logger.debug(`[Webpack] loader: File ${filePath} not found in file cache - falling back to disk`);
+
   return readFileAsync(filePath).then((fileContent: string) => {
     Logger.debug(`[Webpack] loader: Loaded ${filePath} successfully from disk`);
     const file = { path: filePath, content: fileContent };

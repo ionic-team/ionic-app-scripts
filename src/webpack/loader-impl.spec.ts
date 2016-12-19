@@ -107,10 +107,9 @@ describe('webpack loader', () => {
     spyOn(helpers, helpers.getContext.name).and.returnValue(mockContext);
     spyOn(mockContext.fileCache, mockContext.fileCache.get.name).and.returnValue(null);
     spyOn(mockContext.fileCache, mockContext.fileCache.set.name);
-    spyOn(helpers, helpers.readFileAsync.name).and.returnValue(Promise.reject(new Error(cantReadFileError)));
-
-    // act
-    loader.webpackLoader(sourceString, mockSourceMap, mockWebpackObject);
+    spyOn(helpers, helpers.readFileAsync.name).and.callFake(() => {
+      return Promise.reject(new Error(cantReadFileError));
+    });
 
     // assert
     const assertFunction = () => {
@@ -118,6 +117,9 @@ describe('webpack loader', () => {
       expect(spy.calls.mostRecent().args[0].message).toEqual(cantReadFileError);
       done();
     };
+
+    // act
+    return loader.webpackLoader(sourceString, mockSourceMap, mockWebpackObject);
   });
 
   it('should callback with content from disk', (done: Function) => {
