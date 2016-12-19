@@ -11,7 +11,7 @@
 * **logging:** don't log msgs about websocket state ([18185fb](https://github.com/driftyco/ionic-app-scripts/commit/18185fb))
 * **optimization:** stop removing decorators ([45b0255](https://github.com/driftyco/ionic-app-scripts/commit/45b0255))
 * **serve:** find an open port for the notification server if port is used. ([d6de413](https://github.com/driftyco/ionic-app-scripts/commit/d6de413))
-* **copy: ** generate project context if it doesn't exist ([26f6db8](https://github.com/driftyco/ionic-app-scripts/commit/26f6db8a7d3398b940cfb4c4b3eb4a6f141e1be7#diff-b477061dcc036b7490cfc73741747819))
+* **copy:** generate project context if it doesn't exist ([26f6db8](https://github.com/driftyco/ionic-app-scripts/commit/26f6db8a7d3398b940cfb4c4b3eb4a6f141e1be7#diff-b477061dcc036b7490cfc73741747819))
 
 
 ### Features
