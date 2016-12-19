@@ -1,3 +1,24 @@
+<a name="0.0.48"></a>
+## [0.0.48](https://github.com/driftyco/ionic-app-scripts/compare/v0.0.47...v0.0.48) (2016-12-19)
+
+### Upgrade Instructions
+`@ionic/app-scripts` version `0.0.47` had some breaking changes so please make sure you have performed those upgrade instructions.
+
+### Bug Fixes
+
+* **diagnostics:** fix null pointers ([72adc86](https://github.com/driftyco/ionic-app-scripts/commit/72adc86))
+* **inline-templates:** check for existence of content ([#557](https://github.com/driftyco/ionic-app-scripts/issues/557)) ([b68e125](https://github.com/driftyco/ionic-app-scripts/commit/b68e125))
+* **logging:** don't log msgs about websocket state ([18185fb](https://github.com/driftyco/ionic-app-scripts/commit/18185fb))
+* **optimization:** stop removing decorators ([45b0255](https://github.com/driftyco/ionic-app-scripts/commit/45b0255))
+* **serve:** find an open port for the notification server if port is used. ([d6de413](https://github.com/driftyco/ionic-app-scripts/commit/d6de413))
+
+
+### Features
+
+* **sass:** enable Sass indented files compilation ([#565](https://github.com/driftyco/ionic-app-scripts/issues/565)) ([f632298](https://github.com/driftyco/ionic-app-scripts/commit/f632298))
+
+
+
 <a name="0.0.47"></a>
 ## [0.0.47](https://github.com/driftyco/ionic-app-scripts/compare/v0.0.46...v0.0.47) (2016-12-12)
 
