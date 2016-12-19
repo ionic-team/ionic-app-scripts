@@ -1,6 +1,6 @@
 {
   "name": "@ionic/app-scripts",
-  "version": "0.0.47",
+  "version": "0.0.48",
   "description": "Scripts for Ionic Projects",
   "homepage": "http://ionicframework.com/",
   "author": "Ionic Team <hi@ionic.io> (http://ionic.io)",
@@ -120,7 +120,7 @@
   "typings": "dist/index.d.ts",
   "jest": {
     "testEnvironment": "node",
-        "moduleFileExtensions": [
+    "moduleFileExtensions": [
       "ts",
       "js"
     ],
