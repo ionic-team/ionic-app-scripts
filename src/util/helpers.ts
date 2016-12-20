@@ -1,6 +1,5 @@
 import { basename, dirname, extname, join } from 'path';
 import { BuildContext, File } from './interfaces';
-import { BuildError } from './errors';
 import { createReadStream, createWriteStream, readFile, readFileSync, readJsonSync, remove, unlink, writeFile } from 'fs-extra';
 import * as osName from 'os-name';
 
@@ -98,7 +97,7 @@ export function writeFileAsync(filePath: string, content: string): Promise<any> 
   return new Promise((resolve, reject) => {
     writeFile(filePath, content, (err) => {
       if (err) {
-        return reject(new BuildError(err));
+        return reject(err);
       }
       return resolve();
     });
@@ -109,7 +108,7 @@ export function readFileAsync(filePath: string): Promise<string> {
   return new Promise((resolve, reject) => {
     readFile(filePath, 'utf-8', (err, buffer) => {
       if (err) {
-        return reject(new BuildError(err));
+        return reject(err);
       }
       return resolve(buffer);
     });
@@ -120,7 +119,7 @@ export function unlinkAsync(filePath: string): Promise<any> {
   return new Promise((resolve, reject) => {
     unlink(filePath, (err: Error) => {
       if (err) {
-        return reject(new BuildError(err));
+        return reject(err);
       }
       return resolve();
     });

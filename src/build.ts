@@ -24,35 +24,71 @@ export function build(context: BuildContext) {
       logger.finish();
     })
     .catch(err => {
-      handleDeprecations(err);
+      if (err.isFatal) { throw err; }
       throw logger.fail(err);
     });
 }
-
-function handleDeprecations(error: Error) {
-  if (error && error.message && error.message.indexOf('ENOENT') >= 0 && error.message.indexOf(process.env.IONIC_APP_ENTRY_POINT)) {
-    const error = new BuildError(`"main.dev.ts" and "main.prod.ts" have been deprecated. Please create a new file "main.ts" containing the content of "main.dev.ts", and then delete the deprecated files.
-                           For more information, please see the default Ionic project main.ts file here:
-                           https://github.com/driftyco/ionic2-app-base/tree/master/src/app/main.ts`);
-    error.isFatal = true;
-    throw error;
-  }
-}
-
 
 function buildWorker(context: BuildContext) {
   return Promise.resolve().then(() => {
     // load any 100% required files to ensure they exist
     return validateRequiredFilesExist();
-  }).then(() => {
+  })
+  .then(([appEntryPointContents, tsConfigContents]) => {
+    return validateTsConfigSettings(tsConfigContents);
+  })
+  .then(() => {
     return buildProject(context);
   });
 }
 
 function validateRequiredFilesExist() {
-  // for now, just do the entry point
-  // eventually this could be Promise.all and load a bunch of stuff
-  return readFileAsync(process.env.IONIC_APP_ENTRY_POINT);
+  return Promise.all([
+    readFileAsync(process.env.IONIC_APP_ENTRY_POINT),
+    readFileAsync(process.env.IONIC_TS_CONFIG)
+  ]).catch((error) => {
+    if (error.code === 'ENOENT' && error.path === process.env.IONIC_APP_ENTRY_POINT) {
+      error = new BuildError(`"main.dev.ts" and "main.prod.ts" have been deprecated. Please create a new file "main.ts" containing the content of "main.dev.ts", and then delete the deprecated files.
+                            For more information, please see the default Ionic project main.ts file here:
+                            https://github.com/driftyco/ionic2-app-base/tree/master/src/app/main.ts`);
+      error.isFatal = true;
+      throw error;
+    }
+    if (error.code === 'ENOENT' && error.path === process.env.IONIC_TS_CONFIG) {
+      error = new BuildError(['You are missing a "tsconfig.json" file. This file is required.',
+        'For more information please see the default Ionic project tsconfig.json file here:',
+        'https://github.com/driftyco/ionic2-app-base/blob/master/tsconfig.json'].join('\n'));
+      error.isFatal = true;
+      throw error;
+    }
+    error.isFatal = true;
+    throw error;
+  });
+}
+
+function validateTsConfigSettings(tsConfigFileContents: string) {
+
+  return new Promise((resolve, reject) => {
+    try {
+      const tsConfigJson = JSON.parse(tsConfigFileContents);
+      const isValid = tsConfigJson.hasOwnProperty('compilerOptions') &&
+        tsConfigJson.compilerOptions.hasOwnProperty('sourceMap') &&
+        tsConfigJson.compilerOptions.sourceMap === true;
+
+      if (!isValid) {
+        const error = new BuildError(['Your "tsconfig.json" file must have compilerOptions.sourceMap set to true.',
+          'For more information please see the default Ionic project tsconfig.json file here:',
+          'https://github.com/driftyco/ionic2-app-base/blob/master/tsconfig.json'].join('\n'));
+        error.isFatal = true;
+        return reject(error);
+      }
+      resolve();
+    } catch (e) {
+      const error = new BuildError('Your "tsconfig.json" file contains malformed JSON.');
+      error.isFatal = true;
+      return reject(error);
+    }
+  });
 }
 
 function buildProject(context: BuildContext) {
