@@ -1,11 +1,11 @@
-import { FILE_CHANGE_EVENT, FILE_DELETE_EVENT } from './util/constants';
+import * as Constants from './util/constants';
 import { BuildContext, BuildState, BuildUpdateMessage, ChangedFile } from './util/interfaces';
 import { BuildError } from './util/errors';
+import { emit, EventType } from './util/events';
 import { readFileAsync, setContext } from './util/helpers';
 import { bundle, bundleUpdate } from './bundle';
 import { clean } from './clean';
 import { copy } from './copy';
-import { emit, EventType } from './util/events';
 import { lint, lintUpdate } from './lint';
 import { Logger } from './logger/logger';
 import { minifyCss, minifyJs } from './minify';
@@ -44,17 +44,17 @@ function buildWorker(context: BuildContext) {
 
 function validateRequiredFilesExist() {
   return Promise.all([
-    readFileAsync(process.env.IONIC_APP_ENTRY_POINT),
-    readFileAsync(process.env.IONIC_TS_CONFIG)
+    readFileAsync(process.env[Constants.ENV_APP_ENTRY_POINT]),
+    readFileAsync(process.env[Constants.ENV_TS_CONFIG])
   ]).catch((error) => {
-    if (error.code === 'ENOENT' && error.path === process.env.IONIC_APP_ENTRY_POINT) {
+    if (error.code === 'ENOENT' && error.path === process.env[Constants.ENV_APP_ENTRY_POINT]) {
       error = new BuildError(`${error.path} was not found. The "main.dev.ts" and "main.prod.ts" files have been deprecated. Please create a new file "main.ts" containing the content of "main.dev.ts", and then delete the deprecated files.
                             For more information, please see the default Ionic project main.ts file here:
                             https://github.com/driftyco/ionic2-app-base/tree/master/src/app/main.ts`);
       error.isFatal = true;
       throw error;
     }
-    if (error.code === 'ENOENT' && error.path === process.env.IONIC_TS_CONFIG) {
+    if (error.code === 'ENOENT' && error.path === process.env[Constants.ENV_TS_CONFIG]) {
       error = new BuildError([`${error.path} was not found. The "tsconfig.json" file is missing. This file is required.`,
         'For more information please see the default Ionic project tsconfig.json file here:',
         'https://github.com/driftyco/ionic2-app-base/blob/master/tsconfig.json'].join('\n'));
@@ -262,7 +262,7 @@ function buildUpdateTasks(changedFiles: ChangedFile[], context: BuildContext) {
         // we need to do a sass update
         return sassUpdate(changedFiles, context).then(outputCssFile => {
           const changedFile: ChangedFile = {
-            event: FILE_CHANGE_EVENT,
+            event: Constants.FILE_CHANGE_EVENT,
             ext: '.css',
             filePath: outputCssFile
           };
@@ -276,7 +276,7 @@ function buildUpdateTasks(changedFiles: ChangedFile[], context: BuildContext) {
         // we need to do a full sass build
         return sass(context).then(outputCssFile => {
           const changedFile: ChangedFile = {
-            event: FILE_CHANGE_EVENT,
+            event: Constants.FILE_CHANGE_EVENT,
             ext: '.css',
             filePath: outputCssFile
           };
@@ -298,7 +298,7 @@ function loadFiles(changedFiles: ChangedFile[], context: BuildContext) {
   // UPDATE IN-MEMORY FILE CACHE
   let promises: Promise<any>[] = [];
   for (const changedFile of changedFiles) {
-    if (changedFile.event === FILE_DELETE_EVENT) {
+    if (changedFile.event === Constants.FILE_DELETE_EVENT) {
       // remove from the cache on delete
       context.fileCache.remove(changedFile.filePath);
     } else {

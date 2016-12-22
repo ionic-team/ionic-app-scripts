@@ -2,6 +2,7 @@ import { mkdirpSync } from 'fs-extra';
 import { dirname as pathDirname, join as pathJoin, relative as pathRelative, resolve as pathResolve } from 'path';
 import { Logger } from './logger/logger';
 import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars } from './util/config';
+import * as Constants from './util/constants';
 import { emit, EventType } from './util/events';
 import { generateGlobTasks, globAll, GlobObject, GlobResult } from './util/glob-util';
 import { copyFileAsync, rimRafAsync, unlinkAsync } from './util/helpers';
@@ -40,7 +41,7 @@ export function copyWorker(context: BuildContext, configFile: string) {
     // basically, we've got a stew goin'
     return populateFileAndDirectoryInfo(resultMap, copyConfig, toCopyList, directoriesToCreate);
   }).then(() => {
-    if (process.env.IONIC_CLEAN_BEFORE_COPY) {
+    if (process.env[Constants.ENV_CLEAN_BEFORE_COPY]) {
       cleanDirectories(context, directoriesToCreate);
     }
   }).then(() => {

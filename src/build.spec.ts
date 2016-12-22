@@ -1,5 +1,5 @@
+import * as Constants from './util/constants';
 import { BuildContext } from './util/interfaces';
-
 import * as helpers from './util/helpers';
 import * as clean  from './clean';
 import * as build  from './build';
@@ -87,8 +87,8 @@ describe('build', () => {
 
 describe('test project requirements before building', () => {
   it('should fail if APP_ENTRY_POINT file does not exist', () => {
-    process.env.IONIC_APP_ENTRY_POINT = 'src/app/main.ts';
-    process.env.IONIC_TS_CONFIG = 'tsConfig.js';
+    process.env[Constants.ENV_APP_ENTRY_POINT] = 'src/app/main.ts';
+    process.env[Constants.ENV_TS_CONFIG] = 'tsConfig.js';
     const error = new Error('App entry point was not found');
 
     spyOn(helpers, 'readFileAsync').and.returnValue(Promise.reject(error));
@@ -100,8 +100,8 @@ describe('test project requirements before building', () => {
   });
 
   it('should fail if IONIC_TS_CONFIG file does not exist', () => {
-    process.env.IONIC_APP_ENTRY_POINT = 'src/app/main.ts';
-    process.env.IONIC_TS_CONFIG = 'tsConfig.js';
+    process.env[Constants.ENV_APP_ENTRY_POINT] = 'src/app/main.ts';
+    process.env[Constants.ENV_TS_CONFIG] = 'tsConfig.js';
     const error = new Error('App entry point was not found');
 
     spyOn(helpers, 'readFileAsync').and.callFake((filePath: string) => {
@@ -118,8 +118,8 @@ describe('test project requirements before building', () => {
   });
 
   it('should fail fataly if IONIC_TS_CONFIG file does not contain valid JSON', () => {
-    process.env.IONIC_APP_ENTRY_POINT = 'src/app/main.ts';
-    process.env.IONIC_TS_CONFIG = 'tsConfig.js';
+    process.env[Constants.ENV_APP_ENTRY_POINT] = 'src/app/main.ts';
+    process.env[Constants.ENV_TS_CONFIG] = 'tsConfig.js';
     spyOn(helpers, 'readFileAsync').and.callFake(() => {
       return Promise.resolve(`{
         "compilerOptions" {
@@ -136,8 +136,8 @@ describe('test project requirements before building', () => {
   });
 
   it('should fail fataly if IONIC_TS_CONFIG file does not contain compilerOptions.sourceMap === true', () => {
-    process.env.IONIC_APP_ENTRY_POINT = 'src/app/main.ts';
-    process.env.IONIC_TS_CONFIG = 'tsConfig.js';
+    process.env[Constants.ENV_APP_ENTRY_POINT] = 'src/app/main.ts';
+    process.env[Constants.ENV_TS_CONFIG] = 'tsConfig.js';
     spyOn(helpers, 'readFileAsync').and.callFake(() => {
       return Promise.resolve(`{
         "compilerOptions": {
@@ -154,8 +154,8 @@ describe('test project requirements before building', () => {
   });
 
   it('should succeed if IONIC_TS_CONFIG file contains compilerOptions.sourceMap === true', () => {
-    process.env.IONIC_APP_ENTRY_POINT = 'src/app/main.ts';
-    process.env.IONIC_TS_CONFIG = 'tsConfig.js';
+    process.env[Constants.ENV_APP_ENTRY_POINT] = 'src/app/main.ts';
+    process.env[Constants.ENV_TS_CONFIG] = 'tsConfig.js';
 
     spyOn(clean, 'clean');
     spyOn(copy, 'copy').and.returnValue(Promise.resolve());

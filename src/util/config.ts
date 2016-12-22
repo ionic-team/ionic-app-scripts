@@ -409,7 +409,6 @@ export function setAppPackageJsonData(data: any) {
   appPackageJsonData = data;
 }
 
-
 function getAppPackageJsonData(context: BuildContext) {
   if (!appPackageJsonData) {
     try {

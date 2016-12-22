@@ -1,5 +1,6 @@
 import { Logger } from './logger/logger';
 import { getUserConfigFile} from './util/config';
+import * as Constants from './util/constants';
 import { BuildContext, TaskInfo } from './util/interfaces';
 import { AotCompiler } from './aot/aot-compiler';
 
@@ -18,7 +19,7 @@ export function ngc(context: BuildContext, configFile?: string) {
 }
 
 export function ngcWorker(context: BuildContext, configFile: string) {
-  const compiler = new AotCompiler(context, { entryPoint: process.env.IONIC_APP_ENTRY_POINT, rootDir: context.rootDir, tsConfigPath: process.env.IONIC_TS_CONFIG });
+  const compiler = new AotCompiler(context, { entryPoint: process.env[Constants.ENV_APP_ENTRY_POINT], rootDir: context.rootDir, tsConfigPath: process.env[Constants.ENV_TS_CONFIG] });
   return compiler.compile();
 }
 
