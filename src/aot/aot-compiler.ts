@@ -70,8 +70,11 @@ export class AotCompiler {
       // We need to temporarily patch the CodeGenerator until either it's patched or allows us
       // to pass in our own ReflectorHost.
       patchReflectorHost(codeGenerator);
+      Logger.debug('[AotCompiler] compile: starting codegen ... ');
       return codeGenerator.codegen({transitiveModules: true});
     }).then(() => {
+      Logger.debug('[AotCompiler] compile: starting codegen ... DONE');
+      Logger.debug('[AotCompiler] compile: Creating and validating new TypeScript Program ...');
       // Create a new Program, based on the old one. This will trigger a resolution of all
       // transitive modules, which include files that might just have been generated.
       this.program = createProgram(this.tsConfig.parsed.fileNames, this.tsConfig.parsed.options, this.compilerHost, this.program);
@@ -92,23 +95,29 @@ export class AotCompiler {
       }
     })
     .then(() => {
+      Logger.debug('[AotCompiler] compile: Creating and validating new TypeScript Program ... DONE');
+      Logger.debug('[AotCompiler] compile: The following files are included in the program: ');
       for ( const fileName of this.tsConfig.parsed.fileNames) {
+        Logger.debug(`[AotCompiler] compile: ${fileName}`);
         const cleanedFileName = normalize(resolve(fileName));
         const content = readFileSync(cleanedFileName).toString();
         this.context.fileCache.set(cleanedFileName, { path: cleanedFileName, content: content});
       }
     })
     .then(() => {
+      Logger.debug('[AotCompiler] compile: Starting to process and modify entry point ...');
       const mainFile = this.context.fileCache.get(this.options.entryPoint);
       if (!mainFile) {
         throw new BuildError(new Error(`Could not find entry point (bootstrap file) ${this.options.entryPoint}`));
       }
       const mainSourceFile = getTypescriptSourceFile(mainFile.path, mainFile.content, ScriptTarget.Latest, false);
+      Logger.debug('[AotCompiler] compile: Resolving NgModule from entry point');
       const AppNgModuleStringAndClassName = resolveAppNgModuleFromMain(mainSourceFile, this.context.fileCache, this.compilerHost, this.program);
       const AppNgModuleTokens = AppNgModuleStringAndClassName.split('#');
 
       let modifiedFileContent: string = null;
       try {
+        Logger.debug('[AotCompiler] compile: Dynamically changing entry point content to AOT mode content');
         modifiedFileContent = replaceBootstrap(mainFile.path, mainFile.content, AppNgModuleTokens[0], AppNgModuleTokens[1]);
       } catch (ex) {
         Logger.debug(`Failed to parse bootstrap: `, ex.message);
@@ -119,9 +128,12 @@ export class AotCompiler {
         modifiedFileContent = getFallbackMainContent();
       }
 
+      Logger.debug(`[AotCompiler] compile: Modified File Content: ${modifiedFileContent}`);
       this.context.fileCache.set(this.options.entryPoint, { path: this.options.entryPoint, content: modifiedFileContent});
     })
     .then(() => {
+      Logger.debug('[AotCompiler] compile: Starting to process and modify entry point ... DONE');
+      Logger.debug('[AotCompiler] compile: Removing decorators from program files ...');
       const tsFiles = this.context.fileCache.getAll().filter(file => extname(file.path) === '.ts' && file.path.indexOf('.d.ts') === -1);
       for (const tsFile of tsFiles) {
         const cleanedFileContent = removeDecorators(tsFile.path, tsFile.content);
@@ -138,6 +150,7 @@ export class AotCompiler {
         this.fileSystem.addVirtualFile(jsFilePath, transpileOutput.outputText);
         this.fileSystem.addVirtualFile(jsFilePath + '.map', transpileOutput.sourceMapText);
       }
+      Logger.debug('[AotCompiler] compile: Removing decorators from program files ... DONE');
     });
   }
 
