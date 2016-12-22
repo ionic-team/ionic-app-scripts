@@ -2,7 +2,6 @@ import { basename, dirname } from 'path';
 import { FileSystem, VirtualFileSystem } from './interfaces';
 import { FileCache } from './file-cache';
 import { VirtualDirStats, VirtualFileStats } from './virtual-file-utils';
-import { Logger } from '../logger/logger';
 
 export class HybridFileSystem implements FileSystem, VirtualFileSystem {
 
@@ -59,7 +58,6 @@ export class HybridFileSystem implements FileSystem, VirtualFileSystem {
   }
 
   readFile(path: string, callback: Function): any {
-    Logger.debug(`[HybridFileSystem] readFile: reading ${path}`);
     const file = this.fileCache.get(path);
     if (file) {
       callback(null, new Buffer(file.content));
@@ -78,7 +76,6 @@ export class HybridFileSystem implements FileSystem, VirtualFileSystem {
   }
 
   getFileContent(filePath: string) {
-    Logger.debug(`[HybridFileSystem] getFileContent: get from cache ${filePath}`);
     const file = this.fileCache.get(filePath);
     if (file) {
       return file.content;
