@@ -48,14 +48,14 @@ function validateRequiredFilesExist() {
     readFileAsync(process.env.IONIC_TS_CONFIG)
   ]).catch((error) => {
     if (error.code === 'ENOENT' && error.path === process.env.IONIC_APP_ENTRY_POINT) {
-      error = new BuildError(`"main.dev.ts" and "main.prod.ts" have been deprecated. Please create a new file "main.ts" containing the content of "main.dev.ts", and then delete the deprecated files.
+      error = new BuildError(`${error.path} was not found. The "main.dev.ts" and "main.prod.ts" files have been deprecated. Please create a new file "main.ts" containing the content of "main.dev.ts", and then delete the deprecated files.
                             For more information, please see the default Ionic project main.ts file here:
                             https://github.com/driftyco/ionic2-app-base/tree/master/src/app/main.ts`);
       error.isFatal = true;
       throw error;
     }
     if (error.code === 'ENOENT' && error.path === process.env.IONIC_TS_CONFIG) {
-      error = new BuildError(['You are missing a "tsconfig.json" file. This file is required.',
+      error = new BuildError([`${error.path} was not found. The "tsconfig.json" file is missing. This file is required.`,
         'For more information please see the default Ionic project tsconfig.json file here:',
         'https://github.com/driftyco/ionic2-app-base/blob/master/tsconfig.json'].join('\n'));
       error.isFatal = true;
