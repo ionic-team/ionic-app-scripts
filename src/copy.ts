@@ -199,11 +199,13 @@ function getFilesPathsForConfig(copyConfigKeys: string[], copyConfig: CopyConfig
   const promises: Promise<GlobResult[]>[] = [];
   copyConfigKeys.forEach(key => {
     const copyOptions = copyConfig[key];
-    const promise = globAll(copyOptions.src);
-    promises.push(promise);
-    promise.then(globResultList => {
-      srcToResultsMap.set(key, globResultList);
-    });
+    if (copyOptions && copyOptions.src) {
+      const promise = globAll(copyOptions.src);
+      promises.push(promise);
+      promise.then(globResultList => {
+        srcToResultsMap.set(key, globResultList);
+      });
+    }
   });
 
   return Promise.all(promises).then(() => {
