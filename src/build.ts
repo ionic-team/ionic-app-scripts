@@ -76,7 +76,7 @@ function validateTsConfigSettings(tsConfigFileContents: string) {
         tsConfigJson.compilerOptions.sourceMap === true;
 
       if (!isValid) {
-        const error = new BuildError(['Your "tsconfig.json" file must have compilerOptions.sourceMap set to true.',
+        const error = new BuildError(['The "tsconfig.json" file must have compilerOptions.sourceMap set to true.',
           'For more information please see the default Ionic project tsconfig.json file here:',
           'https://github.com/driftyco/ionic2-app-base/blob/master/tsconfig.json'].join('\n'));
         error.isFatal = true;
@@ -84,7 +84,7 @@ function validateTsConfigSettings(tsConfigFileContents: string) {
       }
       resolve();
     } catch (e) {
-      const error = new BuildError('Your "tsconfig.json" file contains malformed JSON.');
+      const error = new BuildError('The "tsconfig.json" file contains malformed JSON.');
       error.isFatal = true;
       return reject(error);
     }
