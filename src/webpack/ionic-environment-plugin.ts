@@ -13,9 +13,6 @@ export class IonicEnvironmentPlugin {
       const hybridFileSystem = getInstance();
       hybridFileSystem.setFileSystem(compiler.inputFileSystem);
       compiler.inputFileSystem = hybridFileSystem;
-      compiler.resolvers.normal.fileSystem = compiler.inputFileSystem;
-      compiler.resolvers.context.fileSystem = compiler.inputFileSystem;
-      compiler.resolvers.loader.fileSystem = compiler.inputFileSystem;
       compiler.watchFileSystem = new WatchMemorySystem(this.fileCache);
 
       // do a bunch of webpack specific stuff here, so cast to an any
