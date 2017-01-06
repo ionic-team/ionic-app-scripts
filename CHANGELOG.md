@@ -2,6 +2,14 @@
 # [1.0.0](https://github.com/driftyco/ionic-app-scripts/compare/v0.0.48...v1.0.0) (2017-01-06)
 
 
+### Upgrade Instructions
+Execute the following command from your ionic project. This installs a new peer dependency called `sw-toolbox` that is used to simplify implementing a service-worker.
+
+```
+npm install sw-toolbox --save-dev
+```
+
+
 ### Bug Fixes
 
 * **build:** check to ensure tsconfig contains sourcemaps true. ([e6bcf22](https://github.com/driftyco/ionic-app-scripts/commit/e6bcf22))
