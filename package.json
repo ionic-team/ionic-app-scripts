@@ -102,6 +102,7 @@
     "@angular/compiler-cli": "*",
     "@angular/tsc-wrapped": "*",
     "rxjs": "*",
+    "sw-toolbox": "*",
     "typescript": "*",
     "zone.js": "*"
   },
