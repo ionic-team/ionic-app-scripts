@@ -6,7 +6,7 @@
 Execute the following command from your ionic project. This installs a new peer dependency called `sw-toolbox` that is used to simplify implementing a service-worker.
 
 ```
-npm install sw-toolbox --save-dev
+npm install sw-toolbox --save --save-exact
 ```
 
 
