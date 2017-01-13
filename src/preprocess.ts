@@ -26,10 +26,10 @@ function preprocessWorker(context: BuildContext) {
   const appModulePath = process.env[Constants.ENV_APP_NG_MODULE_PATH];
   return readFileAsync(appModulePath)
     .then((fileContent: string) => {
-      return extractDeepLinkData(appModulePath, fileContent);
+      return extractDeepLinkData(appModulePath, fileContent, context.runAot);
     });
 }
 
-function extractDeepLinkData(appNgModulePath: string, fileContent: string) {
-  return getDeepLinkData(appNgModulePath, fileContent);
+function extractDeepLinkData(appNgModulePath: string, fileContent: string, isAot: boolean) {
+  return getDeepLinkData(appNgModulePath, fileContent, isAot);
 }

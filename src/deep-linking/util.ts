@@ -49,15 +49,20 @@ function extractRegexContent(content: string, regex: RegExp) {
   return results;
 }
 
-export function getDeepLinkData(appNgModuleFilePath: string, appNgModuleFileContent: string): HydratedDeepLinkConfigEntry[] {
+export function getDeepLinkData(appNgModuleFilePath: string, appNgModuleFileContent: string, isAot: boolean): HydratedDeepLinkConfigEntry[] {
   const deepLinkConfigList = extractDeepLinkPathData(appNgModuleFileContent);
   if (!deepLinkConfigList) {
     return [];
   }
   const appDirectory = dirname(appNgModuleFilePath);
+  const absolutePathSuffix = isAot ? '.ngfactory.ts' : '.ts';
+  const modulePathSuffix = isAot ? '.ngfactory' : '';
+  const namedExportSuffix = isAot ? 'NgFactory' : '';
   const hydratedDeepLinks = deepLinkConfigList.map(deepLinkConfigEntry => {
     return Object.assign({}, deepLinkConfigEntry, {
-      absolutePath: join(appDirectory, deepLinkConfigEntry.modulePath + '.ts')
+      modulePath: deepLinkConfigEntry.modulePath + modulePathSuffix,
+      namedExport: deepLinkConfigEntry.namedExport + namedExportSuffix,
+      absolutePath: join(appDirectory, deepLinkConfigEntry.modulePath + absolutePathSuffix)
     }) as HydratedDeepLinkConfigEntry;
   });
   return hydratedDeepLinks;
