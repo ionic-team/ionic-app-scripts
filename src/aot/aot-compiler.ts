@@ -112,15 +112,14 @@ export class AotCompiler {
         modifiedFileContent = getFallbackMainContent();
       }
 
-
       Logger.debug(`[AotCompiler] compile: Modified File Content: ${modifiedFileContent}`);
       this.context.fileCache.set(this.options.entryPoint, { path: this.options.entryPoint, content: modifiedFileContent});
       Logger.debug('[AotCompiler] compile: Starting to process and modify entry point ... DONE');
     })
     .then(() => {
-      Logger.debug('[AotCompiler] compile: Removing decorators from program files ...');
+      Logger.debug('[AotCompiler] compile: Transpiling files ...');
       transpileFiles(this.context, this.tsConfig, this.fileSystem);
-      Logger.debug('[AotCompiler] compile: Removing decorators from program files ... DONE');
+      Logger.debug('[AotCompiler] compile: Transpiling files ... DONE');
     }).then(() => {
       return {
         lazyLoadedModuleDictionary: this.lazyLoadedModuleDictionary
@@ -154,6 +153,7 @@ function errorCheckProgram(context: BuildContext, tsConfig: ParsedTsConfig, comp
 function transpileFiles(context: BuildContext, tsConfig: ParsedTsConfig, fileSystem: HybridFileSystem) {
   const tsFiles = context.fileCache.getAll().filter(file => extname(file.path) === '.ts' && file.path.indexOf('.d.ts') === -1);
   for (const tsFile of tsFiles) {
+    Logger.debug(`[AotCompiler] transpileFiles: Transpiling file ${tsFile.path} ...`);
     const transpileOutput = transpileFileContent(tsFile.path, tsFile.content, tsConfig.parsed.options);
     const diagnostics = runTypeScriptDiagnostics(context, transpileOutput.diagnostics);
     if (diagnostics.length) {
@@ -167,9 +167,10 @@ function transpileFiles(context: BuildContext, tsConfig: ParsedTsConfig, fileSys
     fileSystem.addVirtualFile(jsFilePath + '.map', transpileOutput.sourceMapText);
 
     // write files to disk here if debug is enabled
-    if (isDebugMode() || true) {
+    if (isDebugMode()) {
       writeNgcFilesToDisk(context, tsFile.path, tsFile.content, transpileOutput.outputText, transpileOutput.sourceMapText);
     }
+    Logger.debug(`[AotCompiler] transpileFiles: Transpiling file ${tsFile.path} ... DONE`);
   }
 }
 

@@ -5,14 +5,17 @@ import { DeepLinkConfigEntry, HydratedDeepLinkConfigEntry } from '../util/interf
 
 function getLinksArrayContent(appNgModuleFileContent: string) {
   const deepLinksContentMatches = LINKS_REGEX.exec(appNgModuleFileContent.toString());
-  if (!deepLinksContentMatches || deepLinksContentMatches.length !== 2) {
-    throw new Error('Could not locate links array in deep links config');
+  if (deepLinksContentMatches && deepLinksContentMatches.length === 2) {
+    return deepLinksContentMatches[1];
   }
-  return deepLinksContentMatches[1];
+  return null;
 }
 
 export function extractDeepLinkPathData(appNgModuleFileContent: string) {
   const linksInternalContent = getLinksArrayContent(appNgModuleFileContent);
+  if (!linksInternalContent) {
+    return null;
+  }
   const pathsList = extractRegexContent(appNgModuleFileContent, LOAD_CHILDREN_REGEX);
   const nameList = extractRegexContent(appNgModuleFileContent, NAME_REGEX);
 
@@ -48,6 +51,9 @@ function extractRegexContent(content: string, regex: RegExp) {
 
 export function getDeepLinkData(appNgModuleFilePath: string, appNgModuleFileContent: string): HydratedDeepLinkConfigEntry[] {
   const deepLinkConfigList = extractDeepLinkPathData(appNgModuleFileContent);
+  if (!deepLinkConfigList) {
+    return [];
+  }
   const appDirectory = dirname(appNgModuleFilePath);
   const hydratedDeepLinks = deepLinkConfigList.map(deepLinkConfigEntry => {
     return Object.assign({}, deepLinkConfigEntry, {

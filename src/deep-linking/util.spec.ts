@@ -54,8 +54,47 @@ export function getSharedIonicModule() {
       expect(results[2].name).toEqual('PageTwo');
     });
   });
-  /*describe('getDeepLinkData', () => {
-    it('should convert the paths to absolute paths', () => {
+
+  describe('getDeepLinkData', () => {
+    it('should return an empty list when no valid deep links are found', () => {
+
+      const fileContent = `
+import { NgModule } from '@angular/core';
+import { IonicApp, IonicModule } from 'ionic-angular';
+import { MyApp } from './app.component';
+import { HomePage } from '../pages/home/home';
+
+import * as Constants from '../util/constants';
+
+@NgModule({
+  declarations: [
+    MyApp,
+    HomePage
+  ],
+  imports: [
+    getSharedIonicModule()
+  ],
+  bootstrap: [IonicApp],
+  entryComponents: [
+    MyApp,
+    HomePage
+  ],
+  providers: []
+})
+export class AppModule {}
+
+export function getSharedIonicModule() {
+  return IonicModule.forRoot(MyApp, {});
+}
+      `;
+
+      const srcDir = '/Users/dan/Dev/myApp/src';
+      const result = util.getDeepLinkData(join(srcDir, 'app/app.module.ts'), fileContent);
+      expect(result).toBeTruthy();
+      expect(result.length).toEqual(0);
+    });
+
+    it('should return a hydrated deep link config', () => {
 
       const fileContent = `
 import { NgModule } from '@angular/core';
@@ -85,9 +124,9 @@ export class AppModule {}
 export function getSharedIonicModule() {
   return IonicModule.forRoot(MyApp, {}, {
     links: [
-      { path: '../pages/home/home.module', namedExport: 'HomePageModule', name: 'Home' },
-      { path: '../pages/page-one/page-one.module', namedExport: 'PageOneModule', name: 'PageOne' },
-      { path: '../pages/page-two/page-two.module', namedExport: 'PageTwoModule', name: 'PageTwo' }
+      { loadChildren: '../pages/home/home.module#HomePageModule', name: 'Home' },
+      { loadChildren: '../pages/page-one/page-one.module#PageOneModule', name: 'PageOne' },
+      { loadChildren: '../pages/page-two/page-two.module#PageTwoModule', name: 'PageTwo' }
     ]
   });
 }
@@ -95,11 +134,17 @@ export function getSharedIonicModule() {
 
       const srcDir = '/Users/dan/Dev/myApp/src';
       const result = util.getDeepLinkData(join(srcDir, 'app/app.module.ts'), fileContent);
-      expect(result).toBeTruthy();
-      expect(result[0].absolutePath).toEqual(join(srcDir, 'pages/home/home.module.ts'));
-      expect(result[1].absolutePath).toEqual(join(srcDir, 'page-one/page-one.module.ts'));
-      expect(result[2].absolutePath).toEqual(join(srcDir, 'page-two/page-two.module.ts'));
+      expect(result[0].modulePath).toEqual('../pages/home/home.module');
+      expect(result[0].name).toEqual('Home');
+      expect(result[0].absolutePath).toEqual('/Users/dan/Dev/myApp/src/pages/home/home.module.ts');
+
+      expect(result[1].modulePath).toEqual('../pages/page-one/page-one.module');
+      expect(result[1].name).toEqual('PageOne');
+      expect(result[1].absolutePath).toEqual('/Users/dan/Dev/myApp/src/pages/page-one/page-one.module.ts');
+
+      expect(result[2].modulePath).toEqual('../pages/page-two/page-two.module');
+      expect(result[2].name).toEqual('PageTwo');
+      expect(result[2].absolutePath).toEqual('/Users/dan/Dev/myApp/src/pages/page-two/page-two.module.ts');
     });
   });
-  */
 });
