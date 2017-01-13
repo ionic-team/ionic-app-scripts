@@ -133,3 +133,18 @@ export interface VirtualFileSystem {
   getAllFileStats():  { [filePath: string]: VirtualFileStats };
   getAllDirStats():  { [filePath: string]: VirtualDirStats };
 };
+
+export interface DeepLinkConfigEntry {
+  modulePath: string;
+  namedExport: string;
+  name: string;
+};
+
+export interface HydratedDeepLinkConfigEntry extends DeepLinkConfigEntry {
+  absolutePath: string;
+};
+
+export interface AppNgModuleInfo {
+  absolutePath: string;
+  className: string;
+};
