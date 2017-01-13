@@ -90,11 +90,9 @@ export function generateContext(context?: BuildContext): BuildContext {
 
   const appNgModulePath = resolve(getConfigValue(context, '--appNgModulePath', null, Constants.ENV_APP_NG_MODULE_PATH, Constants.ENV_APP_NG_MODULE_PATH.toLowerCase(), join(context.srcDir, 'app', 'app.module.ts')));
   setProcessEnvVar(Constants.ENV_APP_NG_MODULE_PATH, appNgModulePath);
-  console.log('appNgModulePath: ', appNgModulePath);
 
   const appNgModuleClass = getConfigValue(context, '--appNgModuleClass', null, Constants.ENV_APP_NG_MODULE_CLASS, Constants.ENV_APP_NG_MODULE_CLASS.toLowerCase(), 'AppModule');
   setProcessEnvVar(Constants.ENV_APP_NG_MODULE_CLASS, appNgModuleClass);
-  console.log('appNgModuleClass: ', appNgModuleClass);
 
   setProcessEnvVar(Constants.ENV_GLOB_UTIL, join(getProcessEnvVar(Constants.ENV_VAR_APP_SCRIPTS_DIR), 'dist', 'util', 'glob-util.js'));
 

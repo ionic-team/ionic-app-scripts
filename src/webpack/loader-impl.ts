@@ -10,7 +10,6 @@ export function webpackLoader(source: string, map: any, webpackContex: any) {
   const context = getContext();
 
   const absolutePath = resolve(normalize(webpackContex.resourcePath));
-  console.log('absolutePath: ', absolutePath);
   Logger.debug(`[Webpack] loader: processing the following file: ${absolutePath}`);
   const javascriptPath = changeExtension(absolutePath, '.js');
   const sourceMapPath = javascriptPath + '.map';
