@@ -25,7 +25,6 @@ function getBootstrapNodes(allCalls: CallExpression[]) {
     .filter(call => call.expression.kind === SyntaxKind.PropertyAccessExpression)
     .map(call => call.expression as PropertyAccessExpression)
     .filter(access => {
-      // console.log('access: ', access);
       return access.name.kind === SyntaxKind.Identifier
           && access.name.text === 'bootstrapModule';
     });

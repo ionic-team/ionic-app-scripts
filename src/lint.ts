@@ -17,7 +17,6 @@ import * as ts from 'typescript';
 
 export function lint(context: BuildContext, configFile?: string) {
   const logger = new Logger('lint');
-  console.log('process.env: ', process.env);
   return runWorker('lint', 'lintWorker', context, configFile)
     .then(() => {
       logger.finish();
