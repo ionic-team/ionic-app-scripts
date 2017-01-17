@@ -124,8 +124,7 @@ npm run build --rollup ./config/rollup.config.js
 | output js map file | `ionic_output_js_map_file_name`  | `--outputJsMapFileName` | `main.js.map` | name of js source map file generated in `buildDir` |
 | output css file | `ionic_output_css_file_name`  | `--outputCssFileName` | `main.css` | name of css file generated in `buildDir` |
 | output css map file | `ionic_output_css_map_file_name`  | `--outputCssMapFileName` | `main.css.map` | name of css source map file generated in `buildDir` |
-
-
+| bail on lint error | `ionic_bail_on_lint_error`  | `--bailOnLintError` | `null` | Set to `true` to make stand-alone lint commands fail with non-zero status code |
 
 
 
@@ -157,7 +156,7 @@ These environment variables are automatically set to [Node's `process.env`](http
 | `IONIC_OUTPUT_CSS_MAP_FILE_NAME` | The file name of the generated css source map file             |
 | `IONIC_WEBPACK_FACTORY`    | The absolute path to Ionic's `webpack-factory` script                |
 | `IONIC_WEBPACK_LOADER`     | The absolute path to Ionic's custom webpack loader                   |
-
+| `IONIC_BAIL_ON_LINT_ERROR`     | Boolean determining whether to exit with a non-zero status code on error |
 
 
 The `process.env.IONIC_ENV` environment variable can be used to test whether it is a `prod` or `dev` build, which automatically gets set by any command. By default the `build` and `serve` tasks produce `dev` builds (a build that does not include Ahead of Time (AoT) compilation or minification). To force a `prod` build you should use the `--prod` command line flag.
@@ -190,6 +189,19 @@ Example NPM Script:
 
 ## Tips
 1. The Webpack `devtool` setting is driven by the `ionic_source_map_type` variable. It defaults to `source-map` for the best quality source map. Developers can enable significantly faster builds by setting `ionic_source_map_type` to `eval`.
+2. By default, the `lint` command does not exit with a non-zero status code on error. To enable this, pass `--bailOnLintError true` to the command.
+
+```
+"scripts" : {
+  ...
+  "lint": "ionic-app-scripts lint"
+  ...
+}
+```
+
+```
+npm run lint --bailOnLintError true
+```
 
 
 ## The Stack

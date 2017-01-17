@@ -217,3 +217,8 @@ export function stringSplice(source: string, startIndex: number, numToDelete: nu
 export function toUnixPath(filePath: string) {
   return filePath.replace(/\\/g, '/');
 }
+
+export function getBooleanPropertyValue(propertyName: string) {
+  const result = process.env[propertyName];
+  return result === 'true';
+}

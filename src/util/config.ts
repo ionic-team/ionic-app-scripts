@@ -120,6 +120,9 @@ export function generateContext(context?: BuildContext): BuildContext {
   const aotWriteToDisk = getConfigValue(context, '--aotWriteToDisk', null, Constants.ENV_AOT_WRITE_TO_DISK, Constants.ENV_AOT_WRITE_TO_DISK.toLowerCase(), null);
   setProcessEnvVar(Constants.ENV_AOT_WRITE_TO_DISK, aotWriteToDisk);
 
+  const bailOnLintError = getConfigValue(context, '--bailOnLintError', null, Constants.ENV_BAIL_ON_LINT_ERROR, Constants.ENV_BAIL_ON_LINT_ERROR.toLowerCase(), null);
+  setProcessEnvVar(Constants.ENV_BAIL_ON_LINT_ERROR, bailOnLintError);
+
   if (!isValidBundler(context.bundler)) {
     context.bundler = bundlerStrategy(context);
   }

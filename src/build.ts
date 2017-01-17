@@ -123,7 +123,7 @@ function buildProject(context: BuildContext) {
     .then(() => {
       // kick off the tslint after everything else
       // nothing needs to wait on its completion
-      lint(context);
+      return lint(context);
     })
     .catch(err => {
       throw new BuildError(err);
