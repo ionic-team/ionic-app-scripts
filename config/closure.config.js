@@ -9,5 +9,9 @@ module.exports = {
    * `java` will suffice. Verify by running `java --version`
    */
   pathToJavaExecutable: 'java',
-  pathToClosureJar: process.env.IONIC_CLOSURE_JAR
+  pathToClosureJar: process.env.IONIC_CLOSURE_JAR,
+  optimization: 'ADVANCED_OPTIMIZATIONS',
+  languageIn: `ECMASCRIPT6`,
+  languageOut: 'ECMASCRIPT5',
+  debug: false
 };

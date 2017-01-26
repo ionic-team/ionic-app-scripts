@@ -30,6 +30,16 @@ function preprocessWorker(context: BuildContext) {
     });
 }
 
+export function preprocessUpdate(changedFiles: ChangedFile[], context: BuildContext) {
+  const appNgModuleChangedFiles = changedFiles.filter(changedFile => changedFile.filePath === process.env[Constants.ENV_APP_NG_MODULE_PATH]);
+  if (appNgModuleChangedFiles.length) {
+    const fileContent = context.fileCache.get(appNgModuleChangedFiles[0].filePath).content;
+    const hydratedDeepLinkEntries = extractDeepLinkData(appNgModuleChangedFiles[0].filePath, fileContent, context.runAot);
+    setParsedDeepLinkConfig(hydratedDeepLinkEntries);
+  }
+  return Promise.resolve();
+}
+
 function extractDeepLinkData(appNgModulePath: string, fileContent: string, isAot: boolean) {
   return getDeepLinkData(appNgModulePath, fileContent, isAot);
 }

@@ -2,7 +2,7 @@ import { mkdirpSync, readFileSync, writeFileSync } from 'fs-extra';
 import { basename, dirname, extname, join, normalize, relative, resolve } from 'path';
 
 import 'reflect-metadata';
-import { CallExpression, CompilerOptions, createProgram, createSourceFile, Decorator, Identifier, ParsedCommandLine, Program, ScriptTarget, SyntaxKind, transpileModule, TranspileOptions, TranspileOutput } from 'typescript';
+import { CompilerOptions, createProgram, ParsedCommandLine, Program,  transpileModule, TranspileOptions, TranspileOutput } from 'typescript';
 import { CodeGenerator, NgcCliOptions, NodeReflectorHostContext, ReflectorHost, StaticReflector }from '@angular/compiler-cli';
 import { tsc } from '@angular/tsc-wrapped/src/tsc';
 import AngularCompilerOptions from '@angular/tsc-wrapped/src/options';
@@ -12,13 +12,11 @@ import { getInstance as getHybridFileSystem } from '../util/hybrid-file-system-f
 import { getInstance } from './compiler-host-factory';
 import { NgcCompilerHost } from './compiler-host';
 import { patchReflectorHost } from './reflector-host';
-import { findNodes, getNodeStringContent, getTypescriptSourceFile, removeDecorators } from '../util/typescript-utils';
 import { getFallbackMainContent, replaceBootstrap } from './utils';
 import { Logger } from '../logger/logger';
 import { printDiagnostics, clearDiagnostics, DiagnosticsType } from '../logger/logger-diagnostics';
 import { runTypeScriptDiagnostics } from '../logger/logger-typescript';
 import { isDebugMode } from '../util/config';
-import * as Constants from '../util/constants';
 import { BuildError } from '../util/errors';
 import { changeExtension } from '../util/helpers';
 import { BuildContext } from '../util/interfaces';
@@ -32,7 +30,6 @@ export class AotCompiler {
   private reflectorHost: ReflectorHost;
   private compilerHost: NgcCompilerHost;
   private fileSystem: HybridFileSystem;
-  private appLevelNgModuleFilePath: string;
   private lazyLoadedModuleDictionary: any;
 
   constructor(private context: BuildContext, private options: AotOptions) {
@@ -96,9 +93,7 @@ export class AotCompiler {
       if (!mainFile) {
         throw new BuildError(new Error(`Could not find entry point (bootstrap file) ${this.options.entryPoint}`));
       }
-      const mainSourceFile = getTypescriptSourceFile(mainFile.path, mainFile.content, ScriptTarget.Latest, false);
       Logger.debug('[AotCompiler] compile: Resolving NgModule from entry point');
-      this.appLevelNgModuleFilePath = this.options.appNgModulePath
       let modifiedFileContent: string = null;
       try {
         Logger.debug('[AotCompiler] compile: Dynamically changing entry point content to AOT mode content');

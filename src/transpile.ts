@@ -1,3 +1,4 @@
+import * as Constants from './util/constants';
 import { FileCache } from './util/file-cache';
 import { BuildContext, BuildState, ChangedFile } from './util/interfaces';
 import { BuildError } from './util/errors';
@@ -7,7 +8,7 @@ import { EventEmitter } from 'events';
 import { fork, ChildProcess } from 'child_process';
 import { inlineTemplate } from './template';
 import { Logger } from './logger/logger';
-import { readFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 import { runTypeScriptDiagnostics } from './logger/logger-typescript';
 import { printDiagnostics, clearDiagnostics, DiagnosticsType } from './logger/logger-diagnostics';
 import * as path from 'path';
@@ -296,6 +297,34 @@ function writeTranspiledFilesCallback(fileCache: FileCache, sourcePath: string, 
     file.content = data;
 
     fileCache.set(sourcePath, file);
+  }
+}
+
+export function transpileBundle(context: BuildContext, target: ts.ScriptTarget = ts.ScriptTarget.ES5) {
+  return Promise.resolve()
+    .then(() => {
+      return transpileBundleImpl(context, target);
+    });
+}
+
+function transpileBundleImpl(context: BuildContext, target: ts.ScriptTarget) {
+  const logger = new Logger('transpile bundle');
+  try {
+    const bundlePath = path.join(context.buildDir, process.env[Constants.ENV_OUTPUT_JS_FILE_NAME]);
+    const bundleContent = readFileSync(bundlePath).toString();
+    const tsConfig = getTsConfig(context);
+    const transpileOptions: ts.TranspileOptions = {
+      compilerOptions: tsConfig.options,
+      fileName: bundlePath,
+      reportDiagnostics: true
+    };
+    // override the target value
+    transpileOptions.compilerOptions.target = target;
+    const transpiledOutput = ts.transpileModule(bundleContent, transpileOptions);
+    writeFileSync(bundlePath, transpiledOutput.outputText);
+    logger.finish();
+  } catch (ex) {
+    throw logger.fail(ex);
   }
 }
 

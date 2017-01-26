@@ -10,7 +10,7 @@ import { lint, lintUpdate } from './lint';
 import { Logger } from './logger/logger';
 import { minifyCss, minifyJs } from './minify';
 import { ngc } from './ngc';
-import { preprocess } from './preprocess';
+import { preprocess, preprocessUpdate } from './preprocess';
 import { sass, sassUpdate } from './sass';
 import { templateUpdate } from './template';
 import { transpile, transpileUpdate, transpileDiagnosticsOnly } from './transpile';
@@ -211,9 +211,10 @@ function buildUpdateTasks(changedFiles: ChangedFile[], context: BuildContext) {
     changedFiles: []
   };
 
-  return Promise.resolve()
+  return loadFiles(changedFiles, context)
     .then(() => {
-      return loadFiles(changedFiles, context);
+      // PREPROCESS
+      return preprocessUpdate(changedFiles, context);
     })
     .then(() => {
       // TEMPLATE

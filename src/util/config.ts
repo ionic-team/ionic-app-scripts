@@ -99,6 +99,12 @@ export function generateContext(context?: BuildContext): BuildContext {
   const cleanBeforeCopy = getConfigValue(context, '--cleanBeforeCopy', null, Constants.ENV_CLEAN_BEFORE_COPY, Constants.ENV_CLEAN_BEFORE_COPY.toLowerCase(), null);
   setProcessEnvVar(Constants.ENV_CLEAN_BEFORE_COPY, cleanBeforeCopy);
 
+  const closureEnabled = getConfigValue(context, '--useExperimentalClosure', null, Constants.ENV_USE_EXPERIMENTAL_CLOSURE, Constants.ENV_USE_EXPERIMENTAL_CLOSURE.toLowerCase(), null);
+  setProcessEnvVar(Constants.ENV_USE_EXPERIMENTAL_CLOSURE, closureEnabled);
+
+  const babiliEnabled = getConfigValue(context, '--useExperimentalBabili', null, Constants.ENV_USE_EXPERIMENTAL_BABILI, Constants.ENV_USE_EXPERIMENTAL_BABILI.toLowerCase(), null);
+  setProcessEnvVar(Constants.ENV_USE_EXPERIMENTAL_BABILI, babiliEnabled);
+
   setProcessEnvVar(Constants.ENV_CLOSURE_JAR, join(getProcessEnvVar(Constants.ENV_VAR_APP_SCRIPTS_DIR), 'bin', 'closure-compiler.jar'));
 
   const outputJsFileName = getConfigValue(context, '--outputJsFileName', null, Constants.ENV_OUTPUT_JS_FILE_NAME, Constants.ENV_OUTPUT_JS_FILE_NAME.toLowerCase(), 'main.js');
@@ -122,6 +128,11 @@ export function generateContext(context?: BuildContext): BuildContext {
 
   const bailOnLintError = getConfigValue(context, '--bailOnLintError', null, Constants.ENV_BAIL_ON_LINT_ERROR, Constants.ENV_BAIL_ON_LINT_ERROR.toLowerCase(), null);
   setProcessEnvVar(Constants.ENV_BAIL_ON_LINT_ERROR, bailOnLintError);
+
+  // default stand-alone builds to default to es5
+  // if closure is being used, don't worry about this as it already automatically converts to ES5
+  const buildToEs5 = getConfigValue(context, '--buildToEs5', null, Constants.ENV_BUILD_TO_ES5, Constants.ENV_BUILD_TO_ES5.toLowerCase(), closureEnabled ? null : 'true');
+  setProcessEnvVar(Constants.ENV_BUILD_TO_ES5, buildToEs5);
 
   if (!isValidBundler(context.bundler)) {
     context.bundler = bundlerStrategy(context);
@@ -162,11 +173,11 @@ export function fillConfigDefaults(userConfigFile: string, defaultConfigFile: st
       statSync(userConfigFile);
       // create a fresh copy of the config each time
       userConfig = require(userConfigFile);
-      
+
       // if user config returns a function call it to determine proper object
-      if (typeof userconfig === 'function') {
-         userConfig = userConfig(); 
-      }  
+      if (typeof userConfig === 'function') {
+         userConfig = userConfig();
+      }
     } catch (e) {
       if (e.code === 'ENOENT') {
         console.error(`Config file "${userConfigFile}" not found. Using defaults instead.`);

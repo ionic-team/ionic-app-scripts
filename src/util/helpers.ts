@@ -1,3 +1,4 @@
+import { randomBytes } from 'crypto';
 import { basename, dirname, extname, join } from 'path';
 import { BuildContext, File, HydratedDeepLinkConfigEntry } from './interfaces';
 import { createReadStream, createWriteStream, readFile, readFileSync, readJsonSync, remove, unlink, writeFile } from 'fs-extra';
@@ -125,8 +126,6 @@ export function unlinkAsync(filePath: string): Promise<any> {
       return resolve();
     });
   });
-
-
 }
 
 export function rimRafAsync(directoryPath: string): Promise<null> {
@@ -216,6 +215,10 @@ export function stringSplice(source: string, startIndex: number, numToDelete: nu
 
 export function toUnixPath(filePath: string) {
   return filePath.replace(/\\/g, '/');
+}
+
+export function generateRandomHexString(numCharacters: number) {
+  return randomBytes(Math.ceil(numCharacters / 2)).toString('hex').slice(0, numCharacters);
 }
 
 export function getBooleanPropertyValue(propertyName: string) {

@@ -8,6 +8,7 @@ export interface BuildContext {
   wwwDir?: string;
   wwwIndex?: string;
   buildDir?: string;
+  nodeModulesDir?: string;
   moduleFiles?: string[];
   isProd?: boolean;
   isWatch?: boolean;
@@ -15,7 +16,6 @@ export interface BuildContext {
   runMinifyJs?: boolean;
   runMinifyCss?: boolean;
   optimizeJs?: boolean;
-
   bundler?: string;
   fileCache?: FileCache;
   inlineTemplates?: boolean;

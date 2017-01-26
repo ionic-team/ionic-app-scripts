@@ -5,7 +5,7 @@ import { fillConfigDefaults, generateContext, getUserConfigFile, replacePathVars
 import * as Constants from './util/constants';
 import { emit, EventType } from './util/events';
 import { generateGlobTasks, globAll, GlobObject, GlobResult } from './util/glob-util';
-import { copyFileAsync, rimRafAsync, unlinkAsync } from './util/helpers';
+import { copyFileAsync, getBooleanPropertyValue, rimRafAsync, unlinkAsync } from './util/helpers';
 import { BuildContext, ChangedFile, TaskInfo } from './util/interfaces';
 import { Watcher, copyUpdate as watchCopyUpdate } from './watch';
 
@@ -41,7 +41,7 @@ export function copyWorker(context: BuildContext, configFile: string) {
     // basically, we've got a stew goin'
     return populateFileAndDirectoryInfo(resultMap, copyConfig, toCopyList, directoriesToCreate);
   }).then(() => {
-    if (process.env[Constants.ENV_CLEAN_BEFORE_COPY]) {
+    if (getBooleanPropertyValue(Constants.ENV_CLEAN_BEFORE_COPY)) {
       cleanDirectories(context, directoriesToCreate);
     }
   }).then(() => {
