@@ -3,7 +3,7 @@ import { basename, dirname, extname, join, normalize, relative, resolve } from '
 
 import 'reflect-metadata';
 import { CompilerOptions, createProgram, ParsedCommandLine, Program,  transpileModule, TranspileOptions, TranspileOutput } from 'typescript';
-import { CodeGenerator, NgcCliOptions, NodeReflectorHostContext, ReflectorHost, StaticReflector }from '@angular/compiler-cli';
+import { NgcCliOptions }from '@angular/compiler-cli';
 import { tsc } from '@angular/tsc-wrapped/src/tsc';
 import AngularCompilerOptions from '@angular/tsc-wrapped/src/options';
 
@@ -11,7 +11,6 @@ import { HybridFileSystem } from '../util/hybrid-file-system';
 import { getInstance as getHybridFileSystem } from '../util/hybrid-file-system-factory';
 import { getInstance } from './compiler-host-factory';
 import { NgcCompilerHost } from './compiler-host';
-import { patchReflectorHost } from './reflector-host';
 import { getFallbackMainContent, replaceBootstrap } from './utils';
 import { Logger } from '../logger/logger';
 import { printDiagnostics, clearDiagnostics, DiagnosticsType } from '../logger/logger-diagnostics';
@@ -21,13 +20,13 @@ import { BuildError } from '../util/errors';
 import { changeExtension } from '../util/helpers';
 import { BuildContext } from '../util/interfaces';
 
+import { doCodegen } from './codegen';
+
 export class AotCompiler {
 
   private tsConfig: ParsedTsConfig;
   private angularCompilerOptions: AngularCompilerOptions;
   private program: Program;
-  private reflector: StaticReflector;
-  private reflectorHost: ReflectorHost;
   private compilerHost: NgcCompilerHost;
   private fileSystem: HybridFileSystem;
   private lazyLoadedModuleDictionary: any;
@@ -43,8 +42,6 @@ export class AotCompiler {
     this.fileSystem = getHybridFileSystem();
     this.compilerHost = getInstance(this.tsConfig.parsed.options);
     this.program = createProgram(this.tsConfig.parsed.fileNames, this.tsConfig.parsed.options, this.compilerHost);
-    this.reflectorHost = new ReflectorHost(this.program, this.compilerHost, this.angularCompilerOptions);
-    this.reflector = new StaticReflector(this.reflectorHost);
   }
 
   compile(): Promise<void> {
@@ -58,20 +55,13 @@ export class AotCompiler {
         basePath: this.options.rootDir
       };
 
-      // Create the Code Generator.
-      const codeGenerator = CodeGenerator.create(
-        this.angularCompilerOptions,
-        i18nOptions,
-        this.program,
-        this.compilerHost,
-        new NodeReflectorHostContext(this.compilerHost)
-      );
-
-      // We need to temporarily patch the CodeGenerator until either it's patched or allows us
-      // to pass in our own ReflectorHost.
-      patchReflectorHost(codeGenerator);
       Logger.debug('[AotCompiler] compile: starting codegen ... ');
-      return codeGenerator.codegen({transitiveModules: true});
+      return doCodegen({
+        angularCompilerOptions: this.angularCompilerOptions,
+        cliOptions: i18nOptions,
+        program: this.program,
+        compilerHost: this.compilerHost
+      });
     }).then(() => {
       Logger.debug('[AotCompiler] compile: starting codegen ... DONE');
       Logger.debug('[AotCompiler] compile: Creating and validating new TypeScript Program ...');
