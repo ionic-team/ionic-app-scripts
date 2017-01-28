@@ -230,10 +230,9 @@ function getComponentDirectories(moduleDirectories: string[], sassConfig: SassCo
 function render(context: BuildContext, sassConfig: SassConfig): Promise<string> {
   return new Promise((resolve, reject) => {
 
-    sassConfig.omitSourceMapUrl = true;
+    sassConfig.omitSourceMapUrl = false;
 
     if (sassConfig.sourceMap) {
-      sassConfig.sourceMap = basename(sassConfig.outFile);
       sassConfig.sourceMapContents = true;
     }
 
@@ -266,7 +265,8 @@ function renderSassSuccess(context: BuildContext, sassResult: Result, sassConfig
     let autoPrefixerMapOptions: any = false;
     if (sassConfig.sourceMap) {
       autoPrefixerMapOptions = {
-        inline: false
+        inline: false,
+        prev: generateSourceMaps(sassResult, sassConfig)
       };
     }
 
@@ -283,10 +283,10 @@ function renderSassSuccess(context: BuildContext, sassResult: Result, sassConfig
           Logger.warn(warn.toString());
         });
 
-        let apMapResult: string = null;
+        let apMapResult: SassMap = null;
         if (sassConfig.sourceMap && postCssResult.map) {
           Logger.debug(`sass, parse postCssResult.map`);
-          apMapResult = JSON.parse(postCssResult.map.toString()).mappings;
+          apMapResult = generateSourceMaps(postCssResult, sassConfig);
         }
 
         Logger.debug(`sass: postcss/autoprefixer completed`);
@@ -295,18 +295,13 @@ function renderSassSuccess(context: BuildContext, sassResult: Result, sassConfig
   }
 
   // without autoprefixer
-  generateSourceMaps(sassResult, sassConfig);
-
-  let sassMapResult: string = null;
-  if (sassResult.map) {
-    sassMapResult = JSON.parse(sassResult.map.toString()).mappings;
-  }
+  let sassMapResult: SassMap = generateSourceMaps(sassResult, sassConfig);
 
   return writeOutput(context, sassConfig, sassResult.css.toString(), sassMapResult);
 }
 
 
-function generateSourceMaps(sassResult: Result, sassConfig: SassConfig) {
+function generateSourceMaps(sassResult: Result, sassConfig: SassConfig): SassMap {
   // this can be async and nothing needs to wait on it
 
   // build Source Maps!
@@ -338,16 +333,13 @@ function generateSourceMaps(sassResult: Result, sassConfig: SassConfig) {
         return src;
       }
     });
-
-    // Replace the map file with the original file name (but new extension)
-    // sassMap.file = gutil.replaceExtension(sassFileSrc, '.css');
-    // Apply the map
-    // applySourceMap(file, sassMap);
+    return sassMap;
   }
 }
 
 
-function writeOutput(context: BuildContext, sassConfig: SassConfig, cssOutput: string, mappingsOutput: string): Promise<string> {
+function writeOutput(context: BuildContext, sassConfig: SassConfig, cssOutput: string, sourceMap: SassMap): Promise<string> {
+  let mappingsOutput: string = JSON.stringify(sourceMap);
   return new Promise((resolve, reject) => {
 
     Logger.debug(`sass start write output: ${sassConfig.outFile}`);
@@ -461,6 +453,9 @@ export interface SassConfig {
 
 
 export interface SassMap {
+  version: number;
   file: string;
-  sources: any[];
+  sources: string[];
+  mappings: string;
+  names: any[];
 }
