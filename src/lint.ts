@@ -22,7 +22,7 @@ export function lint(context: BuildContext, configFile?: string) {
       logger.finish();
     })
     .catch(err => {
-      if (getBooleanPropertyValue(Constants.ENV_BAIL_ON_LINT_ERROR)){
+      if (getBooleanPropertyValue(Constants.ENV_BAIL_ON_LINT_ERROR)) {
         throw logger.fail(err);
       }
       logger.finish();
@@ -71,7 +71,7 @@ function lintApp(context: BuildContext, configFile: string) {
     return lintFile(context, program, file);
   });
 
-  return Promise.all(promises)
+  return Promise.all(promises);
 }
 
 function lintFiles(context: BuildContext, program: ts.Program, filePaths: string[]) {
