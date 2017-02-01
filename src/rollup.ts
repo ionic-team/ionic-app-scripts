@@ -142,14 +142,14 @@ let cachedBundle: RollupBundle = null;
 function createOnWarnFn() {
   const previousWarns: {[key: string]: boolean} = {};
 
-  return function onWarningMessage(msg: string) {
-    if (msg in previousWarns) {
+  return function onWarningMessage(warning: RollupWarning) {
+    if (warning && warning.message in previousWarns) {
       return;
     }
-    previousWarns[msg] = true;
+    previousWarns[warning.message] = true;
 
-    if (!(IGNORE_WARNS.some(warnIgnore => msg.indexOf(warnIgnore) > -1))) {
-      Logger.warn(`rollup: ${msg}`);
+    if (!(IGNORE_WARNS.some(warnIgnore => warning.message.indexOf(warnIgnore) > -1))) {
+      Logger.warn(`rollup: ${warning.loc.file} has issued a warning: ${warning.message}`);
     }
   };
 }
@@ -177,16 +177,29 @@ export interface RollupConfig {
   dest?: string;
   cache?: RollupBundle;
   onwarn?: Function;
-}
-
+};
 
 export interface RollupBundle {
   // https://github.com/rollup/rollup/wiki/JavaScript-API
   write?: Function;
   modules: RollupModule[];
-}
+};
 
 
 export interface RollupModule {
   id: string;
-}
+};
+
+export interface RollupWarning {
+  code: string;
+  message: string;
+  url: string;
+  pos: number;
+  loc: RollupLocationInfo;
+};
+
+export interface RollupLocationInfo {
+  file: string;
+  line: number;
+  column: number;
+};
