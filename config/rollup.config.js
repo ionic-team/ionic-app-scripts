@@ -19,7 +19,7 @@ var rollupConfig = {
    * sourceMap: If true, a separate sourcemap file will
    * be created.
    */
-  sourceMap: process.env.IONIC_GENERATE_SOURCE_MAP === 'true' ? true : false,
+  sourceMap: true,
 
   /**
    * format: The format of the generated bundle

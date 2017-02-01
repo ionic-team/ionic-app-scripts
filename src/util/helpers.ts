@@ -1,7 +1,7 @@
 import { randomBytes } from 'crypto';
 import { basename, dirname, extname, join } from 'path';
 import { BuildContext, File, HydratedDeepLinkConfigEntry } from './interfaces';
-import { createReadStream, createWriteStream, readFile, readFileSync, readJsonSync, remove, unlink, writeFile } from 'fs-extra';
+import { createReadStream, createWriteStream, readdir, readFile, readFileSync, readJsonSync, remove, unlink, writeFile } from 'fs-extra';
 import * as osName from 'os-name';
 
 let _context: BuildContext;
@@ -152,6 +152,17 @@ export function copyFileAsync(srcPath: string, destPath: string): Promise<any> {
     });
 
     createReadStream(srcPath).pipe(writeStream);
+  });
+}
+
+export function readDirAsync(pathToDir: string): Promise<string[]> {
+  return new Promise((resolve, reject) => {
+    readdir(pathToDir, (err: Error, fileNames: string[]) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(fileNames);
+    });
   });
 }
 

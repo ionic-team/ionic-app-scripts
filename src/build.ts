@@ -2,7 +2,7 @@ import * as Constants from './util/constants';
 import { BuildContext, BuildState, BuildUpdateMessage, ChangedFile } from './util/interfaces';
 import { BuildError } from './util/errors';
 import { emit, EventType } from './util/events';
-import { readFileAsync, setContext } from './util/helpers';
+import { getBooleanPropertyValue, readFileAsync, setContext } from './util/helpers';
 import { bundle, bundleUpdate } from './bundle';
 import { clean } from './clean';
 import { copy } from './copy';
@@ -10,6 +10,7 @@ import { lint, lintUpdate } from './lint';
 import { Logger } from './logger/logger';
 import { minifyCss, minifyJs } from './minify';
 import { ngc } from './ngc';
+import { postprocess } from './postprocess';
 import { preprocess, preprocessUpdate } from './preprocess';
 import { sass, sassUpdate } from './sass';
 import { templateUpdate } from './template';
@@ -42,6 +43,8 @@ function buildWorker(context: BuildContext) {
     return preprocess(context);
   }).then(() => {
     return buildProject(context);
+  }).then(() => {
+    return postprocess(context);
   });
 }
 
@@ -122,8 +125,11 @@ function buildProject(context: BuildContext) {
     })
     .then(() => {
       // kick off the tslint after everything else
-      // nothing needs to wait on its completion
-      return lint(context);
+      // nothing needs to wait on its completion unless bailing on lint error is enabled
+      const result = lint(context);
+      if (getBooleanPropertyValue(Constants.ENV_BAIL_ON_LINT_ERROR)) {
+        return result;
+      }
     })
     .catch(err => {
       throw new BuildError(err);

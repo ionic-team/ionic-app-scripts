@@ -1,11 +1,14 @@
-import { BuildContext, TaskInfo } from './util/interfaces';
-import { BuildError } from './util/errors';
-import { fillConfigDefaults, generateContext, getUserConfigFile } from './util/config';
 import { join } from 'path';
-import { Logger } from './logger/logger';
-import { runWorker } from './worker-client';
-import { writeFileAsync } from './util/helpers';
 import * as uglify from 'uglify-js';
+
+import { Logger } from './logger/logger';
+import { fillConfigDefaults, generateContext, getUserConfigFile } from './util/config';
+import * as Constants from './util/constants';
+import { BuildError } from './util/errors';
+import { getBooleanPropertyValue, writeFileAsync } from './util/helpers';
+import { BuildContext, TaskInfo } from './util/interfaces';
+import { runWorker } from './worker-client';
+
 
 
 export function uglifyjs(context: BuildContext, configFile?: string) {
