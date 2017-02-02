@@ -60,7 +60,6 @@ describe('build', () => {
 
       expect(transpile.transpile).not.toHaveBeenCalled();
     }).catch(err => {
-      console.log(`err.message: `, err.message);
       expect(true).toEqual(false);
     });
   });
@@ -87,7 +86,6 @@ describe('build', () => {
       expect(minify.minifyJs).not.toHaveBeenCalled();
       expect(minify.minifyCss).not.toHaveBeenCalled();
     }).catch(err => {
-      console.log(`err.message: `, err.message);
       expect(true).toEqual(false);
     });
   });

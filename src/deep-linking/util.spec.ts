@@ -190,7 +190,6 @@ export function getSharedIonicModule() {
 
       const srcDir = '/Users/dan/Dev/myApp/src';
       const result = util.getDeepLinkData(join(srcDir, 'app/app.module.ts'), fileContent, true);
-      console.log('result: ', result);
       expect(result[0].modulePath).toEqual('../pages/home/home.module.ngfactory');
       expect(result[0].namedExport).toEqual('HomePageModuleNgFactory');
       expect(result[0].name).toEqual('Home');

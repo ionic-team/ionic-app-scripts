@@ -57,19 +57,6 @@ function runBabiliImpl(pathToBabili: string, pathToBundle: string) {
       }
       return resolve(chunks.join(''));
     });
-
-
-    /*exec(`${pathToBabili} ${pathToBundle}`, (err: Error, stdout: string, stderr: string) => {
-      console.log('err: ', err.message);
-      console.log('stdout: ', stdout);
-      console.log('stderr: ', stderr);
-      if (err) {
-        reject(err);
-      } else {
-        resolve(stdout);
-      }
-    });
-    */
   });
 }
 

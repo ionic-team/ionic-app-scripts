@@ -19,7 +19,6 @@ export function closure(context: BuildContext, configFile?: string) {
       logger.finish();
     })
     .catch(err => {
-      console.log('err: ', err);
       throw logger.fail(err);
     });
 }
