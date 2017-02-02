@@ -1,8 +1,9 @@
 import { normalize, resolve } from 'path';
 import { changeExtension, getContext, readFileAsync} from '../util/helpers';
 import { Logger } from '../logger/logger';
-import { File } from '../util/interfaces';
 import { FileCache } from '../util/file-cache';
+
+import { optimizeJavascript } from '../aot/optimization';
 
 export function webpackLoader(source: string, map: any, webpackContex: any) {
   webpackContex.cacheable();
@@ -34,6 +35,7 @@ export function webpackLoader(source: string, map: any, webpackContex: any) {
         }
       }
     }
+    javascriptFile.content = optimizeJavascript(javascriptPath, javascriptFile.content);
     callback(null, javascriptFile.content, sourceMapObject);
   }).catch(err => {
     Logger.debug(`[Webpack] loader: Encountered an unexpected error: ${err.message}`);
