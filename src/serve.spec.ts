@@ -22,6 +22,7 @@ describe('test serve', () => {
     };
     configResults = {
       httpPort: 8100,
+      hostBaseUrl: 'http://localhost:8100',
       host: '0.0.0.0',
       rootDir: '/',
       wwwDir: '/www',

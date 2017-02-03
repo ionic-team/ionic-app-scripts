@@ -3,6 +3,7 @@ import * as path from 'path';
 export interface ServeConfig {
   httpPort: number;
   host: string;
+  hostBaseUrl: string;
   rootDir: string;
   wwwDir: string;
   buildDir: string;

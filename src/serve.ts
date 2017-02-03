@@ -25,10 +25,13 @@ export function serve(context: BuildContext) {
 
   return findClosestOpenPort(host, notificationPort)
     .then((notificationPortFound) => {
+      const hostPort = getHttpServerPort(context);
+      const hostLocation = (host === '0.0.0.0') ? 'localhost' : host;
 
       config = {
-        httpPort: getHttpServerPort(context),
+        httpPort: hostPort,
         host: host,
+        hostBaseUrl: `http://${hostLocation}:${hostPort}`,
         rootDir: context.rootDir,
         wwwDir: context.wwwDir,
         buildDir: context.buildDir,
@@ -66,16 +69,15 @@ export function serve(context: BuildContext) {
 }
 
 function onReady(config: ServeConfig, context: BuildContext) {
-  const host = config.host === '0.0.0.0' ? 'localhost' : config.host;
   if (config.launchBrowser || config.launchLab) {
-    const openOptions: string[] = [`http://${host}:${config.httpPort}`]
+    const openOptions: string[] = [config.hostBaseUrl]
       .concat(launchLab(context) ? [IONIC_LAB_URL] : [])
       .concat(browserOption(context) ? [browserOption(context)] : [])
       .concat(platformOption(context) ? ['?ionicplatform=', platformOption(context)] : []);
 
     open(openOptions.join(''), browserToLaunch(context));
   }
-  Logger.info(`dev server running: http://${host}:${config.httpPort}/`, 'green', true);
+  Logger.info(`dev server running: ${config.hostBaseUrl}/`, 'green', true);
   Logger.newLine();
 }
 
