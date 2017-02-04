@@ -11,6 +11,8 @@ export const BUILD_DIR = 'build';
 export const SRC_DIR = 'src';
 export const TMP_DIR = '.tmp';
 export const WWW_DIR = 'www';
+export const NODE_MODULES = 'node_modules';
+export const IONIC_ANGULAR = 'ionic-angular';
 export const WWW_INDEX_FILENAME = 'index.html';
 
 export const ENV_VAR_PROD = 'prod';
@@ -21,6 +23,9 @@ export const ENV_VAR_SRC_DIR = 'IONIC_SRC_DIR';
 export const ENV_VAR_TMP_DIR = 'IONIC_TMP_DIR';
 export const ENV_VAR_WWW_DIR = 'IONIC_WWW_DIR';
 export const ENV_VAR_BUILD_DIR = 'IONIC_BUILD_DIR';
+export const ENV_VAR_NODE_MODULES_DIR = 'IONIC_NODE_MODULES_DIR';
+export const ENV_VAR_IONIC_ANGULAR_DIR = 'IONIC_ANGULAR_DIR';
+export const ENV_VAR_IONIC_ANGULAR_ENTRY_POINT = 'IONIC_ANGULAR_ENTRY_POINT';
 export const ENV_VAR_APP_SCRIPTS_DIR = 'IONIC_APP_SCRIPTS_DIR';
 export const ENV_VAR_GENERATE_SOURCE_MAP = 'IONIC_GENERATE_SOURCE_MAP';
 export const ENV_VAR_SOURCE_MAP_TYPE = 'IONIC_SOURCE_MAP_TYPE';
@@ -42,6 +47,7 @@ export const ENV_WEBPACK_LOADER = 'IONIC_WEBPACK_LOADER';
 export const ENV_AOT_WRITE_TO_DISK = 'IONIC_AOT_WRITE_TO_DISK';
 export const ENV_BAIL_ON_LINT_ERROR = 'IONIC_BAIL_ON_LINT_ERROR';
 export const ENV_BUILD_TO_ES5 = 'IONIC_BUILD_TO_ES5';
+export const ENV_ENABLE_MANUAL_TREESHAKING = 'IONIC_ENABLE_MANUAL_TREESHAKING';
 
 export const BUNDLER_ROLLUP = 'rollup';
 export const BUNDLER_WEBPACK = 'webpack';

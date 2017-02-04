@@ -7,10 +7,8 @@ module.exports = {
   output: {
     path: '{{BUILD}}',
     publicPath: 'build/',
-    filename: '[name].js',
-    devtoolModuleFilenameTemplate: ionicWebpackFactory.getSourceMapperFunction(),
+    filename: 'deptree.js',
   },
-  devtool: process.env.IONIC_SOURCE_MAP_TYPE,
 
   resolve: {
     extensions: ['.ts', '.js', '.json'],

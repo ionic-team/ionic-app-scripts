@@ -117,6 +117,17 @@ export function readFileAsync(filePath: string): Promise<string> {
   });
 }
 
+export function readAndCacheFile(filePath: string, purge: boolean = false): Promise<string> {
+  const file = _context.fileCache.get(filePath);
+  if (file && !purge) {
+    return Promise.resolve(file.content);
+  }
+  return readFileAsync(filePath).then((fileContent: string) => {
+    _context.fileCache.set(filePath, { path: filePath, content: fileContent});
+    return fileContent;
+  });
+}
+
 export function unlinkAsync(filePath: string): Promise<any> {
   return new Promise((resolve, reject) => {
     unlink(filePath, (err: Error) => {
@@ -214,6 +225,10 @@ export function escapeHtml(unsafe: string) {
          .replace(/>/g, '&gt;')
          .replace(/"/g, '&quot;')
          .replace(/'/g, '&#039;');
+}
+
+export function escapeStringForRegex(input: string) {
+  return input.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
 }
 
 export function rangeReplace(source: string, startIndex: number, endIndex: number, newContent: string) {

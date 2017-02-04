@@ -74,6 +74,15 @@ export function generateContext(context?: BuildContext): BuildContext {
   context.buildDir = resolve(context.buildDir || getConfigValue(context, '--buildDir', null, Constants.ENV_VAR_BUILD_DIR, Constants.ENV_VAR_BUILD_DIR.toLowerCase(), join(context.wwwDir, Constants.BUILD_DIR)));
   setProcessEnvVar(Constants.ENV_VAR_BUILD_DIR, context.buildDir);
 
+  context.nodeModulesDir = resolve(context.nodeModulesDir || getConfigValue(context, '--nodeModulesDir', null, Constants.ENV_VAR_NODE_MODULES_DIR, Constants.ENV_VAR_NODE_MODULES_DIR.toLowerCase(), join(context.rootDir, Constants.NODE_MODULES)));
+  setProcessEnvVar(Constants.ENV_VAR_NODE_MODULES_DIR, context.nodeModulesDir);
+
+  context.ionicAngularDir = resolve(context.ionicAngularDir || getConfigValue(context, '--ionicAngularDir', null, Constants.ENV_VAR_IONIC_ANGULAR_DIR, Constants.ENV_VAR_IONIC_ANGULAR_DIR.toLowerCase(), join(context.nodeModulesDir, Constants.IONIC_ANGULAR)));
+  setProcessEnvVar(Constants.ENV_VAR_IONIC_ANGULAR_DIR, context.ionicAngularDir);
+
+  const ionicAngularEntryPoint = resolve(getConfigValue(context, '--ionicAngularEntryPoint', null, Constants.ENV_VAR_IONIC_ANGULAR_ENTRY_POINT, Constants.ENV_VAR_IONIC_ANGULAR_ENTRY_POINT.toLowerCase(), join(context.ionicAngularDir, 'index.js')));
+  setProcessEnvVar(Constants.ENV_VAR_IONIC_ANGULAR_ENTRY_POINT, ionicAngularEntryPoint);
+
   setProcessEnvVar(Constants.ENV_VAR_APP_SCRIPTS_DIR, join(__dirname, '..', '..'));
 
   const generateSourceMap = getConfigValue(context, '--generateSourceMap', null, Constants.ENV_VAR_GENERATE_SOURCE_MAP, Constants.ENV_VAR_GENERATE_SOURCE_MAP.toLowerCase(), context.isProd || context.runMinifyJs ? null : 'true');
@@ -133,6 +142,9 @@ export function generateContext(context?: BuildContext): BuildContext {
   // if closure is being used, don't worry about this as it already automatically converts to ES5
   const buildToEs5 = getConfigValue(context, '--buildToEs5', null, Constants.ENV_BUILD_TO_ES5, Constants.ENV_BUILD_TO_ES5.toLowerCase(), closureEnabled ? null : 'true');
   setProcessEnvVar(Constants.ENV_BUILD_TO_ES5, buildToEs5);
+
+  const enableManualTreeshaking = getConfigValue(context, '--enableManualTreeshaking', null, Constants.ENV_ENABLE_MANUAL_TREESHAKING, Constants.ENV_ENABLE_MANUAL_TREESHAKING.toLowerCase(), 'true');
+  setProcessEnvVar(Constants.ENV_ENABLE_MANUAL_TREESHAKING, enableManualTreeshaking);
 
   if (!isValidBundler(context.bundler)) {
     context.bundler = bundlerStrategy(context);

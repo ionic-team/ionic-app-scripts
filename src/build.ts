@@ -40,11 +40,7 @@ function buildWorker(context: BuildContext) {
     return validateTsConfigSettings(tsConfigContents);
   })
   .then(() => {
-    return preprocess(context);
-  }).then(() => {
     return buildProject(context);
-  }).then(() => {
-    return postprocess(context);
   });
 }
 
@@ -108,6 +104,9 @@ function buildProject(context: BuildContext) {
 
   return compilePromise
     .then(() => {
+      return preprocess(context);
+    })
+    .then(() => {
       return bundle(context);
     })
     .then(() => {
@@ -122,6 +121,9 @@ function buildProject(context: BuildContext) {
         sassPromise,
         copyPromise
       ]);
+    })
+    .then(() => {
+      return postprocess(context);
     })
     .then(() => {
       // kick off the tslint after everything else
