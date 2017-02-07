@@ -34,7 +34,7 @@ function preprocessWorker(context: BuildContext) {
     });
 }
 
-function writeFilesToDisk(context: BuildContext) {
+export function writeFilesToDisk(context: BuildContext) {
   emptyDirSync(context.tmpDir);
   const files = context.fileCache.getAll();
   files.forEach(file => {
