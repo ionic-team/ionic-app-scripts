@@ -66,8 +66,13 @@ export function ionicRollupResolverPlugin(context: BuildContext) {
           }
         }
 
+        let jsContent = file.content;
+        if (context.optimizeJs) {
+          jsContent = optimizeJavascript(file.path, file.content);
+        }
+
         return {
-          code: optimizeJavascript(jsSourcePath, file.content),
+          code: jsContent,
           map: mapContent
         };
       }
