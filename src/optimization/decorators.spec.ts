@@ -1,4 +1,4 @@
-import * as optimization from './optimization';
+import * as decorators from './decorators';
 
 describe('optimization', () => {
   describe('purgeDecoratorStatements', () => {
@@ -197,7 +197,7 @@ IonicModule.decorators = [
 some more content
       `;
       // act
-      const result = optimization.purgeDecoratorStatements('/Users/dan/Dev/myApp3/node_modules/ionic-angular/index.js', knownContent, ['ionic-angular/index.js']);
+      const result = decorators.purgeDecoratorStatementsImpl('/Users/dan/Dev/myApp3/node_modules/ionic-angular/index.js', knownContent, ['ionic-angular/index.js']);
 
       // assert
       expect(result).not.toEqual(knownContent);

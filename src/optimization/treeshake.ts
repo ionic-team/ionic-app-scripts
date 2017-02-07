@@ -1,12 +1,13 @@
 import { dirname, join, relative } from 'path';
+import { Logger } from '../logger/logger';
 import * as Constants from '../util/constants';
 import { changeExtension, escapeStringForRegex, getBooleanPropertyValue } from '../util/helpers';
 import { TreeShakeCalcResults } from '../util/interfaces';
 
 export function calculateTreeShakeResults(dependencyMap: Map<string, Set<string>>): TreeShakeCalcResults {
-  if (getBooleanPropertyValue(Constants.ENV_ENABLE_MANUAL_TREESHAKING)) {
+  if (getBooleanPropertyValue(Constants.ENV_EXPERIMENTAL_MANUAL_TREESHAKING)) {
     // we aren't mature enough to analyze anything other than the index file right now
-    return purgeModulesWithOneImportee(dependencyMap, process.env[Constants.ENV_VAR_IONIC_ANGULAR_ENTRY_POINT], false);
+    return purgeModulesWithOneImportee(dependencyMap, new Map<string, Set<string>>(), new Map<string, Set<string>>(), process.env[Constants.ENV_VAR_IONIC_ANGULAR_ENTRY_POINT], true);
   }
   return {
     updatedDependencyMap: dependencyMap,
@@ -14,42 +15,41 @@ export function calculateTreeShakeResults(dependencyMap: Map<string, Set<string>
   };
 }
 
-function purgeModulesWithOneImportee(dependencyMap: Map<string, Set<string>>, importee: string, recursive: boolean = false): TreeShakeCalcResults {
+function purgeModulesWithOneImportee(activeDependencyMap: Map<string, Set<string>>, potentiallyPurgedMap: Map<string, Set<string>>, actualPurgedModules: Map<string, Set<string>>, importee: string, recursive: boolean = false): TreeShakeCalcResults {
   // find all modules with a single importee that is equal to the provided importee
   const dependenciesToInspect: string[] = [];
-  const keysToDelete: string[] = [];
-  const potentiallyPurgedModules = new Map<string, Set<string>>();
-  const actualPurgedModules = new Map<string, Set<string>>();
 
-  dependencyMap.forEach((importeeSet: Set<string>, modulePath: string) => {
+  activeDependencyMap.forEach((importeeSet: Set<string>, modulePath: string) => {
     if (importeeSet.has(importee)) {
       importeeSet.delete(importee);
       dependenciesToInspect.push(modulePath);
-      const set = !!potentiallyPurgedModules.get(modulePath) ? potentiallyPurgedModules.get(modulePath) : new Set();
+      const set = !!potentiallyPurgedMap.get(modulePath) ? potentiallyPurgedMap.get(modulePath) : new Set();
       set.add(importee);
-      potentiallyPurgedModules.set(modulePath, set);
+      potentiallyPurgedMap.set(modulePath, set);
     }
   });
 
   if (dependenciesToInspect.length && recursive) {
-    dependenciesToInspect.forEach(dependencyToInspect => purgeModulesWithOneImportee(dependencyMap, dependencyToInspect, recursive));
+    dependenciesToInspect.forEach(dependencyToInspect => purgeModulesWithOneImportee(activeDependencyMap, potentiallyPurgedMap, actualPurgedModules, dependencyToInspect, recursive));
   } else {
+    const keysToDelete: string[] = [];
     // sweet, the recusion is done, so now remove anything from the map with zero importees
-    dependencyMap.forEach((importeeSet: Set<string>, modulePath: string) => {
+    activeDependencyMap.forEach((importeeSet: Set<string>, modulePath: string) => {
       if (importeeSet.size === 0 && meetsFilter(modulePath)) {
         keysToDelete.push(modulePath);
       }
     });
 
     keysToDelete.forEach(key => {
-      dependencyMap.delete(key);
-      const set = potentiallyPurgedModules.get(key);
+      console.log('Dropping ', key);
+      activeDependencyMap.delete(key);
+      const set = potentiallyPurgedMap.get(key);
       actualPurgedModules.set(key, set);
     });
   }
 
   return {
-   updatedDependencyMap: dependencyMap,
+   updatedDependencyMap: activeDependencyMap,
    purgedModules: actualPurgedModules
   };
 }
@@ -63,7 +63,8 @@ export function meetsFilter(modulePath: string) {
 export function purgeUnusedImportsFromIndex(indexFilePath: string, indexFileContent: string, modulePathsToPurge: string[] ) {
   for (const modulePath of modulePathsToPurge) {
     // I cannot get the './' prefix to show up when using path api
-    console.log('Dropping imports from: ', modulePath);
+    // console.log(`[treeshake] purgeUnusedImportsFromIndex: Removing ${modulePath} from ${indexFilePath}`);
+    Logger.debug(`[treeshake] purgeUnusedImportsFromIndex: Removing ${modulePath} from ${indexFilePath}`);
     const extensionless = changeExtension(modulePath, '');
     const importPath = './' + relative(dirname(indexFilePath), extensionless);
     const importRegex = generateImportRegex(importPath);

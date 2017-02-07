@@ -1,5 +1,5 @@
-import { mkdirpSync, readFileSync, writeFileSync } from 'fs-extra';
-import { basename, dirname, extname, join, normalize, relative, resolve } from 'path';
+import { readFileSync } from 'fs-extra';
+import { extname, normalize, resolve } from 'path';
 
 import 'reflect-metadata';
 import { CompilerOptions, createProgram, ParsedCommandLine, Program,  transpileModule, TranspileOptions, TranspileOutput } from 'typescript';
@@ -15,7 +15,6 @@ import { getFallbackMainContent, replaceBootstrap } from './utils';
 import { Logger } from '../logger/logger';
 import { printDiagnostics, clearDiagnostics, DiagnosticsType } from '../logger/logger-diagnostics';
 import { runTypeScriptDiagnostics } from '../logger/logger-typescript';
-import { isDebugMode } from '../util/config';
 import { BuildError } from '../util/errors';
 import { changeExtension } from '../util/helpers';
 import { BuildContext } from '../util/interfaces';
@@ -151,37 +150,19 @@ function transpileFiles(context: BuildContext, tsConfig: ParsedTsConfig, fileSys
     fileSystem.addVirtualFile(jsFilePath, transpileOutput.outputText);
     fileSystem.addVirtualFile(jsFilePath + '.map', transpileOutput.sourceMapText);
 
-    // write files to disk here if debug is enabled
-    if (isDebugMode()) {
-      writeNgcFilesToDisk(context, tsFile.path, tsFile.content, transpileOutput.outputText, transpileOutput.sourceMapText);
-    }
     Logger.debug(`[AotCompiler] transpileFiles: Transpiling file ${tsFile.path} ... DONE`);
   }
 }
 
 function transpileFileContent(fileName: string, sourceText: string, options: CompilerOptions): TranspileOutput {
-    const transpileOptions: TranspileOptions = {
-      compilerOptions: options,
-      fileName: fileName,
-      reportDiagnostics: true
-    };
+  const transpileOptions: TranspileOptions = {
+    compilerOptions: options,
+    fileName: fileName,
+    reportDiagnostics: true
+  };
 
-    return transpileModule(sourceText, transpileOptions);
-  }
-
-function writeNgcFilesToDisk(context: BuildContext, typescriptFilePath: string, typescriptFileContent: string, transpiledFileContent: string, sourcemapContent: string) {
-    const dirName = dirname(typescriptFilePath);
-    const relativePath = relative(process.cwd(), dirName);
-    const tmpPath = join(context.tmpDir, relativePath);
-    const fileName = basename(typescriptFilePath);
-    const fileToWrite = join(tmpPath, fileName);
-    const jsFileToWrite = changeExtension(fileToWrite, '.js');
-
-    mkdirpSync(tmpPath);
-    writeFileSync(fileToWrite, typescriptFileContent);
-    writeFileSync(jsFileToWrite, transpiledFileContent);
-    writeFileSync(jsFileToWrite + '.map', sourcemapContent);
-  }
+  return transpileModule(sourceText, transpileOptions);
+}
 
 export interface AotOptions {
   tsConfigPath: string;

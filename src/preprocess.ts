@@ -1,7 +1,12 @@
+import { emptyDirSync, mkdirpSync, writeFileSync } from 'fs-extra';
+import { basename, dirname, join, relative } from 'path';
+
 import { Logger } from './logger/logger';
+import * as Constants from './util/constants';
 import { BuildError } from './util/errors';
+import { getBooleanPropertyValue } from './util/helpers';
 import { BuildContext, ChangedFile } from './util/interfaces';
-import { dependencyTree } from './dependency-tree';
+import { optimization } from './optimization';
 import { deepLinking, deepLinkingUpdate } from './deep-linking';
 
 export function preprocess(context: BuildContext) {
@@ -16,12 +21,32 @@ export function preprocess(context: BuildContext) {
     });
 }
 
-
 function preprocessWorker(context: BuildContext) {
   return deepLinking(context)
     .then(() => {
-      return dependencyTree(context, null);
+      if (context.optimizeJs) {
+        return optimization(context, null);
+      }
+    }).then(() => {
+      if (getBooleanPropertyValue(Constants.ENV_AOT_WRITE_TO_DISK)) {
+        writeFilesToDisk(context);
+      }
     });
+}
+
+function writeFilesToDisk(context: BuildContext) {
+  emptyDirSync(context.tmpDir);
+  const files = context.fileCache.getAll();
+  files.forEach(file => {
+    const dirName = dirname(file.path);
+    const relativePath = relative(process.cwd(), dirName);
+    const tmpPath = join(context.tmpDir, relativePath);
+    const fileName = basename(file.path);
+    const fileToWrite = join(tmpPath, fileName);
+    mkdirpSync(tmpPath);
+    writeFileSync(fileToWrite, file.content);
+  });
+
 }
 
 export function preprocessUpdate(changedFiles: ChangedFile[], context: BuildContext) {

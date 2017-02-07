@@ -1,3 +1,4 @@
+import { extname } from 'path';
 import { Logger } from './logger/logger';
 import { fillConfigDefaults, getUserConfigFile, replacePathVars } from './util/config';
 import * as Constants from './util/constants';
@@ -5,12 +6,12 @@ import { BuildError } from './util/errors';
 import { readAndCacheFile } from './util/helpers';
 import { BuildContext, TaskInfo } from './util/interfaces';
 import { runWebpackFullBuild, WebpackConfig } from './webpack';
-import { calculateTreeShakeResults, purgeUnusedImportsFromIndex } from './tree-shaking/utils';
+import { purgeDecorators } from './optimization/decorators';
+import { calculateTreeShakeResults, purgeUnusedImportsFromIndex } from './optimization/treeshake';
 
-
-export function dependencyTree(context: BuildContext, configFile: string) {
-  const logger = new Logger(`dependency tree`);
-  return dependencyTreeWorker(context, configFile).then(() => {
+export function optimization(context: BuildContext, configFile: string) {
+  const logger = new Logger(`optimization`);
+  return optimizationWorker(context, configFile).then(() => {
       logger.finish();
     })
     .catch((err: Error) => {
@@ -20,27 +21,38 @@ export function dependencyTree(context: BuildContext, configFile: string) {
     });
 }
 
-
-function dependencyTreeWorker(context: BuildContext, configFile: string) {
+function optimizationWorker(context: BuildContext, configFile: string) {
   const webpackConfig = getConfig(context, configFile);
   return runWebpackFullBuild(webpackConfig).then((stats: any) => {
     const dependencyMap = processStats(context, stats);
+
+    // remove decorators
+    removeDecorators(context);
+    // remove unused component imports
+
     const results = calculateTreeShakeResults(dependencyMap);
     return purgeUnusedImports(context, results.purgedModules);
+  });
+}
+
+function removeDecorators(context: BuildContext) {
+  const jsFiles = context.fileCache.getAll().filter(file => extname(file.path) === '.js');
+  jsFiles.forEach(jsFile => {
+    jsFile.content = purgeDecorators(jsFile.path, jsFile.content);
   });
 }
 
 function purgeUnusedImports(context: BuildContext, purgeDependencyMap: Map<string, Set<string>>) {
   // for now, restrict this to components in the ionic-angular/index.js file
   const indexFilePath = process.env[Constants.ENV_VAR_IONIC_ANGULAR_ENTRY_POINT];
+  const file = context.fileCache.get(indexFilePath);
   const modulesToPurge: string[] = [];
   purgeDependencyMap.forEach((set: Set<string>, moduleToPurge: string) => {
     modulesToPurge.push(moduleToPurge);
   });
-  return readAndCacheFile(indexFilePath).then(fileContent => {
-    const updatedFileContent = purgeUnusedImportsFromIndex(indexFilePath, fileContent, modulesToPurge);
-    context.fileCache.set(indexFilePath, { path: indexFilePath, content: updatedFileContent });
-  });
+
+  const updatedFileContent = purgeUnusedImportsFromIndex(indexFilePath, file.content, modulesToPurge);
+  context.fileCache.set(indexFilePath, { path: indexFilePath, content: updatedFileContent });
 }
 
 function processStats(context: BuildContext, stats: any) {
@@ -58,13 +70,22 @@ function processStats(context: BuildContext, stats: any) {
 function processStatsImpl(context: BuildContext, webpackStats: WebpackStats) {
   const dependencyMap = new Map<string, Set<string>>();
   webpackStats.modules.forEach(webpackModule => {
+    const moduleId = purgeWebpackPrefixFromPath(webpackModule.identifier);
     const dependencySet = new Set<string>();
     webpackModule.reasons.forEach(webpackDependency => {
-      dependencySet.add(webpackDependency.moduleIdentifier);
+      const depId = purgeWebpackPrefixFromPath(webpackDependency.moduleIdentifier);
+      dependencySet.add(depId);
     });
-    dependencyMap.set(webpackModule.identifier, dependencySet);
+    dependencyMap.set(moduleId, dependencySet);
   });
+
+  // printDependencyMap(dependencyMap);
   return dependencyMap;
+}
+
+export function purgeWebpackPrefixFromPath(filePath: string) {
+  const purgedPath = filePath.replace(process.env[Constants.ENV_OPTIMIZATION_LOADER], '');
+  return purgedPath.replace('!', '');
 }
 
 function printDependencyMap(map: Map<string, Set<string>>) {
@@ -74,7 +95,6 @@ function printDependencyMap(map: Map<string, Set<string>>) {
     dependencySet.forEach((importeePath: string) => {
       console.log(`   ${importeePath}`);
     });
-
   });
 }
 
@@ -89,11 +109,11 @@ export function getConfig(context: BuildContext, configFile: string): WebpackCon
 }
 
 const taskInfo: TaskInfo = {
-  fullArg: '--dependencyTree',
+  fullArg: '--optimization',
   shortArg: '-dt',
   envVar: 'IONIC_DEPENDENCY_TREE',
   packageConfig: 'ionic_dependency_tree',
-  defaultConfigFile: 'webpack-dependencytree.config'
+  defaultConfigFile: 'optimization.config'
 };
 
 interface WebpackStats {

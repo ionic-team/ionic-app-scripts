@@ -1,9 +1,7 @@
 import { normalize, resolve } from 'path';
-import { changeExtension, getContext, readFileAsync} from '../util/helpers';
+import { changeExtension, getContext, readAndCacheFile} from '../util/helpers';
 import { Logger } from '../logger/logger';
 import { FileCache } from '../util/file-cache';
-
-import { optimizeJavascript } from '../aot/optimization';
 
 export function webpackLoader(source: string, map: any, webpackContex: any) {
   webpackContex.cacheable();
@@ -35,7 +33,6 @@ export function webpackLoader(source: string, map: any, webpackContex: any) {
         }
       }
     }
-    javascriptFile.content = optimizeJavascript(javascriptPath, javascriptFile.content);
     callback(null, javascriptFile.content, sourceMapObject);
   }).catch(err => {
     Logger.debug(`[Webpack] loader: Encountered an unexpected error: ${err.message}`);
@@ -44,18 +41,9 @@ export function webpackLoader(source: string, map: any, webpackContex: any) {
 }
 
 function readFile(fileCache: FileCache, filePath: string) {
-  let file = fileCache.get(filePath);
-  if (file) {
-    Logger.debug(`[Webpack] loader: Found ${filePath} in file cache`);
-    return Promise.resolve(file);
-  }
-  Logger.debug(`[Webpack] loader: File ${filePath} not found in file cache - falling back to disk`);
-
-  return readFileAsync(filePath).then((fileContent: string) => {
+  return readAndCacheFile(filePath).then((fileContent: string) => {
     Logger.debug(`[Webpack] loader: Loaded ${filePath} successfully from disk`);
-    const file = { path: filePath, content: fileContent };
-    fileCache.set(filePath, file);
-    return file;
+    return fileCache.get(filePath);
   }).catch(err => {
     Logger.debug(`[Webpack] loader: Failed to load ${filePath} from disk`);
     throw err;
