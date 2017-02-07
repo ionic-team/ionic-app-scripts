@@ -1,6 +1,9 @@
 <a name="1.0.1"></a>
 ## [1.0.1](https://github.com/driftyco/ionic-app-scripts/compare/v1.0.0...v1.0.1) (2017-02-07)
 
+### Breaking Changes
+
+This release was accidentally published with a breaking change for Deep Links. If you're using Deep Links, please don't upgrade to this version. We are in the process of changing the DeepLinks API slightly.
 
 ### Bug Fixes
 
