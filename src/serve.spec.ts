@@ -90,6 +90,7 @@ describe('test serve', () => {
     config.addArgv('--address');
     config.addArgv('127.0.0.1');
     configResults.host = '127.0.0.1';
+    configResults.hostBaseUrl = 'http://127.0.0.1:8101';
     config.addArgv('--livereload-port');
     config.addArgv('35729');
     configResults.liveReloadPort = 35729;
