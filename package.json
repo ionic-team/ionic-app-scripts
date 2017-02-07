@@ -90,13 +90,12 @@
     "ionic-cz-conventional-changelog": "1.0.0",
     "jest": "^18.0.0",
     "mock-fs": "3.11.0",
-    "node-sass": "3.10.1",
     "rewire": "^2.5.2",
     "rimraf": "2.5.4",
     "rxjs": "5.0.0-beta.12",
     "tslint-ionic-rules": "0.0.8",
     "typescript": "~2.0.10",
-    "zone.js": "^0.6.26"
+    "zone.js": "^0.7.2"
   },
   "peerDependencies": {
     "@angular/core": "*",
