@@ -1,3 +1,23 @@
+<a name="1.0.1"></a>
+## [1.0.1](https://github.com/driftyco/ionic-app-scripts/compare/v1.0.0...v1.0.1) (2017-02-07)
+
+
+### Bug Fixes
+
+* **angular:** support angular 2.3+ ngc api ([13e930a](https://github.com/driftyco/ionic-app-scripts/commit/13e930a))
+* **deep-linking:** works when there isn't a valid deep link config ([62f05fc](https://github.com/driftyco/ionic-app-scripts/commit/62f05fc))
+* **deep-links:** adjust paths for AoT ([4055d73](https://github.com/driftyco/ionic-app-scripts/commit/4055d73))
+* **sass:** output valid source maps, that chrome can parse ([#306](https://github.com/driftyco/ionic-app-scripts/issues/306)) ([6589550](https://github.com/driftyco/ionic-app-scripts/commit/6589550))
+* **source-maps:** always generate source map, then purge them if not needed in postprocess step ([d26b44c](https://github.com/driftyco/ionic-app-scripts/commit/d26b44c))
+
+
+### Features
+
+* **createWorker:** pass argv and config_argv to spawned processes ([#487](https://github.com/driftyco/ionic-app-scripts/issues/487)) ([02dfff8](https://github.com/driftyco/ionic-app-scripts/commit/02dfff8))
+* **lint:** new option to have stand alone lint bail ([b3bb906](https://github.com/driftyco/ionic-app-scripts/commit/b3bb906))
+
+
+
 <a name="1.0.0"></a>
 # [1.0.0](https://github.com/driftyco/ionic-app-scripts/compare/v0.0.48...v1.0.0) (2017-01-06)
 
