@@ -4,9 +4,8 @@ describe('optimization', () => {
   describe('purgeDecoratorStatements', () => {
     it('should purge the decorators', () => {
       // arrange
-      const knownContent = `
-      some various content
-IonicModule.decorators = [
+      const decoratorStatement = `
+      IonicModule.decorators = [
     { type: NgModule, args: [{
                 imports: [BrowserModule, HttpModule, FormsModule, ReactiveFormsModule],
                 exports: [
@@ -194,14 +193,49 @@ IonicModule.decorators = [
                 entryComponents: []
             },] },
 ];
+      `;
+
+      const additionalGeneratedContent = `
+      /** @nocollapse */
+IonicModule.ctorParameters = () => [];
+function IonicModule_tsickle_Closure_declarations() {
+    /** @type {?} */
+    IonicModule.decorators;
+    /**
+     * @nocollapse
+     * @type {?}
+     */
+    IonicModule.ctorParameters;
+}
+** @nocollapse */
+LazyModule.ctorParameters = () => [];
+function LazyModule_tsickle_Closure_declarations() {
+    /** @type {?} */
+    LazyModule.decorators;
+    /**
+     * @nocollapse
+     * @type {?}
+     */
+    LazyModule.ctorParameters;
+}
+      `;
+
+
+      const knownContent = `
+      some various content
+${decoratorStatement}
+${additionalGeneratedContent}
+
 some more content
       `;
       // act
       const result = decorators.purgeDecoratorStatementsImpl('/Users/dan/Dev/myApp3/node_modules/ionic-angular/index.js', knownContent, ['ionic-angular/index.js']);
 
+      console.log(result);
       // assert
       expect(result).not.toEqual(knownContent);
-      expect(result.indexOf('IonicModule.decorators')).toEqual(-1);
+      expect(result.indexOf(decoratorStatement)).toEqual(-1);
+      expect(result.indexOf(additionalGeneratedContent)).toBeGreaterThan(-1);
     });
   });
 });
