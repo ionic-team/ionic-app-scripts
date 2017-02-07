@@ -38,6 +38,7 @@ describe('webpack loader', () => {
     spyOn(mockWebpackObject, mockWebpackObject.cacheable.name);
     spyOn(mockWebpackObject, mockWebpackObject.async.name).and.returnValue(spy);
     spyOn(helpers, helpers.getContext.name).and.returnValue(mockContext);
+    spyOn(helpers, helpers.readAndCacheFile.name).and.returnValue(Promise.resolve(fakeContent));
     spyOn(mockContext.fileCache, mockContext.fileCache.get.name).and.returnValue({
       path: fakePath,
       content: fakeContent
@@ -48,7 +49,7 @@ describe('webpack loader', () => {
 
     // assert
     const assertFunction = () => {
-      expect(mockContext.fileCache.get).toHaveBeenCalledTimes(2);
+      expect(helpers.readAndCacheFile).toHaveBeenCalledTimes(2);
       expect(spy).toHaveBeenCalledWith(null, fakeContent, mockSourceMap);
       done();
     };
@@ -70,6 +71,7 @@ describe('webpack loader', () => {
     spyOn(mockWebpackObject, mockWebpackObject.cacheable.name);
     spyOn(mockWebpackObject, mockWebpackObject.async.name).and.returnValue(spy);
     spyOn(helpers, helpers.getContext.name).and.returnValue(mockContext);
+    spyOn(helpers, helpers.readAndCacheFile.name).and.returnValue(Promise.resolve(fakeContent));
     const fileCacheSpy = spyOn(mockContext.fileCache, mockContext.fileCache.get.name).and.returnValue({
       path: fakePath,
       content: fakeContent
@@ -90,6 +92,7 @@ describe('webpack loader', () => {
     };
   });
 
+
   it('should callback with error when can\'t load file from disk', (done: Function) => {
     // arrange
     const cantReadFileError = 'Failed to read file from disk';
@@ -107,9 +110,7 @@ describe('webpack loader', () => {
     spyOn(helpers, helpers.getContext.name).and.returnValue(mockContext);
     spyOn(mockContext.fileCache, mockContext.fileCache.get.name).and.returnValue(null);
     spyOn(mockContext.fileCache, mockContext.fileCache.set.name);
-    spyOn(helpers, helpers.readFileAsync.name).and.callFake(() => {
-      return Promise.reject(new Error(cantReadFileError));
-    });
+    spyOn(helpers, helpers.readAndCacheFile.name).and.returnValue(Promise.reject(new Error(cantReadFileError)));
 
     // assert
     const assertFunction = () => {
@@ -137,9 +138,12 @@ describe('webpack loader', () => {
     spyOn(mockWebpackObject, mockWebpackObject.cacheable.name);
     spyOn(mockWebpackObject, mockWebpackObject.async.name).and.returnValue(callbackSpy);
     spyOn(helpers, helpers.getContext.name).and.returnValue(mockContext);
-    spyOn(mockContext.fileCache, mockContext.fileCache.get.name).and.returnValue(null);
     spyOn(mockContext.fileCache, mockContext.fileCache.set.name);
-    const readFileSpy = spyOn(helpers, helpers.readFileAsync.name).and.returnValue(Promise.resolve(fakeContent));
+    const readFileSpy = spyOn(helpers, helpers.readAndCacheFile.name).and.returnValue(Promise.resolve(fakeContent));
+    spyOn(mockContext.fileCache, mockContext.fileCache.get.name).and.returnValue({
+      path: fakePath,
+      content: fakeContent
+    });
 
     // act
     loader.webpackLoader(sourceString, mockSourceMap, mockWebpackObject);
