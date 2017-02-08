@@ -1,6 +1,7 @@
 import { Logger } from './logger/logger';
 import { BuildContext } from './util/interfaces';
 import { purgeSourceMapsIfNeeded } from './util/source-maps';
+import { removeUnusedFonts } from './optimization/remove-unused-fonts';
 
 
 export function postprocess(context: BuildContext) {
@@ -15,5 +16,8 @@ export function postprocess(context: BuildContext) {
 
 
 function postprocessWorker(context: BuildContext) {
-  return purgeSourceMapsIfNeeded(context);
+  return Promise.all([
+    purgeSourceMapsIfNeeded(context),
+    removeUnusedFonts(context)
+  ]);
 }

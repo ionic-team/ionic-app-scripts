@@ -128,15 +128,29 @@ export function readAndCacheFile(filePath: string, purge: boolean = false): Prom
   });
 }
 
-export function unlinkAsync(filePath: string): Promise<any> {
-  return new Promise((resolve, reject) => {
-    unlink(filePath, (err: Error) => {
-      if (err) {
-        return reject(err);
-      }
-      return resolve();
+export function unlinkAsync(filePath: string|string[]): Promise<any> {
+  let filePaths: string[];
+
+  if (typeof filePath === 'string') {
+    filePaths = [filePath];
+  } else if (Array.isArray(filePath)) {
+    filePaths = filePath;
+  } else {
+    return Promise.reject('unlinkAsync, invalid filePath type');
+  }
+
+  let promises = filePaths.map(filePath => {
+    return new Promise((resolve, reject) => {
+      unlink(filePath, (err: Error) => {
+        if (err) {
+          return reject(err);
+        }
+        return resolve();
+      });
     });
   });
+
+  return Promise.all(promises);
 }
 
 export function rimRafAsync(directoryPath: string): Promise<null> {
