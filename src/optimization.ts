@@ -3,11 +3,11 @@ import { Logger } from './logger/logger';
 import { fillConfigDefaults, getUserConfigFile, replacePathVars } from './util/config';
 import * as Constants from './util/constants';
 import { BuildError } from './util/errors';
-import { readAndCacheFile } from './util/helpers';
+import { getBooleanPropertyValue } from './util/helpers';
 import { BuildContext, TaskInfo } from './util/interfaces';
 import { runWebpackFullBuild, WebpackConfig } from './webpack';
 import { purgeDecorators } from './optimization/decorators';
-import { calculateTreeShakeResults, purgeUnusedImportsFromIndex } from './optimization/treeshake';
+import { calculateUnusedComponents, purgeUnusedImportsAndExportsFromIndex } from './optimization/treeshake';
 
 export function optimization(context: BuildContext, configFile: string) {
   const logger = new Logger(`optimization`);
@@ -25,14 +25,23 @@ function optimizationWorker(context: BuildContext, configFile: string) {
   const webpackConfig = getConfig(context, configFile);
   return runWebpackFullBuild(webpackConfig).then((stats: any) => {
     const dependencyMap = processStats(context, stats);
-
-    // remove decorators
-    removeDecorators(context);
-    // remove unused component imports
-
-    const results = calculateTreeShakeResults(dependencyMap);
-    return purgeUnusedImports(context, results.purgedModules);
+    return doOptimizations(context, dependencyMap);
   });
+}
+
+export function doOptimizations(context: BuildContext, dependencyMap: Map<string, Set<string>>) {
+  // remove decorators
+  if (getBooleanPropertyValue(Constants.ENV_EXPERIMENTAL_PURGE_DECORATORS)) {
+    removeDecorators(context);
+  }
+
+  // remove unused component imports
+  if (getBooleanPropertyValue(Constants.ENV_EXPERIMENTAL_MANUAL_TREESHAKING)) {
+    const results = calculateUnusedComponents(dependencyMap);
+    purgeUnusedImports(context, results.purgedModules);
+  }
+
+  return dependencyMap;
 }
 
 function removeDecorators(context: BuildContext) {
@@ -51,7 +60,7 @@ function purgeUnusedImports(context: BuildContext, purgeDependencyMap: Map<strin
     modulesToPurge.push(moduleToPurge);
   });
 
-  const updatedFileContent = purgeUnusedImportsFromIndex(indexFilePath, file.content, modulesToPurge);
+  const updatedFileContent = purgeUnusedImportsAndExportsFromIndex(indexFilePath, file.content, modulesToPurge);
   context.fileCache.set(indexFilePath, { path: indexFilePath, content: updatedFileContent });
 }
 
@@ -64,28 +73,29 @@ function processStats(context: BuildContext, stats: any) {
     chunks: false,
     chunkModules: false
   });
-  return processStatsImpl(context, statsObj);
+  return processStatsImpl(statsObj);
 }
 
-function processStatsImpl(context: BuildContext, webpackStats: WebpackStats) {
+export function processStatsImpl(webpackStats: WebpackStats) {
   const dependencyMap = new Map<string, Set<string>>();
-  webpackStats.modules.forEach(webpackModule => {
-    const moduleId = purgeWebpackPrefixFromPath(webpackModule.identifier);
-    const dependencySet = new Set<string>();
-    webpackModule.reasons.forEach(webpackDependency => {
-      const depId = purgeWebpackPrefixFromPath(webpackDependency.moduleIdentifier);
-      dependencySet.add(depId);
+  if (webpackStats && webpackStats.modules) {
+      webpackStats.modules.forEach(webpackModule => {
+      const moduleId = purgeWebpackPrefixFromPath(webpackModule.identifier);
+      const dependencySet = new Set<string>();
+      webpackModule.reasons.forEach(webpackDependency => {
+        const depId = purgeWebpackPrefixFromPath(webpackDependency.moduleIdentifier);
+        dependencySet.add(depId);
+      });
+      dependencyMap.set(moduleId, dependencySet);
     });
-    dependencyMap.set(moduleId, dependencySet);
-  });
+  }
 
   // printDependencyMap(dependencyMap);
   return dependencyMap;
 }
 
 export function purgeWebpackPrefixFromPath(filePath: string) {
-  const purgedPath = filePath.replace(process.env[Constants.ENV_OPTIMIZATION_LOADER], '');
-  return purgedPath.replace('!', '');
+  return filePath.replace(process.env[Constants.ENV_OPTIMIZATION_LOADER], '').replace(process.env[Constants.ENV_WEBPACK_LOADER], '').replace('!', '');
 }
 
 function printDependencyMap(map: Map<string, Set<string>>) {
@@ -116,15 +126,15 @@ const taskInfo: TaskInfo = {
   defaultConfigFile: 'optimization.config'
 };
 
-interface WebpackStats {
+export interface WebpackStats {
   modules: WebpackModule[];
 };
 
-interface WebpackModule {
+export interface WebpackModule {
   identifier: string;
   reasons: WebpackDependency[];
 };
 
-interface WebpackDependency {
+export interface WebpackDependency {
   moduleIdentifier: string;
 };
