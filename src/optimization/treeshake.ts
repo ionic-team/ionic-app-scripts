@@ -1,69 +1,80 @@
 import { dirname, join, relative } from 'path';
 import { Logger } from '../logger/logger';
 import * as Constants from '../util/constants';
-import { changeExtension, escapeStringForRegex, getBooleanPropertyValue } from '../util/helpers';
+import { changeExtension, escapeStringForRegex } from '../util/helpers';
 import { TreeShakeCalcResults } from '../util/interfaces';
 
-export function calculateTreeShakeResults(dependencyMap: Map<string, Set<string>>): TreeShakeCalcResults {
-  if (getBooleanPropertyValue(Constants.ENV_EXPERIMENTAL_MANUAL_TREESHAKING)) {
-    // we aren't mature enough to analyze anything other than the index file right now
-    return purgeModulesWithOneImportee(dependencyMap, new Map<string, Set<string>>(), new Map<string, Set<string>>(), process.env[Constants.ENV_VAR_IONIC_ANGULAR_ENTRY_POINT], true);
-  }
-  return {
-    updatedDependencyMap: dependencyMap,
-    purgedModules: new Map<string, Set<string>>()
-  };
+export function calculateUnusedComponents(dependencyMap: Map<string, Set<string>>): TreeShakeCalcResults {
+  return calculateUnusedComponentsImpl(dependencyMap, process.env[Constants.ENV_VAR_IONIC_ANGULAR_ENTRY_POINT]);
 }
 
-function purgeModulesWithOneImportee(activeDependencyMap: Map<string, Set<string>>, potentiallyPurgedMap: Map<string, Set<string>>, actualPurgedModules: Map<string, Set<string>>, importee: string, recursive: boolean = false): TreeShakeCalcResults {
-  // find all modules with a single importee that is equal to the provided importee
-  const dependenciesToInspect: string[] = [];
+export function calculateUnusedComponentsImpl(dependencyMap: Map<string, Set<string>>, importee: string): any {
+  const filteredMap = filterMap(dependencyMap);
+  processImportTree(filteredMap, importee);
+  return generateResults(filteredMap);
+}
 
-  activeDependencyMap.forEach((importeeSet: Set<string>, modulePath: string) => {
-    if (importeeSet.has(importee)) {
-      importeeSet.delete(importee);
-      dependenciesToInspect.push(modulePath);
-      const set = !!potentiallyPurgedMap.get(modulePath) ? potentiallyPurgedMap.get(modulePath) : new Set();
-      set.add(importee);
-      potentiallyPurgedMap.set(modulePath, set);
+function generateResults(dependencyMap: Map<string, Set<string>>) {
+  const toPurgeMap = new Map<string, Set<string>>();
+  const updatedMap = new Map<string, Set<string>>();
+  dependencyMap.forEach((importeeSet: Set<string>, modulePath: string) => {
+    if (importeeSet.size > 0) {
+      updatedMap.set(modulePath, importeeSet);
+    } else {
+     toPurgeMap.set(modulePath, importeeSet);
     }
   });
-
-  if (dependenciesToInspect.length && recursive) {
-    dependenciesToInspect.forEach(dependencyToInspect => purgeModulesWithOneImportee(activeDependencyMap, potentiallyPurgedMap, actualPurgedModules, dependencyToInspect, recursive));
-  } else {
-    const keysToDelete: string[] = [];
-    // sweet, the recusion is done, so now remove anything from the map with zero importees
-    activeDependencyMap.forEach((importeeSet: Set<string>, modulePath: string) => {
-      if (importeeSet.size === 0 && meetsFilter(modulePath)) {
-        keysToDelete.push(modulePath);
-      }
-    });
-
-    keysToDelete.forEach(key => {
-      console.log('Dropping ', key);
-      activeDependencyMap.delete(key);
-      const set = potentiallyPurgedMap.get(key);
-      actualPurgedModules.set(key, set);
-    });
-  }
-
   return {
-   updatedDependencyMap: activeDependencyMap,
-   purgedModules: actualPurgedModules
+    updatedDependencyMap: updatedMap,
+    purgedModules: toPurgeMap
   };
 }
 
-export function meetsFilter(modulePath: string) {
-  // for now, just use a simple filter of if a file is in ionic-angular/components
-  const componentDir = join(process.env[Constants.ENV_VAR_IONIC_ANGULAR_DIR], 'components');
-  return modulePath.indexOf(componentDir) >= 0;
+function filterMap(dependencyMap: Map<string, Set<string>>) {
+  const filteredMap = new Map<string, Set<string>>();
+  dependencyMap.forEach((importeeSet: Set<string>, modulePath: string) => {
+     if (isIonicComponent(modulePath)) {
+       filteredMap.set(modulePath, importeeSet);
+     }
+  });
+  return filteredMap;
 }
 
-export function purgeUnusedImportsFromIndex(indexFilePath: string, indexFileContent: string, modulePathsToPurge: string[] ) {
+function processImportTree(dependencyMap: Map<string, Set<string>>, importee: string) {
+  const importees: string[] = [];
+  dependencyMap.forEach((importeeSet: Set<string>, modulePath: string) => {
+    if (importeeSet.has(importee)) {
+      importeeSet.delete(importee);
+      // if it importer by an `ngfactory` file, we probably aren't going to be able to purge it
+      let ngFactoryImportee = false;
+      const importeeList = Array.from(importeeSet);
+      for (const entry of importeeList) {
+        if (isNgFactory(entry)) {
+          ngFactoryImportee = true;
+          break;
+        }
+      }
+      if (!ngFactoryImportee) {
+        importees.push(modulePath);
+      }
+    }
+  });
+  importees.forEach(importee => processImportTree(dependencyMap, importee));
+}
+
+export function isIonicComponent(modulePath: string) {
+  // for now, just use a simple filter of if a file is in ionic-angular/components
+  const ionicAngularComponentDir = join(process.env[Constants.ENV_VAR_IONIC_ANGULAR_DIR], 'components');
+  return modulePath.indexOf(ionicAngularComponentDir) >= 0;
+}
+
+export function isNgFactory(modulePath: string) {
+  return modulePath.indexOf('.ngfactory.') >= 0;
+}
+
+export function purgeUnusedImportsAndExportsFromIndex(indexFilePath: string, indexFileContent: string, modulePathsToPurge: string[] ) {
   for (const modulePath of modulePathsToPurge) {
     // I cannot get the './' prefix to show up when using path api
-    // console.log(`[treeshake] purgeUnusedImportsFromIndex: Removing ${modulePath} from ${indexFilePath}`);
     Logger.debug(`[treeshake] purgeUnusedImportsFromIndex: Removing ${modulePath} from ${indexFilePath}`);
     const extensionless = changeExtension(modulePath, '');
     const importPath = './' + relative(dirname(indexFilePath), extensionless);
