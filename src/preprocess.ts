@@ -22,7 +22,8 @@ export function preprocess(context: BuildContext) {
 }
 
 function preprocessWorker(context: BuildContext) {
-  return deepLinking(context)
+  const deepLinksPromise = getBooleanPropertyValue(Constants.ENV_EXPERIMENTAL_PARSE_DEEPLINKS) ? deepLinking(context) : Promise.resolve();
+  return deepLinksPromise
     .then(() => {
       if (context.optimizeJs) {
         return optimization(context, null);
@@ -50,7 +51,8 @@ export function writeFilesToDisk(context: BuildContext) {
 }
 
 export function preprocessUpdate(changedFiles: ChangedFile[], context: BuildContext) {
-  const promises: Promise<any>[] = [];
-  promises.push(deepLinkingUpdate(changedFiles, context));
-  return Promise.all(promises);
+  if (getBooleanPropertyValue(Constants.ENV_EXPERIMENTAL_PARSE_DEEPLINKS)) {
+    return deepLinkingUpdate(changedFiles, context);
+  }
+  return Promise.resolve();
 }
