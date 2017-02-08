@@ -1,12 +1,7 @@
 import { Logger } from '../logger/logger';
-import * as Constants from '../util/constants';
-import { getBooleanPropertyValue } from '../util/helpers';
 
 export function purgeDecorators(filePath: string, fileContent: string) {
-  if (getBooleanPropertyValue(Constants.ENV_EXPERIMENTAL_PURGE_DECORATORS)) {
-    fileContent = purgeDecoratorStatementsImpl(filePath, fileContent, ['ionic-angular/index.js']);
-  }
-  return fileContent;
+  return purgeDecoratorStatementsImpl(filePath, fileContent, ['ionic-angular/index.js']);
 }
 
 export function purgeDecoratorStatementsImpl(filePath: string, fileContent: string, inclusions: string[]) {

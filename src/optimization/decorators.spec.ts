@@ -229,9 +229,8 @@ ${additionalGeneratedContent}
 some more content
       `;
       // act
-      const result = decorators.purgeDecoratorStatementsImpl('/Users/dan/Dev/myApp3/node_modules/ionic-angular/index.js', knownContent, ['ionic-angular/index.js']);
+      const result = decorators.purgeDecorators('/Users/dan/Dev/myApp3/node_modules/ionic-angular/index.js', knownContent);
 
-      console.log(result);
       // assert
       expect(result).not.toEqual(knownContent);
       expect(result.indexOf(decoratorStatement)).toEqual(-1);
