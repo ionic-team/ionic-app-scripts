@@ -109,7 +109,6 @@ export function runWebpackFullBuild(config: WebpackConfig) {
         resolve(stats);
       }
     };
-
     const compiler = webpackApi(config);
     compiler.run(callback);
   });
