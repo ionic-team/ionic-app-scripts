@@ -100,7 +100,7 @@ function webpackBuildComplete(stats: any, context: BuildContext, webpackConfig: 
   return Promise.resolve();
 }
 
-function runWebpackFullBuild(config: WebpackConfig) {
+export function runWebpackFullBuild(config: WebpackConfig) {
   return new Promise((resolve, reject) => {
     const callback = (err: Error, stats: any) => {
       if (err) {
@@ -109,7 +109,6 @@ function runWebpackFullBuild(config: WebpackConfig) {
         resolve(stats);
       }
     };
-
     const compiler = webpackApi(config);
     compiler.run(callback);
   });

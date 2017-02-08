@@ -4,7 +4,7 @@ import * as config from './util/config';
 
 describe('copy task', () => {
   describe('copyConfigToWatchConfig', () => {
-    it('should do something', () => {
+    it('should convert to watch config format', () => {
       // arrange
       const context = { };
       const configFile = 'configFile';

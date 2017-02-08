@@ -5,8 +5,6 @@ import { Logger } from '../logger/logger';
 import { dirname, join, resolve } from 'path';
 import * as pluginutils from 'rollup-pluginutils';
 
-import { optimizeJavascript } from '../aot/optimization';
-
 export const PLUGIN_NAME = 'ion-rollup-resolver';
 
 export function ionicRollupResolverPlugin(context: BuildContext) {
@@ -66,13 +64,8 @@ export function ionicRollupResolverPlugin(context: BuildContext) {
           }
         }
 
-        let jsContent = file.content;
-        if (context.optimizeJs) {
-          jsContent = optimizeJavascript(file.path, file.content);
-        }
-
         return {
-          code: jsContent,
+          code: file.content,
           map: mapContent
         };
       }

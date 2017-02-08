@@ -74,6 +74,15 @@ export function generateContext(context?: BuildContext): BuildContext {
   context.buildDir = resolve(context.buildDir || getConfigValue(context, '--buildDir', null, Constants.ENV_VAR_BUILD_DIR, Constants.ENV_VAR_BUILD_DIR.toLowerCase(), join(context.wwwDir, Constants.BUILD_DIR)));
   setProcessEnvVar(Constants.ENV_VAR_BUILD_DIR, context.buildDir);
 
+  context.nodeModulesDir = resolve(context.nodeModulesDir || getConfigValue(context, '--nodeModulesDir', null, Constants.ENV_VAR_NODE_MODULES_DIR, Constants.ENV_VAR_NODE_MODULES_DIR.toLowerCase(), join(context.rootDir, Constants.NODE_MODULES)));
+  setProcessEnvVar(Constants.ENV_VAR_NODE_MODULES_DIR, context.nodeModulesDir);
+
+  context.ionicAngularDir = resolve(context.ionicAngularDir || getConfigValue(context, '--ionicAngularDir', null, Constants.ENV_VAR_IONIC_ANGULAR_DIR, Constants.ENV_VAR_IONIC_ANGULAR_DIR.toLowerCase(), join(context.nodeModulesDir, Constants.IONIC_ANGULAR)));
+  setProcessEnvVar(Constants.ENV_VAR_IONIC_ANGULAR_DIR, context.ionicAngularDir);
+
+  const ionicAngularEntryPoint = resolve(getConfigValue(context, '--ionicAngularEntryPoint', null, Constants.ENV_VAR_IONIC_ANGULAR_ENTRY_POINT, Constants.ENV_VAR_IONIC_ANGULAR_ENTRY_POINT.toLowerCase(), join(context.ionicAngularDir, 'index.js')));
+  setProcessEnvVar(Constants.ENV_VAR_IONIC_ANGULAR_ENTRY_POINT, ionicAngularEntryPoint);
+
   setProcessEnvVar(Constants.ENV_VAR_APP_SCRIPTS_DIR, join(__dirname, '..', '..'));
 
   const generateSourceMap = getConfigValue(context, '--generateSourceMap', null, Constants.ENV_VAR_GENERATE_SOURCE_MAP, Constants.ENV_VAR_GENERATE_SOURCE_MAP.toLowerCase(), context.isProd || context.runMinifyJs ? null : 'true');
@@ -99,12 +108,6 @@ export function generateContext(context?: BuildContext): BuildContext {
   const cleanBeforeCopy = getConfigValue(context, '--cleanBeforeCopy', null, Constants.ENV_CLEAN_BEFORE_COPY, Constants.ENV_CLEAN_BEFORE_COPY.toLowerCase(), null);
   setProcessEnvVar(Constants.ENV_CLEAN_BEFORE_COPY, cleanBeforeCopy);
 
-  const closureEnabled = getConfigValue(context, '--useExperimentalClosure', null, Constants.ENV_USE_EXPERIMENTAL_CLOSURE, Constants.ENV_USE_EXPERIMENTAL_CLOSURE.toLowerCase(), null);
-  setProcessEnvVar(Constants.ENV_USE_EXPERIMENTAL_CLOSURE, closureEnabled);
-
-  const babiliEnabled = getConfigValue(context, '--useExperimentalBabili', null, Constants.ENV_USE_EXPERIMENTAL_BABILI, Constants.ENV_USE_EXPERIMENTAL_BABILI.toLowerCase(), null);
-  setProcessEnvVar(Constants.ENV_USE_EXPERIMENTAL_BABILI, babiliEnabled);
-
   setProcessEnvVar(Constants.ENV_CLOSURE_JAR, join(getProcessEnvVar(Constants.ENV_VAR_APP_SCRIPTS_DIR), 'bin', 'closure-compiler.jar'));
 
   const outputJsFileName = getConfigValue(context, '--outputJsFileName', null, Constants.ENV_OUTPUT_JS_FILE_NAME, Constants.ENV_OUTPUT_JS_FILE_NAME.toLowerCase(), 'main.js');
@@ -122,12 +125,29 @@ export function generateContext(context?: BuildContext): BuildContext {
   setProcessEnvVar(Constants.ENV_WEBPACK_FACTORY, join(getProcessEnvVar(Constants.ENV_VAR_APP_SCRIPTS_DIR), 'dist', 'webpack', 'ionic-webpack-factory.js'));
 
   setProcessEnvVar(Constants.ENV_WEBPACK_LOADER, join(getProcessEnvVar(Constants.ENV_VAR_APP_SCRIPTS_DIR), 'dist', 'webpack', 'loader.js'));
+  setProcessEnvVar(Constants.ENV_OPTIMIZATION_LOADER, join(getProcessEnvVar(Constants.ENV_VAR_APP_SCRIPTS_DIR), 'dist', 'webpack', 'optimization-loader.js'));
+
 
   const aotWriteToDisk = getConfigValue(context, '--aotWriteToDisk', null, Constants.ENV_AOT_WRITE_TO_DISK, Constants.ENV_AOT_WRITE_TO_DISK.toLowerCase(), null);
   setProcessEnvVar(Constants.ENV_AOT_WRITE_TO_DISK, aotWriteToDisk);
 
   const bailOnLintError = getConfigValue(context, '--bailOnLintError', null, Constants.ENV_BAIL_ON_LINT_ERROR, Constants.ENV_BAIL_ON_LINT_ERROR.toLowerCase(), null);
   setProcessEnvVar(Constants.ENV_BAIL_ON_LINT_ERROR, bailOnLintError);
+
+  const experimentalManualTreeshaking = getConfigValue(context, '--experimentalManualTreeshaking', null, Constants.ENV_EXPERIMENTAL_MANUAL_TREESHAKING, Constants.ENV_EXPERIMENTAL_MANUAL_TREESHAKING.toLowerCase(), null);
+  setProcessEnvVar(Constants.ENV_EXPERIMENTAL_MANUAL_TREESHAKING, experimentalManualTreeshaking);
+
+  const experimentalPurgeDecorators = getConfigValue(context, '--experimentalPurgeDecorators', null, Constants.ENV_EXPERIMENTAL_PURGE_DECORATORS, Constants.ENV_EXPERIMENTAL_PURGE_DECORATORS.toLowerCase(), null);
+  setProcessEnvVar(Constants.ENV_EXPERIMENTAL_PURGE_DECORATORS, experimentalPurgeDecorators);
+
+  const closureEnabled = getConfigValue(context, '--useExperimentalClosure', null, Constants.ENV_USE_EXPERIMENTAL_CLOSURE, Constants.ENV_USE_EXPERIMENTAL_CLOSURE.toLowerCase(), null);
+  setProcessEnvVar(Constants.ENV_USE_EXPERIMENTAL_CLOSURE, closureEnabled);
+
+  const babiliEnabled = getConfigValue(context, '--useExperimentalBabili', null, Constants.ENV_USE_EXPERIMENTAL_BABILI, Constants.ENV_USE_EXPERIMENTAL_BABILI.toLowerCase(), null);
+  setProcessEnvVar(Constants.ENV_USE_EXPERIMENTAL_BABILI, babiliEnabled);
+
+  const parseDeepLinks = getConfigValue(context, '--experimentalParseDeepLinks', null, Constants.ENV_EXPERIMENTAL_PARSE_DEEPLINKS, Constants.ENV_EXPERIMENTAL_PARSE_DEEPLINKS.toLowerCase(), null);
+  setProcessEnvVar(Constants.ENV_EXPERIMENTAL_PARSE_DEEPLINKS, parseDeepLinks);
 
   // default stand-alone builds to default to es5
   // if closure is being used, don't worry about this as it already automatically converts to ES5

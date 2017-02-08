@@ -13,6 +13,7 @@ export interface BuildContext {
   wwwIndex?: string;
   buildDir?: string;
   nodeModulesDir?: string;
+  ionicAngularDir?: string;
   moduleFiles?: string[];
   isProd?: boolean;
   isWatch?: boolean;
@@ -158,4 +159,9 @@ export interface CodegenOptions {
   cliOptions: CompilerCLI.NgcCliOptions;
   program: Program;
   compilerHost: CompilerHost;
+};
+
+export interface TreeShakeCalcResults {
+  updatedDependencyMap: Map<string, Set<string>>;
+  purgedModules: Map<string, Set<string>>;
 };
