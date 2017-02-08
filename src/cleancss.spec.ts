@@ -66,7 +66,7 @@ describe('clean css task', () => {
       spyOn(config, config.fillConfigDefaults.name).and.returnValue(cleanCssConfig);
       spyOn(helpers, helpers.readFileAsync.name).and.returnValue(Promise.resolve(fileContent));
       spyOn(helpers, helpers.writeFileAsync.name).and.returnValue(Promise.resolve());
-      spyOn(cleanCssFactory, 'getCleanCssInstance').and.returnValue({
+      spyOn(cleanCssFactory, cleanCssFactory.getCleanCssInstance.name).and.returnValue({
         minify: (content: string, cb: Function) => {
           cb(null, { styles: minifiedContent });
         }
