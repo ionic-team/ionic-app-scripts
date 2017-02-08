@@ -131,6 +131,10 @@ export function generateContext(context?: BuildContext): BuildContext {
   const aotWriteToDisk = getConfigValue(context, '--aotWriteToDisk', null, Constants.ENV_AOT_WRITE_TO_DISK, Constants.ENV_AOT_WRITE_TO_DISK.toLowerCase(), null);
   setProcessEnvVar(Constants.ENV_AOT_WRITE_TO_DISK, aotWriteToDisk);
 
+  const printDependencyTree = getConfigValue(context, '--printDependencyTree', null, Constants.ENV_PRINT_DEPENDENCY_TREE, Constants.ENV_PRINT_DEPENDENCY_TREE.toLowerCase(), null);
+  setProcessEnvVar(Constants.ENV_PRINT_DEPENDENCY_TREE, printDependencyTree);
+
+
   const bailOnLintError = getConfigValue(context, '--bailOnLintError', null, Constants.ENV_BAIL_ON_LINT_ERROR, Constants.ENV_BAIL_ON_LINT_ERROR.toLowerCase(), null);
   setProcessEnvVar(Constants.ENV_BAIL_ON_LINT_ERROR, bailOnLintError);
 

@@ -168,6 +168,10 @@ export class Logger {
     console.error(chalk.red(msg));
   }
 
+  static unformattedDebug(msg: string) {
+    console.log(chalk.cyan(msg));
+  }
+
   /**
    * Prints out a blue colored DEBUG prefix. Only prints out when debug mode.
    */

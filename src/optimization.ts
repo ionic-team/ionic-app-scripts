@@ -90,7 +90,10 @@ export function processStatsImpl(webpackStats: WebpackStats) {
     });
   }
 
-  // printDependencyMap(dependencyMap);
+  if (getBooleanPropertyValue(Constants.ENV_PRINT_DEPENDENCY_TREE)) {
+    printDependencyMap(dependencyMap);
+  }
+
   return dependencyMap;
 }
 
@@ -100,10 +103,10 @@ export function purgeWebpackPrefixFromPath(filePath: string) {
 
 function printDependencyMap(map: Map<string, Set<string>>) {
   map.forEach((dependencySet: Set<string>, filePath: string) => {
-    console.log('\n\n');
-    console.log(`${filePath} is imported by the following files:`);
+    Logger.unformattedDebug('\n\n');
+    Logger.unformattedDebug(`${filePath} is imported by the following files:`);
     dependencySet.forEach((importeePath: string) => {
-      console.log(`   ${importeePath}`);
+      Logger.unformattedDebug(`   ${importeePath}`);
     });
   });
 }
