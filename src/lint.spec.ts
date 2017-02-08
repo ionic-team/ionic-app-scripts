@@ -2,6 +2,7 @@ import *  as lint from './lint';
 import * as workerClient from './worker-client';
 import * as Constants from './util/constants';
 
+
 let originalEnv = process.env;
 
 describe('lint task', () => {

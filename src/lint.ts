@@ -1,17 +1,15 @@
 import { access } from 'fs';
 import { BuildContext, ChangedFile, TaskInfo } from './util/interfaces';
-import { BuildError } from './util/errors';
-import { createProgram, findConfiguration, getFileNames } from 'tslint';
+
+import { lintFile, LintResult, processLintResults } from './lint/lint-utils';
+import { createProgram, getFileNames } from './lint/lint-factory';
 import { getUserConfigFile } from './util/config';
 import * as Constants from './util/constants';
-import { readFileAsync, getBooleanPropertyValue } from './util/helpers';
+import { getBooleanPropertyValue } from './util/helpers';
 import { join } from 'path';
 import { Logger } from './logger/logger';
-import { printDiagnostics, DiagnosticsType } from './logger/logger-diagnostics';
-import { runTsLintDiagnostics } from './logger/logger-tslint';
+
 import { runWorker } from './worker-client';
-import * as Linter from 'tslint';
-import * as fs from 'fs';
 import * as ts from 'typescript';
 
 
@@ -67,44 +65,18 @@ function lintApp(context: BuildContext, configFile: string) {
   const program = createProgram(configFile, context.srcDir);
   const files = getFileNames(program);
 
-  const promises = files.map(file => {
-    return lintFile(context, program, file);
-  });
-
-  return Promise.all(promises);
+  return lintFiles(context, program, files);
 }
 
-function lintFiles(context: BuildContext, program: ts.Program, filePaths: string[]) {
-  const promises: Promise<any>[] = [];
-  for (const filePath of filePaths) {
-    promises.push(lintFile(context, program, filePath));
-  }
-  return Promise.all(promises);
-}
-
-function lintFile(context: BuildContext, program: ts.Program, filePath: string): Promise<any> {
+export function lintFiles(context: BuildContext, program: ts.Program, filePaths: string[]) {
   return Promise.resolve().then(() => {
-    if (isMpegFile(filePath)) {
-      throw new Error(`${filePath} is not a valid TypeScript file`);
+    const promises: Promise<any>[] = [];
+    for (const filePath of filePaths) {
+      promises.push(lintFile(context, program, filePath));
     }
-    return readFileAsync(filePath);
-  }).then((fileContents: string) => {
-    const configuration = findConfiguration(null, filePath);
-
-    const linter = new Linter(filePath, fileContents, {
-      configuration: configuration,
-      formatter: null,
-      formattersDirectory: null,
-      rulesDirectory: null,
-    }, program);
-
-    const lintResult = linter.lint();
-    if (lintResult && lintResult.failures && lintResult.failures.length) {
-      const diagnostics = runTsLintDiagnostics(context, <any>lintResult.failures);
-      printDiagnostics(context, DiagnosticsType.TsLint, diagnostics, true, false);
-      throw new BuildError(`${filePath} did not pass TSLint`);
-    }
-    return lintResult;
+    return Promise.all(promises);
+  }).then((lintResults: LintResult[]) => {
+    return processLintResults(context, lintResults);
   });
 }
 
@@ -132,24 +104,6 @@ function getLintConfig(context: BuildContext, configFile: string): Promise<strin
 }
 
 
-function isMpegFile(file: string) {
-  var buffer = new Buffer(256);
-  buffer.fill(0);
-
-  const fd = fs.openSync(file, 'r');
-  try {
-    fs.readSync(fd, buffer, 0, 256, null);
-    if (buffer.readInt8(0) === 0x47 && buffer.readInt8(188) === 0x47) {
-      Logger.debug(`tslint: ${file}: ignoring MPEG transport stream`);
-      return true;
-    }
-  } finally {
-    fs.closeSync(fd);
-  }
-  return false;
-}
-
-
 const taskInfo: TaskInfo = {
   fullArg: '--tslint',
   shortArg: '-i',
@@ -161,4 +115,6 @@ const taskInfo: TaskInfo = {
 export interface LintWorkerConfig {
   configFile: string;
   filePaths: string[];
-}
+};
+
+
