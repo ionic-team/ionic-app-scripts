@@ -144,6 +144,51 @@ export function generateContext(context?: BuildContext): BuildContext {
   const bailOnLintError = getConfigValue(context, '--bailOnLintError', null, Constants.ENV_BAIL_ON_LINT_ERROR, Constants.ENV_BAIL_ON_LINT_ERROR.toLowerCase(), null);
   setProcessEnvVar(Constants.ENV_BAIL_ON_LINT_ERROR, bailOnLintError);
 
+  /* Provider Path Stuff */
+
+  const actionSheetControllerPath = getConfigValue(context, '--actionSheetControllerPath', null, Constants.ENV_ACTION_SHEET_CONTROLLER_PATH, Constants.ENV_ACTION_SHEET_CONTROLLER_PATH.toLowerCase(), join(context.ionicAngularDir, 'components', 'action-sheet', 'action-sheet-controller.js'));
+  setProcessEnvVar(Constants.ENV_ACTION_SHEET_CONTROLLER_PATH, actionSheetControllerPath);
+
+  const actionSheetComponentFactoryPath = getConfigValue(context, '--actionSheetComponentFactoryPath', null, Constants.ENV_ACTION_SHEET_COMPONENT_FACTORY_PATH, Constants.ENV_ACTION_SHEET_COMPONENT_FACTORY_PATH.toLowerCase(), join(context.ionicAngularDir, 'components', 'action-sheet', 'action-sheet-component.ngfactory.js'));
+  setProcessEnvVar(Constants.ENV_ACTION_SHEET_COMPONENT_FACTORY_PATH, actionSheetComponentFactoryPath);
+
+  const alertControllerPath = getConfigValue(context, '--alertControllerPath', null, Constants.ENV_ALERT_CONTROLLER_PATH, Constants.ENV_ALERT_CONTROLLER_PATH.toLowerCase(), join(context.ionicAngularDir, 'components', 'alert', 'alert-controller.js'));
+  setProcessEnvVar(Constants.ENV_ALERT_CONTROLLER_PATH, alertControllerPath);
+
+  const alertComponentFactoryPath = getConfigValue(context, '--alertComponentFactoryPath', null, Constants.ENV_ALERT_COMPONENT_FACTORY_PATH, Constants.ENV_ALERT_COMPONENT_FACTORY_PATH.toLowerCase(), join(context.ionicAngularDir, 'components', 'alert', 'alert-component.ngfactory.js'));
+  setProcessEnvVar(Constants.ENV_ALERT_COMPONENT_FACTORY_PATH, alertComponentFactoryPath);
+
+  const loadingControllerPath = getConfigValue(context, '--loadingControllerPath', null, Constants.ENV_LOADING_CONTROLLER_PATH, Constants.ENV_LOADING_CONTROLLER_PATH.toLowerCase(), join(context.ionicAngularDir, 'components', 'loading', 'loading-controller.js'));
+  setProcessEnvVar(Constants.ENV_LOADING_CONTROLLER_PATH, loadingControllerPath);
+
+  const loadingComponentFactoryPath = getConfigValue(context, '--loadingComponentFactoryPath', null, Constants.ENV_LOADING_COMPONENT_FACTORY_PATH, Constants.ENV_LOADING_COMPONENT_FACTORY_PATH.toLowerCase(), join(context.ionicAngularDir, 'components', 'loading', 'loading-component.ngfactory.js'));
+  setProcessEnvVar(Constants.ENV_LOADING_COMPONENT_FACTORY_PATH, loadingComponentFactoryPath);
+
+  const modalControllerPath = getConfigValue(context, '--modalControllerPath', null, Constants.ENV_MODAL_CONTROLLER_PATH, Constants.ENV_MODAL_CONTROLLER_PATH.toLowerCase(), join(context.ionicAngularDir, 'components', 'modal', 'modal-controller.js'));
+  setProcessEnvVar(Constants.ENV_MODAL_CONTROLLER_PATH, modalControllerPath);
+
+  const modalComponentFactoryPath = getConfigValue(context, '--modalComponentFactoryPath', null, Constants.ENV_MODAL_COMPONENT_FACTORY_PATH, Constants.ENV_MODAL_COMPONENT_FACTORY_PATH.toLowerCase(), join(context.ionicAngularDir, 'components', 'modal', 'modal-component.ngfactory.js'));
+  setProcessEnvVar(Constants.ENV_MODAL_COMPONENT_FACTORY_PATH, modalComponentFactoryPath);
+
+  const pickerControllerPath = getConfigValue(context, '--pickerControllerPath', null, Constants.ENV_PICKER_CONTROLLER_PATH, Constants.ENV_PICKER_CONTROLLER_PATH.toLowerCase(), join(context.ionicAngularDir, 'components', 'picker', 'picker-controller.js'));
+  setProcessEnvVar(Constants.ENV_PICKER_CONTROLLER_PATH, pickerControllerPath);
+
+  const pickerComponentFactoryPath = getConfigValue(context, '--pickerComponentFactoryPath', null, Constants.ENV_PICKER_COMPONENT_FACTORY_PATH, Constants.ENV_PICKER_COMPONENT_FACTORY_PATH.toLowerCase(), join(context.ionicAngularDir, 'components', 'picker', 'picker-component.ngfactory.js'));
+  setProcessEnvVar(Constants.ENV_PICKER_COMPONENT_FACTORY_PATH, pickerComponentFactoryPath);
+
+  const popoverControllerPath = getConfigValue(context, '--popoverControllerPath', null, Constants.ENV_POPOVER_CONTROLLER_PATH, Constants.ENV_POPOVER_CONTROLLER_PATH.toLowerCase(), join(context.ionicAngularDir, 'components', 'popover', 'popover-controller.js'));
+  setProcessEnvVar(Constants.ENV_POPOVER_CONTROLLER_PATH, popoverControllerPath);
+
+  const popoverComponentFactoryPath = getConfigValue(context, '--popoverComponentFactoryPath', null, Constants.ENV_POPOVER_COMPONENT_FACTORY_PATH, Constants.ENV_POPOVER_COMPONENT_FACTORY_PATH.toLowerCase(), join(context.ionicAngularDir, 'components', 'popover', 'popover-component.ngfactory.js'));
+  setProcessEnvVar(Constants.ENV_POPOVER_COMPONENT_FACTORY_PATH, popoverComponentFactoryPath);
+
+  const toastControllerPath = getConfigValue(context, '--toastControllerPath', null, Constants.ENV_TOAST_CONTROLLER_PATH, Constants.ENV_TOAST_CONTROLLER_PATH.toLowerCase(), join(context.ionicAngularDir, 'components', 'toast', 'toast-controller.js'));
+  setProcessEnvVar(Constants.ENV_TOAST_CONTROLLER_PATH, toastControllerPath);
+
+  const toastComponentFactoryPath = getConfigValue(context, '--toastComponentFactoryPath', null, Constants.ENV_TOAST_COMPONENT_FACTORY_PATH, Constants.ENV_TOAST_COMPONENT_FACTORY_PATH.toLowerCase(), join(context.ionicAngularDir, 'components', 'toast', 'toast-component.ngfactory.js'));
+  setProcessEnvVar(Constants.ENV_TOAST_COMPONENT_FACTORY_PATH, toastComponentFactoryPath);
+
+  /* Experimental Flags */
   const experimentalManualTreeshaking = getConfigValue(context, '--experimentalManualTreeshaking', null, Constants.ENV_EXPERIMENTAL_MANUAL_TREESHAKING, Constants.ENV_EXPERIMENTAL_MANUAL_TREESHAKING.toLowerCase(), null);
   setProcessEnvVar(Constants.ENV_EXPERIMENTAL_MANUAL_TREESHAKING, experimentalManualTreeshaking);
 

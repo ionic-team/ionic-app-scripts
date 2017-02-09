@@ -1,7 +1,7 @@
-import { basename, dirname, join, relative } from 'path';
+import { dirname, join, relative } from 'path';
 import { Logger } from '../logger/logger';
 import * as Constants from '../util/constants';
-import { changeExtension, escapeStringForRegex } from '../util/helpers';
+import { changeExtension, convertFilePathToNgFactoryPath, escapeStringForRegex } from '../util/helpers';
 import { TreeShakeCalcResults } from '../util/interfaces';
 
 export function calculateUnusedComponents(dependencyMap: Map<string, Set<string>>): TreeShakeCalcResults {
@@ -71,43 +71,24 @@ function processImportTree(dependencyMap: Map<string, Set<string>>, importee: st
 }
 
 function calculateUnusedIonicProviders(dependencyMap: Map<string, Set<string>>) {
-  const ACTION_SHEET_CONTROLLER = join(process.env[Constants.ENV_VAR_IONIC_ANGULAR_DIR], 'components', 'action-sheet', 'action-sheet-controller.js');
-  const ACTION_SHEET_COMPONENT_FACTORY = join(process.env[Constants.ENV_VAR_IONIC_ANGULAR_DIR], 'components', 'action-sheet', 'action-sheet-component.ngfactory.js');
 
-  const ALERT_CONTROLLER = join(process.env[Constants.ENV_VAR_IONIC_ANGULAR_DIR], 'components', 'alert', 'alert-controller.js');
-  const ALERT_COMPONENT_FACTORY = join(process.env[Constants.ENV_VAR_IONIC_ANGULAR_DIR], 'components', 'alert', 'alert-component.ngfactory.js');
 
-  const LOADING_CONTROLLER = join(process.env[Constants.ENV_VAR_IONIC_ANGULAR_DIR], 'components', 'loading', 'loading-controller.js');
-  const LOADING_COMPONENT_FACTORY = join(process.env[Constants.ENV_VAR_IONIC_ANGULAR_DIR], 'components', 'loading', 'loading-component.ngfactory.js');
-
-  const MODAL_CONTROLLER = join(process.env[Constants.ENV_VAR_IONIC_ANGULAR_DIR], 'components', 'modal', 'modal-controller.js');
-  const MODAL_COMPONENT_FACTORY = join(process.env[Constants.ENV_VAR_IONIC_ANGULAR_DIR], 'components', 'modal', 'modal-component.ngfactory.js');
-
-  const PICKER_CONTROLLER = join(process.env[Constants.ENV_VAR_IONIC_ANGULAR_DIR], 'components', 'picker', 'picker-controller.js');
-  const PICKER_COMPONENT_FACTORY = join(process.env[Constants.ENV_VAR_IONIC_ANGULAR_DIR], 'components', 'picker', 'picker-component.ngfactory.js');
-
-  const POPOVER_CONTROLLER = join(process.env[Constants.ENV_VAR_IONIC_ANGULAR_DIR], 'components', 'popover', 'popover-controller.js');
-  const POPOVER_COMPONENT_FACTORY = join(process.env[Constants.ENV_VAR_IONIC_ANGULAR_DIR], 'components', 'popover', 'popover-component.ngfactory.js');
-
-  const TOAST_CONTROLLER = join(process.env[Constants.ENV_VAR_IONIC_ANGULAR_DIR], 'components', 'toast', 'toast-controller.js');
-  const TOAST_COMPONENT_FACTORY = join(process.env[Constants.ENV_VAR_IONIC_ANGULAR_DIR], 'components', 'toast', 'toast-component.ngfactory.js');
-
-  processIonicProviders(dependencyMap, ACTION_SHEET_CONTROLLER);
-  processIonicProviders(dependencyMap, ALERT_CONTROLLER);
-  processIonicProviders(dependencyMap, LOADING_CONTROLLER);
-  processIonicProviders(dependencyMap, MODAL_CONTROLLER);
-  processIonicProviders(dependencyMap, PICKER_CONTROLLER);
-  processIonicProviders(dependencyMap, POPOVER_CONTROLLER);
-  processIonicProviders(dependencyMap, TOAST_CONTROLLER);
+  processIonicProviders(dependencyMap, process.env[Constants.ENV_ACTION_SHEET_CONTROLLER_PATH]);
+  processIonicProviders(dependencyMap, process.env[Constants.ENV_ALERT_CONTROLLER_PATH]);
+  processIonicProviders(dependencyMap, process.env[Constants.ENV_LOADING_CONTROLLER_PATH]);
+  processIonicProviders(dependencyMap, process.env[Constants.ENV_MODAL_CONTROLLER_PATH]);
+  processIonicProviders(dependencyMap, process.env[Constants.ENV_PICKER_CONTROLLER_PATH]);
+  processIonicProviders(dependencyMap, process.env[Constants.ENV_POPOVER_CONTROLLER_PATH]);
+  processIonicProviders(dependencyMap, process.env[Constants.ENV_TOAST_CONTROLLER_PATH]);
 
   // check if the controllers were deleted, if so, purge the component too
-  processIonicProviderComponents(dependencyMap, ACTION_SHEET_CONTROLLER, ACTION_SHEET_COMPONENT_FACTORY);
-  processIonicProviderComponents(dependencyMap, ALERT_CONTROLLER, ALERT_COMPONENT_FACTORY);
-  processIonicProviderComponents(dependencyMap, LOADING_CONTROLLER, LOADING_COMPONENT_FACTORY);
-  processIonicProviderComponents(dependencyMap, MODAL_CONTROLLER, MODAL_COMPONENT_FACTORY);
-  processIonicProviderComponents(dependencyMap, PICKER_CONTROLLER, PICKER_COMPONENT_FACTORY);
-  processIonicProviderComponents(dependencyMap, POPOVER_CONTROLLER, POPOVER_COMPONENT_FACTORY);
-  processIonicProviderComponents(dependencyMap, TOAST_CONTROLLER, TOAST_COMPONENT_FACTORY);
+  processIonicProviderComponents(dependencyMap, process.env[Constants.ENV_ACTION_SHEET_CONTROLLER_PATH], process.env[Constants.ENV_ACTION_SHEET_COMPONENT_FACTORY_PATH]);
+  processIonicProviderComponents(dependencyMap, process.env[Constants.ENV_ALERT_CONTROLLER_PATH], process.env[Constants.ENV_ALERT_COMPONENT_FACTORY_PATH]);
+  processIonicProviderComponents(dependencyMap, process.env[Constants.ENV_LOADING_CONTROLLER_PATH], process.env[Constants.ENV_LOADING_COMPONENT_FACTORY_PATH]);
+  processIonicProviderComponents(dependencyMap, process.env[Constants.ENV_MODAL_CONTROLLER_PATH], process.env[Constants.ENV_MODAL_COMPONENT_FACTORY_PATH]);
+  processIonicProviderComponents(dependencyMap, process.env[Constants.ENV_PICKER_CONTROLLER_PATH], process.env[Constants.ENV_PICKER_COMPONENT_FACTORY_PATH]);
+  processIonicProviderComponents(dependencyMap, process.env[Constants.ENV_POPOVER_CONTROLLER_PATH], process.env[Constants.ENV_POPOVER_COMPONENT_FACTORY_PATH]);
+  processIonicProviderComponents(dependencyMap, process.env[Constants.ENV_TOAST_CONTROLLER_PATH], process.env[Constants.ENV_TOAST_COMPONENT_FACTORY_PATH]);
 }
 
 function processIonicProviderComponents(dependencyMap: Map<string, Set<string>>, providerPath: string, componentPath: string) {
@@ -119,10 +100,7 @@ function processIonicProviderComponents(dependencyMap: Map<string, Set<string>>,
 
 function getAppModuleNgFactoryPath() {
   const appNgModulePath = process.env[Constants.ENV_APP_NG_MODULE_PATH];
-  const directory = dirname(appNgModulePath);
-  const extensionlessFileName = basename(appNgModulePath, '.js');
-  const ngFactoryFileName = extensionlessFileName + '.ngfactory.js';
-  return join(directory, ngFactoryFileName);
+  return convertFilePathToNgFactoryPath(appNgModulePath);
 }
 
 function processIonicProviders(dependencyMap: Map<string, Set<string>>, providerPath: string) {

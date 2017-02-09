@@ -265,3 +265,11 @@ export function getBooleanPropertyValue(propertyName: string) {
   const result = process.env[propertyName];
   return result === 'true';
 }
+
+export function convertFilePathToNgFactoryPath(filePath: string) {
+  const directory = dirname(filePath);
+  const extension = extname(filePath);
+  const extensionlessFileName = basename(filePath, extension);
+  const ngFactoryFileName = extensionlessFileName + '.ngfactory' + extension;
+  return join(directory, ngFactoryFileName);
+}
