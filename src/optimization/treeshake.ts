@@ -1,7 +1,7 @@
 import { dirname, join, relative } from 'path';
 import { Logger } from '../logger/logger';
 import * as Constants from '../util/constants';
-import { changeExtension, convertFilePathToNgFactoryPath, escapeStringForRegex } from '../util/helpers';
+import { changeExtension, convertFilePathToNgFactoryPath, escapeStringForRegex, toUnixPath } from '../util/helpers';
 import { TreeShakeCalcResults } from '../util/interfaces';
 
 export function calculateUnusedComponents(dependencyMap: Map<string, Set<string>>): TreeShakeCalcResults {
@@ -145,7 +145,8 @@ export function purgeUnusedImportsAndExportsFromIndex(indexFilePath: string, ind
     // I cannot get the './' prefix to show up when using path api
     Logger.debug(`[treeshake] purgeUnusedImportsFromIndex: Removing ${modulePath} from ${indexFilePath}`);
     const extensionless = changeExtension(modulePath, '');
-    const importPath = './' + relative(dirname(indexFilePath), extensionless);
+    const relativeImportPath = './' + relative(dirname(indexFilePath), extensionless);
+    const importPath = toUnixPath(relativeImportPath);
     const importRegex = generateImportRegex(importPath);
     // replace the import if it's found
     let results: RegExpExecArray = null;
@@ -175,7 +176,8 @@ function generateExportRegex(relativeExportPath: string) {
 export function purgeComponentNgFactoryImportAndUsage(appModuleNgFactoryPath: string, appModuleNgFactoryContent: string, componentFactoryPath: string) {
   const extensionlessComponentFactoryPath = changeExtension(componentFactoryPath, '');
   const relativeImportPath = relative(dirname(appModuleNgFactoryPath), extensionlessComponentFactoryPath);
-  const importRegex = generateWildCardImportRegex(relativeImportPath);
+  const importPath = toUnixPath(relativeImportPath);
+  const importRegex = generateWildCardImportRegex(importPath);
   const results = importRegex.exec(appModuleNgFactoryContent);
   if (results && results.length >= 2) {
     appModuleNgFactoryContent = appModuleNgFactoryContent.replace(importRegex, '');
@@ -189,7 +191,8 @@ export function purgeComponentNgFactoryImportAndUsage(appModuleNgFactoryPath: st
 export function purgeProviderControllerImportAndUsage(appModuleNgFactoryPath: string, appModuleNgFactoryContent: string, providerPath: string) {
   const extensionlessComponentFactoryPath = changeExtension(providerPath, '');
   const relativeImportPath = relative(dirname(process.env[Constants.ENV_VAR_IONIC_ANGULAR_DIR]), extensionlessComponentFactoryPath);
-  const importRegex = generateWildCardImportRegex(relativeImportPath);
+  const importPath = toUnixPath(relativeImportPath);
+  const importRegex = generateWildCardImportRegex(importPath);
   const results = importRegex.exec(appModuleNgFactoryContent);
   if (results && results.length >= 2) {
     appModuleNgFactoryContent = appModuleNgFactoryContent.replace(importRegex, '');

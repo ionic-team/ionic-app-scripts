@@ -1,7 +1,21 @@
 import * as decorators from './decorators';
+import * as Constants from '../util/constants';
 
+const entryPoint = '/Users/dan/Dev/myApp3/node_modules/ionic-angular/index.js';
+
+let originalEnv = {};
 describe('optimization', () => {
   describe('purgeDecoratorStatements', () => {
+
+    beforeEach(() => {
+        originalEnv = process.env;
+        process.env[Constants.ENV_VAR_IONIC_ANGULAR_ENTRY_POINT] = entryPoint;
+    });
+
+    afterEach(() => {
+        process.env = originalEnv;
+    });
+
     it('should purge the decorators', () => {
       // arrange
       const decoratorStatement = `
@@ -229,7 +243,7 @@ ${additionalGeneratedContent}
 some more content
       `;
       // act
-      const result = decorators.purgeDecorators('/Users/dan/Dev/myApp3/node_modules/ionic-angular/index.js', knownContent);
+      const result = decorators.purgeDecorators(entryPoint, knownContent);
 
       // assert
       expect(result).not.toEqual(knownContent);
