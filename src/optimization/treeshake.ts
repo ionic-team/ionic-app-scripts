@@ -20,8 +20,10 @@ function generateResults(dependencyMap: Map<string, Set<string>>) {
   const updatedMap = new Map<string, Set<string>>();
   dependencyMap.forEach((importeeSet: Set<string>, modulePath: string) => {
     if ((importeeSet && importeeSet.size > 0) || requiredModule(modulePath)) {
+      Logger.debug(`[treeshake] generateResults: ${modulePath} is not purged`);
       updatedMap.set(modulePath, importeeSet);
     } else {
+      Logger.debug(`[treeshake] generateResults: ${modulePath} is purged`);
       toPurgeMap.set(modulePath, importeeSet);
     }
   });
@@ -89,6 +91,7 @@ function calculateUnusedIonicProviders(dependencyMap: Map<string, Set<string>>) 
   processIonicProviderComponents(dependencyMap, process.env[Constants.ENV_PICKER_CONTROLLER_PATH], process.env[Constants.ENV_PICKER_COMPONENT_FACTORY_PATH]);
   processIonicProviderComponents(dependencyMap, process.env[Constants.ENV_POPOVER_CONTROLLER_PATH], process.env[Constants.ENV_POPOVER_COMPONENT_FACTORY_PATH]);
   processIonicProviderComponents(dependencyMap, process.env[Constants.ENV_TOAST_CONTROLLER_PATH], process.env[Constants.ENV_TOAST_COMPONENT_FACTORY_PATH]);
+
 }
 
 function processIonicProviderComponents(dependencyMap: Map<string, Set<string>>, providerPath: string, componentPath: string) {
@@ -98,9 +101,10 @@ function processIonicProviderComponents(dependencyMap: Map<string, Set<string>>,
   }
 }
 
-function getAppModuleNgFactoryPath() {
+export function getAppModuleNgFactoryPath() {
   const appNgModulePath = process.env[Constants.ENV_APP_NG_MODULE_PATH];
-  return convertFilePathToNgFactoryPath(appNgModulePath);
+  const jsVersion = changeExtension(appNgModulePath, '.js');
+  return convertFilePathToNgFactoryPath(jsVersion);
 }
 
 function processIonicProviders(dependencyMap: Map<string, Set<string>>, providerPath: string) {
@@ -143,18 +147,16 @@ export function purgeUnusedImportsAndExportsFromIndex(indexFilePath: string, ind
     const extensionless = changeExtension(modulePath, '');
     const importPath = './' + relative(dirname(indexFilePath), extensionless);
     const importRegex = generateImportRegex(importPath);
-    const results = importRegex.exec(indexFileContent);
-    if (results) {
-      let namedImports: string = null;
-      if (results.length >= 2) {
-        namedImports = results[1];
-      }
+    // replace the import if it's found
+    let results: RegExpExecArray = null;
+    while ((results = importRegex.exec(indexFileContent)) && results.length) {
       indexFileContent = indexFileContent.replace(importRegex, '');
-      const exportRegex = generateExportRegex(importPath);
-      const exportResults = exportRegex.exec(indexFileContent);
-      if (exportResults) {
-        indexFileContent = indexFileContent.replace(exportRegex, '');
-      }
+    }
+
+    results = null;
+    const exportRegex = generateExportRegex(importPath);
+    while ((results = exportRegex.exec(indexFileContent)) && results.length) {
+      indexFileContent = indexFileContent.replace(exportRegex, '');
     }
   }
   return indexFileContent;
@@ -168,4 +170,74 @@ function generateImportRegex(relativeImportPath: string) {
 function generateExportRegex(relativeExportPath: string) {
   const cleansedString = escapeStringForRegex(relativeExportPath);
   return new RegExp(`export.*?{(.+)}.*?from.*?'${cleansedString}';`);
+}
+
+export function purgeComponentNgFactoryImportAndUsage(appModuleNgFactoryPath: string, appModuleNgFactoryContent: string, componentFactoryPath: string) {
+  const extensionlessComponentFactoryPath = changeExtension(componentFactoryPath, '');
+  const relativeImportPath = relative(dirname(appModuleNgFactoryPath), extensionlessComponentFactoryPath);
+  const importRegex = generateWildCardImportRegex(relativeImportPath);
+  const results = importRegex.exec(appModuleNgFactoryContent);
+  if (results && results.length >= 2) {
+    appModuleNgFactoryContent = appModuleNgFactoryContent.replace(importRegex, '');
+    const namedImport = results[1].trim();
+    const purgeFromConstructor = generateRemoveComponentFromConstructorRegex(namedImport);
+    appModuleNgFactoryContent = appModuleNgFactoryContent.replace(purgeFromConstructor, '');
+  }
+  return appModuleNgFactoryContent;
+}
+
+export function purgeProviderControllerImportAndUsage(appModuleNgFactoryPath: string, appModuleNgFactoryContent: string, providerPath: string) {
+  const extensionlessComponentFactoryPath = changeExtension(providerPath, '');
+  const relativeImportPath = relative(dirname(process.env[Constants.ENV_VAR_IONIC_ANGULAR_DIR]), extensionlessComponentFactoryPath);
+  const importRegex = generateWildCardImportRegex(relativeImportPath);
+  const results = importRegex.exec(appModuleNgFactoryContent);
+  if (results && results.length >= 2) {
+    appModuleNgFactoryContent = appModuleNgFactoryContent.replace(importRegex, '');
+    const namedImport = results[1].trim();
+    // purge the getter
+    const purgeGetterRegEx = generateRemoveGetterFromImportRegex(namedImport);
+    const purgeGetterResults = purgeGetterRegEx.exec(appModuleNgFactoryContent);
+
+    const purgeIfRegEx = generateRemoveIfStatementRegex(namedImport);
+    const purgeIfResults = purgeIfRegEx.exec(appModuleNgFactoryContent);
+
+    if (purgeGetterResults && purgeIfResults) {
+      const getterContentToReplace = purgeGetterResults[0];
+      const newGetterContent = `/*${getterContentToReplace}*/`;
+      appModuleNgFactoryContent = appModuleNgFactoryContent.replace(getterContentToReplace, newGetterContent);
+
+      const purgeIfContentToReplace = purgeIfResults[0];
+      const newPurgeIfContent = `/*${purgeIfContentToReplace}*/`;
+      appModuleNgFactoryContent = appModuleNgFactoryContent.replace(purgeIfContentToReplace, newPurgeIfContent);
+    }
+  }
+  return appModuleNgFactoryContent;
+}
+
+export function purgeProviderClassNameFromIonicModuleForRoot(indexFileContent: string, providerClassName: string) {
+  const regex = generateIonicModulePurgeProviderRegex(providerClassName);
+  indexFileContent = indexFileContent.replace(regex, '');
+  return indexFileContent;
+}
+
+function generateWildCardImportRegex(relativeImportPath: string) {
+  const cleansedString = escapeStringForRegex(relativeImportPath);
+  return new RegExp(`import.*?as(.*?)from '${cleansedString}';`);
+}
+
+function generateRemoveComponentFromConstructorRegex(namedImport: string) {
+  return new RegExp(`${namedImport}\..*?,`);
+}
+
+export function generateRemoveGetterFromImportRegex(namedImport: string) {
+  const regexString = `(get _(.*?)_(\\d*)\\(\\) {([\\s\\S][^}]*?)${namedImport}([\\s\\S]*?)}([\\s\\S]*?)})`;
+  return new RegExp(regexString);
+}
+
+function generateRemoveIfStatementRegex(namedImport: string) {
+  return new RegExp(`if \\(\\(token === ${namedImport}.([\\S]*?)\\)\\) {([\\S\\s]*?)}`, `gm`);
+}
+
+function generateIonicModulePurgeProviderRegex(className: string) {
+  return new RegExp(`(^([\\s]*)${className},\\n)`, `m`);
 }
