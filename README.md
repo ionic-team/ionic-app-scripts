@@ -91,6 +91,7 @@ npm run build --rollup ./config/rollup.config.js
 
 | Config File | package.json Config | Cmd-line Flag         |
 |-------------|---------------------|-----------------------|
+| Babili      | `ionic_exp_babili`  | `--babili`            |
 | CleanCss    | `ionic_cleancss`    | `--cleancss` or `-e`  |
 | Copy        | `ionic_copy`        | `--copy` or `-y`      |
 | Closure     | `ionic_closure`     | `--closure` or `-l`   |
@@ -112,6 +113,10 @@ npm run build --rollup ./config/rollup.config.js
 | src directory   | `ionic_src_dir`     | `--srcDir`    | `src`           | The directory holding the Ionic src code |
 | www directory   | `ionic_www_dir`     | `--wwwDir`    | `www`           | The deployable directory containing everything needed to run the app |
 | build directory | `ionic_build_dir`   | `--buildDir`  | `build`         | The build process uses this directory to store generated files, etc |
+| temp directory   | `ionic_tmp_dir`     | `--tmpDir`    | `.tmp`           | Temporary directory for writing files for debugging and various build tasks |
+| node_modules directory | `ionic_node_modules_dir` | `--nodeModulesDir` | `node_modules` | Node modules directory |
+| ionic-angular directory | `ionic_angular_dir` | `--ionicAngularDir` | `ionic-angular` | ionic-angular directory |
+| ionic-angular entry point | `ionic_angular_entry_point` | `--ionicAngularEntryPoint` | `index.js` | entry point file for ionic-angular |
 | bundler         | `ionic_bundler`     | `--bundler`   | `webpack`       | Chooses which bundler to use: `webpack` or `rollup` |
 | source map type | `ionic_source_map_type`  | `--sourceMapType` | `source-map` | Chooses the webpack `devtool` option. `eval` and `source-map` are supported |
 | generate source map | `ionic_generate_source_map`  | `--generateSourceMap` | `true` | Determines whether to generate a source map or not |
@@ -125,6 +130,17 @@ npm run build --rollup ./config/rollup.config.js
 | output css file | `ionic_output_css_file_name`  | `--outputCssFileName` | `main.css` | name of css file generated in `buildDir` |
 | output css map file | `ionic_output_css_map_file_name`  | `--outputCssMapFileName` | `main.css.map` | name of css source map file generated in `buildDir` |
 | bail on lint error | `ionic_bail_on_lint_error`  | `--bailOnLintError` | `null` | Set to `true` to make stand-alone lint commands fail with non-zero status code |
+| write AoT files to disk | `ionic_aot_write_to_disk` | `--aotWriteToDisk` | `null` | Set to `true` to write files to disk for debugging |
+| print dependency tree | `ionic_print_original_dependency_tree` | `--printOriginalDependencyTree` | `null` | Set to `true` to print out the original dependency tree calculated during the optimize step |
+| print modified dependency tree | `ionic_print_modified_dependency_tree` | `--printModifiedDependencyTree` | `null` | Set to `true` to print out the modified dependency tree after purging unused modules |
+| print webpack dependency tree | `ionic_print_webpack_dependency_tree` | `--printWebpackDependencyTree` | `null` | Set to `true` to print out a dependency tree after running Webpack |
+| experimental parse deeplink config | `ionic_experimental_parse_deeplinks` | `--experimentalParseDeepLinks` | `null` | Set to `true` to parse the Ionic 3.x deep links API for lazy loading (Experimental) |
+| experimental manual tree shaking | `ionic_experimental_manual_treeshaking` | `--experimentalManualTreeshaking` | `null` | Set to `true` to purge unused Ionic components/code (Experimental) |
+| experimental purge decorators | `ionic_experimental_purge_decorators` | `--experimentalPurgeDecorators` | `null` | Set to `true` to purge unneeded decorators to improve tree shakeability of code (Experimental) |
+| experimental closure compiler | `ionic_use_experimental_closure` | `--useExperimentalClosure` | `null` | Set to `true` to use closure compiler to minify the final bundle |
+| experimental babili | `ionic_use_experimental_babili` | `--useExperimentalBabili` | `null` | Set to `true` to use babili to minify es2015 code |
+| convert bundle to ES5 | `ionic_build_to_es5` | `--buildToEs5` | `true` | Convert bundle to ES5 for for production deployments |
+
 
 
 
@@ -140,6 +156,9 @@ These environment variables are automatically set to [Node's `process.env`](http
 | `IONIC_SRC_DIR`            | The absolute path to the app's source directory.                     |
 | `IONIC_WWW_DIR`            | The absolute path to the app's public distribution directory.        |
 | `IONIC_BUILD_DIR`          | The absolute path to the app's bundled js and css files.             |
+| `IONIC_TMP_DIR`            | Temp directory for debugging generated/optimized code and various build tasks |
+| `IONIC_NODE_MODULES_DIR`   | The absolute path to the `node_modules` directory.                   |
+| `IONIC_ANGULAR_DIR`        | The absolute path to the `ionic-angular` node_module directory.      |
 | `IONIC_APP_SCRIPTS_DIR`    | The absolute path to the `@ionic/app-scripts` node_module directory. |
 | `IONIC_SOURCE_MAP_TYPE`    | The Webpack `devtool` setting. `eval` and `source-map` are supported.|
 | `IONIC_GENERATE_SOURCE_MAP`| Determines whether to generate a sourcemap or not.                   |
@@ -157,6 +176,16 @@ These environment variables are automatically set to [Node's `process.env`](http
 | `IONIC_WEBPACK_FACTORY`    | The absolute path to Ionic's `webpack-factory` script                |
 | `IONIC_WEBPACK_LOADER`     | The absolute path to Ionic's custom webpack loader                   |
 | `IONIC_BAIL_ON_LINT_ERROR`     | Boolean determining whether to exit with a non-zero status code on error |
+| `ionic_aot_write_to_disk` | `--aotWriteToDisk` | `null` | Set to `true` to write files to disk for debugging |
+| `ionic_print_original_dependency_tree` | boolean to print out the original dependency tree calculated during the optimize step |
+| `ionic_print_modified_dependency_tree` | boolean to print out the modified dependency tree after purging unused modules |
+| `ionic_print_webpack_dependency_tree` | boolean to print out a dependency tree after running Webpack |
+| `ionic_experimental_parse_deeplinks` | boolean to enable parsing the Ionic 3.x deep links API for lazy loading (Experimental) |
+| `ionic_experimental_manual_treeshaking` | boolean to enable purging unused Ionic components/code (Experimental) |
+| `ionic_experimental_purge_decorators` | boolean to enable purging unneeded decorators from source code (Experimental) |
+| `ionic_use_experimental_closure` | boolean to enable use of closure compiler to minify the final bundle |
+| `ionic_use_experimental_babili` | boolean to enable use of babili to minify es2015 code |
+| `ionic_build_to_es5` | boolean to enable converting bundle to ES5 for for production deployments |
 
 
 The `process.env.IONIC_ENV` environment variable can be used to test whether it is a `prod` or `dev` build, which automatically gets set by any command. By default the `build` and `serve` tasks produce `dev` builds (a build that does not include Ahead of Time (AoT) compilation or minification). To force a `prod` build you should use the `--prod` command line flag.
@@ -202,7 +231,7 @@ Example NPM Script:
 ```
 npm run lint --bailOnLintError true
 ```
-
+3. Set `ionic_experimental_manual_treeshaking` and `ionic_experimental_purge_decorators` to true in the `package.json` to potentially dramatically shrink an app's bundle size.
 
 ## The Stack
 
