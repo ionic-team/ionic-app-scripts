@@ -176,16 +176,16 @@ These environment variables are automatically set to [Node's `process.env`](http
 | `IONIC_WEBPACK_FACTORY`    | The absolute path to Ionic's `webpack-factory` script                |
 | `IONIC_WEBPACK_LOADER`     | The absolute path to Ionic's custom webpack loader                   |
 | `IONIC_BAIL_ON_LINT_ERROR`     | Boolean determining whether to exit with a non-zero status code on error |
-| `ionic_aot_write_to_disk` | `--aotWriteToDisk` | `null` | Set to `true` to write files to disk for debugging |
-| `ionic_print_original_dependency_tree` | boolean to print out the original dependency tree calculated during the optimize step |
-| `ionic_print_modified_dependency_tree` | boolean to print out the modified dependency tree after purging unused modules |
-| `ionic_print_webpack_dependency_tree` | boolean to print out a dependency tree after running Webpack |
-| `ionic_experimental_parse_deeplinks` | boolean to enable parsing the Ionic 3.x deep links API for lazy loading (Experimental) |
-| `ionic_experimental_manual_treeshaking` | boolean to enable purging unused Ionic components/code (Experimental) |
-| `ionic_experimental_purge_decorators` | boolean to enable purging unneeded decorators from source code (Experimental) |
-| `ionic_use_experimental_closure` | boolean to enable use of closure compiler to minify the final bundle |
-| `ionic_use_experimental_babili` | boolean to enable use of babili to minify es2015 code |
-| `ionic_build_to_es5` | boolean to enable converting bundle to ES5 for for production deployments |
+| `IONIC_AOT_WRITE_TO_DISK` | `--aotWriteToDisk` | `null` | Set to `true` to write files to disk for debugging |
+| `IONIC_PRINT_ORIGINAL_DEPENDENCY_TREE` | boolean to print out the original dependency tree calculated during the optimize step |
+| `IONIC_PRINT_MODIFIED_DEPENDENCY_TREE` | boolean to print out the modified dependency tree after purging unused modules |
+| `IONIC_PRINT_WEBPACK_DEPENDENCY_TREE` | boolean to print out a dependency tree after running Webpack |
+| `IONIC_EXPERIMENTAL_PARSE_DEEPLINKS` | boolean to enable parsing the Ionic 3.x deep links API for lazy loading (Experimental) |
+| `IONIC_EXPERIMENTAL_MANUAL_TREESHAKING` | boolean to enable purging unused Ionic components/code (Experimental) |
+| `IONIC_EXPERIMENTAL_PURGE_DECORATORS` | boolean to enable purging unneeded decorators from source code (Experimental) |
+| `IONIC_USE_EXPERIMENTAL_CLOSURE` | boolean to enable use of closure compiler to minify the final bundle |
+| `IONIC_USE_EXPERIMENTAL_BABILI` | boolean to enable use of babili to minify es2015 code |
+| `IONIC_BUILD_TO_ES5` | boolean to enable converting bundle to ES5 for for production deployments |
 
 
 The `process.env.IONIC_ENV` environment variable can be used to test whether it is a `prod` or `dev` build, which automatically gets set by any command. By default the `build` and `serve` tasks produce `dev` builds (a build that does not include Ahead of Time (AoT) compilation or minification). To force a `prod` build you should use the `--prod` command line flag.
