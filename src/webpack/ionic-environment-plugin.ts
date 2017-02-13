@@ -1,16 +1,18 @@
+import { getParsedDeepLinkConfig } from '../util/helpers';
 import { BuildContext, HydratedDeepLinkConfigEntry } from '../util/interfaces';
 import { Logger } from '../logger/logger';
 import { getInstance } from '../util/hybrid-file-system-factory';
 import { createResolveDependenciesFromContextMap } from './util';
 
 export class IonicEnvironmentPlugin {
-  constructor(private context: BuildContext, private parsedDeepLinkConfigs: HydratedDeepLinkConfigEntry[]) {
+  constructor(private context: BuildContext) {
   }
 
   apply(compiler: any) {
 
     compiler.plugin('context-module-factory', (contextModuleFactory: any) => {
-      const webpackDeepLinkModuleDictionary = convertDeepLinkConfigToWebpackFormat(this.parsedDeepLinkConfigs);
+      const deepLinkConfig = getParsedDeepLinkConfig();
+      const webpackDeepLinkModuleDictionary = convertDeepLinkConfigToWebpackFormat(deepLinkConfig);
       contextModuleFactory.plugin('after-resolve', (result: any, callback: Function) => {
         if (!result) {
           return callback();
