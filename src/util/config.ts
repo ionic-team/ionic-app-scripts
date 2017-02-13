@@ -1,6 +1,8 @@
-import { accessSync, readJSONSync, statSync } from 'fs-extra';
-import { BuildContext, TaskInfo } from './interfaces';
 import { join, resolve } from 'path';
+import { accessSync, readJSONSync, statSync } from 'fs-extra';
+
+import { Logger } from '../logger/logger';
+import { BuildContext, TaskInfo } from './interfaces';
 import { objectAssign } from './helpers';
 import { FileCache } from './file-cache';
 import * as Constants from './constants';
@@ -59,96 +61,136 @@ export function generateContext(context?: BuildContext): BuildContext {
 
   context.rootDir = resolve(context.rootDir || getConfigValue(context, '--rootDir', null, Constants.ENV_VAR_ROOT_DIR, Constants.ENV_VAR_ROOT_DIR.toLowerCase(), processCwd));
   setProcessEnvVar(Constants.ENV_VAR_ROOT_DIR, context.rootDir);
+  Logger.debug(`rootDir set to ${context.rootDir}`);
 
   context.tmpDir = resolve(context.tmpDir || getConfigValue(context, '--tmpDir', null, Constants.ENV_VAR_TMP_DIR, Constants.ENV_VAR_TMP_DIR.toLowerCase(), join(context.rootDir, Constants.TMP_DIR)));
   setProcessEnvVar(Constants.ENV_VAR_TMP_DIR, context.tmpDir);
+  Logger.debug(`tmpDir set to ${context.tmpDir}`);
 
   context.srcDir = resolve(context.srcDir || getConfigValue(context, '--srcDir', null, Constants.ENV_VAR_SRC_DIR, Constants.ENV_VAR_SRC_DIR.toLowerCase(), join(context.rootDir, Constants.SRC_DIR)));
   setProcessEnvVar(Constants.ENV_VAR_SRC_DIR, context.srcDir);
+  Logger.debug(`srcDir set to ${context.srcDir}`);
 
   context.wwwDir = resolve(context.wwwDir || getConfigValue(context, '--wwwDir', null, Constants.ENV_VAR_WWW_DIR, Constants.ENV_VAR_WWW_DIR.toLowerCase(), join(context.rootDir, Constants.WWW_DIR)));
   setProcessEnvVar(Constants.ENV_VAR_WWW_DIR, context.wwwDir);
+  Logger.debug(`wwwDir set to ${context.wwwDir}`);
 
   context.wwwIndex = join(context.wwwDir, Constants.WWW_INDEX_FILENAME);
+  Logger.debug(`wwwIndex set to ${context.wwwIndex}`);
 
   context.buildDir = resolve(context.buildDir || getConfigValue(context, '--buildDir', null, Constants.ENV_VAR_BUILD_DIR, Constants.ENV_VAR_BUILD_DIR.toLowerCase(), join(context.wwwDir, Constants.BUILD_DIR)));
   setProcessEnvVar(Constants.ENV_VAR_BUILD_DIR, context.buildDir);
+  Logger.debug(`buildDir set to ${context.buildDir}`);
 
   context.nodeModulesDir = resolve(context.nodeModulesDir || getConfigValue(context, '--nodeModulesDir', null, Constants.ENV_VAR_NODE_MODULES_DIR, Constants.ENV_VAR_NODE_MODULES_DIR.toLowerCase(), join(context.rootDir, Constants.NODE_MODULES)));
   setProcessEnvVar(Constants.ENV_VAR_NODE_MODULES_DIR, context.nodeModulesDir);
+  Logger.debug(`nodeModulesDir set to ${context.nodeModulesDir}`);
 
   context.ionicAngularDir = resolve(context.ionicAngularDir || getConfigValue(context, '--ionicAngularDir', null, Constants.ENV_VAR_IONIC_ANGULAR_DIR, Constants.ENV_VAR_IONIC_ANGULAR_DIR.toLowerCase(), join(context.nodeModulesDir, Constants.IONIC_ANGULAR)));
   setProcessEnvVar(Constants.ENV_VAR_IONIC_ANGULAR_DIR, context.ionicAngularDir);
+  Logger.debug(`ionicAngularDir set to ${context.ionicAngularDir}`);
 
   context.platform = getConfigValue(context, '--platform', null, Constants.ENV_VAR_PLATFORM, null, null);
   setProcessEnvVar(Constants.ENV_VAR_PLATFORM, context.platform);
+  Logger.debug(`platform set to ${context.platform}`);
 
   context.target = getConfigValue(context, '--target', null, Constants.ENV_VAR_TARGET, null, null);
   setProcessEnvVar(Constants.ENV_VAR_TARGET, context.target);
+  Logger.debug(`target set to ${context.target}`);
 
   const ionicAngularEntryPoint = resolve(getConfigValue(context, '--ionicAngularEntryPoint', null, Constants.ENV_VAR_IONIC_ANGULAR_ENTRY_POINT, Constants.ENV_VAR_IONIC_ANGULAR_ENTRY_POINT.toLowerCase(), join(context.ionicAngularDir, 'index.js')));
   setProcessEnvVar(Constants.ENV_VAR_IONIC_ANGULAR_ENTRY_POINT, ionicAngularEntryPoint);
+  Logger.debug(`ionicAngularEntryPoint set to ${ionicAngularEntryPoint}`);
 
-  setProcessEnvVar(Constants.ENV_VAR_APP_SCRIPTS_DIR, join(__dirname, '..', '..'));
+  const appScriptsDir = join(__dirname, '..', '..');
+  setProcessEnvVar(Constants.ENV_VAR_APP_SCRIPTS_DIR, appScriptsDir);
+  Logger.debug(`appScriptsDir set to ${appScriptsDir}`);
 
   const generateSourceMap = getConfigValue(context, '--generateSourceMap', null, Constants.ENV_VAR_GENERATE_SOURCE_MAP, Constants.ENV_VAR_GENERATE_SOURCE_MAP.toLowerCase(), context.isProd || context.runMinifyJs ? null : 'true');
   setProcessEnvVar(Constants.ENV_VAR_GENERATE_SOURCE_MAP, generateSourceMap);
+  Logger.debug(`generateSourceMap set to ${generateSourceMap}`);
 
   const sourceMapTypeValue = getConfigValue(context, '--sourceMapType', null, Constants.ENV_VAR_SOURCE_MAP_TYPE, Constants.ENV_VAR_SOURCE_MAP_TYPE.toLowerCase(), Constants.SOURCE_MAP_TYPE_EXPENSIVE);
   setProcessEnvVar(Constants.ENV_VAR_SOURCE_MAP_TYPE, sourceMapTypeValue);
+  Logger.debug(`sourceMapType set to ${sourceMapTypeValue}`);
 
   const tsConfigPathValue = resolve(getConfigValue(context, '--tsconfig', null, Constants.ENV_TS_CONFIG, Constants.ENV_TS_CONFIG.toLowerCase(), join(context.rootDir, 'tsconfig.json')));
   setProcessEnvVar(Constants.ENV_TS_CONFIG, tsConfigPathValue);
+  Logger.debug(`tsconfig set to ${tsConfigPathValue}`);
 
   const appEntryPointPathValue = resolve(getConfigValue(context, '--appEntryPoint', null, Constants.ENV_APP_ENTRY_POINT, Constants.ENV_APP_ENTRY_POINT.toLowerCase(), join(context.srcDir, 'app', 'main.ts')));
   setProcessEnvVar(Constants.ENV_APP_ENTRY_POINT, appEntryPointPathValue);
+  Logger.debug(`appEntryPoint set to ${appEntryPointPathValue}`);
 
   const appNgModulePath = resolve(getConfigValue(context, '--appNgModulePath', null, Constants.ENV_APP_NG_MODULE_PATH, Constants.ENV_APP_NG_MODULE_PATH.toLowerCase(), join(context.srcDir, 'app', 'app.module.ts')));
   setProcessEnvVar(Constants.ENV_APP_NG_MODULE_PATH, appNgModulePath);
+  Logger.debug(`appNgModulePath set to ${appNgModulePath}`);
 
   const appNgModuleClass = getConfigValue(context, '--appNgModuleClass', null, Constants.ENV_APP_NG_MODULE_CLASS, Constants.ENV_APP_NG_MODULE_CLASS.toLowerCase(), 'AppModule');
   setProcessEnvVar(Constants.ENV_APP_NG_MODULE_CLASS, appNgModuleClass);
+  Logger.debug(`appNgModuleClass set to ${appNgModuleClass}`);
 
-  setProcessEnvVar(Constants.ENV_GLOB_UTIL, join(getProcessEnvVar(Constants.ENV_VAR_APP_SCRIPTS_DIR), 'dist', 'util', 'glob-util.js'));
+  const pathToGlobUtil = join(getProcessEnvVar(Constants.ENV_VAR_APP_SCRIPTS_DIR), 'dist', 'util', 'glob-util.js');
+  setProcessEnvVar(Constants.ENV_GLOB_UTIL, pathToGlobUtil);
+  Logger.debug(`pathToGlobUtil set to ${pathToGlobUtil}`);
 
   const cleanBeforeCopy = getConfigValue(context, '--cleanBeforeCopy', null, Constants.ENV_CLEAN_BEFORE_COPY, Constants.ENV_CLEAN_BEFORE_COPY.toLowerCase(), null);
   setProcessEnvVar(Constants.ENV_CLEAN_BEFORE_COPY, cleanBeforeCopy);
+  Logger.debug(`cleanBeforeCopy set to ${cleanBeforeCopy}`);
 
-  setProcessEnvVar(Constants.ENV_CLOSURE_JAR, join(getProcessEnvVar(Constants.ENV_VAR_APP_SCRIPTS_DIR), 'bin', 'closure-compiler.jar'));
+  const closureCompilerJarPath = join(getProcessEnvVar(Constants.ENV_VAR_APP_SCRIPTS_DIR), 'bin', 'closure-compiler.jar');
+  setProcessEnvVar(Constants.ENV_CLOSURE_JAR, closureCompilerJarPath);
+  Logger.debug(`closureCompilerJarPath set to ${closureCompilerJarPath}`);
 
   const outputJsFileName = getConfigValue(context, '--outputJsFileName', null, Constants.ENV_OUTPUT_JS_FILE_NAME, Constants.ENV_OUTPUT_JS_FILE_NAME.toLowerCase(), 'main.js');
   setProcessEnvVar(Constants.ENV_OUTPUT_JS_FILE_NAME, outputJsFileName);
+  Logger.debug(`outputJsFileName set to ${outputJsFileName}`);
 
   const outputJsMapFileName = getConfigValue(context, '--outputJsMapFileName', null, Constants.ENV_OUTPUT_JS_MAP_FILE_NAME, Constants.ENV_OUTPUT_JS_MAP_FILE_NAME.toLowerCase(), 'main.js.map');
   setProcessEnvVar(Constants.ENV_OUTPUT_JS_MAP_FILE_NAME, outputJsMapFileName);
+  Logger.debug(`outputJsMapFileName set to ${outputJsMapFileName}`);
 
   const outputCssFileName = getConfigValue(context, '--outputCssFileName', null, Constants.ENV_OUTPUT_CSS_FILE_NAME, Constants.ENV_OUTPUT_CSS_FILE_NAME.toLowerCase(), 'main.css');
   setProcessEnvVar(Constants.ENV_OUTPUT_CSS_FILE_NAME, outputCssFileName);
+  Logger.debug(`outputCssFileName set to ${outputCssFileName}`);
 
   const outputCssMapFileName = getConfigValue(context, '--outputCssMapFileName', null, Constants.ENV_OUTPUT_CSS_MAP_FILE_NAME, Constants.ENV_OUTPUT_CSS_MAP_FILE_NAME.toLowerCase(), 'main.css.map');
   setProcessEnvVar(Constants.ENV_OUTPUT_CSS_MAP_FILE_NAME, outputCssMapFileName);
+  Logger.debug(`outputCssMapFileName set to ${outputCssMapFileName}`);
 
-  setProcessEnvVar(Constants.ENV_WEBPACK_FACTORY, join(getProcessEnvVar(Constants.ENV_VAR_APP_SCRIPTS_DIR), 'dist', 'webpack', 'ionic-webpack-factory.js'));
+  const webpackFactoryPath = join(getProcessEnvVar(Constants.ENV_VAR_APP_SCRIPTS_DIR), 'dist', 'webpack', 'ionic-webpack-factory.js');
+  setProcessEnvVar(Constants.ENV_WEBPACK_FACTORY, webpackFactoryPath);
+  Logger.debug(`webpackFactoryPath set to ${webpackFactoryPath}`);
 
-  setProcessEnvVar(Constants.ENV_WEBPACK_LOADER, join(getProcessEnvVar(Constants.ENV_VAR_APP_SCRIPTS_DIR), 'dist', 'webpack', 'loader.js'));
-  setProcessEnvVar(Constants.ENV_OPTIMIZATION_LOADER, join(getProcessEnvVar(Constants.ENV_VAR_APP_SCRIPTS_DIR), 'dist', 'webpack', 'optimization-loader.js'));
+  const webpackLoaderPath = join(getProcessEnvVar(Constants.ENV_VAR_APP_SCRIPTS_DIR), 'dist', 'webpack', 'loader.js');
+  setProcessEnvVar(Constants.ENV_WEBPACK_LOADER, webpackLoaderPath);
+  Logger.debug(`webpackLoaderPath set to ${webpackLoaderPath}`);
+
+  const optimizationLoaderPath = join(getProcessEnvVar(Constants.ENV_VAR_APP_SCRIPTS_DIR), 'dist', 'webpack', 'optimization-loader.js');
+  setProcessEnvVar(Constants.ENV_OPTIMIZATION_LOADER, optimizationLoaderPath);
+  Logger.debug(`optimizationLoaderPath set to ${optimizationLoaderPath}`);
 
 
   const aotWriteToDisk = getConfigValue(context, '--aotWriteToDisk', null, Constants.ENV_AOT_WRITE_TO_DISK, Constants.ENV_AOT_WRITE_TO_DISK.toLowerCase(), null);
   setProcessEnvVar(Constants.ENV_AOT_WRITE_TO_DISK, aotWriteToDisk);
+  Logger.debug(`aotWriteToDisk set to ${aotWriteToDisk}`);
 
   const printOriginalDependencyTree = getConfigValue(context, '--printOriginalDependencyTree', null, Constants.ENV_PRINT_ORIGINAL_DEPENDENCY_TREE, Constants.ENV_PRINT_ORIGINAL_DEPENDENCY_TREE.toLowerCase(), null);
   setProcessEnvVar(Constants.ENV_PRINT_ORIGINAL_DEPENDENCY_TREE, printOriginalDependencyTree);
+  Logger.debug(`printOriginalDependencyTree set to ${printOriginalDependencyTree}`);
 
   const printModifiedDependencyTree = getConfigValue(context, '--printModifiedDependencyTree', null, Constants.ENV_PRINT_MODIFIED_DEPENDENCY_TREE, Constants.ENV_PRINT_MODIFIED_DEPENDENCY_TREE.toLowerCase(), null);
   setProcessEnvVar(Constants.ENV_PRINT_MODIFIED_DEPENDENCY_TREE, printModifiedDependencyTree);
+  Logger.debug(`printModifiedDependencyTree set to ${printModifiedDependencyTree}`);
 
   const printWebpackDependencyTree = getConfigValue(context, '--printWebpackDependencyTree', null, Constants.ENV_PRINT_WEBPACK_DEPENDENCY_TREE, Constants.ENV_PRINT_WEBPACK_DEPENDENCY_TREE.toLowerCase(), null);
   setProcessEnvVar(Constants.ENV_PRINT_WEBPACK_DEPENDENCY_TREE, printWebpackDependencyTree);
+  Logger.debug(`printWebpackDependencyTree set to ${printWebpackDependencyTree}`);
 
 
   const bailOnLintError = getConfigValue(context, '--bailOnLintError', null, Constants.ENV_BAIL_ON_LINT_ERROR, Constants.ENV_BAIL_ON_LINT_ERROR.toLowerCase(), null);
   setProcessEnvVar(Constants.ENV_BAIL_ON_LINT_ERROR, bailOnLintError);
+  Logger.debug(`bailOnLintError set to ${bailOnLintError}`);
 
   /* Provider Path Stuff */
   setProcessEnvVar(Constants.ENV_ACTION_SHEET_CONTROLLER_CLASSNAME, 'ActionSheetController');
@@ -187,28 +229,35 @@ export function generateContext(context?: BuildContext): BuildContext {
   setProcessEnvVar(Constants.ENV_TOAST_COMPONENT_FACTORY_PATH, join(context.ionicAngularDir, 'components', 'toast', 'toast-component.ngfactory.js'));
 
   /* Experimental Flags */
-  const parseDeepLinks = getConfigValue(context, '--experimentalParseDeepLinks', null, Constants.ENV_EXPERIMENTAL_PARSE_DEEPLINKS, Constants.ENV_EXPERIMENTAL_PARSE_DEEPLINKS.toLowerCase(), null);
-  setProcessEnvVar(Constants.ENV_EXPERIMENTAL_PARSE_DEEPLINKS, parseDeepLinks);
+  const experimentalParseDeepLinks = getConfigValue(context, '--experimentalParseDeepLinks', null, Constants.ENV_EXPERIMENTAL_PARSE_DEEPLINKS, Constants.ENV_EXPERIMENTAL_PARSE_DEEPLINKS.toLowerCase(), null);
+  setProcessEnvVar(Constants.ENV_EXPERIMENTAL_PARSE_DEEPLINKS, experimentalParseDeepLinks);
+  Logger.debug(`experimentalParseDeepLinks set to ${experimentalParseDeepLinks}`);
 
   const experimentalManualTreeshaking = getConfigValue(context, '--experimentalManualTreeshaking', null, Constants.ENV_EXPERIMENTAL_MANUAL_TREESHAKING, Constants.ENV_EXPERIMENTAL_MANUAL_TREESHAKING.toLowerCase(), null);
   setProcessEnvVar(Constants.ENV_EXPERIMENTAL_MANUAL_TREESHAKING, experimentalManualTreeshaking);
+  Logger.debug(`experimentalManualTreeshaking set to ${experimentalManualTreeshaking}`);
 
   const experimentalPurgeDecorators = getConfigValue(context, '--experimentalPurgeDecorators', null, Constants.ENV_EXPERIMENTAL_PURGE_DECORATORS, Constants.ENV_EXPERIMENTAL_PURGE_DECORATORS.toLowerCase(), null);
   setProcessEnvVar(Constants.ENV_EXPERIMENTAL_PURGE_DECORATORS, experimentalPurgeDecorators);
+  Logger.debug(`experimentalPurgeDecorators set to ${experimentalPurgeDecorators}`);
 
-  const closureEnabled = getConfigValue(context, '--useExperimentalClosure', null, Constants.ENV_USE_EXPERIMENTAL_CLOSURE, Constants.ENV_USE_EXPERIMENTAL_CLOSURE.toLowerCase(), null);
-  setProcessEnvVar(Constants.ENV_USE_EXPERIMENTAL_CLOSURE, closureEnabled);
+  const useExperimentalClosure = getConfigValue(context, '--useExperimentalClosure', null, Constants.ENV_USE_EXPERIMENTAL_CLOSURE, Constants.ENV_USE_EXPERIMENTAL_CLOSURE.toLowerCase(), null);
+  setProcessEnvVar(Constants.ENV_USE_EXPERIMENTAL_CLOSURE, useExperimentalClosure);
+  Logger.debug(`useExperimentalClosure set to ${useExperimentalClosure}`);
 
-  const babiliEnabled = getConfigValue(context, '--useExperimentalBabili', null, Constants.ENV_USE_EXPERIMENTAL_BABILI, Constants.ENV_USE_EXPERIMENTAL_BABILI.toLowerCase(), null);
-  setProcessEnvVar(Constants.ENV_USE_EXPERIMENTAL_BABILI, babiliEnabled);
+  const useExperimentalBabili = getConfigValue(context, '--useExperimentalBabili', null, Constants.ENV_USE_EXPERIMENTAL_BABILI, Constants.ENV_USE_EXPERIMENTAL_BABILI.toLowerCase(), null);
+  setProcessEnvVar(Constants.ENV_USE_EXPERIMENTAL_BABILI, useExperimentalBabili);
+  Logger.debug(`useExperimentalBabili set to ${useExperimentalBabili}`);
 
   // default stand-alone builds to default to es5
   // if closure is being used, don't worry about this as it already automatically converts to ES5
   const buildToEs5 = getConfigValue(context, '--buildToEs5', null, Constants.ENV_BUILD_TO_ES5, Constants.ENV_BUILD_TO_ES5.toLowerCase(), closureEnabled ? null : 'true');
   setProcessEnvVar(Constants.ENV_BUILD_TO_ES5, buildToEs5);
+  Logger.debug(`buildToEs5 set to ${buildToEs5}`);
 
   if (!isValidBundler(context.bundler)) {
     context.bundler = bundlerStrategy(context);
+    Logger.debug(`bundler set to ${context.bundler}`);
   }
 
   context.inlineTemplates = true;

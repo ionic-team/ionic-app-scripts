@@ -7,7 +7,7 @@ export function purgeDecorators(filePath: string, fileContent: string) {
 
 export function purgeIndexDecorator(filePath: string, fileContent: string) {
   if (process.env[Constants.ENV_VAR_IONIC_ANGULAR_ENTRY_POINT] === filePath) {
-    Logger.debug(`Purging decorators for ${filePath}`);
+    Logger.debug(`Purging index file decorator for ${filePath}`);
     return fileContent.replace(DECORATORS_REGEX, '');
   }
   return fileContent;
