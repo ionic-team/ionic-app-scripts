@@ -67,6 +67,9 @@ function purgeUnusedImports(context: BuildContext, purgeDependencyMap: Map<strin
   // for now, restrict this to components in the ionic-angular/index.js file
   const indexFilePath = process.env[Constants.ENV_VAR_IONIC_ANGULAR_ENTRY_POINT];
   const file = context.fileCache.get(indexFilePath);
+  if (!file) {
+    throw new Error(`Could not find ionic-angular index file ${indexFilePath}`);
+  }
   const modulesToPurge: string[] = [];
   purgeDependencyMap.forEach((set: Set<string>, moduleToPurge: string) => {
     modulesToPurge.push(moduleToPurge);
