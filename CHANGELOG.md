@@ -1,3 +1,19 @@
+<a name="1.1.1"></a>
+## [1.1.1](https://github.com/driftyco/ionic-app-scripts/compare/v1.1.0...v1.1.1) (2017-02-15)
+
+
+### Bug Fixes
+
+* **config:** node_modules directory should not be configurable (users were finding it confusing) ([1f58aaa](https://github.com/driftyco/ionic-app-scripts/commit/1f58aaa))
+* **copy:** support overriding config entries with empty objects ([5879a8b](https://github.com/driftyco/ionic-app-scripts/commit/5879a8b))
+* **deeplinks:** make deep link config parsing support 2.x and 3.x deep link config ([1ac7116](https://github.com/driftyco/ionic-app-scripts/commit/1ac7116))
+* **deeplinks:** provide deep-links config to webpack as needed vs via the constructor ([a735e96](https://github.com/driftyco/ionic-app-scripts/commit/a735e96))
+* **http-server:** drive reading ionic.config.json based on config value ([e2d0d83](https://github.com/driftyco/ionic-app-scripts/commit/e2d0d83))
+* **optimizations:** throw error when ionic-angular index file isn't found ([6437005](https://github.com/driftyco/ionic-app-scripts/commit/6437005))
+* **transpile:** get tsconfig.json location from config value ([79b0eeb](https://github.com/driftyco/ionic-app-scripts/commit/79b0eeb))
+
+
+
 <a name="1.1.0"></a>
 # [1.1.0](https://github.com/driftyco/ionic-app-scripts/compare/v1.0.1...v1.1.0) (2017-02-11)
 
