@@ -148,6 +148,7 @@ export interface DeepLinkConfigEntry {
   modulePath: string;
   namedExport: string;
   name: string;
+  component: string;
 };
 
 export interface HydratedDeepLinkConfigEntry extends DeepLinkConfigEntry {
