@@ -70,6 +70,102 @@ export function getSharedIonicModule() {
       expect(results[4].namedExport).toBe(null);
     });
 
+    it('should handle configs with arrays in them', () => {
+      const knownContent = `
+        @NgModule({
+  declarations: [
+    E2EApp,
+    FirstPage,
+    RedirectPage,
+    AnotherPage,
+    MyCmpTest,
+    MyCmpTest2,
+    PrimaryHeaderPage,
+    TabsPage,
+    Tab1,
+    Tab2,
+    Tab3,
+    TabItemPage
+  ],
+  imports: [
+    BrowserModule,
+    IonicModule.forRoot(E2EApp, {
+      swipeBackEnabled: true
+    }, {
+      links: [
+        { component: FirstPage, name: 'first-page' },
+        { component: AnotherPage, name: 'another-page' },
+        { component: MyCmpTest, name: 'tab1-page1' },
+
+        { loadChildren: './pages/full-page/full-page.module#LinkModule', name: 'full-page', defaultHistory: ['first-page', 'another-page'] },
+
+        { component: PrimaryHeaderPage, name: 'primary-header-page', defaultHistory: ['first-page', 'full-page'] },
+        { component: Tabs, name: 'tabs' },
+        { component: Tab1, name: 'tab1' },
+        { component: TabItemPage, name: 'item' }
+      ]
+    })
+  ],
+  bootstrap: [IonicApp],
+  entryComponents: [
+    E2EApp,
+    FirstPage,
+    RedirectPage,
+    AnotherPage,
+    PrimaryHeaderPage,
+    TabsPage,
+    Tab1,
+    Tab2,
+    Tab3,
+    TabItemPage
+  ]
+})
+export class AppModule {}
+      `;
+
+      const results = util.extractDeepLinkPathData(knownContent);
+
+      expect(results[0].component).toEqual('FirstPage');
+      expect(results[0].name).toEqual('first-page');
+      expect(results[0].modulePath).toEqual(null);
+      expect(results[0].namedExport).toEqual(null);
+
+      expect(results[1].component).toEqual('AnotherPage');
+      expect(results[1].name).toEqual('another-page');
+      expect(results[1].modulePath).toEqual(null);
+      expect(results[1].namedExport).toEqual(null);
+
+      expect(results[2].component).toEqual('MyCmpTest');
+      expect(results[2].name).toEqual('tab1-page1');
+      expect(results[2].modulePath).toEqual(null);
+      expect(results[2].namedExport).toEqual(null);
+
+      expect(results[3].component).toEqual(null);
+      expect(results[3].name).toEqual('full-page');
+      expect(results[3].modulePath).toEqual('./pages/full-page/full-page.module');
+      expect(results[3].namedExport).toEqual('LinkModule');
+
+      expect(results[4].component).toEqual('PrimaryHeaderPage');
+      expect(results[4].name).toEqual('primary-header-page');
+      expect(results[4].modulePath).toEqual(null);
+      expect(results[4].namedExport).toEqual(null);
+
+      expect(results[5].component).toEqual('Tabs');
+      expect(results[5].name).toEqual('tabs');
+      expect(results[5].modulePath).toEqual(null);
+      expect(results[5].namedExport).toEqual(null);
+
+      expect(results[6].component).toEqual('Tab1');
+      expect(results[6].name).toEqual('tab1');
+      expect(results[6].modulePath).toEqual(null);
+      expect(results[6].namedExport).toEqual(null);
+
+      expect(results[7].component).toEqual('TabItemPage');
+      expect(results[7].name).toEqual('item');
+      expect(results[7].modulePath).toEqual(null);
+      expect(results[7].namedExport).toEqual(null);
+    });
+
     it('should throw an exception when there is an invalid deep link config', () => {
       // arrange
       const fileContent = `

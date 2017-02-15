@@ -6,7 +6,7 @@ const LOAD_CHILDREN_SPLIT_TOKEN = '#';
 /* this is a very temporary approach to extracting deeplink data since the Angular compiler API has changed a bit */
 
 function getLinksArrayContent(appNgModuleFileContent: string) {
-  const LINKS_REGEX = /links\s*?:\s*\[([\s|\S]*?)\]/igm;
+  const LINKS_REGEX = /links\s*?:\s*\[([\s\S]*?)}\)/igm;
   const deepLinksContentMatches = LINKS_REGEX.exec(appNgModuleFileContent.toString());
   if (deepLinksContentMatches && deepLinksContentMatches.length === 2) {
     return deepLinksContentMatches[1];
