@@ -13,7 +13,6 @@ export const TMP_DIR = '.tmp';
 export const WWW_DIR = 'www';
 export const NODE_MODULES = 'node_modules';
 export const IONIC_ANGULAR = 'ionic-angular';
-export const WWW_INDEX_FILENAME = 'index.html';
 
 export const ENV_VAR_PROD = 'prod';
 export const ENV_VAR_DEV = 'dev';
@@ -22,6 +21,7 @@ export const ENV_VAR_ROOT_DIR = 'IONIC_ROOT_DIR';
 export const ENV_VAR_SRC_DIR = 'IONIC_SRC_DIR';
 export const ENV_VAR_TMP_DIR = 'IONIC_TMP_DIR';
 export const ENV_VAR_WWW_DIR = 'IONIC_WWW_DIR';
+export const ENV_VAR_HTML_TO_SERVE = 'IONIC_HTML_TO_SERVE';
 export const ENV_VAR_BUILD_DIR = 'IONIC_BUILD_DIR';
 export const ENV_VAR_NODE_MODULES_DIR = 'IONIC_NODE_MODULES_DIR';
 export const ENV_VAR_IONIC_ANGULAR_DIR = 'IONIC_ANGULAR_DIR';
@@ -38,6 +38,7 @@ export const ENV_APP_NG_MODULE_CLASS = 'IONIC_APP_NG_MODULE_CLASS';
 export const ENV_GLOB_UTIL = 'IONIC_GLOB_UTIL';
 export const ENV_CLEAN_BEFORE_COPY = 'IONIC_CLEAN_BEFORE_COPY';
 export const ENV_CLOSURE_JAR = 'IONIC_CLOSURE_JAR';
+export const ENV_READ_CONFIG_JSON = 'IONIC_READ_CONFIG_JSON';
 
 export const ENV_OUTPUT_JS_FILE_NAME = 'IONIC_OUTPUT_JS_FILE_NAME';
 export const ENV_OUTPUT_JS_MAP_FILE_NAME = 'IONIC_OUTPUT_JS_MAP_FILE_NAME';

@@ -14,6 +14,8 @@ import {
 import { Logger } from '../logger/logger';
 import * as proxyMiddleware from 'proxy-middleware';
 import { injectDiagnosticsHtml } from '../logger/logger-diagnostics';
+import * as Constants from '../util/constants';
+import { getBooleanPropertyValue } from '../util/helpers';
 import { getProjectJson, IonicProject } from '../util/ionic-project';
 
 import { LabAppView, ApiCordovaProject } from './lab';
@@ -51,20 +53,23 @@ export function createHttpServer(config: ServeConfig): express.Application {
 }
 
 function setupProxies(app: express.Application) {
+  if (getBooleanPropertyValue(Constants.ENV_READ_CONFIG_JSON)) {
+    getProjectJson().then(function(projectConfig: IonicProject) {
+      for (const proxy of projectConfig.proxies || []) {
+        let opts: any = url.parse(proxy.proxyUrl);
+        if (proxy.proxyNoAgent) {
+          opts.agent = false;
+        }
 
-  getProjectJson().then(function(projectConfig: IonicProject) {
-    for (const proxy of projectConfig.proxies || []) {
-      let opts: any = url.parse(proxy.proxyUrl);
-      if (proxy.proxyNoAgent) {
-        opts.agent = false;
+        opts.rejectUnauthorized = !(proxy.rejectUnauthorized === false);
+
+        app.use(proxy.path, proxyMiddleware(opts));
+        Logger.info('Proxy added:' + proxy.path + ' => ' + url.format(opts));
       }
-
-      opts.rejectUnauthorized = !(proxy.rejectUnauthorized === false);
-
-      app.use(proxy.path, proxyMiddleware(opts));
-      Logger.info('Proxy added:' + proxy.path + ' => ' + url.format(opts));
-    }
-  });
+    }).catch((err: Error) => {
+      Logger.error(`Failed to read the projects ionic.config.json file: ${err.message}`);
+    });
+  }
 }
 
 /**
@@ -74,7 +79,7 @@ function serveIndex(req: express.Request, res: express.Response)  {
   const config: ServeConfig = req.app.get('serveConfig');
 
   // respond with the index.html file
-  const indexFileName = path.join(config.wwwDir, 'index.html');
+  const indexFileName = path.join(config.wwwDir, process.env[Constants.ENV_VAR_HTML_TO_SERVE]);
   fs.readFile(indexFileName, (err, indexHtml) => {
     if (config.useLiveReload) {
       indexHtml = injectLiveReloadScript(indexHtml, config.host, config.liveReloadPort);

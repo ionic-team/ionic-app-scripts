@@ -75,7 +75,8 @@ export function generateContext(context?: BuildContext): BuildContext {
   setProcessEnvVar(Constants.ENV_VAR_WWW_DIR, context.wwwDir);
   Logger.debug(`wwwDir set to ${context.wwwDir}`);
 
-  context.wwwIndex = join(context.wwwDir, Constants.WWW_INDEX_FILENAME);
+  context.wwwIndex = getConfigValue(context, '--wwwIndex', null, Constants.ENV_VAR_HTML_TO_SERVE, Constants.ENV_VAR_HTML_TO_SERVE.toLowerCase(), 'index.html');
+  setProcessEnvVar(Constants.ENV_VAR_HTML_TO_SERVE, context.wwwIndex);
   Logger.debug(`wwwIndex set to ${context.wwwIndex}`);
 
   context.buildDir = resolve(context.buildDir || getConfigValue(context, '--buildDir', null, Constants.ENV_VAR_BUILD_DIR, Constants.ENV_VAR_BUILD_DIR.toLowerCase(), join(context.wwwDir, Constants.BUILD_DIR)));
@@ -117,6 +118,10 @@ export function generateContext(context?: BuildContext): BuildContext {
   const tsConfigPathValue = resolve(getConfigValue(context, '--tsconfig', null, Constants.ENV_TS_CONFIG, Constants.ENV_TS_CONFIG.toLowerCase(), join(context.rootDir, 'tsconfig.json')));
   setProcessEnvVar(Constants.ENV_TS_CONFIG, tsConfigPathValue);
   Logger.debug(`tsconfig set to ${tsConfigPathValue}`);
+
+  const readConfigJson = resolve(getConfigValue(context, '--readConfigJson', null, Constants.ENV_READ_CONFIG_JSON, Constants.ENV_READ_CONFIG_JSON.toLowerCase(), 'true'));
+  setProcessEnvVar(Constants.ENV_READ_CONFIG_JSON, readConfigJson);
+  Logger.debug(`readConfigJson set to ${readConfigJson}`);
 
   const appEntryPointPathValue = resolve(getConfigValue(context, '--appEntryPoint', null, Constants.ENV_APP_ENTRY_POINT, Constants.ENV_APP_ENTRY_POINT.toLowerCase(), join(context.srcDir, 'app', 'main.ts')));
   setProcessEnvVar(Constants.ENV_APP_ENTRY_POINT, appEntryPointPathValue);
