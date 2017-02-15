@@ -372,7 +372,7 @@ let cachedProgram: ts.Program = null;
 let cachedTsConfig: TsConfig = null;
 
 export function getTsConfigPath(context: BuildContext) {
-  return path.join(context.rootDir, 'tsconfig.json');
+  return process.env[Constants.ENV_TS_CONFIG];
 }
 
 export interface TsConfig {
