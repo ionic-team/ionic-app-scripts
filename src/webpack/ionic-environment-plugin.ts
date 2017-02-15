@@ -87,7 +87,9 @@ export function convertDeepLinkConfigToWebpackFormat(parsedDeepLinkConfigs: Hydr
     parsedDeepLinkConfigs = [];
   }
   parsedDeepLinkConfigs.forEach(parsedDeepLinkConfig => {
-    dictionary[parsedDeepLinkConfig.modulePath] = parsedDeepLinkConfig.absolutePath;
+    if (parsedDeepLinkConfig.modulePath && parsedDeepLinkConfig.absolutePath) {
+      dictionary[parsedDeepLinkConfig.modulePath] = parsedDeepLinkConfig.absolutePath;
+    }
   });
   return dictionary;
 }
