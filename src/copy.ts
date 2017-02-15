@@ -145,7 +145,7 @@ function processRemoveFile(changedFile: ChangedFile) {
   // delete any destination files that match the source file
   const list = copyFilePathCache.get(changedFile.filePath) || [];
   copyFilePathCache.delete(changedFile.filePath);
-  const promises: Promise<void>[] = [];
+  const promises: Promise<void[]>[] = [];
   const deletedFilePaths: string[] = [];
   list.forEach(copiedFile => {
     const promise = unlinkAsync(copiedFile.absoluteDestPath);
@@ -251,8 +251,10 @@ export function copyConfigToWatchConfig(context: BuildContext): Watcher {
   const copyConfig: CopyConfig = fillConfigDefaults(configFile, taskInfo.defaultConfigFile);
   let results: GlobObject[] = [];
   for (const key of Object.keys(copyConfig)) {
-    const list = generateGlobTasks(copyConfig[key].src, {});
-    results = results.concat(list);
+    if (copyConfig[key] && copyConfig[key].src) {
+      const list = generateGlobTasks(copyConfig[key].src, {});
+      results = results.concat(list);
+    }
   }
 
   const paths: string[] = [];
