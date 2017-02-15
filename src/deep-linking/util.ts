@@ -55,8 +55,8 @@ function convertRawContentStringToParsedDeepLink(input: string): DeepLinkConfigE
   const loadChildrenValue = extractContentWithKnownMatch(input, LOAD_CHILDREN_REGEX);
   const nameValue = extractContentWithKnownMatch(input, NAME_REGEX);
   const componentValue = extractContentWithKnownMatch(input, COMPONENT_REGEX);
-  let modulePath = null;
-  let namedExport = null;
+  let modulePath: string = null;
+  let namedExport: string = null;
   if (loadChildrenValue) {
     const tokens = loadChildrenValue.split(LOAD_CHILDREN_SPLIT_TOKEN);
     if (tokens.length === 2) {
