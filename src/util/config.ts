@@ -83,7 +83,7 @@ export function generateContext(context?: BuildContext): BuildContext {
   setProcessEnvVar(Constants.ENV_VAR_BUILD_DIR, context.buildDir);
   Logger.debug(`buildDir set to ${context.buildDir}`);
 
-  context.nodeModulesDir = resolve(context.nodeModulesDir || getConfigValue(context, '--nodeModulesDir', null, Constants.ENV_VAR_NODE_MODULES_DIR, Constants.ENV_VAR_NODE_MODULES_DIR.toLowerCase(), join(context.rootDir, Constants.NODE_MODULES)));
+  context.nodeModulesDir = join(context.rootDir, Constants.NODE_MODULES);
   setProcessEnvVar(Constants.ENV_VAR_NODE_MODULES_DIR, context.nodeModulesDir);
   Logger.debug(`nodeModulesDir set to ${context.nodeModulesDir}`);
 
