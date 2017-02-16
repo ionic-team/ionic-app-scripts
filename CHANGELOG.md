@@ -1,3 +1,15 @@
+<a name="1.1.2"></a>
+## [1.1.2](https://github.com/driftyco/ionic-app-scripts/compare/v1.1.1...v1.1.2) (2017-02-16)
+
+
+### Bug Fixes
+
+* **deep-links:** handle configs with internal arrays ([a7df816](https://github.com/driftyco/ionic-app-scripts/commit/a7df816))
+* **deep-links:** only provide deep links to webpack that contain the import used in code and the abs ([fae4862](https://github.com/driftyco/ionic-app-scripts/commit/fae4862))
+* **optimizations:** remove the js file created by the optimizations bundling pass ([c0bb3f4](https://github.com/driftyco/ionic-app-scripts/commit/c0bb3f4))
+
+
+
 <a name="1.1.1"></a>
 ## [1.1.1](https://github.com/driftyco/ionic-app-scripts/compare/v1.1.0...v1.1.1) (2017-02-15)
 
