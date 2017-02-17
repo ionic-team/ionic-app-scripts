@@ -126,11 +126,13 @@ function buildProject(context: BuildContext) {
       return postprocess(context);
     })
     .then(() => {
-      // kick off the tslint after everything else
-      // nothing needs to wait on its completion unless bailing on lint error is enabled
-      const result = lint(context);
-      if (getBooleanPropertyValue(Constants.ENV_BAIL_ON_LINT_ERROR)) {
-        return result;
+      if (getBooleanPropertyValue(Constants.ENV_ENABLE_LINT)) {
+        // kick off the tslint after everything else
+        // nothing needs to wait on its completion unless bailing on lint error is enabled
+        const result = lint(context);
+        if (getBooleanPropertyValue(Constants.ENV_BAIL_ON_LINT_ERROR)) {
+          return result;
+        }
       }
     })
     .catch(err => {
@@ -183,7 +185,9 @@ export function buildUpdate(changedFiles: ChangedFile[], context: BuildContext) 
         if (requiresLintUpdate) {
           // a ts file changed, so let's lint it too, however
           // this task should run as an after thought
-          lintUpdate(changedFiles, context);
+          if (getBooleanPropertyValue(Constants.ENV_ENABLE_LINT)) {
+            lintUpdate(changedFiles, context);
+          }
         }
 
         logger.finish('green', true);

@@ -48,6 +48,8 @@ describe('build', () => {
       runAot: true
     };
 
+    const getBooleanPropertyValueSpy = spyOn(helpers, helpers.getBooleanPropertyValue.name).and.returnValue(true);
+
     return build.build(context).then(() => {
       expect(helpers.readFileAsync).toHaveBeenCalled();
       expect(copy.copy).toHaveBeenCalled();
@@ -57,9 +59,11 @@ describe('build', () => {
       expect(sass.sass).toHaveBeenCalled();
       expect(minify.minifyCss).toHaveBeenCalled();
       expect(lint.lint).toHaveBeenCalled();
+      expect(getBooleanPropertyValueSpy.calls.first().args[0]).toEqual(Constants.ENV_ENABLE_LINT);
 
       expect(transpile.transpile).not.toHaveBeenCalled();
     }).catch(err => {
+      console.log('err: ', err.message);
       expect(true).toEqual(false);
     });
   });
@@ -73,6 +77,8 @@ describe('build', () => {
       runAot: false
     };
 
+    const getBooleanPropertyValueSpy = spyOn(helpers, helpers.getBooleanPropertyValue.name).and.returnValue(true);
+
     return build.build(context).then(() => {
       expect(helpers.readFileAsync).toHaveBeenCalled();
       expect(copy.copy).toHaveBeenCalled();
@@ -80,6 +86,36 @@ describe('build', () => {
       expect(bundle.bundle).toHaveBeenCalled();
       expect(sass.sass).toHaveBeenCalled();
       expect(lint.lint).toHaveBeenCalled();
+      expect(getBooleanPropertyValueSpy.calls.first().args[0]).toEqual(Constants.ENV_ENABLE_LINT);
+      expect(postprocess.postprocess).toHaveBeenCalled();
+      expect(preprocess.preprocess).toHaveBeenCalled();
+      expect(ngc.ngc).not.toHaveBeenCalled();
+      expect(minify.minifyJs).not.toHaveBeenCalled();
+      expect(minify.minifyCss).not.toHaveBeenCalled();
+    }).catch(err => {
+      expect(true).toEqual(false);
+    });
+  });
+
+  it('should skip lint', () => {
+    let context: BuildContext = {
+      isProd: false,
+      optimizeJs: false,
+      runMinifyJs: false,
+      runMinifyCss: false,
+      runAot: false
+    };
+
+    const getBooleanPropertyValueSpy = spyOn(helpers, helpers.getBooleanPropertyValue.name).and.returnValue(false);
+
+    return build.build(context).then(() => {
+      expect(helpers.readFileAsync).toHaveBeenCalled();
+      expect(copy.copy).toHaveBeenCalled();
+      expect(transpile.transpile).toHaveBeenCalled();
+      expect(bundle.bundle).toHaveBeenCalled();
+      expect(sass.sass).toHaveBeenCalled();
+      expect(lint.lint).not.toHaveBeenCalled();
+      expect(getBooleanPropertyValueSpy.calls.first().args[0]).toEqual(Constants.ENV_ENABLE_LINT);
       expect(postprocess.postprocess).toHaveBeenCalled();
       expect(preprocess.preprocess).toHaveBeenCalled();
       expect(ngc.ngc).not.toHaveBeenCalled();
