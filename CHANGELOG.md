@@ -1,3 +1,14 @@
+<a name="1.1.3"></a>
+## [1.1.3](https://github.com/driftyco/ionic-app-scripts/compare/v1.1.2...v1.1.3) (2017-02-17)
+
+
+### Bug Fixes
+
+* **config:** Setting readConfigJson constant wrong ([#761](https://github.com/driftyco/ionic-app-scripts/issues/761)) ([64bc17f](https://github.com/driftyco/ionic-app-scripts/commit/64bc17f))
+* **source-maps:** source map must correspond to .js file name with a .map at the end ([debd88b](https://github.com/driftyco/ionic-app-scripts/commit/debd88b))
+
+
+
 <a name="1.1.2"></a>
 ## [1.1.2](https://github.com/driftyco/ionic-app-scripts/compare/v1.1.1...v1.1.2) (2017-02-16)
 
