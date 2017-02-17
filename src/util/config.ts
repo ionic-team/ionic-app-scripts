@@ -3,7 +3,7 @@ import { accessSync, readJSONSync, statSync } from 'fs-extra';
 
 import { Logger } from '../logger/logger';
 import { BuildContext, TaskInfo } from './interfaces';
-import { objectAssign } from './helpers';
+import { getBooleanPropertyValue, objectAssign } from './helpers';
 import { FileCache } from './file-cache';
 import * as Constants from './constants';
 
@@ -197,6 +197,14 @@ export function generateContext(context?: BuildContext): BuildContext {
   setProcessEnvVar(Constants.ENV_BAIL_ON_LINT_ERROR, bailOnLintError);
   Logger.debug(`bailOnLintError set to ${bailOnLintError}`);
 
+  const enableLint = getConfigValue(context, '--enableLint', null, Constants.ENV_ENABLE_LINT, Constants.ENV_ENABLE_LINT.toLowerCase(), 'true');
+  setProcessEnvVar(Constants.ENV_ENABLE_LINT, enableLint);
+  Logger.debug(`enableLint set to ${enableLint}`);
+
+  const disableLogging = getConfigValue(context, '--disableLogging', null, Constants.ENV_DISABLE_LOGGING, Constants.ENV_DISABLE_LOGGING.toLowerCase(), null);
+  setProcessEnvVar(Constants.ENV_DISABLE_LOGGING, disableLogging);
+  Logger.debug(`disableLogging set to ${disableLogging}`);
+
   /* Provider Path Stuff */
   setProcessEnvVar(Constants.ENV_ACTION_SHEET_CONTROLLER_CLASSNAME, 'ActionSheetController');
   setProcessEnvVar(Constants.ENV_ACTION_SHEET_CONTROLLER_PATH, join(context.ionicAngularDir, 'components', 'action-sheet', 'action-sheet-controller.js'));
@@ -268,6 +276,15 @@ export function generateContext(context?: BuildContext): BuildContext {
   context.inlineTemplates = true;
 
   checkDebugMode();
+
+  if (getBooleanPropertyValue(Constants.ENV_DISABLE_LOGGING)) {
+    console.debug = () => { };
+    console.error = () => { };
+    console.info = () => { };
+    console.log = () => { };
+    console.trace = () => { };
+    console.warn = () => { };
+  }
 
   return context;
 }

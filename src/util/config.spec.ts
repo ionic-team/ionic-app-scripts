@@ -1,13 +1,14 @@
+import { join, resolve } from 'path';
+
+import * as helpers from './helpers';
 import { BuildContext } from './interfaces';
 import * as config from './config';
-
 import * as Constants from './constants';
-import { resolve } from 'path';
 
 
 describe('config', () => {
 
-  describe('config.config.generateContext', () => {
+  describe('config.generateContext', () => {
 
     it('should set isWatch true with isWatch true context', () => {
       const context = config.generateContext({
@@ -48,7 +49,7 @@ describe('config', () => {
       expect(context).toBeDefined();
     });
 
-    it('should set default prod specific build flag defaults to false', () => {
+    it('should set the correct defaults for a dev build', () => {
       // arrange
       const fakeConfig: any = { };
       config.setProcessEnv(fakeConfig);
@@ -65,11 +66,90 @@ describe('config', () => {
       expect(context.runMinifyCss).toEqual(false);
       expect(context.optimizeJs).toEqual(false);
       expect(fakeConfig[Constants.ENV_VAR_IONIC_ENV]).toEqual(Constants.ENV_VAR_DEV);
+
+      expect(context.rootDir).toEqual(process.cwd());
+      expect(context.tmpDir).toEqual(join(process.cwd(), Constants.TMP_DIR));
+      expect(context.srcDir).toEqual(join(process.cwd(), Constants.SRC_DIR));
+      expect(context.wwwDir).toEqual(join(process.cwd(), Constants.WWW_DIR));
+      expect(context.wwwIndex).toEqual('index.html');
+      expect(context.buildDir).toEqual(join(process.cwd(), Constants.WWW_DIR, Constants.BUILD_DIR));
+      expect(context.nodeModulesDir).toEqual(join(process.cwd(), Constants.NODE_MODULES));
+      expect(context.ionicAngularDir).toEqual(join(process.cwd(), Constants.NODE_MODULES, Constants.IONIC_ANGULAR));
+      expect(context.platform).toEqual(null);
+      expect(context.target).toEqual(null);
+      expect(fakeConfig[Constants.ENV_VAR_IONIC_ANGULAR_ENTRY_POINT]).toEqual(join(context.ionicAngularDir, 'index.js'));
+      expect(fakeConfig[Constants.ENV_VAR_APP_SCRIPTS_DIR]).toEqual(join(__dirname, '..', '..'));
+      expect(fakeConfig[Constants.ENV_VAR_GENERATE_SOURCE_MAP]).toEqual('true');
+      expect(fakeConfig[Constants.ENV_VAR_SOURCE_MAP_TYPE]).toEqual(Constants.SOURCE_MAP_TYPE_EXPENSIVE);
+      expect(fakeConfig[Constants.ENV_TS_CONFIG]).toEqual(join(process.cwd(), 'tsconfig.json'));
+      expect(fakeConfig[Constants.ENV_READ_CONFIG_JSON]).toEqual('true');
+      expect(fakeConfig[Constants.ENV_APP_ENTRY_POINT]).toEqual(join(context.srcDir, 'app', 'main.ts'));
+      expect(fakeConfig[Constants.ENV_APP_NG_MODULE_PATH]).toEqual(join(context.srcDir, 'app', 'app.module.ts'));
+      expect(fakeConfig[Constants.ENV_APP_NG_MODULE_CLASS]).toEqual('AppModule');
+      expect(fakeConfig[Constants.ENV_GLOB_UTIL]).toEqual(join(fakeConfig[Constants.ENV_VAR_APP_SCRIPTS_DIR], 'dist', 'util', 'glob-util.js'));
+      expect(fakeConfig[Constants.ENV_CLEAN_BEFORE_COPY]).toBeFalsy();
+      expect(fakeConfig[Constants.ENV_CLOSURE_JAR]).toEqual(join(fakeConfig[Constants.ENV_VAR_APP_SCRIPTS_DIR], 'bin', 'closure-compiler.jar'));
+      expect(fakeConfig[Constants.ENV_OUTPUT_JS_FILE_NAME]).toEqual('main.js');
+      expect(fakeConfig[Constants.ENV_OUTPUT_JS_MAP_FILE_NAME]).toEqual('main.js.map');
+      expect(fakeConfig[Constants.ENV_OUTPUT_CSS_FILE_NAME]).toEqual('main.css');
+      expect(fakeConfig[Constants.ENV_OUTPUT_CSS_MAP_FILE_NAME]).toEqual('main.css.map');
+      expect(fakeConfig[Constants.ENV_WEBPACK_FACTORY]).toEqual(join(fakeConfig[Constants.ENV_VAR_APP_SCRIPTS_DIR], 'dist', 'webpack', 'ionic-webpack-factory.js'));
+      expect(fakeConfig[Constants.ENV_WEBPACK_LOADER]).toEqual(join(fakeConfig[Constants.ENV_VAR_APP_SCRIPTS_DIR], 'dist', 'webpack', 'loader.js'));
+      expect(fakeConfig[Constants.ENV_OPTIMIZATION_LOADER]).toEqual(join(fakeConfig[Constants.ENV_VAR_APP_SCRIPTS_DIR], 'dist', 'webpack', 'optimization-loader.js'));
+      expect(fakeConfig[Constants.ENV_AOT_WRITE_TO_DISK]).toBeFalsy();
+      expect(fakeConfig[Constants.ENV_PRINT_ORIGINAL_DEPENDENCY_TREE]).toBeFalsy();
+      expect(fakeConfig[Constants.ENV_PRINT_MODIFIED_DEPENDENCY_TREE]).toBeFalsy();
+      expect(fakeConfig[Constants.ENV_PRINT_WEBPACK_DEPENDENCY_TREE]).toBeFalsy();
+      expect(fakeConfig[Constants.ENV_BAIL_ON_LINT_ERROR]).toBeFalsy();
+      expect(fakeConfig[Constants.ENV_ENABLE_LINT]).toEqual('true');
+      expect(fakeConfig[Constants.ENV_DISABLE_LOGGING]).toBeFalsy();
+
+      expect(fakeConfig[Constants.ENV_ACTION_SHEET_CONTROLLER_CLASSNAME]).toEqual('ActionSheetController');
+      expect(fakeConfig[Constants.ENV_ACTION_SHEET_CONTROLLER_PATH]).toEqual(join(context.ionicAngularDir, 'components', 'action-sheet', 'action-sheet-controller.js'));
+      expect(fakeConfig[Constants.ENV_ACTION_SHEET_VIEW_CONTROLLER_PATH]).toEqual(join(context.ionicAngularDir, 'components', 'action-sheet', 'action-sheet.js'));
+      expect(fakeConfig[Constants.ENV_ACTION_SHEET_COMPONENT_FACTORY_PATH]).toEqual(join(context.ionicAngularDir, 'components', 'action-sheet', 'action-sheet-component.ngfactory.js'));
+
+      expect(fakeConfig[Constants.ENV_ALERT_CONTROLLER_CLASSNAME]).toEqual('AlertController');
+      expect(fakeConfig[Constants.ENV_ALERT_CONTROLLER_PATH]).toEqual(join(context.ionicAngularDir, 'components', 'alert', 'alert-controller.js'));
+      expect(fakeConfig[Constants.ENV_ALERT_VIEW_CONTROLLER_PATH]).toEqual(join(context.ionicAngularDir, 'components', 'alert', 'alert.js'));
+      expect(fakeConfig[Constants.ENV_ALERT_COMPONENT_FACTORY_PATH]).toEqual(join(context.ionicAngularDir, 'components', 'alert', 'alert-component.ngfactory.js'));
+
+      expect(fakeConfig[Constants.ENV_LOADING_CONTROLLER_CLASSNAME]).toEqual('LoadingController');
+      expect(fakeConfig[Constants.ENV_LOADING_CONTROLLER_PATH]).toEqual(join(context.ionicAngularDir, 'components', 'loading', 'loading-controller.js'));
+      expect(fakeConfig[Constants.ENV_LOADING_VIEW_CONTROLLER_PATH]).toEqual(join(context.ionicAngularDir, 'components', 'loading', 'loading.js'));
+      expect(fakeConfig[Constants.ENV_LOADING_COMPONENT_FACTORY_PATH]).toEqual(join(context.ionicAngularDir, 'components', 'loading', 'loading-component.ngfactory.js'));
+
+      expect(fakeConfig[Constants.ENV_MODAL_CONTROLLER_CLASSNAME]).toEqual('ModalController');
+      expect(fakeConfig[Constants.ENV_MODAL_CONTROLLER_PATH]).toEqual(join(context.ionicAngularDir, 'components', 'modal', 'modal-controller.js'));
+      expect(fakeConfig[Constants.ENV_MODAL_VIEW_CONTROLLER_PATH]).toEqual(join(context.ionicAngularDir, 'components', 'modal', 'modal.js'));
+      expect(fakeConfig[Constants.ENV_MODAL_COMPONENT_FACTORY_PATH]).toEqual(join(context.ionicAngularDir, 'components', 'modal', 'modal-component.ngfactory.js'));
+
+      expect(fakeConfig[Constants.ENV_PICKER_CONTROLLER_CLASSNAME]).toEqual('PickerController');
+      expect(fakeConfig[Constants.ENV_PICKER_CONTROLLER_PATH]).toEqual(join(context.ionicAngularDir, 'components', 'picker', 'picker-controller.js'));
+      expect(fakeConfig[Constants.ENV_PICKER_VIEW_CONTROLLER_PATH]).toEqual(join(context.ionicAngularDir, 'components', 'picker', 'picker.js'));
+      expect(fakeConfig[Constants.ENV_PICKER_COMPONENT_FACTORY_PATH]).toEqual(join(context.ionicAngularDir, 'components', 'picker', 'picker-component.ngfactory.js'));
+
+      expect(fakeConfig[Constants.ENV_POPOVER_CONTROLLER_CLASSNAME]).toEqual('PopoverController');
+      expect(fakeConfig[Constants.ENV_POPOVER_CONTROLLER_PATH]).toEqual(join(context.ionicAngularDir, 'components', 'popover', 'popover-controller.js'));
+      expect(fakeConfig[Constants.ENV_POPOVER_VIEW_CONTROLLER_PATH]).toEqual(join(context.ionicAngularDir, 'components', 'popover', 'popover.js'));
+      expect(fakeConfig[Constants.ENV_POPOVER_COMPONENT_FACTORY_PATH]).toEqual(join(context.ionicAngularDir, 'components', 'popover', 'popover-component.ngfactory.js'));
+
+      expect(fakeConfig[Constants.ENV_TOAST_CONTROLLER_CLASSNAME]).toEqual('ToastController');
+      expect(fakeConfig[Constants.ENV_TOAST_CONTROLLER_PATH]).toEqual(join(context.ionicAngularDir, 'components', 'toast', 'toast-controller.js'));
+      expect(fakeConfig[Constants.ENV_TOAST_VIEW_CONTROLLER_PATH]).toEqual(join(context.ionicAngularDir, 'components', 'toast', 'toast.js'));
+      expect(fakeConfig[Constants.ENV_TOAST_COMPONENT_FACTORY_PATH]).toEqual(join(context.ionicAngularDir, 'components', 'toast', 'toast-component.ngfactory.js'));
+
+      expect(fakeConfig[Constants.ENV_EXPERIMENTAL_PARSE_DEEPLINKS]).toBeFalsy();
+      expect(fakeConfig[Constants.ENV_EXPERIMENTAL_MANUAL_TREESHAKING]).toBeFalsy();
+      expect(fakeConfig[Constants.ENV_EXPERIMENTAL_PURGE_DECORATORS]).toBeFalsy();
+      expect(fakeConfig[Constants.ENV_USE_EXPERIMENTAL_CLOSURE]).toBeFalsy();
+      expect(fakeConfig[Constants.ENV_USE_EXPERIMENTAL_BABILI]).toBeFalsy();
+      expect(fakeConfig[Constants.ENV_BUILD_TO_ES5]).toEqual('true');
+      expect(context.bundler).toEqual('webpack');
     });
 
-    it('should set default prod specific build flags to true when isProd is true', () => {
+    it('should set defaults for a prod build', () => {
       // arrange
-       // arrange
       const fakeConfig: any = { };
       config.setProcessEnv(fakeConfig);
 
@@ -85,7 +165,34 @@ describe('config', () => {
       expect(context.runMinifyCss).toEqual(true);
       expect(context.optimizeJs).toEqual(true);
       expect(fakeConfig[Constants.ENV_VAR_IONIC_ENV]).toEqual(Constants.ENV_VAR_PROD);
+      expect(fakeConfig[Constants.ENV_VAR_GENERATE_SOURCE_MAP]).toBeFalsy();
     });
+
+    it('should override console', () => {
+      const originalDebug = console.debug;
+      const originalError = console.error;
+      const originalInfo = console.info;
+      const originalLog = console.log;
+      const originalTrace = console.trace;
+      const originalWarn = console.warn;
+
+      const fakeConfig: any = { };
+      config.setProcessEnv(fakeConfig);
+
+      spyOn(helpers, helpers.getBooleanPropertyValue.name).and.returnValue(true);
+
+      config.generateContext({
+        isProd: true
+      });
+
+      expect(console.debug).not.toEqual(originalDebug);
+      expect(console.error).not.toEqual(originalError);
+      expect(console.info).not.toEqual(originalInfo);
+      expect(console.log).not.toEqual(originalLog);
+      expect(console.trace).not.toEqual(originalTrace);
+      expect(console.warn).not.toEqual(originalWarn);
+    });
+
   });
 
   describe('config.replacePathVars', () => {
