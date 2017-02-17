@@ -16,12 +16,12 @@ module.exports = {
   /**
    * inSourceMap: file name for the input source map
    */
-  inSourceMap: process.env.IONIC_OUTPUT_JS_MAP_FILE_NAME,
+  inSourceMap: process.env.IONIC_OUTPUT_JS_FILE_NAME + '.map',
 
   /**
    * outSourceMap: file name for the output source map
    */
-  outSourceMap: process.env.IONIC_OUTPUT_JS_MAP_FILE_NAME,
+  outSourceMap: process.env.IONIC_OUTPUT_JS_FILE_NAME + '.map',
 
   /**
    * mangle: uglify 2's mangle option

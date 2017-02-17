@@ -90,9 +90,7 @@ describe('config', () => {
       expect(fakeConfig[Constants.ENV_CLEAN_BEFORE_COPY]).toBeFalsy();
       expect(fakeConfig[Constants.ENV_CLOSURE_JAR]).toEqual(join(fakeConfig[Constants.ENV_VAR_APP_SCRIPTS_DIR], 'bin', 'closure-compiler.jar'));
       expect(fakeConfig[Constants.ENV_OUTPUT_JS_FILE_NAME]).toEqual('main.js');
-      expect(fakeConfig[Constants.ENV_OUTPUT_JS_MAP_FILE_NAME]).toEqual('main.js.map');
       expect(fakeConfig[Constants.ENV_OUTPUT_CSS_FILE_NAME]).toEqual('main.css');
-      expect(fakeConfig[Constants.ENV_OUTPUT_CSS_MAP_FILE_NAME]).toEqual('main.css.map');
       expect(fakeConfig[Constants.ENV_WEBPACK_FACTORY]).toEqual(join(fakeConfig[Constants.ENV_VAR_APP_SCRIPTS_DIR], 'dist', 'webpack', 'ionic-webpack-factory.js'));
       expect(fakeConfig[Constants.ENV_WEBPACK_LOADER]).toEqual(join(fakeConfig[Constants.ENV_VAR_APP_SCRIPTS_DIR], 'dist', 'webpack', 'loader.js'));
       expect(fakeConfig[Constants.ENV_OPTIMIZATION_LOADER]).toEqual(join(fakeConfig[Constants.ENV_VAR_APP_SCRIPTS_DIR], 'dist', 'webpack', 'optimization-loader.js'));

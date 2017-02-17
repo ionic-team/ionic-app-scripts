@@ -125,9 +125,7 @@ npm run build --rollup ./config/rollup.config.js
 | app ng module class | `ionic_app_ng_module_class`  | `--appNgModuleClass` | `AppModule` | Exported class name for app's primary `NgModule` |
 | clean before copy | `ionic_clean_before_copy`  | `--cleanBeforeCopy` | `false` | clean out existing files before copy task runs |
 | output js file | `ionic_output_js_file_name`  | `--outputJsFileName` | `main.js` | name of js file generated in `buildDir` |
-| output js map file | `ionic_output_js_map_file_name`  | `--outputJsMapFileName` | `main.js.map` | name of js source map file generated in `buildDir` |
 | output css file | `ionic_output_css_file_name`  | `--outputCssFileName` | `main.css` | name of css file generated in `buildDir` |
-| output css map file | `ionic_output_css_map_file_name`  | `--outputCssMapFileName` | `main.css.map` | name of css source map file generated in `buildDir` |
 | bail on lint error | `ionic_bail_on_lint_error`  | `--bailOnLintError` | `null` | Set to `true` to make stand-alone lint commands fail with non-zero status code |
 | write AoT files to disk | `ionic_aot_write_to_disk` | `--aotWriteToDisk` | `null` | Set to `true` to write files to disk for debugging |
 | print dependency tree | `ionic_print_original_dependency_tree` | `--printOriginalDependencyTree` | `null` | Set to `true` to print out the original dependency tree calculated during the optimize step |
@@ -169,9 +167,7 @@ These environment variables are automatically set to [Node's `process.env`](http
 | `IONIC_CLEAN_BEFORE_COPY`  | Attempt to clean existing directories before copying files.          |
 | `IONIC_CLOSURE_JAR`        | The absolute path ot the closure compiler jar file                   |
 | `IONIC_OUTPUT_JS_FILE_NAME` | The file name of the generated javascript file                      |
-| `IONIC_OUTPUT_JS_MAP_FILE_NAME` | The file name of the generated javascript source map file       |
 | `IONIC_OUTPUT_CSS_FILE_NAME` | The file name of the generated css file                            |
-| `IONIC_OUTPUT_CSS_MAP_FILE_NAME` | The file name of the generated css source map file             |
 | `IONIC_WEBPACK_FACTORY`    | The absolute path to Ionic's `webpack-factory` script                |
 | `IONIC_WEBPACK_LOADER`     | The absolute path to Ionic's custom webpack loader                   |
 | `IONIC_BAIL_ON_LINT_ERROR`     | Boolean determining whether to exit with a non-zero status code on error |
