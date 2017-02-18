@@ -1,14 +1,24 @@
 import * as helpers from './helpers';
 
+let originalEnv: any = null;
 describe('helpers', () => {
+
   describe('getBooleanPropertyValue', () => {
+
+    beforeEach(() => {
+      originalEnv = process.env;
+      process.env = {};
+    });
+
+    afterEach(() => {
+      process.env = originalEnv;
+    });
+
     it('should return true when value is "true"', () => {
       // arrange
       const propertyName = 'test';
       const propertyValue = 'true';
-      let environment: any = { };
-      environment[propertyName] = propertyValue;
-      process.env = environment;
+      process.env[propertyName] = propertyValue;
       // act
       const result = helpers.getBooleanPropertyValue(propertyName);
       // assert
@@ -18,8 +28,6 @@ describe('helpers', () => {
     it('should return false when value is undefined/null', () => {
       // arrange
       const propertyName = 'test';
-      let environment: any = { };
-      process.env = environment;
       // act
       const result = helpers.getBooleanPropertyValue(propertyName);
       // assert
@@ -30,13 +38,32 @@ describe('helpers', () => {
       // arrange
       const propertyName = 'test';
       const propertyValue = 'taco';
-      let environment: any = { };
-      environment[propertyName] = propertyValue;
-      process.env = environment;
+      process.env[propertyName] = propertyValue;
       // act
       const result = helpers.getBooleanPropertyValue(propertyName);
       // assert
       expect(result).toEqual(false);
+    });
+  });
+
+  describe('getPropertyValue', () => {
+    beforeEach(() => {
+      originalEnv = process.env;
+      process.env = {};
+    });
+
+    afterEach(() => {
+      process.env = originalEnv;
+    });
+
+    it('should return the property value', () => {
+      const propertyName = 'test';
+      const propertyValue = 'taco';
+      process.env[propertyName] = propertyValue;
+      const result = helpers.getPropertyValue(propertyName);
+      expect(result).toEqual(propertyValue);
+      const nullResult = helpers.getPropertyValue('somePropertyNotFound');
+      expect(nullResult).toBeFalsy();
     });
   });
 

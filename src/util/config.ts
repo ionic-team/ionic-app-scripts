@@ -83,6 +83,26 @@ export function generateContext(context?: BuildContext): BuildContext {
   setProcessEnvVar(Constants.ENV_VAR_BUILD_DIR, context.buildDir);
   Logger.debug(`buildDir set to ${context.buildDir}`);
 
+  context.pagesDir = resolve(context.pagesDir || getConfigValue(context, '--pagesDir', null, Constants.ENV_VAR_PAGES_DIR, Constants.ENV_VAR_PAGES_DIR.toLowerCase(), join(context.srcDir, 'pages')));
+  setProcessEnvVar(Constants.ENV_VAR_PAGES_DIR, context.pagesDir);
+  Logger.debug(`pagesDir set to ${context.pagesDir}`);
+
+  context.componentsDir = resolve(context.componentsDir || getConfigValue(context, '--componentsDir', null, Constants.ENV_VAR_COMPONENTS_DIR, Constants.ENV_VAR_COMPONENTS_DIR.toLowerCase(), join(context.srcDir, 'components')));
+  setProcessEnvVar(Constants.ENV_VAR_COMPONENTS_DIR, context.componentsDir);
+  Logger.debug(`componentsDir set to ${context.componentsDir}`);
+
+  context.directivesDir = resolve(context.directivesDir || getConfigValue(context, '--directivesDir', null, Constants.ENV_VAR_DIRECTIVES_DIR, Constants.ENV_VAR_DIRECTIVES_DIR.toLowerCase(), join(context.srcDir, 'components')));
+  setProcessEnvVar(Constants.ENV_VAR_DIRECTIVES_DIR, context.directivesDir);
+  Logger.debug(`directivesDir set to ${context.directivesDir}`);
+
+  context.pipesDir = resolve(context.pipesDir || getConfigValue(context, '--pipesDir', null, Constants.ENV_VAR_PIPES_DIR, Constants.ENV_VAR_PIPES_DIR.toLowerCase(), join(context.srcDir, 'pipes')));
+  setProcessEnvVar(Constants.ENV_VAR_PIPES_DIR, context.pipesDir);
+  Logger.debug(`pipesDir set to ${context.pipesDir}`);
+
+  context.providersDir = resolve(context.providersDir || getConfigValue(context, '--providersDir', null, Constants.ENV_VAR_PROVIDERS_DIR, Constants.ENV_VAR_PROVIDERS_DIR.toLowerCase(), join(context.srcDir, 'providers')));
+  setProcessEnvVar(Constants.ENV_VAR_PROVIDERS_DIR, context.providersDir);
+  Logger.debug(`providersDir set to ${context.providersDir}`);
+
   context.nodeModulesDir = join(context.rootDir, Constants.NODE_MODULES);
   setProcessEnvVar(Constants.ENV_VAR_NODE_MODULES_DIR, context.nodeModulesDir);
   Logger.debug(`nodeModulesDir set to ${context.nodeModulesDir}`);
@@ -90,6 +110,10 @@ export function generateContext(context?: BuildContext): BuildContext {
   context.ionicAngularDir = resolve(context.ionicAngularDir || getConfigValue(context, '--ionicAngularDir', null, Constants.ENV_VAR_IONIC_ANGULAR_DIR, Constants.ENV_VAR_IONIC_ANGULAR_DIR.toLowerCase(), join(context.nodeModulesDir, Constants.IONIC_ANGULAR)));
   setProcessEnvVar(Constants.ENV_VAR_IONIC_ANGULAR_DIR, context.ionicAngularDir);
   Logger.debug(`ionicAngularDir set to ${context.ionicAngularDir}`);
+
+  const ionicAngularTemplatesDir = join(context.ionicAngularDir, 'templates');
+  setProcessEnvVar(Constants.ENV_VAR_IONIC_ANGULAR_TEMPLATE_DIR, ionicAngularTemplatesDir);
+  Logger.debug(`ionicAngularTemplatesDir set to ${ionicAngularTemplatesDir}`);
 
   context.platform = getConfigValue(context, '--platform', null, Constants.ENV_VAR_PLATFORM, null, null);
   setProcessEnvVar(Constants.ENV_VAR_PLATFORM, context.platform);

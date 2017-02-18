@@ -270,6 +270,10 @@ export function getBooleanPropertyValue(propertyName: string) {
   return result === 'true';
 }
 
+export function getPropertyValue(propertyName: string) {
+  return process.env[propertyName];
+}
+
 export function convertFilePathToNgFactoryPath(filePath: string) {
   const directory = dirname(filePath);
   const extension = extname(filePath);
@@ -319,4 +323,8 @@ export function processStatsImpl(webpackStats: WebpackStats) {
 
 export function purgeWebpackPrefixFromPath(filePath: string) {
   return filePath.replace(process.env[Constants.ENV_OPTIMIZATION_LOADER], '').replace(process.env[Constants.ENV_WEBPACK_LOADER], '').replace('!', '');
+}
+
+export function replaceAll(input: string, toReplace: string, replacement: string) {
+  return input.split(toReplace).join(replacement);
 }
