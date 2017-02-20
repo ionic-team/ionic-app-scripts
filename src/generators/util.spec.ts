@@ -177,28 +177,86 @@ export class $CLASSNAMEComponent {
 
       `;
 
+      const fileFive = '/Users/dan/fileFive';
+      const fileFiveContent = `
+import { NgModule } from '@angular/core';
+import { $CLASSNAME } from './$FILENAME';
+import { IonicModule } from 'ionic-angular';
+
+@NgModule({
+  declarations: [
+    $CLASSNAME,
+  ],
+  imports: [
+    IonicModule.forChild($CLASSNAME)
+  ],
+  entryComponents: [
+    $CLASSNAME
+  ],
+  providers: []
+})
+export class $CLASSNAMEModule {}
+      `;
+
+      const fileSix = '/Users/dan/fileSix';
+      const fileSixContent = `
+<!--
+  Generated template for the $CLASSNAME page.
+
+  See http://ionicframework.com/docs/v2/components/#navigation for more info on
+  Ionic pages and navigation.
+-->
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>$SUPPLIEDNAME</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content padding>
+
+</ion-content>
+      `;
+
       const map = new Map<string, string>();
       map.set(fileOne, fileOneContent);
       map.set(fileTwo, fileTwoContent);
       map.set(fileThree, fileThreeContent);
       map.set(fileFour, fileFourContent);
+      map.set(fileFive, fileFiveContent);
+      map.set(fileSix, fileSixContent);
 
       const className = 'SettingsView';
       const fileName = 'settings-view';
+      const suppliedName = 'settings view';
 
-      const results = util.applyTemplates({ className: className, fileName: fileName}, map);
+      const results = util.applyTemplates({ name: suppliedName, className: className, fileName: fileName}, map);
       const modifiedContentOne = results.get(fileOne);
       const modifiedContentTwo = results.get(fileTwo);
       const modifiedContentThree = results.get(fileThree);
       const modifiedContentFour = results.get(fileFour);
+      const modifiedContentFive = results.get(fileFive);
+      const modifiedContentSix = results.get(fileSix);
       expect(modifiedContentOne.indexOf(GeneratorConstants.CLASSNAME_VARIABLE)).toEqual(-1);
       expect(modifiedContentOne.indexOf(GeneratorConstants.FILENAME_VARIABLE)).toEqual(-1);
+      expect(modifiedContentOne.indexOf(GeneratorConstants.SUPPLIEDNAME_VARIABLE)).toEqual(-1);
       expect(modifiedContentTwo.indexOf(GeneratorConstants.CLASSNAME_VARIABLE)).toEqual(-1);
       expect(modifiedContentTwo.indexOf(GeneratorConstants.FILENAME_VARIABLE)).toEqual(-1);
+      expect(modifiedContentTwo.indexOf(GeneratorConstants.SUPPLIEDNAME_VARIABLE)).toEqual(-1);
       expect(modifiedContentThree.indexOf(GeneratorConstants.CLASSNAME_VARIABLE)).toEqual(-1);
       expect(modifiedContentThree.indexOf(GeneratorConstants.FILENAME_VARIABLE)).toEqual(-1);
+      expect(modifiedContentThree.indexOf(GeneratorConstants.SUPPLIEDNAME_VARIABLE)).toEqual(-1);
       expect(modifiedContentFour.indexOf(GeneratorConstants.CLASSNAME_VARIABLE)).toEqual(-1);
       expect(modifiedContentFour.indexOf(GeneratorConstants.FILENAME_VARIABLE)).toEqual(-1);
+      expect(modifiedContentFour.indexOf(GeneratorConstants.SUPPLIEDNAME_VARIABLE)).toEqual(-1);
+      expect(modifiedContentFive.indexOf(GeneratorConstants.CLASSNAME_VARIABLE)).toEqual(-1);
+      expect(modifiedContentFive.indexOf(GeneratorConstants.FILENAME_VARIABLE)).toEqual(-1);
+      expect(modifiedContentFive.indexOf(GeneratorConstants.SUPPLIEDNAME_VARIABLE)).toEqual(-1);
+      expect(modifiedContentSix.indexOf(GeneratorConstants.CLASSNAME_VARIABLE)).toEqual(-1);
+      expect(modifiedContentSix.indexOf(GeneratorConstants.FILENAME_VARIABLE)).toEqual(-1);
+      expect(modifiedContentSix.indexOf(GeneratorConstants.SUPPLIEDNAME_VARIABLE)).toEqual(-1);
     });
   });
 

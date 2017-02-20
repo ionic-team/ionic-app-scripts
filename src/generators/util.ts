@@ -1,12 +1,12 @@
-import { basename, join } from 'path';
+import { basename, dirname, join } from 'path';
 import { readdirSync} from 'fs';
 
 import { paramCase, pascalCase } from 'change-case';
 
 import * as Constants from '../util/constants';
 import * as GeneratorConstants from './constants';
-import { getPropertyValue, readFileAsync, replaceAll, writeFileAsync } from '../util/helpers';
-import { BuildContext, GeneratorRequest, HydratedGeneratorRequest } from '../util/interfaces';
+import { getPropertyValue, mkDirpAsync, readFileAsync, replaceAll, writeFileAsync } from '../util/helpers';
+import { BuildContext } from '../util/interfaces';
 
 export function hydrateRequest(context: BuildContext, request: GeneratorRequest) {
   const hydrated = Object.assign({}, request) as HydratedGeneratorRequest;
@@ -32,6 +32,7 @@ export function readTemplates(pathToRead: string): Promise<Map<string, string>> 
     promise.then((fileContent: string) => {
       filePathToContent.set(absolutePath, fileContent);
     });
+    return promise;
   });
   return Promise.all(promises).then(() => {
     return filePathToContent;
@@ -55,7 +56,8 @@ export function applyTemplates(request: HydratedGeneratorRequest, templates: Map
   templates.forEach((fileContent: string, filePath: string) => {
     const classnameRemovedContent = replaceAll(fileContent, GeneratorConstants.CLASSNAME_VARIABLE, request.className);
     const fileNameRemovedContent = replaceAll(classnameRemovedContent, GeneratorConstants.FILENAME_VARIABLE, request.fileName);
-    appliedTemplateMap.set(filePath, fileNameRemovedContent);
+    const suppliedNameRemovedContent = replaceAll(fileNameRemovedContent, GeneratorConstants.SUPPLIEDNAME_VARIABLE, request.name);
+    appliedTemplateMap.set(filePath, suppliedNameRemovedContent);
   });
   return appliedTemplateMap;
 }
@@ -68,10 +70,17 @@ export function writeGeneratedFiles(request: HydratedGeneratorRequest, processed
     const newFileName = `${request.fileName}.${newFileExtension}`;
     const fileToWrite = join(request.dirToWrite, newFileName);
     createdFileList.push(fileToWrite);
-    promises.push(writeFileAsync(fileToWrite, fileContent));
+    promises.push(createDirAndWriteFile(fileToWrite, fileContent));
   });
   return Promise.all(promises).then(() => {
     return createdFileList;
+  });
+}
+
+function createDirAndWriteFile(filePath: string, fileContent: string) {
+  const directory = dirname(filePath);
+  return mkDirpAsync(directory).then(() => {
+    return writeFileAsync(filePath, fileContent);
   });
 }
 
@@ -89,3 +98,22 @@ export function getDirToWriteToByType(context: BuildContext, type: string) {
   }
   throw new Error(`Unknown Generator Type: ${type}`);
 }
+
+export interface GeneratorOption {
+  type: string;
+  multiple: boolean;
+};
+
+export interface GeneratorRequest {
+  type?: string;
+  name?: string;
+  includeSpec?: boolean;
+  includeNgModule?: boolean;
+};
+
+export interface HydratedGeneratorRequest extends GeneratorRequest {
+  fileName?: string;
+  className?: string;
+  dirToRead?: string;
+  dirToWrite?: string;
+};

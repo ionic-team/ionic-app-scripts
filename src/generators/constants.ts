@@ -1,5 +1,6 @@
 export const CLASSNAME_VARIABLE = '$CLASSNAME';
 export const FILENAME_VARIABLE = '$FILENAME';
+export const SUPPLIEDNAME_VARIABLE = '$SUPPLIEDNAME';
 
 export const KNOWN_FILE_EXTENSION = '.tmpl';
 

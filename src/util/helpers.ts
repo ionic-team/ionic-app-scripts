@@ -1,6 +1,6 @@
 import { randomBytes } from 'crypto';
 import { basename, dirname, extname, join } from 'path';
-import { createReadStream, createWriteStream, readdir, readFile, readFileSync, readJsonSync, remove, unlink, writeFile } from 'fs-extra';
+import { createReadStream, createWriteStream, ensureDir, readdir, readFile, readFileSync, readJsonSync, remove, unlink, writeFile } from 'fs-extra';
 import * as osName from 'os-name';
 
 import * as Constants from './constants';
@@ -181,6 +181,17 @@ export function copyFileAsync(srcPath: string, destPath: string) {
     });
 
     createReadStream(srcPath).pipe(writeStream);
+  });
+}
+
+export function mkDirpAsync(directoryPath: string) {
+  return new Promise((resolve, reject) => {
+    ensureDir(directoryPath, (err: Error) => {
+      if (err) {
+        return reject(err);
+      }
+      return resolve();
+    });
   });
 }
 

@@ -189,22 +189,3 @@ export interface WebpackModule {
 export interface WebpackDependency {
   moduleIdentifier: string;
 };
-
-export interface GeneratorOption {
-  type: string;
-  multiple: boolean;
-};
-
-export interface GeneratorRequest {
-  type?: string;
-  name?: string;
-  includeSpec?: boolean;
-  includeNgModule?: boolean;
-};
-
-export interface HydratedGeneratorRequest extends GeneratorRequest {
-  fileName?: string;
-  className?: string;
-  dirToRead?: string;
-  dirToWrite?: string;
-};
