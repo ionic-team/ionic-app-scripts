@@ -63,7 +63,6 @@ describe('build', () => {
 
       expect(transpile.transpile).not.toHaveBeenCalled();
     }).catch(err => {
-      console.log('err: ', err.message);
       expect(true).toEqual(false);
     });
   });
