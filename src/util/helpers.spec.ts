@@ -1,14 +1,64 @@
 import * as helpers from './helpers';
 
+let originalEnv: any = process.env;
 describe('helpers', () => {
+
+  beforeEach(() => {
+    originalEnv = process.env;
+    process.env = {};
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
+  describe('getIntPropertyValue', () => {
+    it('should return an int', () => {
+      // arrange
+      const propertyName = 'test';
+      const propertyValue = '3000';
+      process.env[propertyName] = propertyValue;
+
+      // act
+      const result = helpers.getIntPropertyValue(propertyName);
+
+      // assert
+      expect(result).toEqual(3000);
+    });
+
+    it('should round to an int', () => {
+      // arrange
+      const propertyName = 'test';
+      const propertyValue = '3000.03';
+      process.env[propertyName] = propertyValue;
+
+      // act
+      const result = helpers.getIntPropertyValue(propertyName);
+
+      // assert
+      expect(result).toEqual(3000);
+    });
+
+    it('should round to a NaN', () => {
+      // arrange
+      const propertyName = 'test';
+      const propertyValue = 'tacos';
+      process.env[propertyName] = propertyValue;
+
+      // act
+      const result = helpers.getIntPropertyValue(propertyName);
+
+      // assert
+      expect(result).toEqual(NaN);
+    });
+  });
+
   describe('getBooleanPropertyValue', () => {
     it('should return true when value is "true"', () => {
       // arrange
       const propertyName = 'test';
       const propertyValue = 'true';
-      let environment: any = { };
-      environment[propertyName] = propertyValue;
-      process.env = environment;
+      process.env[propertyName] = propertyValue;
       // act
       const result = helpers.getBooleanPropertyValue(propertyName);
       // assert
@@ -18,8 +68,6 @@ describe('helpers', () => {
     it('should return false when value is undefined/null', () => {
       // arrange
       const propertyName = 'test';
-      let environment: any = { };
-      process.env = environment;
       // act
       const result = helpers.getBooleanPropertyValue(propertyName);
       // assert
@@ -30,9 +78,7 @@ describe('helpers', () => {
       // arrange
       const propertyName = 'test';
       const propertyValue = 'taco';
-      let environment: any = { };
-      environment[propertyName] = propertyValue;
-      process.env = environment;
+      process.env[propertyName] = propertyValue;
       // act
       const result = helpers.getBooleanPropertyValue(propertyName);
       // assert
