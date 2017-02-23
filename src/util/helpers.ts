@@ -265,6 +265,11 @@ export function generateRandomHexString(numCharacters: number) {
   return randomBytes(Math.ceil(numCharacters / 2)).toString('hex').slice(0, numCharacters);
 }
 
+export function getIntPropertyValue(propertyName: string) {
+  const result = process.env[propertyName];
+  return parseInt(result, 0);
+}
+
 export function getBooleanPropertyValue(propertyName: string) {
   const result = process.env[propertyName];
   return result === 'true';

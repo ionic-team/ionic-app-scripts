@@ -1,12 +1,16 @@
+import { extname, join, normalize, resolve as pathResolve } from 'path';
+
+import * as chokidar from 'chokidar';
+
 import * as buildTask from './build';
 import { copyUpdate as copyUpdateHandler} from './copy';
-import { BuildContext, BuildState, ChangedFile, TaskInfo } from './util/interfaces';
-import { BuildError } from './util/errors';
+import { Logger } from './logger/logger';
 import { canRunTranspileUpdate } from './transpile';
 import { fillConfigDefaults, getUserConfigFile, replacePathVars } from './util/config';
-import { extname, join, normalize, resolve as pathResolve } from 'path';
-import { Logger } from './logger/logger';
-import * as chokidar from 'chokidar';
+import * as Constants from './util/constants';
+import { BuildError } from './util/errors';
+import { getIntPropertyValue } from './util/helpers';
+import { BuildContext, BuildState, ChangedFile, TaskInfo } from './util/interfaces';
 
 
 // https://github.com/paulmillr/chokidar
@@ -77,7 +81,7 @@ function startWatcher(name: string, watcher: Watcher, context: BuildContext) {
         filesWatchedString = watcher.paths.join(', ');
       }
       reject(new BuildError(`A watch configured to watch the following paths failed to start. It likely that a file referenced does not exist: ${filesWatchedString}`));
-    }, 3000);
+    }, getIntPropertyValue(Constants.ENV_START_WATCH_TIMEOUT));
     prepareWatcher(context, watcher);
 
     if (!watcher.paths) {
