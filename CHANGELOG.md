@@ -1,3 +1,14 @@
+<a name="1.1.4"></a>
+## [1.1.4](https://github.com/driftyco/ionic-app-scripts/compare/v1.1.3...v1.1.4) (2017-02-23)
+
+
+### Bug Fixes
+
+* **optimizations:** comment out code instead of purge it so source-maps don't error out in some edge ([1dedc53](https://github.com/driftyco/ionic-app-scripts/commit/1dedc53))
+* **watch:** make default watch fail-to-start timeout configurable so it works more reliably on slow ([2e2a647](https://github.com/driftyco/ionic-app-scripts/commit/2e2a647)), closes [#772](https://github.com/driftyco/ionic-app-scripts/issues/772)
+
+
+
 <a name="1.1.3"></a>
 ## [1.1.3](https://github.com/driftyco/ionic-app-scripts/compare/v1.1.2...v1.1.3) (2017-02-17)
 
