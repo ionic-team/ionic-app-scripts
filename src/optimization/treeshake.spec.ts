@@ -1,6 +1,7 @@
-import { join } from 'path';
+import { join, relative } from 'path';
 import * as treeshake from './treeshake';
 import * as Constants from '../util/constants';
+import * as helpers from '../util/helpers';
 
 
 let originalEnv: any = null;
@@ -1207,15 +1208,26 @@ export const AppModuleNgFactory = new import0.NgModuleFactory(AppModuleInjector,
       const componentFactoryPath2 = `/Users/dan/Dev/myApp3/node_modules/ionic-angular/components/alert/alert-component.ngfactory.js`;
 
       // act
-      let updatedContent = treeshake.purgeComponentNgFactoryImportAndUsage(appModuleNgFactoryPath, knownContent, componentFactoryPath);
-      updatedContent = treeshake.purgeComponentNgFactoryImportAndUsage(appModuleNgFactoryPath, updatedContent, componentFactoryPath2);
+      const updatedContent = treeshake.purgeComponentNgFactoryImportAndUsage(appModuleNgFactoryPath, knownContent, componentFactoryPath);
+      const updatedContentAgain = treeshake.purgeComponentNgFactoryImportAndUsage(appModuleNgFactoryPath, updatedContent, componentFactoryPath2);
 
       // assert
-      expect(updatedContent).not.toEqual(knownContent);
-      expect(updatedContent.indexOf(knownImport)).toEqual(-1);
-      expect(updatedContent.indexOf(knownImport2)).toEqual(-1);
-      expect(updatedContent.indexOf(knownImportUsage)).toEqual(-1);
-      expect(updatedContent.indexOf(knownImportUsage2)).toEqual(-1);
+      expect(updatedContentAgain).not.toEqual(knownContent);
+      const knownImportOneRegex = treeshake.generateWildCardImportRegex('../../node_modules/ionic-angular/components/action-sheet/action-sheet-component.ngfactory');
+      const knownImportTwoRegex = treeshake.generateWildCardImportRegex('../../node_modules/ionic-angular/components/alert/alert-component.ngfactory');
+      const knownImportOneResults = knownImportOneRegex.exec(updatedContentAgain);
+      const knownImportTwoResults = knownImportTwoRegex.exec(updatedContentAgain);
+      const knownNamedImportOne = knownImportOneResults[1].trim();
+      const knownNamedImportTwo = knownImportTwoResults[1].trim();
+      expect(updatedContentAgain.indexOf(`/*${knownImportOneResults[0]}*/`)).toBeGreaterThanOrEqual(0);
+      expect(updatedContentAgain.indexOf(`/*${knownImportTwoResults[0]}*/`)).toBeGreaterThanOrEqual(0);
+
+      const removeFromConstructorRegexOne = treeshake.generateRemoveComponentFromConstructorRegex(knownNamedImportOne);
+      const removeFromConstructorRegexTwo = treeshake.generateRemoveComponentFromConstructorRegex(knownNamedImportTwo);
+      const removeFromConstructorOneResults = removeFromConstructorRegexOne.exec(updatedContentAgain);
+      const removeFromConstructorTwoResults = removeFromConstructorRegexTwo.exec(updatedContentAgain);
+      expect(updatedContentAgain.indexOf(`/*${removeFromConstructorOneResults[0]}*/`)).toBeGreaterThanOrEqual(0);
+      expect(updatedContentAgain.indexOf(`/*${removeFromConstructorTwoResults[0]}*/`)).toBeGreaterThanOrEqual(0);
     });
   });
 
@@ -1235,32 +1247,32 @@ export const AppModuleNgFactory = new import0.NgModuleFactory(AppModuleInjector,
       // arrange
 
       const ifStatementOne = `
-        if ((token === import32.ActionSheetController)) {
-            return this._ActionSheetController_54;
-        }
+if ((token === import32.ActionSheetController)) {
+    return this._ActionSheetController_54;
+}
       `;
       const ifStatementTwo = `
-        if ((token === import33.AlertController)) {
-            return this._AlertController_55;
-        }
+if ((token === import33.AlertController)) {
+    return this._AlertController_55;
+}
       `;
 
       const getterOne = `
-        get _ActionSheetController_54() {
-            if ((this.__ActionSheetController_54 == null)) {
-                (this.__ActionSheetController_54 = new import32.ActionSheetController(this._App_19, this._Config_16));
-            }
-            return this.__ActionSheetController_54;
-        }
+get _ActionSheetController_54() {
+    if ((this.__ActionSheetController_54 == null)) {
+        (this.__ActionSheetController_54 = new import32.ActionSheetController(this._App_19, this._Config_16));
+    }
+    return this.__ActionSheetController_54;
+}
       `;
 
       const getterTwo = `
-        get _AlertController_55() {
-            if ((this.__AlertController_55 == null)) {
-                (this.__AlertController_55 = new import33.AlertController(this._App_19, this._Config_16));
-            }
-            return this.__AlertController_55;
-        }
+get _AlertController_55() {
+    if ((this.__AlertController_55 == null)) {
+        (this.__AlertController_55 = new import33.AlertController(this._App_19, this._Config_16));
+    }
+    return this.__AlertController_55;
+}
       `;
 
       const knownContent = `
@@ -1916,22 +1928,47 @@ export const AppModuleNgFactory = new import0.NgModuleFactory(AppModuleInjector,
 //# sourceMappingURL=app.module.ngfactory.js.map
       `;
 
+      const nodeModulesPath = '/Users/dan/Dev/myApp3/node_modules';
+
       const appModuleNgFactoryPath = `/Users/dan/Dev/myApp3/src/app/app.module.ngfactory.js`;
-      const controllerPath = `/Users/dan/Dev/myApp3/node_modules/ionic-angular/components/action-sheet/action-sheet-controller.js`;
-      const controllerPath2 = `/Users/dan/Dev/myApp3/node_modules/ionic-angular/components/alert/alert-controller.js`;
+      const controllerPath = join(nodeModulesPath, 'ionic-angular', 'components', 'action-sheet', 'action-sheet-controller.js');
+      const controllerPath2 = join(nodeModulesPath, 'ionic-angular', 'components', 'alert', 'alert-controller.js');
 
       // act
 
       let updatedContent = treeshake.purgeProviderControllerImportAndUsage(appModuleNgFactoryPath, knownContent, controllerPath);
-      updatedContent = treeshake.purgeProviderControllerImportAndUsage(appModuleNgFactoryPath, knownContent, controllerPath2);
+      updatedContent = treeshake.purgeProviderControllerImportAndUsage(appModuleNgFactoryPath, updatedContent, controllerPath2);
 
       // assert
       expect(updatedContent).not.toEqual(knownContent);
-      /*expect(updatedContent.indexOf(ifStatementOne)).toEqual(-1);
-      expect(updatedContent.indexOf(ifStatementTwo)).toEqual(-1);
-      expect(updatedContent.indexOf(getterOne)).toEqual(-1);
-      expect(updatedContent.indexOf(getterTwo)).toEqual(-1);
-      */
+      const relativeImportPathOne = helpers.changeExtension(relative(nodeModulesPath, controllerPath), '');
+      const relativeImportPathTwo = helpers.changeExtension(relative(nodeModulesPath, controllerPath2), '');
+
+      const importRegexOne = treeshake.generateWildCardImportRegex(relativeImportPathOne);
+      const importRegexTwo = treeshake.generateWildCardImportRegex(relativeImportPathTwo);
+      const importResultOne = importRegexOne.exec(updatedContent);
+      const importResultTwo = importRegexTwo.exec(updatedContent);
+      expect(updatedContent.indexOf(`/*${importResultOne[0]}*/`)).toBeGreaterThanOrEqual(0);
+      expect(updatedContent.indexOf(`/*${importResultTwo[0]}*/`)).toBeGreaterThanOrEqual(0);
+
+      const namedImportOne = importResultOne[1].trim();
+      const namedImportTwo = importResultTwo[1].trim();
+
+      const purgeGetterRegExOne = treeshake.generateRemoveGetterFromImportRegex(namedImportOne);
+      const purgeGetterResultsOne = purgeGetterRegExOne.exec(updatedContent);
+      const purgeIfRegExOne = treeshake.generateRemoveIfStatementRegex(namedImportOne);
+      const purgeIfResultsOne = purgeIfRegExOne.exec(updatedContent);
+
+      const purgeGetterRegExTwo = treeshake.generateRemoveGetterFromImportRegex(namedImportTwo);
+
+      const purgeGetterResultsTwo = purgeGetterRegExTwo.exec(updatedContent);
+      const purgeIfRegExTwo = treeshake.generateRemoveIfStatementRegex(namedImportTwo);
+      const purgeIfResultsTwo = purgeIfRegExTwo.exec(updatedContent);
+
+      expect(updatedContent.indexOf(`/*${purgeGetterResultsOne[0]}*/`)).toBeGreaterThanOrEqual(0);
+      expect(updatedContent.indexOf(`/*${purgeIfResultsOne[0]}*/`)).toBeGreaterThanOrEqual(0);
+      expect(updatedContent.indexOf(`/*${purgeGetterResultsTwo[0]}*/`)).toBeGreaterThanOrEqual(0);
+      expect(updatedContent.indexOf(`/*${purgeIfResultsTwo[0]}*/`)).toBeGreaterThanOrEqual(0);
     });
   });
 
@@ -1999,8 +2036,12 @@ export const AppModuleNgFactory = new import0.NgModuleFactory(AppModuleInjector,
 
       // assert
       expect(updatedContent).not.toEqual(knownContent);
-      expect(updatedContent.indexOf(classOne)).toEqual(-1);
-      expect(updatedContent.indexOf(classTwo)).toEqual(-1);
+      const regexOne = treeshake.generateIonicModulePurgeProviderRegex(classOne);
+      const regexTwo = treeshake.generateIonicModulePurgeProviderRegex(classTwo);
+      const resultsOne = regexOne.exec(updatedContent);
+      const resultsTwo = regexTwo.exec(updatedContent);
+      expect(updatedContent.indexOf(`/*${resultsOne[0]}*/`)).toBeGreaterThanOrEqual(0);
+      expect(updatedContent.indexOf(`/*${resultsTwo[0]}*/`)).toBeGreaterThanOrEqual(0);
     });
   });
 });

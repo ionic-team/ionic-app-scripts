@@ -16,7 +16,7 @@ describe('optimization', () => {
         process.env = originalEnv;
     });
 
-    it('should purge the decorators', () => {
+    it('should comment out the decorator statement', () => {
       // arrange
       const decoratorStatement = `
       IonicModule.decorators = [
@@ -247,7 +247,10 @@ some more content
 
       // assert
       expect(result).not.toEqual(knownContent);
-      expect(result.indexOf(decoratorStatement)).toEqual(-1);
+      const regex = decorators.getDecoratorRegex();
+      const matches = regex.exec(result);
+      expect(matches).toBeTruthy();
+      expect(result.indexOf(`/*${matches[0]}*/`)).toBeGreaterThan(0);
       expect(result.indexOf(additionalGeneratedContent)).toBeGreaterThan(-1);
     });
   });

@@ -8,9 +8,15 @@ export function purgeDecorators(filePath: string, fileContent: string) {
 export function purgeIndexDecorator(filePath: string, fileContent: string) {
   if (process.env[Constants.ENV_VAR_IONIC_ANGULAR_ENTRY_POINT] === filePath) {
     Logger.debug(`Purging index file decorator for ${filePath}`);
-    return fileContent.replace(DECORATORS_REGEX, '');
+    const DECORATORS_REGEX = getDecoratorRegex();
+    const matches = DECORATORS_REGEX.exec(fileContent);
+    if (matches && matches.length) {
+      return fileContent.replace(matches[0], `/*${matches[0]}*/`);
+    }
   }
   return fileContent;
 }
 
-const DECORATORS_REGEX = /IonicModule.decorators.=[\s\S\n]*?([\s\S\n]*?)];/igm;
+export function getDecoratorRegex() {
+  return /IonicModule.decorators.=[\s\S\n]*?([\s\S\n]*?)];/igm;
+}
