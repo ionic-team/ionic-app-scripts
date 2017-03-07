@@ -2,7 +2,7 @@
 
 if (process.argv.length > 2) {
 
-  if (process.env.npm_config_argv) {
+  if (process.env.npm_config_argv && process.env.npm_config_argv.length > 0 && process.env.npm_config_argv !== 'undefined') {
     try {
       var npmRunArgs = JSON.parse(process.env.npm_config_argv);
       if (npmRunArgs && npmRunArgs.original && npmRunArgs.original.length > 2) {

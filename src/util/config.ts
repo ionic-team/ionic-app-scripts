@@ -221,6 +221,10 @@ export function generateContext(context?: BuildContext): BuildContext {
   setProcessEnvVar(Constants.ENV_DISABLE_LOGGING, disableLogging);
   Logger.debug(`disableLogging set to ${disableLogging}`);
 
+  const startWatchTimeout = getConfigValue(context, '--startWatchTimeout', null, Constants.ENV_START_WATCH_TIMEOUT, Constants.ENV_START_WATCH_TIMEOUT.toLowerCase(), '3000');
+  setProcessEnvVar(Constants.ENV_START_WATCH_TIMEOUT, startWatchTimeout);
+  Logger.debug(`startWatchTimeout set to ${startWatchTimeout}`);
+
   /* Provider Path Stuff */
   setProcessEnvVar(Constants.ENV_ACTION_SHEET_CONTROLLER_CLASSNAME, 'ActionSheetController');
   setProcessEnvVar(Constants.ENV_ACTION_SHEET_CONTROLLER_PATH, join(context.ionicAngularDir, 'components', 'action-sheet', 'action-sheet-controller.js'));

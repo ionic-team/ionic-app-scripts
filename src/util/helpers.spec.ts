@@ -3,6 +3,56 @@ import * as helpers from './helpers';
 let originalEnv: any = null;
 describe('helpers', () => {
 
+  beforeEach(() => {
+    originalEnv = process.env;
+    process.env = {};
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
+  describe('getIntPropertyValue', () => {
+    it('should return an int', () => {
+      // arrange
+      const propertyName = 'test';
+      const propertyValue = '3000';
+      process.env[propertyName] = propertyValue;
+
+      // act
+      const result = helpers.getIntPropertyValue(propertyName);
+
+      // assert
+      expect(result).toEqual(3000);
+    });
+
+    it('should round to an int', () => {
+      // arrange
+      const propertyName = 'test';
+      const propertyValue = '3000.03';
+      process.env[propertyName] = propertyValue;
+
+      // act
+      const result = helpers.getIntPropertyValue(propertyName);
+
+      // assert
+      expect(result).toEqual(3000);
+    });
+
+    it('should round to a NaN', () => {
+      // arrange
+      const propertyName = 'test';
+      const propertyValue = 'tacos';
+      process.env[propertyName] = propertyValue;
+
+      // act
+      const result = helpers.getIntPropertyValue(propertyName);
+
+      // assert
+      expect(result).toEqual(NaN);
+    });
+  });
+
   describe('getBooleanPropertyValue', () => {
 
     beforeEach(() => {

@@ -137,6 +137,7 @@ npm run build --rollup ./config/rollup.config.js
 | experimental closure compiler | `ionic_use_experimental_closure` | `--useExperimentalClosure` | `null` | Set to `true` to use closure compiler to minify the final bundle |
 | experimental babili | `ionic_use_experimental_babili` | `--useExperimentalBabili` | `null` | Set to `true` to use babili to minify es2015 code |
 | convert bundle to ES5 | `ionic_build_to_es5` | `--buildToEs5` | `true` | Convert bundle to ES5 for for production deployments |
+| default watch timeout | `ionic_start_watch_timeout` | `--startWatchTimeout` | `3000` | Milliseconds controlling the default watch timeout |
 
 
 
@@ -181,6 +182,7 @@ These environment variables are automatically set to [Node's `process.env`](http
 | `IONIC_USE_EXPERIMENTAL_CLOSURE` | boolean to enable use of closure compiler to minify the final bundle |
 | `IONIC_USE_EXPERIMENTAL_BABILI` | boolean to enable use of babili to minify es2015 code |
 | `IONIC_BUILD_TO_ES5` | boolean to enable converting bundle to ES5 for for production deployments |
+| `IONIC_START_WATCH_TIMEOUT` | Milliseconds controlling the default watch timeout |
 
 
 The `process.env.IONIC_ENV` environment variable can be used to test whether it is a `prod` or `dev` build, which automatically gets set by any command. By default the `build` and `serve` tasks produce `dev` builds (a build that does not include Ahead of Time (AoT) compilation or minification). To force a `prod` build you should use the `--prod` command line flag.
@@ -258,3 +260,4 @@ Execute the following steps to publish a release:
 7. Run `npm version patch` to tick the version and generate a git tag
 8. Run `npm run github-release` to create the github release entry
 9. Run `npm publish` to publish the package to npm
+10. Push changes to github master branch
