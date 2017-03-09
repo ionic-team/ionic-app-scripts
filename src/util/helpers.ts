@@ -4,12 +4,12 @@ import { createReadStream, createWriteStream, ensureDir, readdir, readFile, read
 import * as osName from 'os-name';
 
 import * as Constants from './constants';
-import { BuildContext, File, HydratedDeepLinkConfigEntry, WebpackStats } from './interfaces';
+import { BuildContext, DeepLinkConfigEntry, File, WebpackStats } from './interfaces';
 import { Logger } from '../logger/logger';
 
 
 let _context: BuildContext;
-let _parsedDeepLinkConfig: HydratedDeepLinkConfigEntry[];
+let _parsedDeepLinkConfig: DeepLinkConfigEntry[];
 
 let cachedAppScriptsPackageJson: any;
 export function getAppScriptsPackageJson() {
@@ -223,11 +223,11 @@ export function getContext() {
   return _context;
 }
 
-export function setParsedDeepLinkConfig(parsedDeepLinkConfig: HydratedDeepLinkConfigEntry[]) {
+export function setParsedDeepLinkConfig(parsedDeepLinkConfig: DeepLinkConfigEntry[]) {
   _parsedDeepLinkConfig = parsedDeepLinkConfig;
 }
 
-export function getParsedDeepLinkConfig(): HydratedDeepLinkConfigEntry[] {
+export function getParsedDeepLinkConfig(): DeepLinkConfigEntry[] {
   return _parsedDeepLinkConfig;
 }
 
@@ -274,6 +274,11 @@ export function toUnixPath(filePath: string) {
 
 export function generateRandomHexString(numCharacters: number) {
   return randomBytes(Math.ceil(numCharacters / 2)).toString('hex').slice(0, numCharacters);
+}
+
+export function getStringPropertyValue(propertyName: string) {
+  const result = process.env[propertyName];
+  return result;
 }
 
 export function getIntPropertyValue(propertyName: string) {
