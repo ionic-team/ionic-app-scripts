@@ -106,7 +106,7 @@
     "@angular/tsc-wrapped": "*",
     "rxjs": "*",
     "sw-toolbox": "*",
-    "typescript": "*",
+    "typescript": "~2.2.1",
     "zone.js": "*"
   },
   "repository": {
