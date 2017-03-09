@@ -26,18 +26,13 @@ function deepLinkingWorker(context: BuildContext) {
   return Promise.resolve().then(() => {
     const appNgModulePath = getStringPropertyValue(Constants.ENV_APP_NG_MODULE_PATH);
     const appNgModuleFile = context.fileCache.get(appNgModulePath);
-    console.log('Getting deep link config entries');
     const deepLinkConfigEntries = getDeepLinkData(appNgModulePath, context.fileCache, context.runAot);
-    console.log('Checking for existing deep link config');
     const hasExisting = hasExistingDeepLinkConfig(appNgModulePath, appNgModuleFile.content);
     if (!hasExisting) {
       // only update the app's main ngModule if there isn't an existing config
-      console.log('Converting deep link config to string');
       const deepLinkString = convertDeepLinkConfigEntriesToString(deepLinkConfigEntries);
-      console.log('Updating App module and factory');
       updateAppNgModuleAndFactoryWithDeepLinkConfig(context, deepLinkString);
     }
-    console.log('DONE');
     return deepLinkConfigEntries;
   });
 }
