@@ -3,6 +3,7 @@ import { BuildContext , DeepLinkConfigEntry} from '../util/interfaces';
 import { Logger } from '../logger/logger';
 import { getInstance } from '../util/hybrid-file-system-factory';
 import { createResolveDependenciesFromContextMap } from './util';
+import { WatchMemorySystem } from './watch-memory-system';
 
 export class IonicEnvironmentPlugin {
   constructor(private context: BuildContext) {
@@ -30,6 +31,7 @@ export class IonicEnvironmentPlugin {
       const hybridFileSystem = getInstance();
       hybridFileSystem.setFileSystem(compiler.inputFileSystem);
       compiler.inputFileSystem = hybridFileSystem;
+      compiler.watchFileSystem = new WatchMemorySystem(this.context.fileCache);
 
       // do a bunch of webpack specific stuff here, so cast to an any
       // populate the content of the file system with any virtual files
