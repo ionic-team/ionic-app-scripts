@@ -70,6 +70,7 @@ describe('config', () => {
       expect(context.rootDir).toEqual(process.cwd());
       expect(context.tmpDir).toEqual(join(process.cwd(), Constants.TMP_DIR));
       expect(context.srcDir).toEqual(join(process.cwd(), Constants.SRC_DIR));
+      expect(fakeConfig[Constants.ENV_VAR_DEEPLINKS_DIR]).toEqual(context.srcDir);
       expect(context.wwwDir).toEqual(join(process.cwd(), Constants.WWW_DIR));
       expect(context.wwwIndex).toEqual('index.html');
       expect(context.buildDir).toEqual(join(process.cwd(), Constants.WWW_DIR, Constants.BUILD_DIR));

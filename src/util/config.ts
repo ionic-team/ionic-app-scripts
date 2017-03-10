@@ -71,6 +71,10 @@ export function generateContext(context?: BuildContext): BuildContext {
   setProcessEnvVar(Constants.ENV_VAR_SRC_DIR, context.srcDir);
   Logger.debug(`srcDir set to ${context.srcDir}`);
 
+  const deepLinksDir = resolve(getConfigValue(context, '--deepLinksDir', null, Constants.ENV_VAR_DEEPLINKS_DIR, Constants.ENV_VAR_DEEPLINKS_DIR.toLowerCase(), context.srcDir));
+  setProcessEnvVar(Constants.ENV_VAR_DEEPLINKS_DIR, deepLinksDir);
+  Logger.debug(`deepLinksDir set to ${deepLinksDir}`);
+
   context.wwwDir = resolve(context.wwwDir || getConfigValue(context, '--wwwDir', null, Constants.ENV_VAR_WWW_DIR, Constants.ENV_VAR_WWW_DIR.toLowerCase(), join(context.rootDir, Constants.WWW_DIR)));
   setProcessEnvVar(Constants.ENV_VAR_WWW_DIR, context.wwwDir);
   Logger.debug(`wwwDir set to ${context.wwwDir}`);

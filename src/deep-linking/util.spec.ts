@@ -1,12 +1,53 @@
 import { join } from 'path';
 import * as util from './util';
 
+import * as Constants from '../util/constants';
 import { FileCache } from '../util/file-cache';
 import *  as helpers from '../util/helpers';
 import { DeepLinkConfigEntry } from '../util/interfaces';
 import * as tsUtils from '../util/typescript-utils';
 
 describe('util', () => {
+  describe('filterTypescriptFilesForDeepLinks', () => {
+    it('should return a list of files that are in the directory specified for deeplinking', () => {
+      const pagesDir = join('Users', 'dan', 'myApp', 'src', 'pages');
+
+      const knownFileContent = 'Some string';
+      const pageOneTs = join(pagesDir, 'page-one', 'page-one.ts');
+      const pageOneHtml = join(pagesDir, 'page-one', 'page-one.html');
+      const pageOneModule = join(pagesDir, 'page-one', 'page-one.module.ts');
+
+      const pageTwoTs = join(pagesDir, 'page-two', 'page-two.ts');
+      const pageTwoHtml = join(pagesDir, 'page-two', 'page-two.html');
+      const pageTwoModule = join(pagesDir, 'page-two', 'page-two.module.ts');
+
+      const pageThreeTs = join(pagesDir, 'page-three', 'page-three.ts');
+      const pageThreeHtml = join(pagesDir, 'page-three', 'page-three.html');
+      const pageThreeModule = join(pagesDir, 'page-three', 'page-three.module.ts');
+
+      const someOtherFile = join('Users', 'hans-gruber', 'test.ts');
+
+      const fileCache = new FileCache();
+      fileCache.set(pageOneTs, { path: pageOneTs, content: knownFileContent});
+      fileCache.set(pageOneHtml, { path: pageOneHtml, content: knownFileContent});
+      fileCache.set(pageOneModule, { path: pageOneModule, content: knownFileContent});
+      fileCache.set(pageTwoTs, { path: pageTwoTs, content: knownFileContent});
+      fileCache.set(pageTwoHtml, { path: pageTwoHtml, content: knownFileContent});
+      fileCache.set(pageTwoModule, { path: pageTwoModule, content: knownFileContent});
+      fileCache.set(pageThreeTs, { path: pageThreeTs, content: knownFileContent});
+      fileCache.set(pageThreeHtml, { path: pageThreeHtml, content: knownFileContent});
+      fileCache.set(pageThreeModule, { path: pageThreeModule, content: knownFileContent});
+      fileCache.set(someOtherFile, { path: someOtherFile, content: knownFileContent});
+
+      spyOn(helpers, helpers.getStringPropertyValue.name).and.returnValues(pagesDir, '.module.ts');
+
+      const results = util.filterTypescriptFilesForDeepLinks(fileCache);
+      expect(results.length).toEqual(3);
+      expect(results[0].path).toEqual(pageOneTs);
+      expect(results[1].path).toEqual(pageTwoTs);
+      expect(results[2].path).toEqual(pageThreeTs);
+    });
+  });
   describe('parseDeepLinkDecorator', () => {
     it('should return the decorator content from fully hydrated decorator', () => {
       const knownContent = `
@@ -1062,14 +1103,14 @@ export class PageThreeModule {
 
       `;
 
-      const prefix = join('Users', 'dan', 'myApp', 'src');
-      const appNgModulePath = join(prefix, 'app', 'app.module.ts');
-      const pageOneNgModulePath = join(prefix, 'pages', 'page-one', 'page-one.module.ts');
-      const pageOnePath = join(prefix, 'pages', 'page-one', 'page-one.ts');
-      const pageTwoNgModulePath = join(prefix, 'pages', 'page-two', 'page-two.module.ts');
-      const pageTwoPath = join(prefix, 'pages', 'page-two', 'page-two.ts');
-      const pageSettingsNgModulePath = join(prefix, 'pages', 'settings-page', 'settings-page.module.ts');
-      const pageSettingsPath = join(prefix, 'pages', 'settings-page', 'settings-page.ts');
+      const srcDir = join('Users', 'dan', 'myApp', 'src');
+      const appNgModulePath = join(srcDir, 'app', 'app.module.ts');
+      const pageOneNgModulePath = join(srcDir, 'pages', 'page-one', 'page-one.module.ts');
+      const pageOnePath = join(srcDir, 'pages', 'page-one', 'page-one.ts');
+      const pageTwoNgModulePath = join(srcDir, 'pages', 'page-two', 'page-two.module.ts');
+      const pageTwoPath = join(srcDir, 'pages', 'page-two', 'page-two.ts');
+      const pageSettingsNgModulePath = join(srcDir, 'pages', 'settings-page', 'settings-page.module.ts');
+      const pageSettingsPath = join(srcDir, 'pages', 'settings-page', 'settings-page.ts');
 
       const fileCache = new FileCache();
       fileCache.set(pageOnePath, { path: pageOnePath, content: pageOneContent});
@@ -1081,7 +1122,13 @@ export class PageThreeModule {
       fileCache.set(pageSettingsPath, { path: pageSettingsPath, content: pageSettingsContent});
       fileCache.set(pageSettingsNgModulePath, { path: pageSettingsNgModulePath, content: pageSettingsNgModuleContent});
 
-      spyOn(helpers, helpers.getStringPropertyValue.name).and.returnValue('.module.ts');
+      spyOn(helpers, helpers.getStringPropertyValue.name).and.callFake((input: string) => {
+        if (input === Constants.ENV_VAR_DEEPLINKS_DIR) {
+          return srcDir;
+        } else {
+          return '.module.ts';
+        }
+      });
 
       const results = util.getDeepLinkData(appNgModulePath, fileCache, false);
       expect(results.length).toEqual(2);
@@ -1249,14 +1296,14 @@ export class PageThreeModule {
 
       `;
 
-      const prefix = join('/Users', 'dan', 'myApp', 'src');
-      const appNgModulePath = join(prefix, 'app', 'app.module.ts');
-      const pageOneNgModulePath = join(prefix, 'pages', 'page-one', 'page-one.module.ts');
-      const pageOnePath = join(prefix, 'pages', 'page-one', 'page-one.ts');
-      const pageTwoNgModulePath = join(prefix, 'pages', 'page-two', 'page-two.module.ts');
-      const pageTwoPath = join(prefix, 'pages', 'page-two', 'page-two.ts');
-      const pageSettingsNgModulePath = join(prefix, 'pages', 'settings-page', 'fake-dir', 'settings-page.module.ts');
-      const pageSettingsPath = join(prefix, 'pages', 'settings-page', 'fake-dir', 'settings-page.ts');
+      const srcDir = join('/Users', 'dan', 'myApp', 'src');
+      const appNgModulePath = join(srcDir, 'app', 'app.module.ts');
+      const pageOneNgModulePath = join(srcDir, 'pages', 'page-one', 'page-one.module.ts');
+      const pageOnePath = join(srcDir, 'pages', 'page-one', 'page-one.ts');
+      const pageTwoNgModulePath = join(srcDir, 'pages', 'page-two', 'page-two.module.ts');
+      const pageTwoPath = join(srcDir, 'pages', 'page-two', 'page-two.ts');
+      const pageSettingsNgModulePath = join(srcDir, 'pages', 'settings-page', 'fake-dir', 'settings-page.module.ts');
+      const pageSettingsPath = join(srcDir, 'pages', 'settings-page', 'fake-dir', 'settings-page.ts');
 
       const fileCache = new FileCache();
       fileCache.set(pageOnePath, { path: pageOnePath, content: pageOneContent});
@@ -1268,7 +1315,13 @@ export class PageThreeModule {
       fileCache.set(pageSettingsPath, { path: pageSettingsPath, content: pageSettingsContent});
       fileCache.set(pageSettingsNgModulePath, { path: pageSettingsNgModulePath, content: pageSettingsNgModuleContent});
 
-      spyOn(helpers, helpers.getStringPropertyValue.name).and.returnValue('.module.ts');
+      spyOn(helpers, helpers.getStringPropertyValue.name).and.callFake((input: string) => {
+        if (input === Constants.ENV_VAR_DEEPLINKS_DIR) {
+          return srcDir;
+        } else {
+          return '.module.ts';
+        }
+      });
 
       const results = util.getDeepLinkData(appNgModulePath, fileCache, false);
       expect(results.length).toEqual(3);
@@ -1461,14 +1514,14 @@ export class PageThreeModule {
 
       `;
 
-      const prefix = join('/Users', 'dan', 'myApp', 'src');
-      const appNgModulePath = join(prefix, 'app', 'app.module.ts');
-      const pageOneNgModulePath = join(prefix, 'pages', 'page-one', 'page-one.not-module.ts');
-      const pageOnePath = join(prefix, 'pages', 'page-one', 'page-one.ts');
-      const pageTwoNgModulePath = join(prefix, 'pages', 'page-two', 'page-two.module.ts');
-      const pageTwoPath = join(prefix, 'pages', 'page-two', 'page-two.ts');
-      const pageSettingsNgModulePath = join(prefix, 'pages', 'settings-page', 'fake-dir', 'settings-page.module.ts');
-      const pageSettingsPath = join(prefix, 'pages', 'settings-page', 'fake-dir', 'settings-page.ts');
+      const srcDir = join('/Users', 'dan', 'myApp', 'src');
+      const appNgModulePath = join(srcDir, 'app', 'app.module.ts');
+      const pageOneNgModulePath = join(srcDir, 'pages', 'page-one', 'page-one.not-module.ts');
+      const pageOnePath = join(srcDir, 'pages', 'page-one', 'page-one.ts');
+      const pageTwoNgModulePath = join(srcDir, 'pages', 'page-two', 'page-two.module.ts');
+      const pageTwoPath = join(srcDir, 'pages', 'page-two', 'page-two.ts');
+      const pageSettingsNgModulePath = join(srcDir, 'pages', 'settings-page', 'fake-dir', 'settings-page.module.ts');
+      const pageSettingsPath = join(srcDir, 'pages', 'settings-page', 'fake-dir', 'settings-page.ts');
 
       const fileCache = new FileCache();
       fileCache.set(pageOnePath, { path: pageOnePath, content: pageOneContent});
@@ -1480,7 +1533,13 @@ export class PageThreeModule {
       fileCache.set(pageSettingsPath, { path: pageSettingsPath, content: pageSettingsContent});
       fileCache.set(pageSettingsNgModulePath, { path: pageSettingsNgModulePath, content: pageSettingsNgModuleContent});
 
-      spyOn(helpers, helpers.getStringPropertyValue.name).and.returnValue('.module.ts');
+      spyOn(helpers, helpers.getStringPropertyValue.name).and.callFake((input: string) => {
+        if (input === Constants.ENV_VAR_DEEPLINKS_DIR) {
+          return srcDir;
+        } else {
+          return '.module.ts';
+        }
+      });
 
       const knownError = 'should never get here';
 

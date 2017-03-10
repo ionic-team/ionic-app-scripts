@@ -18,14 +18,14 @@ import { Logger } from '../logger/logger';
 import * as Constants from '../util/constants';
 import { FileCache } from '../util/file-cache';
 import { changeExtension, getStringPropertyValue, replaceAll } from '../util/helpers';
-import { BuildContext, ChangedFile, DeepLinkConfigEntry, DeepLinkDecoratorAndClass, DeepLinkPathInfo } from '../util/interfaces';
+import { BuildContext, ChangedFile, DeepLinkConfigEntry, DeepLinkDecoratorAndClass, DeepLinkPathInfo, File } from '../util/interfaces';
 import { appendAfter, getClassDeclarations, getTypescriptSourceFile, getNodeStringContent, replaceNode } from '../util/typescript-utils';
 
 import { transpileTsString } from '../transpile';
 
 export function getDeepLinkData(appNgModuleFilePath: string, fileCache: FileCache, isAot: boolean): DeepLinkConfigEntry[] {
-  // TODO, get `node_modules` out of here, use the property instead
-  const typescriptFiles = fileCache.getAll().filter(file => extname(file.path) === '.ts' && file.path.indexOf('node_modules') === -1);
+  // we only care about analyzing a subset of typescript files, so do that for efficiency
+  const typescriptFiles = filterTypescriptFilesForDeepLinks(fileCache);
   const deepLinkConfigEntries: DeepLinkConfigEntry[] = [];
   typescriptFiles.forEach(file => {
     const sourceFile = getTypescriptSourceFile(file.path, file.content);
@@ -39,6 +39,12 @@ export function getDeepLinkData(appNgModuleFilePath: string, fileCache: FileCach
     }
   });
   return deepLinkConfigEntries;
+}
+
+export function filterTypescriptFilesForDeepLinks(fileCache: FileCache): File[] {
+  const deepLinksDir = getStringPropertyValue(Constants.ENV_VAR_DEEPLINKS_DIR);
+  const moduleSuffix = getStringPropertyValue(Constants.ENV_NG_MODULE_FILE_NAME_SUFFIX);
+  return fileCache.getAll().filter(file => extname(file.path) === '.ts' && file.path.indexOf(moduleSuffix) === -1 && file.path.indexOf(deepLinksDir) >= 0);
 }
 
 export function getNgModulePathFromCorrespondingPage(filePath: string) {
