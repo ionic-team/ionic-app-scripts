@@ -17,7 +17,7 @@ export const COMPONENT = 'component';
 export const DIRECTIVE = 'directive';
 export const PAGE = 'page';
 export const PIPE = 'pipe';
-export const PROVIDER = 'pipe';
+export const PROVIDER = 'provider';
 export const TABS = 'tabs';
 
 
