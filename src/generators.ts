@@ -12,6 +12,10 @@ export function generateNonTab(request: GeneratorRequest) {
   return processNonTabRequest(context, request);
 }
 
+export function processPageRequest(context: BuildContext, name: string) {
+  return processNonTabRequest(context, { type: 'page', name });
+}
+
 function processNonTabRequest(context: BuildContext, request: GeneratorRequest): Promise<string[]> {
   Logger.debug('[Generators] processNonTabRequest: Hydrating the request with project data ...');
   const hydratedRequest = hydrateRequest(context, request);
