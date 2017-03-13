@@ -10,7 +10,7 @@ import * as tsUtils from '../util/typescript-utils';
 describe('util', () => {
   describe('filterTypescriptFilesForDeepLinks', () => {
     it('should return a list of files that are in the directory specified for deeplinking', () => {
-      const pagesDir = join('Users', 'dan', 'myApp', 'src', 'pages');
+      const pagesDir = join('Users', 'noone', 'myApp', 'src', 'pages');
 
       const knownFileContent = 'Some string';
       const pageOneTs = join(pagesDir, 'page-one', 'page-one.ts');
@@ -671,7 +671,7 @@ export class TacoBellModule {}
   });
 
   describe('getRelativePathToPageNgModuleFromAppNgModule', () => {
-    const prefix = join('Users', 'dan', 'myApp', 'src');
+    const prefix = join('Users', 'noone', 'myApp', 'src');
     const appNgModulePath = join(prefix, 'app', 'app.module.ts');
     const pageNgModulePath = join(prefix, 'pages', 'page-one', 'page-one.module.ts');
     const result = util.getRelativePathToPageNgModuleFromAppNgModule(appNgModulePath, pageNgModulePath);
@@ -680,7 +680,7 @@ export class TacoBellModule {}
 
   describe('getNgModuleDataFromPage', () => {
     it('should throw when NgModule is not in cache', () => {
-      const prefix = join('Users', 'dan', 'myApp', 'src');
+      const prefix = join('Users', 'noone', 'myApp', 'src');
       const appNgModulePath = join(prefix, 'app', 'app.module.ts');
       const pagePath = join(prefix, 'pages', 'page-one', 'page-one.ts');
       const fileCache = new FileCache();
@@ -711,7 +711,7 @@ import { HomePage } from './home';
 })
 export class HomePageModule {}
       `;
-      const prefix = join('Users', 'dan', 'myApp', 'src');
+      const prefix = join('Users', 'noone', 'myApp', 'src');
       const appNgModulePath = join(prefix, 'app', 'app.module.ts');
       const pageNgModulePath = join(prefix, 'pages', 'page-one', 'page-one.module.ts');
       const pagePath = join(prefix, 'pages', 'page-one', 'page-one.ts');
@@ -743,7 +743,7 @@ import { HomePage } from './home';
 })
 export class HomePageModule {}
       `;
-      const prefix = join('Users', 'dan', 'myApp', 'src');
+      const prefix = join('Users', 'noone', 'myApp', 'src');
       const appNgModulePath = join(prefix, 'app', 'app.module.ts');
       const pageNgModulePath = join(prefix, 'pages', 'page-one', 'page-one.module.ts');
       const pagePath = join(prefix, 'pages', 'page-one', 'page-one.ts');
@@ -917,7 +917,7 @@ export class PageThreeModule {
 
       `;
 
-      const prefix = join('Users', 'dan', 'myApp', 'src');
+      const prefix = join('Users', 'noone', 'myApp', 'src');
       const appNgModulePath = join(prefix, 'app', 'app.module.ts');
       const pageOneNgModulePath = join(prefix, 'pages', 'page-one', 'page-one.module.ts');
       const pageOnePath = join(prefix, 'pages', 'page-one', 'page-one.ts');
@@ -1103,7 +1103,7 @@ export class PageThreeModule {
 
       `;
 
-      const srcDir = join('Users', 'dan', 'myApp', 'src');
+      const srcDir = join('Users', 'noone', 'myApp', 'src');
       const appNgModulePath = join(srcDir, 'app', 'app.module.ts');
       const pageOneNgModulePath = join(srcDir, 'pages', 'page-one', 'page-one.module.ts');
       const pageOnePath = join(srcDir, 'pages', 'page-one', 'page-one.ts');
@@ -1296,7 +1296,7 @@ export class PageThreeModule {
 
       `;
 
-      const srcDir = join('/Users', 'dan', 'myApp', 'src');
+      const srcDir = join('/Users', 'noone', 'myApp', 'src');
       const appNgModulePath = join(srcDir, 'app', 'app.module.ts');
       const pageOneNgModulePath = join(srcDir, 'pages', 'page-one', 'page-one.module.ts');
       const pageOnePath = join(srcDir, 'pages', 'page-one', 'page-one.ts');
@@ -1514,7 +1514,7 @@ export class PageThreeModule {
 
       `;
 
-      const srcDir = join('/Users', 'dan', 'myApp', 'src');
+      const srcDir = join('/Users', 'noone', 'myApp', 'src');
       const appNgModulePath = join(srcDir, 'app', 'app.module.ts');
       const pageOneNgModulePath = join(srcDir, 'pages', 'page-one', 'page-one.not-module.ts');
       const pageOnePath = join(srcDir, 'pages', 'page-one', 'page-one.ts');
