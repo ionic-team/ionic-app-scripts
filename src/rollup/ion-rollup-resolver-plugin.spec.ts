@@ -3,7 +3,7 @@ import { BuildContext } from '../util/interfaces';
 import { dirname, join, resolve } from 'path';
 import { resolveId } from './ionic-rollup-resolver-plugin';
 
-const importer = '/Users/dan/Dev/ionic-conference-app/src/app/app.module.ts';
+const importer = '/Users/noone/Dev/ionic-conference-app/src/app/app.module.ts';
 
 describe('ion-rollup-resolver', () => {
 

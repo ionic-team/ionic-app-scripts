@@ -120,10 +120,10 @@ describe('helpers', () => {
   describe('processStatsImpl', () => {
     it('should convert object graph to known module map', () => {
       // arrange
-      const moduleOne = '/Users/dan/myModuleOne.js';
-      const moduleTwo = '/Users/dan/myModuleTwo.js';
-      const moduleThree = '/Users/dan/myModuleThree.js';
-      const moduleFour = '/Users/dan/myModuleFour.js';
+      const moduleOne = '/Users/noone/myModuleOne.js';
+      const moduleTwo = '/Users/noone/myModuleTwo.js';
+      const moduleThree = '/Users/noone/myModuleThree.js';
+      const moduleFour = '/Users/noone/myModuleFour.js';
       const objectGraph: any = {
         modules: [
           {

@@ -9,7 +9,7 @@ describe('util', () => {
   describe('hydrateRequest', () => {
     it('should take a request and return a hydrated request', () => {
       // arrange
-      const componentsDir = '/Users/dan/project/src/components';
+      const componentsDir = '/Users/noone/project/src/components';
       const context = {
         componentsDir: componentsDir
       };
@@ -20,7 +20,7 @@ describe('util', () => {
         includeNgModule: true
       };
 
-      const templateDir = '/Users/dan/project/node_modules/ionic-angular/templates';
+      const templateDir = '/Users/noone/project/node_modules/ionic-angular/templates';
       spyOn(helpers, helpers.getPropertyValue.name).and.returnValue(templateDir);
 
       // act
@@ -41,7 +41,7 @@ describe('util', () => {
   describe('readTemplates', () => {
     it('should get a map of templates and their content back', () => {
       // arrange
-      const templateDir = '/Users/dan/project/node_modules/ionic-angular/templates/component';
+      const templateDir = '/Users/noone/project/node_modules/ionic-angular/templates/component';
       const knownValues = ['html.tmpl', 'scss.tmpl', 'spec.ts.tmpl', 'ts.tmpl', 'module.tmpl'];
       const fileContent = 'SomeContent';
       spyOn(fs, 'readdirSync').and.returnValue(knownValues);
@@ -64,7 +64,7 @@ describe('util', () => {
   describe('filterOutTemplates', () => {
     it('should preserve all templates', () => {
       const map = new Map<string, string>();
-      const templateDir = '/Users/dan/project/node_modules/ionic-angular/templates/component';
+      const templateDir = '/Users/noone/project/node_modules/ionic-angular/templates/component';
       const fileContent = 'SomeContent';
       const knownValues = ['html.tmpl', 'scss.tmpl', 'spec.ts.tmpl', 'ts.tmpl', 'module.tmpl'];
       map.set(join(templateDir, knownValues[0]), fileContent);
@@ -79,7 +79,7 @@ describe('util', () => {
 
     it('should remove spec', () => {
       const map = new Map<string, string>();
-      const templateDir = '/Users/dan/project/node_modules/ionic-angular/templates/component';
+      const templateDir = '/Users/noone/project/node_modules/ionic-angular/templates/component';
       const fileContent = 'SomeContent';
       const knownValues = ['html.tmpl', 'scss.tmpl', 'spec.ts.tmpl', 'ts.tmpl', 'module.tmpl'];
       map.set(join(templateDir, knownValues[0]), fileContent);
@@ -99,7 +99,7 @@ describe('util', () => {
 
     it('should remove spec and module', () => {
       const map = new Map<string, string>();
-      const templateDir = '/Users/dan/project/node_modules/ionic-angular/templates/component';
+      const templateDir = '/Users/noone/project/node_modules/ionic-angular/templates/component';
       const fileContent = 'SomeContent';
       const knownValues = ['html.tmpl', 'scss.tmpl', 'spec.ts.tmpl', 'ts.tmpl', 'module.ts.tmpl'];
       map.set(join(templateDir, knownValues[0]), fileContent);
@@ -120,7 +120,7 @@ describe('util', () => {
 
   describe('applyTemplates', () => {
     it('should replace the template content', () => {
-      const fileOne = '/Users/dan/fileOne';
+      const fileOne = '/Users/noone/fileOne';
 
       const fileOneContent = `
 <!--
@@ -134,14 +134,14 @@ describe('util', () => {
 
       `;
 
-      const fileTwo = '/Users/dan/fileTwo';
+      const fileTwo = '/Users/noone/fileTwo';
       const fileTwoContent = `
 $FILENAME {
 
 }
       `;
 
-      const fileThree = '/Users/dan/fileThree';
+      const fileThree = '/Users/noone/fileThree';
       const fileThreeContent = `
 describe('$CLASSNAME', () => {
   it('should do something', () => {
@@ -150,7 +150,7 @@ describe('$CLASSNAME', () => {
 });
       `;
 
-      const fileFour = '/Users/dan/fileFour';
+      const fileFour = '/Users/noone/fileFour';
       const fileFourContent = `
 import { Component } from '@angular/core';
 
@@ -177,7 +177,7 @@ export class $CLASSNAMEComponent {
 
       `;
 
-      const fileFive = '/Users/dan/fileFive';
+      const fileFive = '/Users/noone/fileFive';
       const fileFiveContent = `
 import { NgModule } from '@angular/core';
 import { $CLASSNAME } from './$FILENAME';
@@ -198,7 +198,7 @@ import { IonicModule } from 'ionic-angular';
 export class $CLASSNAMEModule {}
       `;
 
-      const fileSix = '/Users/dan/fileSix';
+      const fileSix = '/Users/noone/fileSix';
       const fileSixContent = `
 <!--
   Generated template for the $CLASSNAME page.
@@ -263,11 +263,11 @@ export class $CLASSNAMEModule {}
   describe('writeGeneratedFiles', () => {
     it('should return the list of files generated', () => {
       const map = new Map<string, string>();
-      const templateDir = '/Users/dan/project/node_modules/ionic-angular/templates/component';
+      const templateDir = '/Users/noone/project/node_modules/ionic-angular/templates/component';
       const fileContent = 'SomeContent';
       const knownValues = ['html.tmpl', 'scss.tmpl', 'spec.ts.tmpl', 'ts.tmpl', 'module.tmpl'];
       const fileName = 'settings-view';
-      const dirToWrite = join('/Users/dan/project/src/components', fileName);
+      const dirToWrite = join('/Users/noone/project/src/components', fileName);
       map.set(join(templateDir, knownValues[0]), fileContent);
       map.set(join(templateDir, knownValues[1]), fileContent);
       map.set(join(templateDir, knownValues[2]), fileContent);

@@ -18,7 +18,7 @@ describe('lint utils', () => {
           return mockLintResults;
         }
       };
-      const filePath = '/Users/dan/someFile.ts';
+      const filePath = '/Users/noone/someFile.ts';
       const fileContent = 'someContent';
       const mockProgram: any = {};
       spyOn(helpers, helpers.readFileAsync.name).and.returnValue(Promise.resolve(fileContent));

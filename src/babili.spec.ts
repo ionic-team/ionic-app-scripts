@@ -8,7 +8,7 @@ describe('babili function', () => {
 
   it('should call main babili function', () => {
     const context = {
-      rootDir: '/Users/dan/Projects/ionic-conference-app'
+      rootDir: '/Users/noone/Projects/ionic-conference-app'
     };
     const configFile = 'configFileContents';
 

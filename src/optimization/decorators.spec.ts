@@ -1,7 +1,7 @@
 import * as decorators from './decorators';
 import * as Constants from '../util/constants';
 
-const entryPoint = '/Users/dan/Dev/myApp3/node_modules/ionic-angular/index.js';
+const entryPoint = '/Users/noone/Dev/myApp3/node_modules/ionic-angular/index.js';
 
 let originalEnv = {};
 describe('optimization', () => {

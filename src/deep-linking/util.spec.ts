@@ -568,7 +568,7 @@ import { HomePage } from './home';
 export class HomePageModule {}
       `;
 
-      const knownPath = '/Users/dan/idk/some-path.module.ts';
+      const knownPath = '/Users/noone/idk/some-path.module.ts';
 
       const result = util.getNgModuleClassName(knownPath, knownContent);
       expect(result).toEqual('HomePageModule');
@@ -601,7 +601,7 @@ export class TacoBell {
 }
       `;
 
-      const knownPath = '/Users/dan/idk/some-path.module.ts';
+      const knownPath = '/Users/noone/idk/some-path.module.ts';
 
       const result = util.getNgModuleClassName(knownPath, knownContent);
       expect(result).toEqual('HomePageModule');
@@ -618,7 +618,7 @@ export class HomePageModule {}
 
       `;
 
-      const knownPath = '/Users/dan/idk/some-path.module.ts';
+      const knownPath = '/Users/noone/idk/some-path.module.ts';
 
       const knownError = 'Should never happen';
       try {
@@ -658,7 +658,7 @@ export class TacoBellModule {}
 
       `;
 
-      const knownPath = '/Users/dan/idk/some-path.module.ts';
+      const knownPath = '/Users/noone/idk/some-path.module.ts';
 
       const knownError = 'Should never happen';
       try {
@@ -1330,7 +1330,7 @@ export class PageThreeModule {
       expect(results[0].segment).toEqual(null);
       expect(results[0].priority).toEqual('low');
       expect(results[0].defaultHistory.length).toEqual(0);
-      expect(results[0].absolutePath).toEqual('/Users/dan/myApp/src/pages/page-one/page-one.module.ts');
+      expect(results[0].absolutePath).toEqual('/Users/noone/myApp/src/pages/page-one/page-one.module.ts');
       expect(results[0].userlandModulePath).toEqual('../pages/page-one/page-one.module');
       expect(results[0].className).toEqual('PageOneModule');
 
@@ -1338,7 +1338,7 @@ export class PageThreeModule {
       expect(results[1].segment).toEqual(null);
       expect(results[1].priority).toEqual('low');
       expect(results[1].defaultHistory.length).toEqual(0);
-      expect(results[1].absolutePath).toEqual('/Users/dan/myApp/src/pages/page-two/page-two.module.ts');
+      expect(results[1].absolutePath).toEqual('/Users/noone/myApp/src/pages/page-two/page-two.module.ts');
       expect(results[1].userlandModulePath).toEqual('../pages/page-two/page-two.module');
       expect(results[1].className).toEqual('PageTwoModule');
 
@@ -1348,7 +1348,7 @@ export class PageThreeModule {
       expect(results[2].defaultHistory.length).toEqual(2);
       expect(results[2].defaultHistory[0]).toEqual('page-one');
       expect(results[2].defaultHistory[1]).toEqual('page-two');
-      expect(results[2].absolutePath).toEqual('/Users/dan/myApp/src/pages/settings-page/fake-dir/settings-page.module.ts');
+      expect(results[2].absolutePath).toEqual('/Users/noone/myApp/src/pages/settings-page/fake-dir/settings-page.module.ts');
       expect(results[2].userlandModulePath).toEqual('../pages/settings-page/fake-dir/settings-page.module');
       expect(results[2].className).toEqual('PageThreeModule');
     });
@@ -1659,7 +1659,7 @@ export class AppModule {}
         defaultHistory: [],
         priority: 'low',
         rawString: 'irrelevant for this test',
-        absolutePath: '/Users/dan/test/taco',
+        absolutePath: '/Users/noone/test/taco',
         userlandModulePath: '../pages/home-page/home-page.module',
         className: 'HomePageModule'
       };
@@ -1675,7 +1675,7 @@ export class AppModule {}
         defaultHistory: ['page-two', 'page-three', 'page-four'],
         priority: 'low',
         rawString: 'irrelevant for this test',
-        absolutePath: '/Users/dan/test/taco',
+        absolutePath: '/Users/noone/test/taco',
         userlandModulePath: '../pages/home-page/home-page.module',
         className: 'HomePageModule'
       };
@@ -1694,7 +1694,7 @@ export class AppModule {}
         defaultHistory: ['page-two', 'page-three', 'page-four'],
         priority: 'low',
         rawString: 'irrelevant for this test',
-        absolutePath: '/Users/dan/test/taco',
+        absolutePath: '/Users/noone/test/taco',
         userlandModulePath: '../pages/home-page/home-page.module',
         className: 'HomePageModule'
       });
@@ -1704,7 +1704,7 @@ export class AppModule {}
         defaultHistory: [],
         priority: 'low',
         rawString: 'irrelevant for this test',
-        absolutePath: '/Users/dan/test/taco',
+        absolutePath: '/Users/noone/test/taco',
         userlandModulePath: '../pages/page-two/page-two.module',
         className: 'PageTwoModule'
       });
@@ -1714,7 +1714,7 @@ export class AppModule {}
         defaultHistory: [],
         priority: 'low',
         rawString: 'irrelevant for this test',
-        absolutePath: '/Users/dan/test/taco',
+        absolutePath: '/Users/noone/test/taco',
         userlandModulePath: '../pages/settings-page/setting-page.module',
         className: 'SettingsPageModule'
       });
