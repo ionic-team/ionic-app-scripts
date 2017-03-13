@@ -349,3 +349,19 @@ export function purgeWebpackPrefixFromPath(filePath: string) {
 export function replaceAll(input: string, toReplace: string, replacement: string) {
   return input.split(toReplace).join(replacement);
 }
+
+export function ensureSuffix(input: string, suffix: string) {
+  if (!input.endsWith(suffix)) {
+    input += suffix;
+  }
+
+  return input;
+}
+
+export function removeSuffix(input: string, suffix: string) {
+  if (input.endsWith(suffix)) {
+    input = input.substring(0, input.length - suffix.length);
+  }
+
+  return input;
+}

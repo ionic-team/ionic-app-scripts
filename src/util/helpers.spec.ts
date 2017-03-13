@@ -177,4 +177,24 @@ describe('helpers', () => {
       expect(setFour.size).toEqual(0);
     });
   });
+
+  describe('ensureSuffix', () => {
+    it('should not include the suffix of a string that already has the suffix', () => {
+      expect(helpers.ensureSuffix('dan dan the sunshine man', ' man')).toEqual('dan dan the sunshine man');
+    });
+
+    it('should ensure the suffix of a string without the suffix', () => {
+      expect(helpers.ensureSuffix('dan dan the sunshine', ' man')).toEqual('dan dan the sunshine man');
+    });
+  });
+
+  describe('removeSuffix', () => {
+    it('should remove the suffix of a string that has the suffix', () => {
+      expect(helpers.removeSuffix('dan dan the sunshine man', ' man')).toEqual('dan dan the sunshine');
+    });
+
+    it('should do nothing if the string does not have the suffix', () => {
+      expect(helpers.removeSuffix('dan dan the sunshine man', ' woman')).toEqual('dan dan the sunshine man');
+    });
+  });
 });

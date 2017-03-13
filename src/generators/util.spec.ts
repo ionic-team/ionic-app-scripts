@@ -31,7 +31,7 @@ describe('util', () => {
       expect(hydratedRequest.name).toEqual(request.name);
       expect(hydratedRequest.includeNgModule).toBeTruthy();
       expect(hydratedRequest.includeSpec).toBeTruthy();
-      expect(hydratedRequest.className).toEqual('SettingsView');
+      expect(hydratedRequest.className).toEqual('SettingsViewPage');
       expect(hydratedRequest.fileName).toEqual('settings-view');
       expect(hydratedRequest.dirToRead).toEqual(join(templateDir, Constants.COMPONENT));
       expect(hydratedRequest.dirToWrite).toEqual(join(componentsDir, hydratedRequest.fileName));
@@ -228,7 +228,7 @@ export class $CLASSNAMEModule {}
       map.set(fileFive, fileFiveContent);
       map.set(fileSix, fileSixContent);
 
-      const className = 'SettingsView';
+      const className = 'SettingsViewPage';
       const fileName = 'settings-view';
       const suppliedName = 'settings view';
 

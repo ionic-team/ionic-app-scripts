@@ -7,11 +7,12 @@ import * as Constants from '../util/constants';
 import * as GeneratorConstants from './constants';
 import { getPropertyValue, mkDirpAsync, readFileAsync, replaceAll, writeFileAsync } from '../util/helpers';
 import { BuildContext } from '../util/interfaces';
+import { ensureSuffix, removeSuffix } from '../util/helpers';
 
 export function hydrateRequest(context: BuildContext, request: GeneratorRequest) {
   const hydrated = Object.assign({}, request) as HydratedGeneratorRequest;
-  hydrated.className = pascalCase(request.name);
-  hydrated.fileName = paramCase(request.name);
+  hydrated.className = ensureSuffix(pascalCase(request.name), 'Page');
+  hydrated.fileName = removeSuffix(paramCase(request.name), '-page');
 
   hydrated.dirToRead = join(getPropertyValue(Constants.ENV_VAR_IONIC_ANGULAR_TEMPLATE_DIR), request.type);
 
