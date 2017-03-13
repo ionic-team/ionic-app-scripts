@@ -274,6 +274,7 @@ export class $CLASSNAMEModule {}
       map.set(join(templateDir, knownValues[3]), fileContent);
       map.set(join(templateDir, knownValues[4]), fileContent);
 
+      spyOn(helpers, helpers.mkDirpAsync.name).and.returnValue(Promise.resolve());
       spyOn(helpers, helpers.writeFileAsync.name).and.returnValue(Promise.resolve());
 
       const promise = util.writeGeneratedFiles({ dirToWrite: dirToWrite, fileName: fileName }, map);
