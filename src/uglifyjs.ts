@@ -2,6 +2,7 @@ import { join } from 'path';
 import * as uglify from 'uglify-js';
 
 import { Logger } from './logger/logger';
+import { extname } from 'path';
 import { readdirSync, writeFileSync } from 'fs';
 import { fillConfigDefaults, generateContext, getUserConfigFile } from './util/config';
 import { BuildError } from './util/errors';
@@ -33,7 +34,7 @@ export function uglifyjsWorker(context: BuildContext, configFile: string): Promi
       const files = readdirSync(context.buildDir);
 
       files.forEach((file) => {
-        if (file.indexOf('deptree') === -1 && file.indexOf('map') === -1 && file.indexOf('sw-toolbox') === -1 && file.indexOf('polyfills') === -1) {
+        if (extname(file) === 'js' && file.indexOf('polyfills') === -1 && file.indexOf('sw-toolbox') === -1) {
           const uglifyJsConfig: UglifyJsConfig = fillConfigDefaults(configFile, taskInfo.defaultConfigFile);
           uglifyJsConfig.sourceFile = join(context.buildDir, file);
           uglifyJsConfig.inSourceMap = join(context.buildDir, uglifyJsConfig.inSourceMap);
