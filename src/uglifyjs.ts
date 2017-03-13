@@ -34,7 +34,7 @@ export function uglifyjsWorker(context: BuildContext, configFile: string): Promi
       const files = readdirSync(context.buildDir);
 
       files.forEach((file) => {
-        if (extname(file) === 'js' && file.indexOf('polyfills') === -1 && file.indexOf('sw-toolbox') === -1) {
+        if (extname(file) === '.js' && file.indexOf('polyfills') === -1 && file.indexOf('sw-toolbox') === -1) {
           const uglifyJsConfig: UglifyJsConfig = fillConfigDefaults(configFile, taskInfo.defaultConfigFile);
           uglifyJsConfig.sourceFile = join(context.buildDir, file);
           uglifyJsConfig.inSourceMap = join(context.buildDir, uglifyJsConfig.inSourceMap);

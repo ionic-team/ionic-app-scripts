@@ -312,7 +312,7 @@ function transpileBundleImpl(context: BuildContext, target: ts.ScriptTarget) {
   try {
     const files = readdirSync(context.buildDir);
     files.forEach((file) => {
-      if (path.extname(file) === 'js' && file.indexOf('polyfills') === -1 && file.indexOf('sw-toolbox') === -1) {
+      if (path.extname(file) === '.js' && file.indexOf('polyfills') === -1 && file.indexOf('sw-toolbox') === -1) {
         const bundlePath = path.join(context.buildDir, file);
         const bundleContent = readFileSync(bundlePath).toString();
         const tsConfig = getTsConfig(context);
