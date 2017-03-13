@@ -4,12 +4,13 @@ import * as crossSpawn from 'cross-spawn';
 import { EventEmitter } from 'events';
 
 describe('babili function', () => {
-  const emitter = new EventEmitter();
+  let emitter;
+
   beforeEach(() => {
+    emitter = new EventEmitter();
+
     spyOn(configUtil, 'getUserConfigFile').and.returnValue('fileContents');
-    spyOn(crossSpawn, 'spawn').and.callFake(() => {
-      return emitter;
-    });
+    spyOn(crossSpawn, 'spawn').and.returnValue(emitter);
   });
 
   it('should call main babili function', () => {
