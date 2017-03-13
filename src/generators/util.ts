@@ -10,7 +10,7 @@ import { BuildContext } from '../util/interfaces';
 import { ensureSuffix, removeSuffix } from '../util/helpers';
 
 export function hydrateRequest(context: BuildContext, request: GeneratorRequest) {
-  const hydrated = Object.assign({}, request) as HydratedGeneratorRequest;
+  const hydrated = Object.assign({ includeNgModule: true }, request) as HydratedGeneratorRequest;
   hydrated.className = ensureSuffix(pascalCase(request.name), 'Page');
   hydrated.fileName = removeSuffix(paramCase(request.name), '-page');
 
