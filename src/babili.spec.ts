@@ -1,9 +1,15 @@
 import * as babili from './babili';
 import * as configUtil from './util/config';
+import * as crossSpawn from 'cross-spawn';
+import { EventEmitter } from 'events';
 
 describe('babili function', () => {
+  const emitter = new EventEmitter();
   beforeEach(() => {
     spyOn(configUtil, 'getUserConfigFile').and.returnValue('fileContents');
+    spyOn(crossSpawn, 'spawn').and.callFake(() => {
+      return emitter;
+    });
   });
 
   it('should call main babili function', () => {
@@ -12,7 +18,9 @@ describe('babili function', () => {
     };
     const configFile = 'configFileContents';
 
-    return babili.babili(context, configFile).then(() => {
+    let pr = babili.babili(context, configFile);
+    emitter.emit('close', 0);
+    pr.then(() => {
       expect(configUtil.getUserConfigFile).toHaveBeenCalledWith(context, babili.taskInfo, configFile);
     });
   });
