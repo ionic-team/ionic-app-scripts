@@ -4,7 +4,7 @@ import * as crossSpawn from 'cross-spawn';
 import { EventEmitter } from 'events';
 
 describe('babili function', () => {
-  let emitter;
+  let emitter: EventEmitter;
 
   beforeEach(() => {
     emitter = new EventEmitter();
