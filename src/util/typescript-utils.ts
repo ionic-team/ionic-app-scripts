@@ -4,6 +4,7 @@ import {
   CallExpression,
   ClassDeclaration,
   createSourceFile,
+  Decorator,
   Identifier,
   ImportClause,
   ImportDeclaration,
@@ -162,3 +163,56 @@ In general, it's considered a best practice to have at most one class declaratio
   }
   return classDeclarations;
 }
+
+export function getNgModuleClassName(filePath: string, fileContent: string) {
+  const ngModuleSourceFile = getTypescriptSourceFile(filePath, fileContent);
+  const classDeclarations = getClassDeclarations(ngModuleSourceFile);
+  // find the class with NgModule decorator;
+  const classNameList: string[] = [];
+  classDeclarations.forEach(classDeclaration => {
+    if (classDeclaration && classDeclaration.decorators) {
+      classDeclaration.decorators.forEach(decorator => {
+        if (decorator.expression && (decorator.expression as CallExpression).expression && ((decorator.expression as CallExpression).expression as Identifier).text === NG_MODULE_DECORATOR_TEXT) {
+          const className = (classDeclaration.name as Identifier).text;
+          classNameList.push(className);
+        }
+      });
+    }
+  });
+
+  if (classNameList.length === 0) {
+    throw new Error(`Could not find a class declaration in ${filePath}`);
+  }
+
+  if (classNameList.length > 1) {
+    throw new Error(`Multiple class declarations with NgModule in ${filePath}. The correct class to use could not be determined.`);
+  }
+
+  return classNameList[0];
+}
+
+export function getNgModuleDecorator(fileName: string, sourceFile: SourceFile) {
+  const ngModuleDecorators: Decorator[] = [];
+  const classDeclarations = getClassDeclarations(sourceFile);
+  classDeclarations.forEach(classDeclaration => {
+    if (classDeclaration && classDeclaration.decorators) {
+      classDeclaration.decorators.forEach(decorator => {
+        if (decorator.expression && (decorator.expression as CallExpression).expression && ((decorator.expression as CallExpression).expression as Identifier).text === NG_MODULE_DECORATOR_TEXT) {
+          ngModuleDecorators.push(decorator);
+        }
+      });
+    }
+  });
+
+  if (ngModuleDecorators.length === 0) {
+    throw new Error(`Could not find an "NgModule" decorator in ${fileName}`);
+  }
+
+  if (ngModuleDecorators.length > 1) {
+    throw new Error(`Multiple "NgModule" decorators found in ${fileName}. The correct one to use could not be determined`);
+  }
+
+  return ngModuleDecorators[0];
+}
+
+const NG_MODULE_DECORATOR_TEXT = 'NgModule';

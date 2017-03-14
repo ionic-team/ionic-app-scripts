@@ -96,11 +96,11 @@ export function getNgModules(context: BuildContext, type: string): Promise<GlobR
 export function getDirToWriteToByType(context: BuildContext, type: string) {
   if (type === Constants.COMPONENT) {
     return context.componentsDir;
-  } else if ( type === Constants.DIRECTIVE) {
+  } else if (type === Constants.DIRECTIVE) {
     return context.directivesDir;
   } else if (type === Constants.PAGE) {
     return context.pagesDir;
-  } else if ( type === Constants.PIPE) {
+  } else if (type === Constants.PIPE) {
     return context.pipesDir;
   } else if (type === Constants.PROVIDER) {
     return context.providersDir;

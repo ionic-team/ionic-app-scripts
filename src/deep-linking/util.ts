@@ -1,17 +1,17 @@
 import { dirname, extname, relative } from 'path';
 
 import {
-    ArrayLiteralExpression,
-    CallExpression,
-    Decorator,
-    Expression,
-    Identifier,
-    Node,
-    ObjectLiteralExpression,
-    PropertyAccessExpression,
-    PropertyAssignment,
-    SourceFile,
-    SyntaxKind
+  ArrayLiteralExpression,
+  CallExpression,
+  Decorator,
+  Expression,
+  Identifier,
+  Node,
+  ObjectLiteralExpression,
+  PropertyAccessExpression,
+  PropertyAssignment,
+  SourceFile,
+  SyntaxKind
 } from 'typescript';
 
 import { Logger } from '../logger/logger';
@@ -19,7 +19,7 @@ import * as Constants from '../util/constants';
 import { FileCache } from '../util/file-cache';
 import { changeExtension, getStringPropertyValue, replaceAll } from '../util/helpers';
 import { BuildContext, ChangedFile, DeepLinkConfigEntry, DeepLinkDecoratorAndClass, DeepLinkPathInfo, File } from '../util/interfaces';
-import { appendAfter, getClassDeclarations, getTypescriptSourceFile, getNodeStringContent, replaceNode } from '../util/typescript-utils';
+import { appendAfter, getNgModuleClassName, getNgModuleDecorator, getClassDeclarations, getTypescriptSourceFile, getNodeStringContent, replaceNode } from '../util/typescript-utils';
 
 import { transpileTsString } from '../transpile';
 
@@ -75,33 +75,6 @@ export function getNgModuleDataFromPage(appNgModuleFilePath: string, filePath: s
     userlandModulePath: userlandModulePath,
     className: namedExport
   };
-}
-
-export function getNgModuleClassName(filePath: string, fileContent: string) {
-  const ngModuleSourceFile = getTypescriptSourceFile(filePath, fileContent);
-  const classDeclarations = getClassDeclarations(ngModuleSourceFile);
-  // find the class with NgModule decorator;
-  const classNameList: string[] = [];
-  classDeclarations.forEach(classDeclaration => {
-    if (classDeclaration && classDeclaration.decorators) {
-      classDeclaration.decorators.forEach(decorator => {
-        if (decorator.expression && (decorator.expression as CallExpression).expression && ((decorator.expression as CallExpression).expression as Identifier).text === NG_MODULE_DECORATOR_TEXT) {
-          const className = (classDeclaration.name as Identifier).text;
-          classNameList.push(className);
-        }
-      });
-    }
-  });
-
-  if (classNameList.length === 0) {
-    throw new Error(`Could not find a class declaration in ${filePath}`);
-  }
-
-  if (classNameList.length > 1) {
-    throw new Error(`Multiple class declarations with NgModule in ${filePath}. The correct class to use could not be determined.`);
-  }
-
-  return classNameList[0];
 }
 
 export function getDeepLinkDecoratorContentForSourceFile(sourceFile: SourceFile): DeepLinkDecoratorAndClass {
@@ -204,7 +177,7 @@ function getArrayValueFromDeepLinkDecorator(sourceFile: SourceFile, propertyNode
 
 export function hasExistingDeepLinkConfig(appNgModuleFilePath: string, appNgModuleFileContent: string) {
   const sourceFile = getTypescriptSourceFile(appNgModuleFilePath, appNgModuleFileContent);
-  const decorator = getAppNgModuleDecorator(appNgModuleFilePath, sourceFile);
+  const decorator = getNgModuleDecorator(appNgModuleFilePath, sourceFile);
   const functionCall = getIonicModuleForRootCall(decorator);
 
   if (functionCall.arguments.length <= 2) {
@@ -213,30 +186,6 @@ export function hasExistingDeepLinkConfig(appNgModuleFilePath: string, appNgModu
 
   const deepLinkConfigArg = functionCall.arguments[2];
   return deepLinkConfigArg.kind === SyntaxKind.ObjectLiteralExpression;
-}
-
-function getAppNgModuleDecorator(appNgModuleFilePath: string, sourceFile: SourceFile) {
-  const ngModuleDecorators: Decorator[] = [];
-  const classDeclarations = getClassDeclarations(sourceFile);
-  classDeclarations.forEach(classDeclaration => {
-    if (classDeclaration && classDeclaration.decorators) {
-      classDeclaration.decorators.forEach(decorator => {
-        if (decorator.expression && (decorator.expression as CallExpression).expression && ((decorator.expression as CallExpression).expression as Identifier).text === NG_MODULE_DECORATOR_TEXT) {
-          ngModuleDecorators.push(decorator);
-        }
-      });
-    }
-  });
-
-  if (ngModuleDecorators.length === 0) {
-    throw new Error(`Could not find an "NgModule" decorator in ${appNgModuleFilePath}`);
-  }
-
-  if (ngModuleDecorators.length > 1) {
-    throw new Error(`Multiple "NgModule" decorators found in ${appNgModuleFilePath}. The correct one to use could not be determined`);
-  }
-
-  return ngModuleDecorators[0];
 }
 
 function getNgModuleObjectLiteralArg(decorator: Decorator) {
@@ -358,13 +307,13 @@ export function updateAppNgModuleAndFactoryWithDeepLinkConfig(context: BuildCont
 
 export function getUpdatedAppNgModuleContentWithDeepLinkConfig(appNgModuleFilePath: string, appNgModuleFileContent: string, deepLinkStringContent: string) {
   let sourceFile = getTypescriptSourceFile(appNgModuleFilePath, appNgModuleFileContent);
-  let decorator = getAppNgModuleDecorator(appNgModuleFilePath, sourceFile);
+  let decorator = getNgModuleDecorator(appNgModuleFilePath, sourceFile);
   let functionCall = getIonicModuleForRootCall(decorator);
 
   if (functionCall.arguments.length === 1) {
     appNgModuleFileContent = addDefaultSecondArgumentToAppNgModule(appNgModuleFileContent, functionCall);
     sourceFile = getTypescriptSourceFile(appNgModuleFilePath, appNgModuleFileContent);
-    decorator = getAppNgModuleDecorator(appNgModuleFilePath, sourceFile);
+    decorator = getNgModuleDecorator(appNgModuleFilePath, sourceFile);
     functionCall = getIonicModuleForRootCall(decorator);
   }
 
@@ -405,7 +354,6 @@ export function addDeepLinkArgumentToAppNgModule(appNgModuleFileContent: string,
 
 
 const DEEPLINK_DECORATOR_TEXT = 'DeepLink';
-const NG_MODULE_DECORATOR_TEXT = 'NgModule';
 const DEEPLINK_DECORATOR_NAME_ATTRIBUTE = 'name';
 const DEEPLINK_DECORATOR_SEGMENT_ATTRIBUTE = 'segment';
 const DEEPLINK_DECORATOR_PRIORITY_ATTRIBUTE = 'priority';
