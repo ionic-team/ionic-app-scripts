@@ -2,6 +2,8 @@ import { basename, join } from 'path';
 import * as fs from 'fs';
 import * as Constants from '../util/constants';
 import * as helpers from '../util/helpers';
+import * as globUtils from '../util/glob-util';
+import { GlobResult } from '../util/glob-util';
 import * as util from './util';
 import * as GeneratorConstants from './constants';
 
@@ -299,13 +301,7 @@ export class $CLASSNAMEModule {}
     const providersDir = '/path/to/providers';
 
     beforeEach(() => {
-      context = {
-        componentsDir,
-        directivesDir,
-        pagesDir,
-        pipesDir,
-        providersDir,
-      };
+      context = { componentsDir, directivesDir, pagesDir, pipesDir, providersDir };
     });
 
     it('should return the appropriate components directory', () => {
@@ -330,6 +326,45 @@ export class $CLASSNAMEModule {}
 
     it('should throw error upon unknown generator type', () => {
       expect(() => util.getDirToWriteToByType(context, 'dan')).toThrowError('Unknown Generator Type: dan');
+    });
+  });
+
+  describe('getNgModules', () => {
+    let context: any;
+    const componentsDir = '/path/to/components';
+    const directivesDir = '/path/to/directives';
+    const pagesDir = '/path/to/pages';
+    const pipesDir = '/path/to/pipes';
+    const providersDir = '/path/to/providers';
+
+    beforeEach(() => {
+      context = { componentsDir, directivesDir, pagesDir, pipesDir, providersDir };
+    });
+
+    function genMockGlobResults(types: string[]): GlobResult[] {
+      return types.map((type) => {
+        return { absolutePath: `/path/to/${type}`, base: '/path' }
+      });
+    }
+
+    it('should return an empty list of glob results', () => {
+      const globAllSpy = spyOn(globUtils, globUtils.globAll.name);
+      util.getNgModules(context, []);
+      expect(globAllSpy).toHaveBeenCalledWith([]);
+    });
+
+    it('should return a list of glob results for components', () => {
+      const globAllSpy = spyOn(globUtils, globUtils.globAll.name);
+      spyOn(helpers, helpers.getStringPropertyValue.name).and.returnValue('.module.ts');
+      util.getNgModules(context, ['component']);
+      expect(globAllSpy).toHaveBeenCalledWith(['/path/to/components/**/*.module.ts']);
+    });
+
+    it('should return a list of glob results for pages and components', () => {
+      const globAllSpy = spyOn(globUtils, globUtils.globAll.name);
+      spyOn(helpers, helpers.getStringPropertyValue.name).and.returnValue('.module.ts');
+      util.getNgModules(context, ['page', 'component']);
+      expect(globAllSpy).toHaveBeenCalledWith(['/path/to/pages/**/*.module.ts', '/path/to/components/**/*.module.ts']);
     });
   });
 });
