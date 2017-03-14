@@ -289,4 +289,47 @@ export class $CLASSNAMEModule {}
       });
     });
   });
+
+  describe('getDirToWriteToByType', () => {
+    let context: any;
+    const componentsDir = '/path/to/components';
+    const directivesDir = '/path/to/directives';
+    const pagesDir = '/path/to/pages';
+    const pipesDir = '/path/to/pipes';
+    const providersDir = '/path/to/providers';
+
+    beforeEach(() => {
+      context = {
+        componentsDir,
+        directivesDir,
+        pagesDir,
+        pipesDir,
+        providersDir,
+      };
+    });
+
+    it('should return the appropriate components directory', () => {
+      expect(util.getDirToWriteToByType(context, 'component')).toEqual(componentsDir);
+    });
+
+    it('should return the appropriate directives directory', () => {
+      expect(util.getDirToWriteToByType(context, 'directive')).toEqual(directivesDir);
+    });
+
+    it('should return the appropriate pages directory', () => {
+      expect(util.getDirToWriteToByType(context, 'page')).toEqual(pagesDir);
+    });
+
+    it('should return the appropriate pipes directory', () => {
+      expect(util.getDirToWriteToByType(context, 'pipe')).toEqual(pipesDir);
+    });
+
+    it('should return the appropriate providers directory', () => {
+      expect(util.getDirToWriteToByType(context, 'provider')).toEqual(providersDir);
+    });
+
+    it('should throw error upon unknown generator type', () => {
+      expect(() => util.getDirToWriteToByType(context, 'dan')).toThrowError('Unknown Generator Type: dan');
+    });
+  });
 });
