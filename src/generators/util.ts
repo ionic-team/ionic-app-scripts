@@ -5,8 +5,9 @@ import { paramCase, pascalCase, upperCaseFirst } from 'change-case';
 
 import * as Constants from '../util/constants';
 import * as GeneratorConstants from './constants';
-import { getPropertyValue, mkDirpAsync, readFileAsync, replaceAll, writeFileAsync } from '../util/helpers';
+import { getPropertyValue, getStringPropertyValue, mkDirpAsync, readFileAsync, replaceAll, writeFileAsync } from '../util/helpers';
 import { BuildContext } from '../util/interfaces';
+import { globAll, GlobResult } from '../util/glob-util';
 import { ensureSuffix, removeSuffix } from '../util/helpers';
 
 export function hydrateRequest(context: BuildContext, request: GeneratorRequest) {
@@ -83,6 +84,13 @@ function createDirAndWriteFile(filePath: string, fileContent: string) {
   return mkDirpAsync(directory).then(() => {
     return writeFileAsync(filePath, fileContent);
   });
+}
+
+export function getNgModules(context: BuildContext, type: string): Promise<GlobResult[]> {
+  const ngModuleSuffix = getStringPropertyValue(Constants.ENV_NG_MODULE_FILE_NAME_SUFFIX);
+  const genDir = getDirToWriteToByType(context, type);
+
+  return globAll([join(genDir, '**', `*${ngModuleSuffix}`)]);
 }
 
 export function getDirToWriteToByType(context: BuildContext, type: string) {

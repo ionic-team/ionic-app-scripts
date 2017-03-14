@@ -2,10 +2,9 @@ import { Logger} from './logger/logger';
 import { generateContext } from './util/config';
 import * as Constants from './util/constants';
 import { BuildContext } from './util/interfaces';
-import { applyTemplates, filterOutTemplates, GeneratorOption, GeneratorRequest, hydrateRequest, readTemplates, writeGeneratedFiles } from './generators/util';
+import { applyTemplates, filterOutTemplates, getNgModules, GeneratorOption, GeneratorRequest, hydrateRequest, readTemplates, writeGeneratedFiles } from './generators/util';
 
-export { GeneratorOption };
-export { GeneratorRequest };
+export { getNgModules, GeneratorOption, GeneratorRequest };
 
 export function generateNonTab(request: GeneratorRequest) {
   const context = generateContext();
@@ -14,6 +13,12 @@ export function generateNonTab(request: GeneratorRequest) {
 
 export function processPageRequest(context: BuildContext, name: string) {
   return processNonTabRequest(context, { type: 'page', name });
+}
+
+export function processPipeRequest(context: BuildContext, name: string, ngModulePaths: string[]) {
+  return processNonTabRequest(context, { type: 'pipe', name }).then(() => {
+    // TODO
+  });
 }
 
 function processNonTabRequest(context: BuildContext, request: GeneratorRequest): Promise<string[]> {
