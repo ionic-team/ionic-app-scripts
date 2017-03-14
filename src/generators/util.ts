@@ -86,11 +86,10 @@ function createDirAndWriteFile(filePath: string, fileContent: string) {
   });
 }
 
-export function getNgModules(context: BuildContext, type: string): Promise<GlobResult[]> {
+export function getNgModules(context: BuildContext, types: string[]): Promise<GlobResult[]> {
   const ngModuleSuffix = getStringPropertyValue(Constants.ENV_NG_MODULE_FILE_NAME_SUFFIX);
-  const genDir = getDirToWriteToByType(context, type);
-
-  return globAll([join(genDir, '**', `*${ngModuleSuffix}`)]);
+  const patterns = types.map((type) => join(getDirToWriteToByType(context, type), '**', `*${ngModuleSuffix}`));
+  return globAll(patterns);
 }
 
 export function getDirToWriteToByType(context: BuildContext, type: string) {
