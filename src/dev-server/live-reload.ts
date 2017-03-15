@@ -2,21 +2,26 @@ import { ChangedFile } from '../util/interfaces';
 import { hasDiagnostics } from '../logger/logger-diagnostics';
 import * as path from 'path';
 import * as tinylr from 'tiny-lr';
-import { ServeConfig } from './serve-config';
 import * as events from '../util/events';
 
+export interface LiveReloadConfig {
+  host: string;
+  buildDir: string;
+  wwwDir: string;
+  liveReloadPort: number;
+}
 
-export function createLiveReloadServer(config: ServeConfig) {
+export function createLiveReloadServer({ liveReloadPort, host, buildDir, wwwDir }: LiveReloadConfig) {
   const liveReloadServer = tinylr();
-  liveReloadServer.listen(config.liveReloadPort, config.host);
+  liveReloadServer.listen(liveReloadPort, host);
 
   function fileChange(changedFiles: ChangedFile[]) {
     // only do a live reload if there are no diagnostics
     // the notification server takes care of showing diagnostics
-    if (!hasDiagnostics(config.buildDir)) {
+    if (!hasDiagnostics(buildDir)) {
       liveReloadServer.changed({
         body: {
-          files: changedFiles.map(changedFile => '/' + path.relative(config.wwwDir, changedFile.filePath))
+          files: changedFiles.map(changedFile => '/' + path.relative(wwwDir, changedFile.filePath))
         }
       });
     }

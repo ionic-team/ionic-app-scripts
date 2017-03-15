@@ -5,10 +5,15 @@ import { generateRuntimeDiagnosticContent } from '../logger/logger-runtime';
 import { hasDiagnostics, getDiagnosticsHtmlContent } from '../logger/logger-diagnostics';
 import { on, EventType } from '../util/events';
 import { Server as WebSocketServer } from 'ws';
-import { ServeConfig } from './serve-config';
 
+export interface NotificationServerConfig {
+  buildDir: string;
+  rootDir: string;
+  wwwDir: string;
+  notificationPort: number;
+}
 
-export function createNotificationServer(config: ServeConfig) {
+export function createNotificationServer({ buildDir, rootDir, wwwDir, notificationPort}: NotificationServerConfig) {
   let wsServer: any;
   const msgToClient: WsMessage[] = [];
 
@@ -62,14 +67,14 @@ export function createNotificationServer(config: ServeConfig) {
       data: {
         buildId: buildUpdateMsg.buildId,
         reloadApp: buildUpdateMsg.reloadApp,
-        diagnosticsHtml: hasDiagnostics(config.buildDir) ? getDiagnosticsHtmlContent(config.buildDir) : null
+        diagnosticsHtml: hasDiagnostics(buildDir) ? getDiagnosticsHtmlContent(buildDir) : null
       }
     };
     queueMessageSend(msg);
   });
 
   // create web socket server
-  const wss = new WebSocketServer({ port: config.notificationPort });
+  const wss = new WebSocketServer({ port: notificationPort });
   wss.broadcast = function broadcast(data: any) {
     wss.clients.forEach(function each(client: any) {
       client.send(data);
@@ -138,8 +143,8 @@ export function createNotificationServer(config: ServeConfig) {
       category: 'buildUpdate',
       type: 'completed',
       data: {
-        diagnosticsHtml: generateRuntimeDiagnosticContent(config.rootDir,
-                                                          config.buildDir,
+        diagnosticsHtml: generateRuntimeDiagnosticContent(rootDir,
+                                                          buildDir,
                                                           clientMsg.data.message,
                                                           clientMsg.data.stack)
       }

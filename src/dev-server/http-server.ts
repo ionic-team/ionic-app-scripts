@@ -5,7 +5,6 @@ import * as express from 'express';
 import * as fs from 'fs';
 import * as url from 'url';
 import {
-  ServeConfig,
   LOGGER_DIR,
   IONIC_LAB_URL,
   IOS_PLATFORM_PATH,
@@ -20,6 +19,19 @@ import { getProjectJson, IonicProject } from '../util/ionic-project';
 
 import { LabAppView, ApiCordovaProject } from './lab';
 
+export interface ServeConfig {
+  httpPort: number;
+  host: string;
+  rootDir: string;
+  wwwDir: string;
+  buildDir: string;
+  isCordovaServe: boolean;
+  useLiveReload: boolean;
+  liveReloadPort: Number;
+  notificationPort: Number;
+  notifyOnConsoleLog: boolean;
+  useProxy: boolean;
+}
 
 /**
  * Create HTTP server

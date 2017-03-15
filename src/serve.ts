@@ -8,7 +8,7 @@ import open from './util/open';
 import { createNotificationServer } from './dev-server/notification-server';
 import { createHttpServer } from './dev-server/http-server';
 import { createLiveReloadServer } from './dev-server/live-reload';
-import { ServeConfig, IONIC_LAB_URL } from './dev-server/serve-config';
+import { IONIC_LAB_URL } from './dev-server/serve-config';
 import { findClosestOpenPorts } from './util/network';
 
 const DEV_LOGGER_DEFAULT_PORT = 53703;
@@ -19,44 +19,59 @@ const DEV_SERVER_DEFAULT_HOST = '0.0.0.0';
 export function serve(context: BuildContext) {
   setContext(context);
 
-  let config: ServeConfig;
   const host = getHttpServerHost(context);
-  const notificationPort = getNotificationPort(context);
-  const liveReloadServerPort = getLiveReloadServerPort(context);
-  const hostPort = getHttpServerPort(context);
+  let notificationPort = getNotificationPort(context);
+  let liveReloadServerPort = getLiveReloadServerPort(context);
+  let hostPort = getHttpServerPort(context);
+  const cordovaServe = isCordovaServe(context);
+  const liveReload = useLiveReload(context);
+  const notifyOnConsoleLog = sendClientConsoleLogs(context);
+  let hostBaseUrl = '';
 
   return findClosestOpenPorts(host, [notificationPort, liveReloadServerPort, hostPort])
     .then(([notificationPortFound, liveReloadServerPortFound, hostPortFound]) => {
-      const hostLocation = (host === '0.0.0.0') ? 'localhost' : host;
+      notificationPort = notificationPortFound;
+      liveReloadServerPort = liveReloadServerPortFound;
+      hostPort = hostPortFound;
 
-      config = {
+      const hostLocation = (host === '0.0.0.0') ? 'localhost' : host;
+      hostBaseUrl = `http://${hostLocation}:${hostPortFound}`;
+
+      createNotificationServer({
+        buildDir: context.buildDir,
+        rootDir: context.rootDir,
+        wwwDir: context.wwwDir,
+        notificationPort: notificationPortFound
+      });
+      createLiveReloadServer({
+        host: host,
+        buildDir: context.buildDir,
+        wwwDir: context.wwwDir,
+        liveReloadPort: liveReloadServerPortFound
+      });
+      createHttpServer({
         httpPort: hostPortFound,
         host: host,
-        hostBaseUrl: `http://${hostLocation}:${hostPortFound}`,
         rootDir: context.rootDir,
         wwwDir: context.wwwDir,
         buildDir: context.buildDir,
-        isCordovaServe: isCordovaServe(context),
-        launchBrowser: launchBrowser(context),
-        launchLab: launchLab(context),
-        browserToLaunch: browserToLaunch(context),
-        useLiveReload: useLiveReload(context),
+        isCordovaServe: cordovaServe,
+        useLiveReload: liveReload,
         liveReloadPort: liveReloadServerPortFound,
         notificationPort: notificationPortFound,
-        useServerLogs: useServerLogs(context),
-        useProxy: useProxy(context),
-        notifyOnConsoleLog: sendClientConsoleLogs(context)
-      };
-
-      createNotificationServer(config);
-      createLiveReloadServer(config);
-      createHttpServer(config);
+        notifyOnConsoleLog: notifyOnConsoleLog,
+        useProxy: useProxy(context)
+      });
 
       return watch(context);
     })
     .then(() => {
-      onReady(config, context);
-      return config;
+      onReady(hostBaseUrl, context);
+      return {
+        hostBaseUrl,
+        httpPort: hostPort,
+        host: host
+      };
     }, (err: BuildError) => {
       throw err;
     })
@@ -64,17 +79,24 @@ export function serve(context: BuildContext) {
       if (err && err.isFatal) {
         throw err;
       } else {
-        onReady(config, context);
+        onReady(hostBaseUrl, context);
       }
     });
 }
 
-function onReady(config: ServeConfig, context: BuildContext) {
+function onReady(hostBaseUrl: string, context: BuildContext) {
+  const config = {
+    launchBrowser: launchBrowser(context),
+    launchLab: launchLab(context),
+    browserOption: browserOption(context),
+    platformOption: platformOption(context),
+    hostBaseUrl
+  }
   if (config.launchBrowser || config.launchLab) {
     const openOptions: string[] = [config.hostBaseUrl]
-      .concat(launchLab(context) ? [IONIC_LAB_URL] : [])
-      .concat(browserOption(context) ? [browserOption(context)] : [])
-      .concat(platformOption(context) ? ['?ionicplatform=', platformOption(context)] : []);
+      .concat(config.launchLab ? [IONIC_LAB_URL] : [])
+      .concat(config.browserOption ? [config.browserOption] : [])
+      .concat(config.platformOption ? ['?ionicplatform=', config.platformOption] : []);
 
     open(openOptions.join(''), browserToLaunch(context));
   }
