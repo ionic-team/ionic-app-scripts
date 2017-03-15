@@ -2,6 +2,8 @@ import { Logger} from './logger/logger';
 import { generateContext } from './util/config';
 import * as Constants from './util/constants';
 import { BuildContext } from './util/interfaces';
+import { readFileAsync } from './util/helpers';
+import { getTypescriptSourceFile, appendNgModuleDeclaration, insertNamedImportIfNeeded } from './util/typescript-utils';
 import { applyTemplates, filterOutTemplates, getNgModules, GeneratorOption, GeneratorRequest, hydrateRequest, readTemplates, writeGeneratedFiles } from './generators/util';
 
 export { getNgModules, GeneratorOption, GeneratorRequest };
@@ -15,9 +17,17 @@ export function processPageRequest(context: BuildContext, name: string) {
   return processNonTabRequest(context, { type: 'page', name });
 }
 
-export function processPipeRequest(context: BuildContext, name: string, ngModulePaths: string[]) {
-  return processNonTabRequest(context, { type: 'pipe', name }).then(() => {
-    // TODO
+export function processPipeRequest(context: BuildContext, name: string, ngModulePath: string) {
+  const hydratedRequest = hydrateRequest(context, { type: 'pipe', name });
+
+  return readFileAsync(ngModulePath).then((fileContent: string) => {
+    fileContent = insertNamedImportIfNeeded(ngModulePath, fileContent, name, `./${name}`);
+    fileContent = appendNgModuleDeclaration(ngModulePath, fileContent, name);
+    // TODO: write file
+
+    return processNonTabRequest(context, hydratedRequest).then(() => {
+      // TODO
+    });
   });
 }
 

@@ -341,12 +341,6 @@ export class $CLASSNAMEModule {}
       context = { componentsDir, directivesDir, pagesDir, pipesDir, providersDir };
     });
 
-    function genMockGlobResults(types: string[]): GlobResult[] {
-      return types.map((type) => {
-        return { absolutePath: `/path/to/${type}`, base: '/path' }
-      });
-    }
-
     it('should return an empty list of glob results', () => {
       const globAllSpy = spyOn(globUtils, globUtils.globAll.name);
       util.getNgModules(context, []);

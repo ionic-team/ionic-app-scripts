@@ -19,7 +19,16 @@ import * as Constants from '../util/constants';
 import { FileCache } from '../util/file-cache';
 import { changeExtension, getStringPropertyValue, replaceAll } from '../util/helpers';
 import { BuildContext, ChangedFile, DeepLinkConfigEntry, DeepLinkDecoratorAndClass, DeepLinkPathInfo, File } from '../util/interfaces';
-import { appendAfter, getNgModuleClassName, getNgModuleDecorator, getClassDeclarations, getTypescriptSourceFile, getNodeStringContent, replaceNode } from '../util/typescript-utils';
+import {
+  appendAfter,
+  getClassDeclarations,
+  getNgModuleClassName,
+  getNgModuleDecorator,
+  getNgModuleObjectLiteralArg,
+  getTypescriptSourceFile,
+  getNodeStringContent,
+  replaceNode,
+} from '../util/typescript-utils';
 
 import { transpileTsString } from '../transpile';
 
@@ -186,14 +195,6 @@ export function hasExistingDeepLinkConfig(appNgModuleFilePath: string, appNgModu
 
   const deepLinkConfigArg = functionCall.arguments[2];
   return deepLinkConfigArg.kind === SyntaxKind.ObjectLiteralExpression;
-}
-
-function getNgModuleObjectLiteralArg(decorator: Decorator) {
-  const ngModuleArgs = (decorator.expression as CallExpression).arguments;
-  if (!ngModuleArgs || ngModuleArgs.length === 0 || ngModuleArgs.length > 1) {
-    throw new Error(`Invalid NgModule Argument`);
-  }
-  return ngModuleArgs[0] as ObjectLiteralExpression;
 }
 
 function getIonicModuleForRootCall(decorator: Decorator) {

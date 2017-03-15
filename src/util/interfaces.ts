@@ -20,6 +20,7 @@ export interface BuildContext {
   nodeModulesDir?: string;
   ionicAngularDir?: string;
   moduleFiles?: string[];
+  appNgModulePath?: string;
   isProd?: boolean;
   isWatch?: boolean;
   runAot?: boolean;

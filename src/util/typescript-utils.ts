@@ -1,9 +1,8 @@
-import { Logger } from '../logger/logger';
+import * as path from 'path';
 
 import {
   CallExpression,
   ClassDeclaration,
-  createSourceFile,
   Decorator,
   Identifier,
   ImportClause,
@@ -11,13 +10,19 @@ import {
   ImportSpecifier,
   NamedImports,
   Node,
+  NodeArray,
+  ObjectLiteralElement,
+  ObjectLiteralExpression,
+  PropertyAssignment,
   ScriptTarget,
   SourceFile,
   StringLiteral,
-  SyntaxKind
+  SyntaxKind,
+  createSourceFile,
 } from 'typescript';
 
 import { rangeReplace, stringSplice } from './helpers';
+import { Logger } from '../logger/logger';
 
 export function getTypescriptSourceFile(filePath: string, fileContent: string, languageVersion: ScriptTarget = ScriptTarget.Latest, setParentNodes: boolean = false): SourceFile {
   return createSourceFile(filePath, fileContent, languageVersion, setParentNodes);
@@ -213,6 +218,28 @@ export function getNgModuleDecorator(fileName: string, sourceFile: SourceFile) {
   }
 
   return ngModuleDecorators[0];
+}
+
+export function getNgModuleObjectLiteralArg(decorator: Decorator) {
+  const ngModuleArgs = (decorator.expression as CallExpression).arguments;
+  if (!ngModuleArgs || ngModuleArgs.length === 0 || ngModuleArgs.length > 1) {
+    throw new Error(`Invalid NgModule Argument`);
+  }
+  return ngModuleArgs[0] as ObjectLiteralExpression;
+}
+
+export function findObjectLiteralElementByName(properties: NodeArray<ObjectLiteralElement>, identifierToLookFor: string) {
+  return properties.filter((propertyNode) => {
+    return propertyNode && (propertyNode as PropertyAssignment).name && ((propertyNode as PropertyAssignment).name as Identifier).text === identifierToLookFor;
+  })[0];
+}
+
+export function appendNgModuleDeclaration(filePath: string, fileContent: string, declaration: string): string {
+  const sourceFile = getTypescriptSourceFile(filePath, fileContent, ScriptTarget.Latest, false);
+  const decorator = getNgModuleDecorator(path.basename(filePath), sourceFile);
+  const obj = getNgModuleObjectLiteralArg(decorator);
+  const declarations = (findObjectLiteralElementByName(obj.properties, 'declarations') as PropertyAssignment).initializer.elements;
+  return appendAfter(fileContent, declarations[declarations.length - 1], `,\n    ${declaration}`);
 }
 
 const NG_MODULE_DECORATOR_TEXT = 'NgModule';

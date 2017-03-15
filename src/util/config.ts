@@ -155,9 +155,9 @@ export function generateContext(context?: BuildContext): BuildContext {
   setProcessEnvVar(Constants.ENV_APP_ENTRY_POINT, appEntryPointPathValue);
   Logger.debug(`appEntryPoint set to ${appEntryPointPathValue}`);
 
-  const appNgModulePath = resolve(getConfigValue(context, '--appNgModulePath', null, Constants.ENV_APP_NG_MODULE_PATH, Constants.ENV_APP_NG_MODULE_PATH.toLowerCase(), join(context.srcDir, 'app', 'app.module.ts')));
-  setProcessEnvVar(Constants.ENV_APP_NG_MODULE_PATH, appNgModulePath);
-  Logger.debug(`appNgModulePath set to ${appNgModulePath}`);
+  context.appNgModulePath = resolve(getConfigValue(context, '--appNgModulePath', null, Constants.ENV_APP_NG_MODULE_PATH, Constants.ENV_APP_NG_MODULE_PATH.toLowerCase(), join(context.srcDir, 'app', 'app.module.ts')));
+  setProcessEnvVar(Constants.ENV_APP_NG_MODULE_PATH, context.appNgModulePath);
+  Logger.debug(`appNgModulePath set to ${context.appNgModulePath}`);
 
   const appNgModuleClass = getConfigValue(context, '--appNgModuleClass', null, Constants.ENV_APP_NG_MODULE_CLASS, Constants.ENV_APP_NG_MODULE_CLASS.toLowerCase(), 'AppModule');
   setProcessEnvVar(Constants.ENV_APP_NG_MODULE_CLASS, appNgModuleClass);
