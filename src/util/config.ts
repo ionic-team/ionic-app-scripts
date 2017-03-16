@@ -195,7 +195,6 @@ export function generateContext(context?: BuildContext): BuildContext {
   setProcessEnvVar(Constants.ENV_OPTIMIZATION_LOADER, optimizationLoaderPath);
   Logger.debug(`optimizationLoaderPath set to ${optimizationLoaderPath}`);
 
-
   const aotWriteToDisk = getConfigValue(context, '--aotWriteToDisk', null, Constants.ENV_AOT_WRITE_TO_DISK, Constants.ENV_AOT_WRITE_TO_DISK.toLowerCase(), null);
   setProcessEnvVar(Constants.ENV_AOT_WRITE_TO_DISK, aotWriteToDisk);
   Logger.debug(`aotWriteToDisk set to ${aotWriteToDisk}`);
@@ -211,7 +210,6 @@ export function generateContext(context?: BuildContext): BuildContext {
   const printWebpackDependencyTree = getConfigValue(context, '--printWebpackDependencyTree', null, Constants.ENV_PRINT_WEBPACK_DEPENDENCY_TREE, Constants.ENV_PRINT_WEBPACK_DEPENDENCY_TREE.toLowerCase(), null);
   setProcessEnvVar(Constants.ENV_PRINT_WEBPACK_DEPENDENCY_TREE, printWebpackDependencyTree);
   Logger.debug(`printWebpackDependencyTree set to ${printWebpackDependencyTree}`);
-
 
   const bailOnLintError = getConfigValue(context, '--bailOnLintError', null, Constants.ENV_BAIL_ON_LINT_ERROR, Constants.ENV_BAIL_ON_LINT_ERROR.toLowerCase(), null);
   setProcessEnvVar(Constants.ENV_BAIL_ON_LINT_ERROR, bailOnLintError);
@@ -232,6 +230,10 @@ export function generateContext(context?: BuildContext): BuildContext {
   const ngModuleFileNameSuffix = getConfigValue(context, '--ngModuleFileNameSuffix', null, Constants.ENV_NG_MODULE_FILE_NAME_SUFFIX, Constants.ENV_NG_MODULE_FILE_NAME_SUFFIX.toLowerCase(), '.module.ts');
   setProcessEnvVar(Constants.ENV_NG_MODULE_FILE_NAME_SUFFIX, ngModuleFileNameSuffix);
   Logger.debug(`ngModuleFileNameSuffix set to ${ngModuleFileNameSuffix}`);
+
+  const createDefaultNgModuleWhenMissing = getConfigValue(context, '--createDefaultNgModuleWhenMissing', null, Constants.ENV_CREATE_DEFAULT_NG_MODULE_WHEN_MISSING, Constants.ENV_CREATE_DEFAULT_NG_MODULE_WHEN_MISSING.toLowerCase(), 'true');
+  setProcessEnvVar(Constants.ENV_CREATE_DEFAULT_NG_MODULE_WHEN_MISSING, createDefaultNgModuleWhenMissing);
+  Logger.debug(`createDefaultNgModuleWhenMissing set to ${createDefaultNgModuleWhenMissing}`);
 
   /* Provider Path Stuff */
   setProcessEnvVar(Constants.ENV_ACTION_SHEET_CONTROLLER_CLASSNAME, 'ActionSheetController');

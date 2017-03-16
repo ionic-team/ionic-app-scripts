@@ -1,4 +1,6 @@
-import { dirname, extname, relative } from 'path';
+import { writeFileSync } from 'fs';
+
+import { basename, dirname, extname, relative } from 'path';
 
 import {
   ArrayLiteralExpression,
@@ -17,7 +19,7 @@ import {
 import { Logger } from '../logger/logger';
 import * as Constants from '../util/constants';
 import { FileCache } from '../util/file-cache';
-import { changeExtension, getStringPropertyValue, replaceAll } from '../util/helpers';
+import { changeExtension, getBooleanPropertyValue, getStringPropertyValue, replaceAll } from '../util/helpers';
 import { BuildContext, ChangedFile, DeepLinkConfigEntry, DeepLinkDecoratorAndClass, DeepLinkPathInfo, File } from '../util/interfaces';
 import {
   appendAfter,
@@ -42,7 +44,7 @@ export function getDeepLinkData(appNgModuleFilePath: string, fileCache: FileCach
 
     if (deepLinkDecoratorData) {
       // sweet, the page has a DeepLinkDecorator, which means it meets the criteria to process that bad boy
-      const pathInfo = getNgModuleDataFromPage(appNgModuleFilePath, file.path, fileCache, isAot);
+      const pathInfo = getNgModuleDataFromPage(appNgModuleFilePath, file.path, deepLinkDecoratorData.className, fileCache, isAot);
       const deepLinkConfigEntry = Object.assign({}, deepLinkDecoratorData, pathInfo);
       deepLinkConfigEntries.push(deepLinkConfigEntry);
     }
@@ -65,11 +67,23 @@ export function getRelativePathToPageNgModuleFromAppNgModule(pathToAppNgModule: 
   return relative(dirname(pathToAppNgModule), pathToPageNgModule);
 }
 
-export function getNgModuleDataFromPage(appNgModuleFilePath: string, filePath: string, fileCache: FileCache, isAot: boolean): DeepLinkPathInfo {
+export function getNgModuleDataFromPage(appNgModuleFilePath: string, filePath: string, className: string, fileCache: FileCache, isAot: boolean): DeepLinkPathInfo {
   const ngModulePath = getNgModulePathFromCorrespondingPage(filePath);
-  const ngModuleFile = fileCache.get(ngModulePath);
+  let ngModuleFile = fileCache.get(ngModulePath);
   if (!ngModuleFile) {
-    throw new Error(`${filePath} has a @DeepLink decorator, but it does not have a corresponding "NgModule" at ${ngModulePath}`);
+    // the NgModule file does not exists, check if we are going to make it easy for the userlandModulePath
+    // and automagically generate an NgModule for them
+    // /gif magic
+    if (getBooleanPropertyValue(Constants.ENV_CREATE_DEFAULT_NG_MODULE_WHEN_MISSING)) {
+      const defaultNgModuleContent = generateDefaultDeepLinkNgModuleContent(filePath, className);
+      // cache it and write it to disk to avoid this connodrum in the future
+      ngModuleFile = { path: ngModulePath, content: defaultNgModuleContent};
+      fileCache.set(ngModulePath, ngModuleFile);
+      writeFileSync(ngModulePath, defaultNgModuleContent);
+    } else {
+      // the flag is not set, so throw an error
+      throw new Error(`${filePath} has a @DeepLink decorator, but it does not have a corresponding "NgModule" at ${ngModulePath}`);
+    }
   }
   // get the class declaration out of NgModule class content
   const exportedClassName = getNgModuleClassName(ngModuleFile.path, ngModuleFile.content);
@@ -116,7 +130,8 @@ export function getDeepLinkDecoratorContentForSourceFile(sourceFile: SourceFile)
             segment: deepLinkSegment,
             priority: deepLinkPriority,
             defaultHistory: deepLinkDefaultHistory,
-            rawString: rawStringContent
+            rawString: rawStringContent,
+            className: className
           });
         }
       });
@@ -350,6 +365,28 @@ export function addDeepLinkArgumentToAppNgModule(appNgModuleFileContent: string,
   const argTwoNode = ionicModuleForRoot.arguments[1];
   const updatedFileContent = appendAfter(appNgModuleFileContent, argTwoNode, `, ${deepLinkString}`);
   return updatedFileContent;
+}
+
+export function generateDefaultDeepLinkNgModuleContent(filePath: string, className: string) {
+  const importFrom = basename(filePath, '.ts');
+
+  return `
+import { NgModule } from '@angular/core';
+import { DeepLinkModule } from 'ionic-angular';
+import { ${className} } from './${importFrom}';
+
+
+@NgModule({
+  declarations: [
+    ${className},
+  ],
+  imports: [
+    DeepLinkModule.forChild(${className})
+  ]
+})
+export class ${className}Module {}
+
+`;
 }
 
 

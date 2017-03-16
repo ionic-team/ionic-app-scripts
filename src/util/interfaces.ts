@@ -156,6 +156,7 @@ export interface DeepLinkDecoratorAndClass {
   defaultHistory: string[];
   priority: string;
   rawString: string;
+  className: string;
 };
 
 export interface DeepLinkPathInfo {
