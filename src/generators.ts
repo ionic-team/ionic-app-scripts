@@ -5,6 +5,7 @@ import { BuildContext } from './util/interfaces';
 import { readFileAsync, writeFileAsync } from './util/helpers';
 import { getTypescriptSourceFile, appendNgModuleDeclaration, insertNamedImportIfNeeded } from './util/typescript-utils';
 import { applyTemplates, filterOutTemplates, getNgModules, GeneratorOption, GeneratorRequest, hydrateRequest, readTemplates, writeGeneratedFiles } from './generators/util';
+import * as path from 'path';
 
 export { getNgModules, GeneratorOption, GeneratorRequest };
 
@@ -19,10 +20,12 @@ export function processPageRequest(context: BuildContext, name: string) {
 
 export function processPipeRequest(context: BuildContext, name: string, ngModulePath: string) {
   const hydratedRequest = hydrateRequest(context, { type: 'pipe', name });
-
+  console.log(hydratedRequest);
+  console.log(ngModulePath);
   return readFileAsync(ngModulePath).then((fileContent: string) => {
-    fileContent = insertNamedImportIfNeeded(ngModulePath, fileContent, name, `./${name}`);
-    fileContent = appendNgModuleDeclaration(ngModulePath, fileContent, name);
+    fileContent = insertNamedImportIfNeeded(ngModulePath, fileContent, hydratedRequest.className, path.relative(path.dirname(ngModulePath), hydratedRequest.dirToWrite));
+    fileContent = appendNgModuleDeclaration(ngModulePath, fileContent, hydratedRequest.className);
+    console.log(fileContent);
     return writeFileAsync(ngModulePath, fileContent);
   }).then(() => {
     return processNonTabRequest(context, hydratedRequest);
