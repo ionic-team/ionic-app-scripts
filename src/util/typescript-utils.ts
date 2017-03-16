@@ -14,6 +14,7 @@ import {
   ObjectLiteralElement,
   ObjectLiteralExpression,
   PropertyAssignment,
+  ArrayLiteralExpression,
   ScriptTarget,
   SourceFile,
   StringLiteral,
@@ -238,7 +239,8 @@ export function appendNgModuleDeclaration(filePath: string, fileContent: string,
   const sourceFile = getTypescriptSourceFile(filePath, fileContent, ScriptTarget.Latest, false);
   const decorator = getNgModuleDecorator(path.basename(filePath), sourceFile);
   const obj = getNgModuleObjectLiteralArg(decorator);
-  const declarations = (findObjectLiteralElementByName(obj.properties, 'declarations') as PropertyAssignment).initializer.elements;
+  const properties = (findObjectLiteralElementByName(obj.properties, 'declarations') as PropertyAssignment);
+  const declarations = (properties.initializer as ArrayLiteralExpression).elements;
   return appendAfter(fileContent, declarations[declarations.length - 1], `,\n    ${declaration}`);
 }
 
