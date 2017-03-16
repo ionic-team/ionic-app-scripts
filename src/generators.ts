@@ -1,11 +1,7 @@
-import { Logger} from './logger/logger';
 import { generateContext } from './util/config';
 import * as Constants from './util/constants';
 import { BuildContext } from './util/interfaces';
-import { readFileAsync, writeFileAsync } from './util/helpers';
-import { getTypescriptSourceFile, appendNgModuleDeclaration, insertNamedImportIfNeeded } from './util/typescript-utils';
-import { applyTemplates, filterOutTemplates, getNgModules, GeneratorOption, GeneratorRequest, hydrateRequest, readTemplates, writeGeneratedFiles } from './generators/util';
-import * as path from 'path';
+import { getNgModules, GeneratorOption, GeneratorRequest, nonPageFileManipulation, processNonTabRequest } from './generators/util';
 
 export { getNgModules, GeneratorOption, GeneratorRequest };
 
@@ -19,31 +15,19 @@ export function processPageRequest(context: BuildContext, name: string) {
 }
 
 export function processPipeRequest(context: BuildContext, name: string, ngModulePath: string) {
-  const hydratedRequest = hydrateRequest(context, { type: 'pipe', name });
-  return readFileAsync(ngModulePath).then((fileContent: string) => {
-    fileContent = insertNamedImportIfNeeded(ngModulePath, fileContent, hydratedRequest.className, path.relative(path.dirname(ngModulePath), hydratedRequest.dirToWrite));
-    fileContent = appendNgModuleDeclaration(ngModulePath, fileContent, hydratedRequest.className);
-    return writeFileAsync(ngModulePath, fileContent);
-  }).then(() => {
-    return processNonTabRequest(context, hydratedRequest);
-  }).then(() => {
-    // TODO
-  });
+  return nonPageFileManipulation(context, name, ngModulePath, 'pipe');
 }
 
-function processNonTabRequest(context: BuildContext, request: GeneratorRequest): Promise<string[]> {
-  Logger.debug('[Generators] processNonTabRequest: Hydrating the request with project data ...');
-  const hydratedRequest = hydrateRequest(context, request);
-  Logger.debug('[Generators] processNonTabRequest: Reading templates ...');
-  return readTemplates(hydratedRequest.dirToRead).then((map: Map<string, string>) => {
-    Logger.debug('[Generators] processNonTabRequest: Filtering out NgModule and Specs if needed ...');
-    return filterOutTemplates(hydratedRequest, map);
-  }).then((filteredMap: Map<string, string>) => {
-    Logger.debug('[Generators] processNonTabRequest: Applying tempaltes ...');
-    const appliedTemplateMap = applyTemplates(hydratedRequest, filteredMap);
-    Logger.debug('[Generators] processNonTabRequest: Writing generated files to disk ...');
-    return writeGeneratedFiles(hydratedRequest, appliedTemplateMap);
-  });
+export function processDirectiveRequest(context: BuildContext, name: string, ngModulePath: string) {
+  return nonPageFileManipulation(context, name, ngModulePath, 'directive');
+}
+
+export function processComponentRequest(context: BuildContext, name: string, ngModulePath: string) {
+  return nonPageFileManipulation(context, name, ngModulePath, 'component');
+}
+
+export function processProviderRequest(context: BuildContext, name: string, ngModulePath: string) {
+  return nonPageFileManipulation(context, name, ngModulePath, 'provider');
 }
 
 export function listOptions() {

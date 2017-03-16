@@ -95,7 +95,7 @@ export function generateContext(context?: BuildContext): BuildContext {
   setProcessEnvVar(Constants.ENV_VAR_COMPONENTS_DIR, context.componentsDir);
   Logger.debug(`componentsDir set to ${context.componentsDir}`);
 
-  context.directivesDir = resolve(context.directivesDir || getConfigValue(context, '--directivesDir', null, Constants.ENV_VAR_DIRECTIVES_DIR, Constants.ENV_VAR_DIRECTIVES_DIR.toLowerCase(), join(context.srcDir, 'components')));
+  context.directivesDir = resolve(context.directivesDir || getConfigValue(context, '--directivesDir', null, Constants.ENV_VAR_DIRECTIVES_DIR, Constants.ENV_VAR_DIRECTIVES_DIR.toLowerCase(), join(context.srcDir, 'directives')));
   setProcessEnvVar(Constants.ENV_VAR_DIRECTIVES_DIR, context.directivesDir);
   Logger.debug(`directivesDir set to ${context.directivesDir}`);
 
