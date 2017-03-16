@@ -231,10 +231,6 @@ export function generateContext(context?: BuildContext): BuildContext {
   setProcessEnvVar(Constants.ENV_NG_MODULE_FILE_NAME_SUFFIX, ngModuleFileNameSuffix);
   Logger.debug(`ngModuleFileNameSuffix set to ${ngModuleFileNameSuffix}`);
 
-  const createDefaultNgModuleWhenMissing = getConfigValue(context, '--createDefaultNgModuleWhenMissing', null, Constants.ENV_CREATE_DEFAULT_NG_MODULE_WHEN_MISSING, Constants.ENV_CREATE_DEFAULT_NG_MODULE_WHEN_MISSING.toLowerCase(), 'true');
-  setProcessEnvVar(Constants.ENV_CREATE_DEFAULT_NG_MODULE_WHEN_MISSING, createDefaultNgModuleWhenMissing);
-  Logger.debug(`createDefaultNgModuleWhenMissing set to ${createDefaultNgModuleWhenMissing}`);
-
   /* Provider Path Stuff */
   setProcessEnvVar(Constants.ENV_ACTION_SHEET_CONTROLLER_CLASSNAME, 'ActionSheetController');
   setProcessEnvVar(Constants.ENV_ACTION_SHEET_CONTROLLER_PATH, join(context.ionicAngularDir, 'components', 'action-sheet', 'action-sheet-controller.js'));

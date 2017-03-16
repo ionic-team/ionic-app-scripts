@@ -1,5 +1,3 @@
-import { writeFileSync } from 'fs';
-
 import { basename, dirname, extname, relative } from 'path';
 
 import {
@@ -19,7 +17,7 @@ import {
 import { Logger } from '../logger/logger';
 import * as Constants from '../util/constants';
 import { FileCache } from '../util/file-cache';
-import { changeExtension, getBooleanPropertyValue, getStringPropertyValue, replaceAll } from '../util/helpers';
+import { changeExtension, getStringPropertyValue, replaceAll } from '../util/helpers';
 import { BuildContext, ChangedFile, DeepLinkConfigEntry, DeepLinkDecoratorAndClass, DeepLinkPathInfo, File } from '../util/interfaces';
 import {
   appendAfter,
@@ -71,19 +69,7 @@ export function getNgModuleDataFromPage(appNgModuleFilePath: string, filePath: s
   const ngModulePath = getNgModulePathFromCorrespondingPage(filePath);
   let ngModuleFile = fileCache.get(ngModulePath);
   if (!ngModuleFile) {
-    // the NgModule file does not exists, check if we are going to make it easy for the userlandModulePath
-    // and automagically generate an NgModule for them
-    // /gif magic
-    if (getBooleanPropertyValue(Constants.ENV_CREATE_DEFAULT_NG_MODULE_WHEN_MISSING)) {
-      const defaultNgModuleContent = generateDefaultDeepLinkNgModuleContent(filePath, className);
-      // cache it and write it to disk to avoid this connodrum in the future
-      ngModuleFile = { path: ngModulePath, content: defaultNgModuleContent};
-      fileCache.set(ngModulePath, ngModuleFile);
-      writeFileSync(ngModulePath, defaultNgModuleContent);
-    } else {
-      // the flag is not set, so throw an error
-      throw new Error(`${filePath} has a @DeepLink decorator, but it does not have a corresponding "NgModule" at ${ngModulePath}`);
-    }
+    throw new Error(`${filePath} has a @DeepLink decorator, but it does not have a corresponding "NgModule" at ${ngModulePath}`);
   }
   // get the class declaration out of NgModule class content
   const exportedClassName = getNgModuleClassName(ngModuleFile.path, ngModuleFile.content);

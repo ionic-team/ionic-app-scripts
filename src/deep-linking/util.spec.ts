@@ -567,7 +567,6 @@ export function removeDecorators(fileName: string, source: string): string {
       const knownClassName = 'PageOne';
       const fileCache = new FileCache();
       spyOn(helpers, helpers.getStringPropertyValue.name).and.returnValue('.module.ts');
-      spyOn(helpers, helpers.getBooleanPropertyValue.name).and.returnValue(false);
 
       const knownErrorMsg = 'Should never happen';
       try {
@@ -575,24 +574,7 @@ export function removeDecorators(fileName: string, source: string): string {
         throw new Error(knownErrorMsg);
       } catch (ex) {
         expect(ex.message).not.toEqual(knownErrorMsg);
-        expect(helpers.getBooleanPropertyValue).toHaveBeenCalledWith(Constants.ENV_CREATE_DEFAULT_NG_MODULE_WHEN_MISSING);
       }
-    });
-
-    it('should create a default ngModule and write it to disk when create default ngModule flag is on', () => {
-      const prefix = join('Users', 'noone', 'myApp', 'src');
-      const appNgModulePath = join(prefix, 'app', 'app.module.ts');
-      const pagePath = join(prefix, 'pages', 'page-one', 'page-one.ts');
-      const knownClassName = 'PageOne';
-      const fileCache = new FileCache();
-      spyOn(helpers, helpers.getStringPropertyValue.name).and.returnValue('.module.ts');
-      spyOn(helpers, helpers.getBooleanPropertyValue.name).and.returnValue(true);
-      spyOn(fs, 'writeFileSync');
-      const result = util.getNgModuleDataFromPage(appNgModulePath, pagePath, knownClassName, fileCache, false);
-      expect(result.absolutePath).toEqual('Users/noone/myApp/src/pages/page-one/page-one.module.ts');
-      expect(result.userlandModulePath).toEqual('../pages/page-one/page-one.module');
-      expect(result.className).toEqual('PageOneModule');
-      expect(fs.writeFileSync).toHaveBeenCalled();
     });
 
     it('should return non-aot adjusted paths when not in AoT', () => {
@@ -620,14 +602,12 @@ export class HomePageModule {}
       const fileCache = new FileCache();
       fileCache.set(pageNgModulePath, { path: pageNgModulePath, content: pageNgModuleContent});
       spyOn(helpers, helpers.getStringPropertyValue.name).and.returnValue('.module.ts');
-      spyOn(helpers, helpers.getBooleanPropertyValue.name);
 
       const result = util.getNgModuleDataFromPage(appNgModulePath, pagePath, knownClassName, fileCache, false);
 
       expect(result.absolutePath).toEqual(pageNgModulePath);
       expect(result.userlandModulePath).toEqual('../pages/page-one/page-one.module');
       expect(result.className).toEqual('HomePageModule');
-      expect(helpers.getBooleanPropertyValue).not.toHaveBeenCalled();
     });
 
     it('should return adjusted paths to account for AoT', () => {
@@ -655,13 +635,11 @@ export class HomePageModule {}
       const fileCache = new FileCache();
       fileCache.set(pageNgModulePath, { path: pageNgModulePath, content: pageNgModuleContent});
       spyOn(helpers, helpers.getStringPropertyValue.name).and.returnValue('.module.ts');
-      spyOn(helpers, helpers.getBooleanPropertyValue.name);
 
       const result = util.getNgModuleDataFromPage(appNgModulePath, pagePath, knownClassName, fileCache, true);
       expect(result.absolutePath).toEqual(helpers.changeExtension(pageNgModulePath, '.ngfactory.ts'));
       expect(result.userlandModulePath).toEqual('../pages/page-one/page-one.module.ngfactory');
       expect(result.className).toEqual('HomePageModuleNgFactory');
-      expect(helpers.getBooleanPropertyValue).not.toHaveBeenCalled();
     });
   });
 
