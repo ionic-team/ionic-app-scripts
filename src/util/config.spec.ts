@@ -146,7 +146,7 @@ describe('config', () => {
       expect(fakeConfig[Constants.ENV_TOAST_VIEW_CONTROLLER_PATH]).toEqual(join(context.ionicAngularDir, 'components', 'toast', 'toast.js'));
       expect(fakeConfig[Constants.ENV_TOAST_COMPONENT_FACTORY_PATH]).toEqual(join(context.ionicAngularDir, 'components', 'toast', 'toast-component.ngfactory.js'));
 
-      expect(fakeConfig[Constants.ENV_EXPERIMENTAL_PARSE_DEEPLINKS]).toBeFalsy();
+      expect(fakeConfig[Constants.ENV_PARSE_DEEPLINKS]).toBeTruthy();
       expect(fakeConfig[Constants.ENV_EXPERIMENTAL_MANUAL_TREESHAKING]).toBeFalsy();
       expect(fakeConfig[Constants.ENV_EXPERIMENTAL_PURGE_DECORATORS]).toBeFalsy();
       expect(fakeConfig[Constants.ENV_USE_EXPERIMENTAL_CLOSURE]).toBeFalsy();

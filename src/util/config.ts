@@ -268,9 +268,9 @@ export function generateContext(context?: BuildContext): BuildContext {
   setProcessEnvVar(Constants.ENV_TOAST_COMPONENT_FACTORY_PATH, join(context.ionicAngularDir, 'components', 'toast', 'toast-component.ngfactory.js'));
 
   /* Experimental Flags */
-  const experimentalParseDeepLinks = getConfigValue(context, '--experimentalParseDeepLinks', null, Constants.ENV_EXPERIMENTAL_PARSE_DEEPLINKS, Constants.ENV_EXPERIMENTAL_PARSE_DEEPLINKS.toLowerCase(), null);
-  setProcessEnvVar(Constants.ENV_EXPERIMENTAL_PARSE_DEEPLINKS, experimentalParseDeepLinks);
-  Logger.debug(`experimentalParseDeepLinks set to ${experimentalParseDeepLinks}`);
+  const parseDeepLinks = getConfigValue(context, '--parseDeepLinks', null, Constants.ENV_PARSE_DEEPLINKS, Constants.ENV_PARSE_DEEPLINKS.toLowerCase(), 'true');
+  setProcessEnvVar(Constants.ENV_PARSE_DEEPLINKS, parseDeepLinks);
+  Logger.debug(`parseDeepLinks set to ${parseDeepLinks}`);
 
   const experimentalManualTreeshaking = getConfigValue(context, '--experimentalManualTreeshaking', null, Constants.ENV_EXPERIMENTAL_MANUAL_TREESHAKING, Constants.ENV_EXPERIMENTAL_MANUAL_TREESHAKING.toLowerCase(), null);
   setProcessEnvVar(Constants.ENV_EXPERIMENTAL_MANUAL_TREESHAKING, experimentalManualTreeshaking);

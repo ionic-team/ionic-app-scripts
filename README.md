@@ -131,7 +131,7 @@ npm run build --rollup ./config/rollup.config.js
 | print dependency tree | `ionic_print_original_dependency_tree` | `--printOriginalDependencyTree` | `null` | Set to `true` to print out the original dependency tree calculated during the optimize step |
 | print modified dependency tree | `ionic_print_modified_dependency_tree` | `--printModifiedDependencyTree` | `null` | Set to `true` to print out the modified dependency tree after purging unused modules |
 | print webpack dependency tree | `ionic_print_webpack_dependency_tree` | `--printWebpackDependencyTree` | `null` | Set to `true` to print out a dependency tree after running Webpack |
-| experimental parse deeplink config | `ionic_experimental_parse_deeplinks` | `--experimentalParseDeepLinks` | `null` | Set to `true` to parse the Ionic 3.x deep links API for lazy loading (Experimental) |
+| parse deeplink config | `ionic_parse_deeplinks` | `--parseDeepLinks` | `true` | Parses and extracts data from the `@DeepLink` decorator |
 | experimental manual tree shaking | `ionic_experimental_manual_treeshaking` | `--experimentalManualTreeshaking` | `null` | Set to `true` to purge unused Ionic components/code (Experimental) |
 | experimental purge decorators | `ionic_experimental_purge_decorators` | `--experimentalPurgeDecorators` | `null` | Set to `true` to purge unneeded decorators to improve tree shakeability of code (Experimental) |
 | experimental closure compiler | `ionic_use_experimental_closure` | `--useExperimentalClosure` | `null` | Set to `true` to use closure compiler to minify the final bundle |
@@ -176,7 +176,7 @@ These environment variables are automatically set to [Node's `process.env`](http
 | `IONIC_PRINT_ORIGINAL_DEPENDENCY_TREE` | boolean to print out the original dependency tree calculated during the optimize step |
 | `IONIC_PRINT_MODIFIED_DEPENDENCY_TREE` | boolean to print out the modified dependency tree after purging unused modules |
 | `IONIC_PRINT_WEBPACK_DEPENDENCY_TREE` | boolean to print out a dependency tree after running Webpack |
-| `IONIC_EXPERIMENTAL_PARSE_DEEPLINKS` | boolean to enable parsing the Ionic 3.x deep links API for lazy loading (Experimental) |
+| `IONIC_PARSE_DEEPLINKS` | boolean to enable parsing the Ionic 3.x deep links API for lazy loading |
 | `IONIC_EXPERIMENTAL_MANUAL_TREESHAKING` | boolean to enable purging unused Ionic components/code (Experimental) |
 | `IONIC_EXPERIMENTAL_PURGE_DECORATORS` | boolean to enable purging unneeded decorators from source code (Experimental) |
 | `IONIC_USE_EXPERIMENTAL_CLOSURE` | boolean to enable use of closure compiler to minify the final bundle |
