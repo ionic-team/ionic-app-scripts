@@ -1,7 +1,6 @@
 import * as serve from './serve';
 import * as config from './util/config';
 import { BuildContext } from './util/interfaces';
-import { ServeConfig } from './dev-server/serve-config';
 
 import * as watch from './watch';
 import * as open from './util/open';
@@ -11,7 +10,7 @@ import * as liveReloadServer from './dev-server/live-reload';
 import * as network from './util/network';
 
 describe('test serve', () => {
-  let configResults: ServeConfig;
+  let configResults: any;
   let context: BuildContext;
 
   beforeEach(() => {

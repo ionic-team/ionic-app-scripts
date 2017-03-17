@@ -1,5 +1,6 @@
 import * as express from 'express';
 import * as archiver from 'archiver';
+import * as path from 'path';
 import { BuildContext } from './util/interfaces';
 import { getConfigValue } from './util/config';
 import { setContext } from './util/helpers';
@@ -8,13 +9,16 @@ import { createNotificationServer } from './dev-server/notification-server';
 import { createWsServer } from './dev-server/ws-server';
 import { findClosestOpenPorts } from './util/network';
 import { Logger } from './logger/logger';
-import * as events from './util/events';
+import {
+  on as onGlobalEvent,
+  EventType
+} from './util/events';
 
 const DEV_LOGGER_DEFAULT_PORT = 53703;
 const WS_SERVER_DEFAULT_PORT = 40000;
 const DEV_SERVER_DEFAULT_PORT = 8100;
 
-export async function serve(context: BuildContext) {
+export async function deviceView(context: BuildContext, publicIP: string) {
   setContext(context);
 
   const host = getHttpServerHost(context);
@@ -40,7 +44,6 @@ export async function serve(context: BuildContext) {
     archive.finalize();
   });
 
-
   createNotificationServer({
     buildDir: context.buildDir,
     rootDir: context.rootDir,
@@ -51,13 +54,56 @@ export async function serve(context: BuildContext) {
   let wsServer = createWsServer({
     port: wsServerPortFound
   });
+  const httpServerUrl = `http://${publicIP}:${hostPortFound}`;
+
+  wsServer.onMessage((ws: any, data: any) => {
+    const { eventType, payload } = JSON.parse(data);
+    let eventTypeResponse = '';
+    let payloadResponse = {};
+
+    switch (eventType) {
+    case 'request-zip':
+      eventTypeResponse = 'zip-location';
+      payloadResponse = {
+        url: `${httpServerUrl}/app.zip`
+      };
+      break;
+    }
+
+    ws.sendJson({
+      eventType: eventTypeResponse,
+      payload: payloadResponse
+    });
+  });
+
+  const fileChangedCb = fileChanged(wsServer, context.wwwDir, httpServerUrl);
+
+  onGlobalEvent(EventType.FileChange, fileChangedCb);
+  onGlobalEvent(EventType.ReloadApp, fileChangedCb);
 
   await watch(context);
 
-  events.on(events.EventType.FileChange, wsServer.broadcast);
-
   return {
+    wsPort: wsServerPortFound,
+    hostPort: hostPortFound
   };
+}
+
+function fileChanged(wsServer: any, wwwDir: string, httpUrl: string) {
+  return (data: any[]) => {
+    data = data.map(fd => {
+      const filePath = path.relative(wwwDir, fd.filePath);
+      return {
+        path: filePath,
+        url: `${httpUrl}/${filePath}`
+      };
+    });
+
+    wsServer.broadcast({
+      eventType: 'files-update',
+      payload: data
+    });
+  }
 }
 
 function getHttpServerPort(context: BuildContext): number {

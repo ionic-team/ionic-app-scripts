@@ -18,8 +18,8 @@ export function createWsServer({ port }: WSOptions) {
   wss.broadcast = function broadcast(data: any): void {
     const msg = JSON.stringify(data);
 
-    wss.clients.forEach(function each(client: any) {
-      if (client.readyState === WebSocket.OPEN) {
+    wss.clients.forEach((client: any) => {
+      if (client.readyState === ws.OPEN) {
         client.send(msg);
       }
     });
@@ -28,6 +28,9 @@ export function createWsServer({ port }: WSOptions) {
   wss.on('connection', (ws: any) => {
     ws.on('message', (data: string) => {
       subscribers.forEach(fn => {
+        ws.sendJson = () => {
+          return ws.send(JSON.stringify(data));
+        };
         fn(ws, data);
       });
     });
