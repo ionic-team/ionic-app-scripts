@@ -17,6 +17,7 @@ export function createWsServer({ port }: WSOptions) {
 
   wss.broadcast = function broadcast(data: any): void {
     const msg = JSON.stringify(data);
+    console.log('broadcast', msg);
 
     wss.clients.forEach((client: any) => {
       if (client.readyState === ws.OPEN) {
@@ -28,8 +29,9 @@ export function createWsServer({ port }: WSOptions) {
   wss.on('connection', (ws: any) => {
     ws.on('message', (data: string) => {
       subscribers.forEach(fn => {
-        ws.sendJson = () => {
-          return ws.send(JSON.stringify(data));
+        ws.sendJson = (sendJson: any) => {
+          console.log('sendJson', sendJson);
+          return ws.send(JSON.stringify(sendJson));
         };
         fn(ws, data);
       });

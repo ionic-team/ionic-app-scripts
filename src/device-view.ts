@@ -79,7 +79,9 @@ export async function deviceView(context: BuildContext, publicIP: string) {
   const fileChangedCb = fileChanged(wsServer, context.wwwDir, httpServerUrl);
 
   onGlobalEvent(EventType.FileChange, fileChangedCb);
-  onGlobalEvent(EventType.ReloadApp, fileChangedCb);
+  onGlobalEvent(EventType.ReloadApp, () =>
+    fileChangedCb([{ event: 'change', ext: '.html', filePath: 'index.html'}])
+  );
 
   await watch(context);
 
@@ -95,7 +97,7 @@ function fileChanged(wsServer: any, wwwDir: string, httpUrl: string) {
       const filePath = path.relative(wwwDir, fd.filePath);
       return {
         path: filePath,
-        url: `${httpUrl}/${filePath}`
+        url: `${httpUrl}/www/${filePath}`
       };
     });
 
