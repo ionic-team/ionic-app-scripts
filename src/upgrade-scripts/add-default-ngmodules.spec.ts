@@ -121,9 +121,9 @@ describe('add default ngmodules upgrade script', () => {
 function getClassContent(className: string, folderName: string) {
   return `
 import { Component } from '@angular/core';
-import { DeepLink, NavController } from 'ionic-angular';
+import { IonicPage, NavController } from 'ionic-angular';
 
-@DeepLink()
+@IonicPage()
 @Component({
   selector: '${folderName}',
   templateUrl: './${folderName}.html'

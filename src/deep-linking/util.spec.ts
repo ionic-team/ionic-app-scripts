@@ -57,7 +57,7 @@ import { Component } from '@angular/core';
 
 import { DeepLink, NavController } from 'ionic-angular';
 
-@DeepLink({
+@IonicPage({
   name: 'someName',
   segment: 'someSegmentBro',
   defaultHistory: ['page-one', 'page-two'],
@@ -116,7 +116,7 @@ import { Component } from '@angular/core';
 
 import { DeepLink, NavController } from 'ionic-angular';
 
-@DeepLink({
+@IonicPage({
   segment: 'someSegmentBro',
   defaultHistory: ['page-one', 'page-two'],
   priority: 'high'
@@ -174,7 +174,7 @@ import { Component } from '@angular/core';
 
 import { DeepLink, NavController } from 'ionic-angular';
 
-@DeepLink({
+@IonicPage({
   defaultHistory: ['page-one', 'page-two'],
   priority: 'high'
 })
@@ -231,7 +231,7 @@ import { Component } from '@angular/core';
 
 import { DeepLink, NavController } from 'ionic-angular';
 
-@DeepLink({
+@IonicPage({
   priority: 'high'
 })
 @Component({
@@ -287,7 +287,7 @@ import { Component } from '@angular/core';
 
 import { DeepLink, NavController } from 'ionic-angular';
 
-@DeepLink({
+@IonicPage({
 })
 @Component({
   selector: 'page-home',
@@ -342,7 +342,7 @@ import { Component } from '@angular/core';
 
 import { DeepLink, NavController } from 'ionic-angular';
 
-@DeepLink()
+@IonicPage()
 @Component({
   selector: 'page-home',
   template: \`
@@ -397,9 +397,9 @@ import { Component } from '@angular/core';
 
 import { DeepLink, NavController } from 'ionic-angular';
 
-@DeepLink({
+@IonicPage({
 })
-@DeepLink({
+@IonicPage({
 })
 @Component({
   selector: 'page-home',
@@ -835,7 +835,7 @@ import { Component } from '@angular/core';
 import { DeepLink, NavController } from 'ionic-angular';
 
 
-@DeepLink({
+@IonicPage({
   name: 'SomeOtherName'
 })
 @Component({
@@ -945,7 +945,7 @@ export class PageTwoModule {
 import { Component } from '@angular/core';
 import { DeepLink, NavController } from 'ionic-angular';
 
-@DeepLink({
+@IonicPage({
   segment: 'someSegmentBro',
   defaultHistory: ['page-one', 'page-two'],
   priority: 'high'
@@ -1026,7 +1026,7 @@ import { Component } from '@angular/core';
 import { DeepLink, NavController } from 'ionic-angular';
 
 
-@DeepLink({
+@IonicPage({
   name: 'SomeOtherName'
 })
 @Component({
@@ -1081,7 +1081,7 @@ import { LoadingController, ModalController, NavController, PopoverController } 
   selector: 'page-page-two',
   templateUrl: './page-two.html'
 })
-@DeepLink()
+@IonicPage()
 export class PageTwo {
 
   constructor(public loadingController: LoadingController, public modalController: ModalController, public navCtrl: NavController, public popoverCtrl: PopoverController) {}
@@ -1138,7 +1138,7 @@ export class PageTwoModule {
 import { Component } from '@angular/core';
 import { DeepLink, NavController } from 'ionic-angular';
 
-@DeepLink({
+@IonicPage({
   segment: 'someSegmentBro',
   defaultHistory: ['page-one', 'page-two'],
   priority: 'high'
@@ -1244,7 +1244,7 @@ import { Component } from '@angular/core';
 import { DeepLink, NavController } from 'ionic-angular';
 
 
-@DeepLink({
+@IonicPage({
   name: 'SomeOtherName'
 })
 @Component({
@@ -1299,7 +1299,7 @@ import { LoadingController, ModalController, NavController, PopoverController } 
   selector: 'page-page-two',
   templateUrl: './page-two.html'
 })
-@DeepLink()
+@IonicPage()
 export class PageTwo {
 
   constructor(public loadingController: LoadingController, public modalController: ModalController, public navCtrl: NavController, public popoverCtrl: PopoverController) {}
@@ -1356,7 +1356,7 @@ export class PageTwoModule {
 import { Component } from '@angular/core';
 import { DeepLink, NavController } from 'ionic-angular';
 
-@DeepLink({
+@IonicPage({
   segment: 'someSegmentBro',
   defaultHistory: ['page-one', 'page-two'],
   priority: 'high'

@@ -69,7 +69,7 @@ export function getNgModuleDataFromPage(appNgModuleFilePath: string, filePath: s
   const ngModulePath = getNgModulePathFromCorrespondingPage(filePath);
   let ngModuleFile = fileCache.get(ngModulePath);
   if (!ngModuleFile) {
-    throw new Error(`${filePath} has a @DeepLink decorator, but it does not have a corresponding "NgModule" at ${ngModulePath}`);
+    throw new Error(`${filePath} has a @IonicPage decorator, but it does not have a corresponding "NgModule" at ${ngModulePath}`);
   }
   // get the class declaration out of NgModule class content
   const exportedClassName = getNgModuleClassName(ngModuleFile.path, ngModuleFile.content);
@@ -125,7 +125,7 @@ export function getDeepLinkDecoratorContentForSourceFile(sourceFile: SourceFile)
   });
 
   if (list.length > 1) {
-    throw new Error('Only one @DeepLink decorator is allowed per file.');
+    throw new Error('Only one @IonicPage decorator is allowed per file.');
   }
 
   if (list.length === 1) {
@@ -152,7 +152,7 @@ function getStringValueFromDeepLinkDecorator(sourceFile: SourceFile, propertyNod
     Logger.debug(`[DeepLinking util] getNameValueFromDeepLinkDecorator: DeepLink ${identifierToLookFor} set to ${valueToReturn}`);
     return valueToReturn;
   } catch (ex) {
-    Logger.error(`Failed to parse the @DeepLink decorator. The ${identifierToLookFor} must be an array of strings`);
+    Logger.error(`Failed to parse the @IonicPage decorator. The ${identifierToLookFor} must be an array of strings`);
     throw ex;
   }
 }
@@ -180,7 +180,7 @@ function getArrayValueFromDeepLinkDecorator(sourceFile: SourceFile, propertyNode
     Logger.debug(`[DeepLinking util] getNameValueFromDeepLinkDecorator: DeepLink ${identifierToLookFor} set to ${valueToReturn}`);
     return valueToReturn;
   } catch (ex) {
-    Logger.error(`Failed to parse the @DeepLink decorator. The ${identifierToLookFor} must be an array of strings`);
+    Logger.error(`Failed to parse the @IonicPage decorator. The ${identifierToLookFor} must be an array of strings`);
     throw ex;
   }
 }
@@ -377,7 +377,7 @@ export class ${className}Module {}
 
 
 
-const DEEPLINK_DECORATOR_TEXT = 'DeepLink';
+const DEEPLINK_DECORATOR_TEXT = 'IonicPage';
 const DEEPLINK_DECORATOR_NAME_ATTRIBUTE = 'name';
 const DEEPLINK_DECORATOR_SEGMENT_ATTRIBUTE = 'segment';
 const DEEPLINK_DECORATOR_PRIORITY_ATTRIBUTE = 'priority';
