@@ -1,4 +1,3 @@
-import * as fs from 'fs';
 import { join } from 'path';
 
 import * as util from './util';
@@ -55,7 +54,7 @@ describe('util', () => {
       const knownContent = `
 import { Component } from '@angular/core';
 
-import { DeepLink, NavController } from 'ionic-angular';
+import { IonicPage, NavController } from 'ionic-angular';
 
 @IonicPage({
   name: 'someName',
@@ -114,7 +113,7 @@ export class HomePage {
       const knownContent = `
 import { Component } from '@angular/core';
 
-import { DeepLink, NavController } from 'ionic-angular';
+import { IonicPage, NavController } from 'ionic-angular';
 
 @IonicPage({
   segment: 'someSegmentBro',
@@ -172,7 +171,7 @@ export class HomePage {
       const knownContent = `
 import { Component } from '@angular/core';
 
-import { DeepLink, NavController } from 'ionic-angular';
+import { IonicPage, NavController } from 'ionic-angular';
 
 @IonicPage({
   defaultHistory: ['page-one', 'page-two'],
@@ -229,7 +228,7 @@ export class HomePage {
       const knownContent = `
 import { Component } from '@angular/core';
 
-import { DeepLink, NavController } from 'ionic-angular';
+import { IonicPage, NavController } from 'ionic-angular';
 
 @IonicPage({
   priority: 'high'
@@ -285,7 +284,7 @@ export class HomePage {
       const knownContent = `
 import { Component } from '@angular/core';
 
-import { DeepLink, NavController } from 'ionic-angular';
+import { IonicPage, NavController } from 'ionic-angular';
 
 @IonicPage({
 })
@@ -340,7 +339,7 @@ export class HomePage {
       const knownContent = `
 import { Component } from '@angular/core';
 
-import { DeepLink, NavController } from 'ionic-angular';
+import { IonicPage, NavController } from 'ionic-angular';
 
 @IonicPage()
 @Component({
@@ -395,7 +394,7 @@ export class HomePage {
       const knownContent = `
 import { Component } from '@angular/core';
 
-import { DeepLink, NavController } from 'ionic-angular';
+import { IonicPage, NavController } from 'ionic-angular';
 
 @IonicPage({
 })
@@ -452,7 +451,7 @@ export class HomePage {
       const knownContent = `
 import { Component } from '@angular/core';
 
-import { DeepLink, NavController } from 'ionic-angular';
+import { IonicPage, NavController } from 'ionic-angular';
 
 @Component({
   selector: 'page-home',
@@ -648,7 +647,7 @@ export class HomePageModule {}
 
       const pageOneContent = `
 import { Component } from '@angular/core';
-import { DeepLink, NavController } from 'ionic-angular';
+import { IonicPage, NavController } from 'ionic-angular';
 
 
 @Component({
@@ -756,7 +755,7 @@ export class PageTwoModule {
 
       const pageSettingsContent = `
 import { Component } from '@angular/core';
-import { DeepLink, NavController } from 'ionic-angular';
+import { IonicPage, NavController } from 'ionic-angular';
 
 /*
   Generated class for the PageTwo page.
@@ -832,7 +831,7 @@ export class PageThreeModule {
 
       const pageOneContent = `
 import { Component } from '@angular/core';
-import { DeepLink, NavController } from 'ionic-angular';
+import { IonicPage, NavController } from 'ionic-angular';
 
 
 @IonicPage({
@@ -943,7 +942,7 @@ export class PageTwoModule {
 
       const pageSettingsContent = `
 import { Component } from '@angular/core';
-import { DeepLink, NavController } from 'ionic-angular';
+import { IonicPage, NavController } from 'ionic-angular';
 
 @IonicPage({
   segment: 'someSegmentBro',
@@ -1023,7 +1022,7 @@ export class PageThreeModule {
 
       const pageOneContent = `
 import { Component } from '@angular/core';
-import { DeepLink, NavController } from 'ionic-angular';
+import { IonicPage, NavController } from 'ionic-angular';
 
 
 @IonicPage({
@@ -1136,7 +1135,7 @@ export class PageTwoModule {
 
       const pageSettingsContent = `
 import { Component } from '@angular/core';
-import { DeepLink, NavController } from 'ionic-angular';
+import { IonicPage, NavController } from 'ionic-angular';
 
 @IonicPage({
   segment: 'someSegmentBro',
@@ -1241,7 +1240,7 @@ export class PageThreeModule {
     it('should throw when it cant find an NgModule as a peer to the page with a deep link config', () => {
       const pageOneContent = `
 import { Component } from '@angular/core';
-import { DeepLink, NavController } from 'ionic-angular';
+import { IonicPage, NavController } from 'ionic-angular';
 
 
 @IonicPage({
@@ -1354,7 +1353,7 @@ export class PageTwoModule {
 
       const pageSettingsContent = `
 import { Component } from '@angular/core';
-import { DeepLink, NavController } from 'ionic-angular';
+import { IonicPage, NavController } from 'ionic-angular';
 
 @IonicPage({
   segment: 'someSegmentBro',
