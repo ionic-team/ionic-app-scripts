@@ -1,3 +1,5 @@
+import * as childProcess from 'child_process';
+
 import { BuildContext } from './util/interfaces';
 import { getConfigValue, hasConfigValue } from './util/config';
 import { BuildError } from './util/errors';
@@ -18,10 +20,22 @@ export function test(context: BuildContext) {
   console.log('TESTING');
   //"test": "karma start ./test-config/karma.conf.js"
 
-  //.then(() => {
-  return Promise.resolve().then(() => {
-    logger.finish();
+  Logger.info('Running Karma');
+
+  return new Promise((resolve, reject) => {
+
+    childProcess.exec('karma start ./testing/karma.conf.js', (err, stdout, stderr) => {
+      console.log(err, stdout, stderr);
+      logger.finish();
+      resolve();
+    });
   });
+
+
+  //.then(() => {
+  //return Promise.resolve().then(() => {
+    //logger.finish();
+  //});
   //})
   //.catch(err => {
     //throw logger.fail(err);
