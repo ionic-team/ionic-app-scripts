@@ -6,7 +6,7 @@ import { camelCase, paramCase, pascalCase, sentenceCase, upperCaseFirst } from '
 
 import * as Constants from '../util/constants';
 import * as GeneratorConstants from './constants';
-import { getPropertyValue, getStringPropertyValue, mkDirpAsync, readFileAsync, replaceAll, writeFileAsync } from '../util/helpers';
+import { getStringPropertyValue, mkDirpAsync, readFileAsync, replaceAll, writeFileAsync } from '../util/helpers';
 import { BuildContext } from '../util/interfaces';
 import { globAll, GlobResult } from '../util/glob-util';
 import { ensureSuffix, removeSuffix } from '../util/helpers';
@@ -19,7 +19,7 @@ export function hydrateRequest(context: BuildContext, request: GeneratorRequest)
   hydrated.className = ensureSuffix(pascalCase(request.name), upperCaseFirst(suffix));
   hydrated.fileName = removeSuffix(paramCase(request.name), `-${paramCase(suffix)}`);
 
-  hydrated.dirToRead = join(getPropertyValue(Constants.ENV_VAR_IONIC_ANGULAR_TEMPLATE_DIR), request.type);
+  hydrated.dirToRead = join(getStringPropertyValue(Constants.ENV_VAR_IONIC_ANGULAR_TEMPLATE_DIR), request.type);
 
   const baseDir = getDirToWriteToByType(context, request.type);
   hydrated.dirToWrite = join(baseDir, hydrated.fileName);

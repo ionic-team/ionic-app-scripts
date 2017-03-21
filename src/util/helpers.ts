@@ -291,10 +291,6 @@ export function getBooleanPropertyValue(propertyName: string) {
   return result === 'true';
 }
 
-export function getPropertyValue(propertyName: string) {
-  return process.env[propertyName];
-}
-
 export function convertFilePathToNgFactoryPath(filePath: string) {
   const directory = dirname(filePath);
   const extension = extname(filePath);

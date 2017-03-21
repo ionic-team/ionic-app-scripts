@@ -3,7 +3,6 @@ import * as fs from 'fs';
 import * as Constants from '../util/constants';
 import * as helpers from '../util/helpers';
 import * as globUtils from '../util/glob-util';
-import { GlobResult } from '../util/glob-util';
 import * as util from './util';
 import * as GeneratorConstants from './constants';
 
@@ -23,7 +22,7 @@ describe('util', () => {
       };
 
       const templateDir = '/Users/noone/project/node_modules/ionic-angular/templates';
-      spyOn(helpers, helpers.getPropertyValue.name).and.returnValue(templateDir);
+      spyOn(helpers, helpers.getStringPropertyValue.name).and.returnValue(templateDir);
 
       // act
       const hydratedRequest = util.hydrateRequest(context, request);
@@ -403,7 +402,7 @@ $TAB_CONTENT
 
     beforeEach(() => {
       const templateDir = '/Users/noone/project/node_modules/ionic-angular/templates';
-      spyOn(helpers, helpers.getPropertyValue.name).and.returnValue(templateDir);
+      spyOn(helpers, helpers.getStringPropertyValue.name).and.returnValue(templateDir);
     });
 
     it('should return a succesful promise', () => {

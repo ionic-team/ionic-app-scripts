@@ -96,27 +96,6 @@ describe('helpers', () => {
     });
   });
 
-  describe('getPropertyValue', () => {
-    beforeEach(() => {
-      originalEnv = process.env;
-      process.env = {};
-    });
-
-    afterEach(() => {
-      process.env = originalEnv;
-    });
-
-    it('should return the property value', () => {
-      const propertyName = 'test';
-      const propertyValue = 'taco';
-      process.env[propertyName] = propertyValue;
-      const result = helpers.getPropertyValue(propertyName);
-      expect(result).toEqual(propertyValue);
-      const nullResult = helpers.getPropertyValue('somePropertyNotFound');
-      expect(nullResult).toBeFalsy();
-    });
-  });
-
   describe('processStatsImpl', () => {
     it('should convert object graph to known module map', () => {
       // arrange
