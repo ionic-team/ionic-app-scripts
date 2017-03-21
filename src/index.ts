@@ -8,6 +8,7 @@ export { minify } from './minify';
 export { ngc } from './ngc';
 export { sass, sassUpdate } from './sass';
 export { serve } from './serve';
+export { test } from './test';
 export { transpile } from './transpile';
 export { uglifyjs } from './uglifyjs';
 export { watch, buildUpdate } from './watch';
