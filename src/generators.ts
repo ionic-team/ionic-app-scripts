@@ -1,17 +1,12 @@
-import { generateContext } from './util/config';
 import * as Constants from './util/constants';
 import { BuildContext } from './util/interfaces';
-import { getNgModules, GeneratorOption, GeneratorRequest, nonPageFileManipulation, processNonTabRequest } from './generators/util';
+import { hydrateRequest, hydrateTabRequest, getNgModules, GeneratorOption, GeneratorRequest, nonPageFileManipulation, generateTemplates, tabsModuleManipulation } from './generators/util';
 
 export { getNgModules, GeneratorOption, GeneratorRequest };
 
-export function generateNonTab(request: GeneratorRequest) {
-  const context = generateContext();
-  return processNonTabRequest(context, request);
-}
-
 export function processPageRequest(context: BuildContext, name: string) {
-  return processNonTabRequest(context, { type: 'page', name });
+  const hydratedRequest = hydrateRequest(context, { type: 'page', name });
+  return generateTemplates(context, hydratedRequest);
 }
 
 export function processPipeRequest(context: BuildContext, name: string, ngModulePath: string) {
@@ -28,6 +23,21 @@ export function processComponentRequest(context: BuildContext, name: string, ngM
 
 export function processProviderRequest(context: BuildContext, name: string, ngModulePath: string) {
   return nonPageFileManipulation(context, name, ngModulePath, 'provider');
+}
+
+export function processTabsRequest(context: BuildContext, name: string, tabs: string[]) {
+  const tabHydratedRequests = tabs.map((tab) => hydrateRequest(context, { type: 'page', name: tab }));
+  const hydratedRequest = hydrateTabRequest(context, { type: 'tabs', name, tabs: tabHydratedRequests });
+
+  return generateTemplates(context, hydratedRequest).then(() => {
+    const promises = tabHydratedRequests.map((hydratedRequest) => {
+      return generateTemplates(context, hydratedRequest);
+    });
+
+    return Promise.all(promises);
+  }).then((tabs) => {
+    tabsModuleManipulation(tabs, hydratedRequest, tabHydratedRequests);
+  });
 }
 
 export function listOptions() {
