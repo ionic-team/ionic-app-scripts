@@ -93,12 +93,16 @@ window.IonicDevServer = {
   },
 
   reloadApp: function() {
-    window.location.reload(true);
+    if (!window.usingSquirrel) {
+      console.log('dang');
+      window.location.reload(true);
+    }
   },
 
   openConnection: function() {
     var self = this;
-    this.socket = new WebSocket('ws://' + window.location.hostname + ':' + IonicDevServerConfig.wsPort);
+    var websocketAddress = IonicDevServerConfig.hostIP || window.location.hostname;
+    this.socket = new WebSocket('ws://' + websocketAddress + ':' + IonicDevServerConfig.wsPort);
 
     this.socket.onopen = function(ev) {
       self.socketReady = true;

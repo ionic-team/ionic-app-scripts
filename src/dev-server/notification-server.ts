@@ -29,7 +29,7 @@ export function createNotificationServer({ buildDir, rootDir, wwwDir, notificati
   function drainMessageQueue(options = { broadcast: false }) {
     let sendMethod = wsServer && wsServer.send;
     if (options.hasOwnProperty('broadcast') && options.broadcast) {
-      sendMethod = wss.broadcast;
+      sendMethod = broadcast;
     }
     if (sendMethod && wss.clients.length > 0) {
       let msg: any;
@@ -75,11 +75,13 @@ export function createNotificationServer({ buildDir, rootDir, wwwDir, notificati
 
   // create web socket server
   const wss = new WebSocketServer({ port: notificationPort });
-  wss.broadcast = function broadcast(data: any) {
+
+  function broadcast(data: any) {
     wss.clients.forEach(function each(client: any) {
       client.send(data);
     });
   };
+
   wss.on('connection', (ws: any) => {
     // we've successfully connected
     wsServer = ws;

@@ -1,47 +1,42 @@
 import * as ws from 'ws';
 
 export interface WSOptions {
-  port: Number;
-}
-
-export interface WsMessage {
-  type: string;
-  msg: { [key: string]: any };
+  port: number;
 }
 
 export function createWsServer({ port }: WSOptions) {
-  const wss = new ws.Server({
-    port: port
-  });
+  const wss = ws.createServer({ port });
   let subscribers: Function[] = [];
 
-  wss.broadcast = function broadcast(data: any): void {
-    const msg = JSON.stringify(data);
-    console.log('broadcast', msg);
+  const broadcast = (data: any): void => {
 
     wss.clients.forEach((client: any) => {
       if (client.readyState === ws.OPEN) {
-        client.send(msg);
+        client.sendJson(data);
       }
     });
   };
 
-  wss.on('connection', (ws: any) => {
-    ws.on('message', (data: string) => {
+  const onMessage = (fn: Function): void => {
+    subscribers.push(fn);
+  };
+
+  wss.on('connection', (client: any) => {
+    client.sendJson = (sendJson: any) => {
+      return client.send(JSON.stringify(sendJson));
+    };
+
+    client.on('message', (data: string) => {
+      const parsedData = JSON.parse(data);
+
       subscribers.forEach(fn => {
-        ws.sendJson = (sendJson: any) => {
-          console.log('sendJson', sendJson);
-          return ws.send(JSON.stringify(sendJson));
-        };
-        fn(ws, data);
+        fn(client, parsedData);
       });
     });
   });
 
   return {
-    broadcast: wss.broadcast,
-    onMessage: (fn: Function) => {
-      subscribers.push(fn);
-    }
+    broadcast,
+    onMessage
   };
 }
