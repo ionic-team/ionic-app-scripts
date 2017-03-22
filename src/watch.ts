@@ -170,30 +170,38 @@ export function prepareWatcher(context: BuildContext, watcher: Watcher) {
 }
 
 
-let queuedChangedFiles: ChangedFile[] = [];
-let queuedChangeFileTimerId: any;
+let queuedWatchEventsMap = new Map<string, ChangedFile>();
+let queuedWatchEventsTimerId: any;
 
 export function buildUpdate(event: string, filePath: string, context: BuildContext) {
-  const changedFile: ChangedFile = {
-    event: event,
-    filePath: filePath,
-    ext: extname(filePath).toLowerCase()
-  };
+  return queueWatchUpdatesForBuild(event, filePath, context);
+}
 
-  // do not allow duplicates
-  if (!queuedChangedFiles.some(f => f.filePath === filePath)) {
-    queuedChangedFiles.push(changedFile);
+export function queueWatchUpdatesForBuild(event: string, filePath: string, context: BuildContext) {
+  if (queuedWatchEventsMap.get(filePath)) {
+
+    const changedFile: ChangedFile = {
+      event: event,
+      filePath: filePath,
+      ext: extname(filePath).toLowerCase()
+    };
+
+    queuedWatchEventsMap.set(filePath, changedFile);
 
     // debounce our build update incase there are multiple files
-    clearTimeout(queuedChangeFileTimerId);
+    clearTimeout(queuedWatchEventsTimerId);
 
     // run this code in a few milliseconds if another hasn't come in behind it
-    queuedChangeFileTimerId = setTimeout(() => {
+    queuedWatchEventsTimerId = setTimeout(() => {
+
       // figure out what actually needs to be rebuilt
-      const changedFiles = runBuildUpdate(context, queuedChangedFiles);
+      const queuedChangeFileList: ChangedFile[] = [];
+      queuedWatchEventsMap.forEach(changedFile => queuedChangeFileList.push(changedFile));
+
+      const changedFiles = runBuildUpdate(context, queuedChangeFileList);
 
       // clear out all the files that are queued up for the build update
-      queuedChangedFiles.length = 0;
+      queuedWatchEventsMap.clear();
 
       if (changedFiles && changedFiles.length) {
         // cool, we've got some build updating to do ;)
@@ -204,6 +212,48 @@ export function buildUpdate(event: string, filePath: string, context: BuildConte
 
   return Promise.resolve();
 }
+
+// exported just for use in unit testing
+export let buildUpdatePromise: Promise<any> = null;
+export let queuedChangedFileMap = new Map<string, ChangedFile>();
+export function queueOrRunBuildUpdate(changedFiles: ChangedFile[], context: BuildContext) {
+  if (buildUpdatePromise) {
+    // there is an active build going on, so queue our changes and run
+    // another build when this one finishes
+
+    // in the event this is called multiple times while queued, we are following a "last event wins" pattern
+    // so if someone makes an edit, and then deletes a file, the last "ChangedFile" is the one we act upon
+    changedFiles.forEach(changedFile => {
+      queuedChangedFileMap.set(changedFile.filePath, changedFile);
+    });
+    return buildUpdatePromise;
+  } else {
+    // there is not an active build going going on
+    // clear out any queued file changes, and run the build
+    queuedChangedFileMap.clear();
+    const buildUpdateComplete = () => {
+      // the update is complete, so check if there are pending updates that need to be run
+      buildUpdatePromise = null;
+      if (queuedChangedFileMap.size > 0) {
+        const queuedChangeFileList: ChangedFile[] = [];
+        queuedChangedFileMap.forEach(changedFile => {
+          queuedChangeFileList.push(changedFile);
+        });
+        queueOrRunBuildUpdate(queuedChangeFileList, context);
+      }
+    };
+
+    buildUpdatePromise = buildTask.buildUpdate(changedFiles, context).then(buildUpdateComplete).catch((err: Error) => {
+      buildUpdateComplete();
+    });
+    return buildUpdatePromise;
+  }
+}
+
+
+
+
+
 
 let queuedCopyChanges: ChangedFile[] = [];
 let queuedCopyTimerId: any;
