@@ -257,7 +257,7 @@ describe('watch', () => {
   });
 
   describe('queueOrRunBuildUpdate', () => {
-    /*it('should not queue a build when there isnt an active build', () => {
+    it('should not queue a build when there isnt an active build', () => {
       const changedFileOne: ChangedFile = {
         event: 'change',
         ext: '.ts',
@@ -321,7 +321,7 @@ describe('watch', () => {
         expect(watch.queuedChangedFileMap.size).toEqual(0);
       });
     });
-    */
+
 
     it('should queue up changes when a build is active', () => {
       const changedFileOne: ChangedFile = {
