@@ -231,7 +231,8 @@ export function queueOrRunBuildUpdate(changedFiles: ChangedFile[], context: Buil
     // there is not an active build going going on
     // clear out any queued file changes, and run the build
     queuedChangedFileMap.clear();
-    const buildUpdateComplete = () => {
+
+    const buildUpdateCompleteCallback: () => Promise<any> = () => {
       // the update is complete, so check if there are pending updates that need to be run
       buildUpdatePromise = null;
       if (queuedChangedFileMap.size > 0) {
@@ -239,14 +240,15 @@ export function queueOrRunBuildUpdate(changedFiles: ChangedFile[], context: Buil
         queuedChangedFileMap.forEach(changedFile => {
           queuedChangeFileList.push(changedFile);
         });
-        queueOrRunBuildUpdate(queuedChangeFileList, context);
+        return queueOrRunBuildUpdate(queuedChangeFileList, context);
       }
+      return Promise.resolve();
     };
 
-    buildUpdatePromise = buildTask.buildUpdate(changedFiles, context).then(buildUpdateComplete).catch((err: Error) => {
-      buildUpdateComplete();
+    buildUpdatePromise = buildTask.buildUpdate(changedFiles, context);
+    return buildUpdatePromise.then(buildUpdateCompleteCallback).catch((err: Error) => {
+      return buildUpdateCompleteCallback();
     });
-    return buildUpdatePromise;
   }
 }
 
