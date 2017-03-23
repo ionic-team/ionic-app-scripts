@@ -178,37 +178,34 @@ export function buildUpdate(event: string, filePath: string, context: BuildConte
 }
 
 export function queueWatchUpdatesForBuild(event: string, filePath: string, context: BuildContext) {
-  if (queuedWatchEventsMap.get(filePath)) {
+  const changedFile: ChangedFile = {
+    event: event,
+    filePath: filePath,
+    ext: extname(filePath).toLowerCase()
+  };
 
-    const changedFile: ChangedFile = {
-      event: event,
-      filePath: filePath,
-      ext: extname(filePath).toLowerCase()
-    };
+  queuedWatchEventsMap.set(filePath, changedFile);
 
-    queuedWatchEventsMap.set(filePath, changedFile);
+  // debounce our build update incase there are multiple files
+  clearTimeout(queuedWatchEventsTimerId);
 
-    // debounce our build update incase there are multiple files
-    clearTimeout(queuedWatchEventsTimerId);
+  // run this code in a few milliseconds if another hasn't come in behind it
+  queuedWatchEventsTimerId = setTimeout(() => {
 
-    // run this code in a few milliseconds if another hasn't come in behind it
-    queuedWatchEventsTimerId = setTimeout(() => {
+    // figure out what actually needs to be rebuilt
+    const queuedChangeFileList: ChangedFile[] = [];
+    queuedWatchEventsMap.forEach(changedFile => queuedChangeFileList.push(changedFile));
 
-      // figure out what actually needs to be rebuilt
-      const queuedChangeFileList: ChangedFile[] = [];
-      queuedWatchEventsMap.forEach(changedFile => queuedChangeFileList.push(changedFile));
+    const changedFiles = runBuildUpdate(context, queuedChangeFileList);
 
-      const changedFiles = runBuildUpdate(context, queuedChangeFileList);
+    // clear out all the files that are queued up for the build update
+    queuedWatchEventsMap.clear();
 
-      // clear out all the files that are queued up for the build update
-      queuedWatchEventsMap.clear();
-
-      if (changedFiles && changedFiles.length) {
-        // cool, we've got some build updating to do ;)
-        buildTask.buildUpdate(changedFiles, context);
-      }
-    }, BUILD_UPDATE_DEBOUNCE_MS);
-  }
+    if (changedFiles && changedFiles.length) {
+      // cool, we've got some build updating to do ;)
+      queueOrRunBuildUpdate(changedFiles, context);
+    }
+  }, BUILD_UPDATE_DEBOUNCE_MS);
 
   return Promise.resolve();
 }
