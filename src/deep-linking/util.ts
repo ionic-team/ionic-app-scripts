@@ -265,7 +265,6 @@ export function updateAppNgModuleAndFactoryWithDeepLinkConfig(context: BuildCont
   }
 
   const updatedAppNgModuleContent = getUpdatedAppNgModuleContentWithDeepLinkConfig(appNgModulePath, appNgModuleFile.content, deepLinkString);
-
   context.fileCache.set(appNgModulePath, { path: appNgModulePath, content: updatedAppNgModuleContent});
 
   const appNgModuleOutput = transpileTsString(context, appNgModulePath, updatedAppNgModuleContent);
@@ -298,12 +297,12 @@ export function updateAppNgModuleAndFactoryWithDeepLinkConfig(context: BuildCont
     context.fileCache.set(appNgModuleFactoryPathJsFile, { path: appNgModuleFactoryPathJsFile, content: appNgModuleFactoryOutput.outputText});
 
     if (changedFiles) {
-    changedFiles.push({
-      event: 'change',
-      filePath: appNgModuleFactoryPath,
-      ext: extname(appNgModuleFactoryPath).toLowerCase()
-    });
-  }
+      changedFiles.push({
+        event: 'change',
+        filePath: appNgModuleFactoryPath,
+        ext: extname(appNgModuleFactoryPath).toLowerCase()
+      });
+    }
   }
 }
 
@@ -331,7 +330,7 @@ export function getUpdatedAppNgModuleFactoryContentWithDeepLinksConfig(appNgModu
   // tried to do this with typescript API, wasn't clear on how to do it
   const regex = /this.*?DeepLinkConfigToken.*?=([\s\S]*?);/g;
   const results = regex.exec(appNgModuleFactoryFileContent);
-  if (results.length === 2) {
+  if (results && results.length === 2) {
     const actualString = results[0];
     const chunkToReplace = results[1];
     const fullStringToReplace = actualString.replace(chunkToReplace, deepLinkStringContent);

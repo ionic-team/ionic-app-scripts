@@ -35,7 +35,7 @@ function deepLinkingWorker(context: BuildContext) {
   return deepLinkingWorkerImpl(context, null);
 }
 
-function deepLinkingWorkerImpl(context: BuildContext, changedFiles: ChangedFile[]) {
+export function deepLinkingWorkerImpl(context: BuildContext, changedFiles: ChangedFile[]) {
   return Promise.resolve().then(() => {
     const appNgModulePath = getStringPropertyValue(Constants.ENV_APP_NG_MODULE_PATH);
     const appNgModuleFile = context.fileCache.get(appNgModulePath);
@@ -54,12 +54,16 @@ function deepLinkingWorkerImpl(context: BuildContext, changedFiles: ChangedFile[
 }
 
 export function deepLinkingUpdate(changedFiles: ChangedFile[], context: BuildContext) {
-  // TODO, consider optimizing later
+  const tsFiles = changedFiles.filter(changedFile => changedFile.ext === '.ts');
+  if (tsFiles.length === 0) {
+    return Promise.resolve();
+  }
   const logger = new Logger('deeplinks update');
   return deepLinkingWorkerImpl(context, changedFiles).then((deepLinkConfigEntries: DeepLinkConfigEntry[]) => {
     setParsedDeepLinkConfig(deepLinkConfigEntries);
     logger.finish();
   }).catch((err: Error) => {
+    Logger.warn(err.message);
     const error = new BuildError(err.message);
     throw logger.fail(error);
   });
