@@ -1,4 +1,4 @@
-import { basename, dirname } from 'path';
+import { basename, dirname, join } from 'path';
 import { FileSystem, VirtualFileSystem } from './interfaces';
 import { FileCache } from './file-cache';
 import { VirtualDirStats, VirtualFileStats } from './virtual-file-utils';
@@ -103,5 +103,19 @@ export class HybridFileSystem implements FileSystem, VirtualFileSystem {
 
   getAllDirStats():  { [filePath: string]: VirtualDirStats } {
     return this.directoryStats;
+  }
+
+  mkdirp(filePath: string, callback: Function) {
+    callback();
+  }
+
+  join(dirPath: string, fileName: string) {
+    return join(dirPath, fileName);
+  }
+
+  writeFile(filePath: string, fileContent: Buffer, callback: Function) {
+    const stringContent = fileContent.toString();
+    this.addVirtualFile(filePath, stringContent);
+    callback();
   }
 }

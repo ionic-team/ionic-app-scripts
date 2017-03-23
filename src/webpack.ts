@@ -8,7 +8,7 @@ import { fillConfigDefaults, getUserConfigFile, replacePathVars } from './util/c
 import * as Constants from './util/constants';
 import { BuildError, IgnorableError } from './util/errors';
 import { emit, EventType } from './util/events';
-import { getBooleanPropertyValue, printDependencyMap, webpackStatsToDependencyMap } from './util/helpers';
+import { getBooleanPropertyValue, printDependencyMap, webpackStatsToDependencyMap, writeFileAsync } from './util/helpers';
 import { BuildContext, BuildState, ChangedFile, TaskInfo } from './util/interfaces';
 
 
@@ -108,7 +108,13 @@ function webpackBuildComplete(stats: any, context: BuildContext, webpackConfig: 
 
   context.moduleFiles = files;
 
-  return Promise.resolve();
+  return writeBundleFilesToDisk(context);
+}
+
+export function writeBundleFilesToDisk(context: BuildContext) {
+  const buildFiles = context.fileCache.getAll().filter(file => file.path.indexOf(context.buildDir) >= 0);
+  const promises = buildFiles.map(buildFile => writeFileAsync(buildFile.path, buildFile.content));
+  return Promise.all(promises);
 }
 
 export function runWebpackFullBuild(config: WebpackConfig) {
