@@ -5,6 +5,7 @@ import * as helpers from '../util/helpers';
 import * as globUtils from '../util/glob-util';
 import * as util from './util';
 import * as GeneratorConstants from './constants';
+import * as TypeScriptUtils from '../util/typescript-utils';
 
 describe('util', () => {
   describe('hydrateRequest', () => {
@@ -406,13 +407,26 @@ $TAB_CONTENT
     });
 
     it('should return a succesful promise', () => {
-      let rejected = false;
+      // set up spies
+      spyOn(helpers, helpers.readFileAsync.name).and.returnValue(Promise.resolve('file content'));
+      spyOn(fs, 'readdirSync').and.returnValue([
+        '/path/to/nowhere',
+        'path/to/somewhere'
+      ]);
+      spyOn(helpers, helpers.writeFileAsync.name).and.returnValue(Promise.resolve());
+      spyOn(helpers, helpers.mkDirpAsync.name).and.returnValue(Promise.resolve());
+      spyOn(TypeScriptUtils, TypeScriptUtils.insertNamedImportIfNeeded.name).and.returnValue('file content');
+      spyOn(TypeScriptUtils, TypeScriptUtils.appendNgModuleDeclaration.name).and.returnValue('sliced string');
 
-      util.nonPageFileManipulation(context, 'coolStuff', '/src/pages/cool-tab-one/cool-tab-one.module.ts', 'pipe').catch(() => {
-        rejected = true;
+      // what we want to test
+      const promise = util.nonPageFileManipulation(context, 'coolStuff', '/src/pages/cool-tab-one/cool-tab-one.module.ts', 'pipe');
+
+      // test
+      return promise.then((value: string[]) => {
+        expect(helpers.readFileAsync).toHaveBeenCalled();
+        expect(helpers.writeFileAsync).toHaveBeenCalled();
+        expect(helpers.mkDirpAsync).toHaveBeenCalled();
       });
-
-      expect(rejected).toBeFalsy();
     });
 
     it('should throw when files are not written succesfully', () => {

@@ -121,4 +121,29 @@ export class TacoBellModule {}
       }
     });
   });
+
+  describe('insertNamedImportIfNeeded', () => {
+    it('should return modified file content, which is a string', () => {
+      const filePath = '/path/to/my/file';
+      const fileContent = 'import {A, B, C} from modulePath';
+      const namedImport = 'NamedImport';
+      const fromModule = 'CoolModule';
+
+      const result = tsUtils.insertNamedImportIfNeeded(filePath, fileContent, namedImport, fromModule);
+
+      // TODO: figure out how to match the exact string
+      expect(result).toEqual(jasmine.any(String));
+    });
+  });
+
+  it('should return the same file content as the import is already in the file', () => {
+    const filePath = '/path/to/my/file';
+    const fileContent = 'import { A } from "modulePath"';
+    const namedImport = 'A';
+    const fromModule = `modulePath`;
+
+    const result = tsUtils.insertNamedImportIfNeeded(filePath, fileContent, namedImport, fromModule);
+
+    expect(result).toEqual(fileContent);
+  });
 });
