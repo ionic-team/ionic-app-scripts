@@ -136,14 +136,47 @@ export class TacoBellModule {}
     });
 
     it('should return the same file content as the import is already in the file', () => {
-    const filePath = '/path/to/my/file';
-    const fileContent = 'import { A } from "modulePath"';
-    const namedImport = 'A';
-    const fromModule = `modulePath`;
+      const filePath = '/path/to/my/file';
+      const fileContent = 'import { A } from "modulePath"';
+      const namedImport = 'A';
+      const fromModule = `modulePath`;
 
-    const result = tsUtils.insertNamedImportIfNeeded(filePath, fileContent, namedImport, fromModule);
+      const result = tsUtils.insertNamedImportIfNeeded(filePath, fileContent, namedImport, fromModule);
 
-    expect(result).toEqual(fileContent);
+      expect(result).toEqual(fileContent);
+    });
   });
+
+  describe('getNgModuleDecorator', () => {
+    it('should return an object', () => {
+      const knownContent = `
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { IonicApp, IonicModule } from '../../../../..';
+
+import { AppComponent } from './app.component';
+import { RootPageModule } from '../pages/root-page/root-page.module';
+
+@NgModule({
+  declarations: [
+    AppComponent
+  ],
+  imports: [
+    BrowserModule,
+    IonicModule.forRoot(AppComponent),
+    RootPageModule
+  ],
+  bootstrap: [IonicApp],
+})
+export class AppModule {}
+
+      `;
+
+      const knownPath = '/some/fake/path';
+      const sourceFile = tsUtils.getTypescriptSourceFile(knownPath, knownContent);
+      const result: any = tsUtils.getNgModuleDecorator('coolFile.ts', sourceFile);
+
+      expect(result).toEqual(jasmine.any(Object));
+    });
   });
 });
