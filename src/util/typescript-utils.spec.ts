@@ -134,9 +134,8 @@ export class TacoBellModule {}
       // TODO: figure out how to match the exact string
       expect(result).toEqual(jasmine.any(String));
     });
-  });
 
-  it('should return the same file content as the import is already in the file', () => {
+    it('should return the same file content as the import is already in the file', () => {
     const filePath = '/path/to/my/file';
     const fileContent = 'import { A } from "modulePath"';
     const namedImport = 'A';
@@ -145,5 +144,6 @@ export class TacoBellModule {}
     const result = tsUtils.insertNamedImportIfNeeded(filePath, fileContent, namedImport, fromModule);
 
     expect(result).toEqual(fileContent);
+  });
   });
 });
