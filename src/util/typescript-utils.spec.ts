@@ -174,9 +174,38 @@ export class AppModule {}
 
       const knownPath = '/some/fake/path';
       const sourceFile = tsUtils.getTypescriptSourceFile(knownPath, knownContent);
-      const result: any = tsUtils.getNgModuleDecorator('coolFile.ts', sourceFile);
+      const result = tsUtils.getNgModuleDecorator('coolFile.ts', sourceFile);
 
       expect(result).toEqual(jasmine.any(Object));
+    });
+
+    it('should throw an error', () => {
+      const messedUpContent = `
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { IonicApp, IonicModule } from '../../../../..';
+
+import { AppComponent } from './app.component';
+import { RootPageModule } from '../pages/root-page/root-page.module';
+
+({
+  declarations: [
+    AppComponent
+  ],
+  imports: [
+    BrowserModule,
+    IonicModule.forRoot(AppComponent),
+    RootPageModule
+  ],
+  bootstrap: [IonicApp],
+})
+export class AppModule {}
+
+      `;
+      const knownPath = '/some/fake/path';
+      const sourceFile = tsUtils.getTypescriptSourceFile(knownPath, messedUpContent);
+
+      expect(() => tsUtils.getNgModuleDecorator('coolFile.ts', sourceFile)).toThrowError('Could not find an "NgModule" decorator in coolFile.ts');
     });
   });
 });
