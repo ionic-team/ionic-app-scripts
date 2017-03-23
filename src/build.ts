@@ -227,10 +227,6 @@ function buildUpdateTasks(changedFiles: ChangedFile[], context: BuildContext) {
 
   return loadFiles(changedFiles, context)
     .then(() => {
-      // PREPROCESS
-      return preprocessUpdate(changedFiles, context);
-    })
-    .then(() => {
       // TEMPLATE
       if (context.templateState === BuildState.RequiresUpdate) {
         resolveValue.requiresAppReload = true;
@@ -257,6 +253,10 @@ function buildUpdateTasks(changedFiles: ChangedFile[], context: BuildContext) {
       // no transpiling required
       return Promise.resolve();
 
+    })
+    .then(() => {
+      // PREPROCESS
+      return preprocessUpdate(changedFiles, context);
     })
     .then(() => {
       // BUNDLE

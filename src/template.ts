@@ -1,27 +1,36 @@
+import { readFileSync, writeFileSync } from 'fs';
+import { dirname, extname, join, parse, resolve } from 'path';
+
 import { BuildContext, BuildState, ChangedFile, File } from './util/interfaces';
 import { changeExtension } from './util/helpers';
 import { Logger } from './logger/logger';
-import { getJsOutputDest } from './bundle';
 import { invalidateCache } from './rollup';
-import { dirname, extname, join, parse, resolve } from 'path';
-import { readFileSync, writeFileSync } from 'fs';
+
 
 
 export function templateUpdate(changedFiles: ChangedFile[], context: BuildContext) {
   try {
     const changedTemplates = changedFiles.filter(changedFile => changedFile.ext === '.html');
     const start = Date.now();
-    const bundleOutputDest = getJsOutputDest(context);
-    let bundleSourceText = readFileSync(bundleOutputDest, 'utf8');
+
+    const bundleFiles = context.fileCache.getAll().filter(file => file.path.indexOf(context.buildDir) >= 0 && extname(file.path) === '.js');
 
     // update the corresponding transpiled javascript file with the template changed (inline it)
     // as well as the bundle
     for (const changedTemplateFile of changedTemplates) {
       const file = context.fileCache.get(changedTemplateFile.filePath);
-      if (! updateCorrespondingJsFile(context, file.content, changedTemplateFile.filePath)) {
+      if (!updateCorrespondingJsFile(context, file.content, changedTemplateFile.filePath)) {
         throw new Error(`Failed to inline template ${changedTemplateFile.filePath}`);
       }
-      bundleSourceText = replaceExistingJsTemplate(bundleSourceText, file.content, changedTemplateFile.filePath);
+      // find the corresponding bundle
+      for (const bundleFile of bundleFiles) {
+        const newContent = replaceExistingJsTemplate(bundleFile.content, file.content, changedTemplateFile.filePath);
+        if (newContent && newContent !== bundleFile.content) {
+          context.fileCache.set(bundleFile.path, { path: bundleFile.path, content: newContent});
+          writeFileSync(bundleFile.path, newContent);
+          break;
+        }
+      }
     }
 
     // invaldiate any rollup bundles, if they're not using rollup no harm done
@@ -31,16 +40,14 @@ export function templateUpdate(changedFiles: ChangedFile[], context: BuildContex
     const logger = new Logger(`template update`);
     logger.setStartTime(start);
 
-    writeFileSync(bundleOutputDest, bundleSourceText, { encoding: 'utf8'});
-
-    // congrats, all gud
+    // congrats, all good
     changedTemplates.forEach(changedTemplate => {
       Logger.debug(`templateUpdate, updated: ${changedTemplate.filePath}`);
     });
 
     context.templateState = BuildState.SuccessfulBuild;
     logger.finish();
-    resolve();
+    return Promise.resolve();
 
   } catch (ex) {
     Logger.debug(`templateUpdate error: ${ex.message}`);
