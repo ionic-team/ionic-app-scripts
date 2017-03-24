@@ -9,10 +9,17 @@ export function runTsLintDiagnostics(context: BuildContext, failures: RuleFailur
   });
 }
 
+function getPositonData(positionObject: any) {
+  return {
+    position: positionObject.position,
+    line: positionObject.lineAndCharacter ? positionObject.lineAndCharacter.line : 0,
+    character: positionObject.lineAndCharacter ? positionObject.lineAndCharacter.character : 0,
+  };
+}
 
 function loadDiagnostic(context: BuildContext, f: RuleFailure) {
-  const start: RuleFailurePosition = f.startPosition.toJson();
-  const end: RuleFailurePosition = f.endPosition.toJson();
+  const start: RuleFailurePosition = getPositonData(f.startPosition);
+  const end: RuleFailurePosition = getPositonData(f.endPosition);
 
   const d: Diagnostic = {
     level: 'warn',
