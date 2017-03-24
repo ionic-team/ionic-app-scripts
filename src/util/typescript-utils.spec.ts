@@ -209,3 +209,58 @@ export class AppModule {}
     });
   });
 });
+
+describe('appendNgModuleDeclaration', () => {
+  it('should return a modified file content', () => {
+    const knownContent = `
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { IonicApp, IonicModule } from '../../../../..';
+
+import { AppComponent } from './app.component';
+import { RootPageModule } from '../pages/root-page/root-page.module';
+
+@NgModule({
+  declarations: [
+    AppComponent
+  ],
+  imports: [
+    BrowserModule,
+    IonicModule.forRoot(AppComponent),
+    RootPageModule
+  ],
+  bootstrap: [IonicApp],
+})
+export class AppModule {}
+`;
+
+    const knownPath = '/some/fake/path';
+
+    const expectedContent = `
+import { NgModule } from \'@angular/core\';
+import { BrowserModule } from \'@angular/platform-browser\';
+import { IonicApp, IonicModule } from \'../../../../..\';
+
+import { AppComponent } from \'./app.component\';
+import { RootPageModule } from \'../pages/root-page/root-page.module\';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    CoolComponent
+  ],
+  imports: [
+    BrowserModule,
+    IonicModule.forRoot(AppComponent),
+    RootPageModule
+  ],
+  bootstrap: [IonicApp],
+})
+export class AppModule {}
+`;
+
+    const result = tsUtils.appendNgModuleDeclaration(knownPath, knownContent, 'CoolComponent');
+    expect(result).toEqual(expectedContent);
+  });
+});
+
