@@ -1,4 +1,5 @@
 import { BuildError } from './util/errors';
+import { buildErrorToJson } from './util/helpers';
 import { Logger } from './logger/logger';
 import { WorkerMessage } from './util/interfaces';
 
@@ -39,11 +40,13 @@ function taskResolve(taskModule: string, taskWorker: string, val: any) {
 }
 
 
-function taskReject(taskModule: string, taskWorker: string, val: any) {
+function taskReject(taskModule: string, taskWorker: string, error: Error) {
+  const buildError = new BuildError(error.message);
+  const json = buildErrorToJson(buildError);
   const msg: WorkerMessage = {
     taskModule: taskModule,
     taskWorker: taskWorker,
-    reject: new BuildError(val).toJson(),
+    reject: json,
     pid: process.pid
   };
 
@@ -53,11 +56,13 @@ function taskReject(taskModule: string, taskWorker: string, val: any) {
 }
 
 
-function taskError(taskModule: string, taskWorker: string, err: any) {
+function taskError(taskModule: string, taskWorker: string, error: Error) {
+  const buildError = new BuildError(error.message);
+  const json = buildErrorToJson(buildError);
   const msg: WorkerMessage = {
     taskModule: taskModule,
     taskWorker: taskWorker,
-    error: new BuildError(err).toJson(),
+    error: json,
     pid: process.pid
   };
 
