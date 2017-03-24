@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { join } from 'path';
+import { dirname, extname, join } from 'path';
 
 import * as webpackApi from 'webpack';
 
@@ -95,7 +95,7 @@ function webpackBuildComplete(stats: any, context: BuildContext, webpackConfig: 
 
   // set the module files used in this bundle
   // this reference can be used elsewhere in the build (sass)
-  const files = stats.compilation.modules.map((webpackObj: any) => {
+  const files: string[] = stats.compilation.modules.map((webpackObj: any) => {
     if (webpackObj.resource) {
       return webpackObj.resource;
     } else {
@@ -112,8 +112,10 @@ function webpackBuildComplete(stats: any, context: BuildContext, webpackConfig: 
 }
 
 export function writeBundleFilesToDisk(context: BuildContext) {
-  const buildFiles = context.fileCache.getAll().filter(file => file.path.indexOf(context.buildDir) >= 0);
-  const promises = buildFiles.map(buildFile => writeFileAsync(buildFile.path, buildFile.content));
+  const bundledFilesToWrite = context.fileCache.getAll().filter(file => {
+    return dirname(file.path) === context.buildDir && (file.path.endsWith('.js') || file.path.endsWith('.js.map'));
+  });
+  const promises = bundledFilesToWrite.map(bundledFileToWrite => writeFileAsync(bundledFileToWrite.path, bundledFileToWrite.content));
   return Promise.all(promises);
 }
 
