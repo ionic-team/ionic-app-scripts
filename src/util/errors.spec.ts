@@ -5,39 +5,27 @@ describe('Errors', () => {
 
   describe('BuildError', () => {
 
-    /*it('should create BuildError from err object in constructor', () => {
-      const buildError = new BuildError();
-      buildError.hasBeenLogged = false;
-      buildError.message = 'message1';
+    it('should create BuildError from err object in constructor', () => {
+      const buildError = new BuildError('message1');
       buildError.name = 'name1';
       buildError.stack = 'stack1';
+      buildError.isFatal = true;
+      buildError.hasBeenLogged = true;
 
       const buildErrorCopy = new BuildError(buildError);
-
-      const json = buildErrorCopy.toJson();
-      expect(json.hasBeenLogged).toEqual(buildError.hasBeenLogged);
-      expect(json.message).toEqual(buildError.message);
-      expect(json.name).toEqual(buildError.name);
-      expect(json.stack).toEqual(buildError.stack);
+      expect(buildErrorCopy.message).toEqual(buildError.message);
+      expect(buildErrorCopy.message).toEqual('message1');
+      expect(buildErrorCopy.name).toEqual(buildError.name);
+      expect(buildErrorCopy.stack).toEqual(buildError.stack);
+      expect(buildErrorCopy.isFatal).toEqual(buildError.isFatal);
+      expect(buildErrorCopy.hasBeenLogged).toEqual(buildError.hasBeenLogged);
     });
 
-    it('should create json object', () => {
-      const buildError = new BuildError();
-      buildError.hasBeenLogged = false;
-      buildError.message = 'message';
-      buildError.name = 'name';
-      buildError.stack = 'stack';
-      const json = buildError.toJson();
-      expect(json.hasBeenLogged).toEqual(buildError.hasBeenLogged);
-      expect(json.message).toEqual(buildError.message);
-      expect(json.name).toEqual(buildError.name);
-      expect(json.stack).toEqual(buildError.stack);
-    });*/
-
-    it('should stop npm run test from cancelling', () => {
-
+    it('should create a default object', () => {
+      const buildError = new BuildError('message1');
+      expect(buildError.isFatal).toBeFalsy();
+      expect(buildError.hasBeenLogged).toBeFalsy();
     });
-
   });
 
 });

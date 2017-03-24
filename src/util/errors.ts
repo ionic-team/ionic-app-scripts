@@ -3,37 +3,15 @@ export class BuildError extends Error {
   hasBeenLogged = false;
   isFatal: boolean = false;
 
-  constructor(err?: any) {
-    super();
-
-    if (err) {
-      if (err.message) {
-        this.message = err.message;
-      } else if (err) {
-        this.message = err;
-      }
-      if (err.stack) {
-        this.stack = err.stack;
-      }
-      if (err.name) {
-        this.name = err.name;
-      }
-      if (typeof err.hasBeenLogged === 'boolean') {
-        this.hasBeenLogged = err.hasBeenLogged;
-      }
-      if (err.hasOwnProperty('isFatal')) {
-        this.isFatal = err.isFatal;
-      }
+  constructor(error: Error | string) {
+    super(error instanceof Error ? error.message : error);
+    if (error instanceof Error) {
+      this.message = error.message;
+      this.stack = error.stack;
+      this.name = error.name;
+      this.hasBeenLogged = (error as BuildError).hasBeenLogged;
+      this.isFatal = (error as BuildError).isFatal;
     }
-  }
-
-  toJson() {
-    return {
-      message: this.message,
-      name: this.name,
-      stack: this.stack,
-      hasBeenLogged: this.hasBeenLogged
-    };
   }
 }
 

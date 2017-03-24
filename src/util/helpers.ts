@@ -4,6 +4,7 @@ import { createReadStream, createWriteStream, ensureDir, readdir, readFile, read
 import * as osName from 'os-name';
 
 import * as Constants from './constants';
+import { BuildError } from './errors';
 import { BuildContext, DeepLinkConfigEntry, File, WebpackStats } from './interfaces';
 import { Logger } from '../logger/logger';
 
@@ -364,4 +365,14 @@ export function removeSuffix(input: string, suffix: string) {
   }
 
   return input;
+}
+
+export function buildErrorToJson(buildError: BuildError) {
+  return {
+    message: buildError.message,
+    name: buildError.name,
+    stack: buildError.stack,
+    hasBeenLogged: buildError.hasBeenLogged,
+    isFatal: buildError.isFatal
+  };
 }

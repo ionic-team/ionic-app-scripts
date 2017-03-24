@@ -1,3 +1,4 @@
+import { BuildError } from './errors';
 import * as helpers from './helpers';
 
 let originalEnv: any = null;
@@ -188,6 +189,23 @@ describe('helpers', () => {
 
     it('should replace a variable and handle undefined', () => {
       expect(helpers.replaceAll('hello $VAR world', '$VAR', undefined)).toEqual('hello  world');
+    });
+  });
+
+  describe('buildErrorToJson', () => {
+    it('should return a pojo', () => {
+      const buildError = new BuildError('message1');
+      buildError.name = 'name1';
+      buildError.stack = 'stack1';
+      buildError.isFatal = true;
+      buildError.hasBeenLogged = false;
+
+      const object = helpers.buildErrorToJson(buildError);
+      expect(object.message).toEqual('message1');
+      expect(object.name).toEqual(buildError.name);
+      expect(object.stack).toEqual(buildError.stack);
+      expect(object.isFatal).toEqual(buildError.isFatal);
+      expect(object.hasBeenLogged).toEqual(buildError.hasBeenLogged);
     });
   });
 });
