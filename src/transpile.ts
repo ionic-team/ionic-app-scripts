@@ -122,7 +122,7 @@ export function transpileWorker(context: BuildContext, workerConfig: TranspileWo
       // darn, we've got some things wrong, transpile failed :(
       printDiagnostics(context, DiagnosticsType.TypeScript, diagnostics, true, true);
 
-      reject(new BuildError());
+      reject(new BuildError('Failed to transpile program'));
 
     } else {
       // transpile success :)
@@ -359,7 +359,7 @@ export function getTsConfig(context: BuildContext, tsConfigPath?: string): TsCon
 
     if (diagnostics.length) {
       printDiagnostics(context, DiagnosticsType.TypeScript, diagnostics, true, true);
-      throw new BuildError();
+      throw new BuildError(`tsconfig: invalid config, "${tsConfigPath}""`);
     }
 
     config = {
