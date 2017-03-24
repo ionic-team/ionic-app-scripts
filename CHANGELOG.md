@@ -1,3 +1,32 @@
+<a name="1.2.0"></a>
+# [1.2.0](https://github.com/driftyco/ionic-app-scripts/compare/v1.1.4...v1.2.0) (2017-03-24)
+
+
+### Bug Fixes
+
+* **deep-linking:** Fix issue with deep-linking when attempting to update a template and failing, resulting in a full build but not processing deep links ([6b158d3](https://github.com/driftyco/ionic-app-scripts/commit/6b158d3))
+* **optimization:** fix out of memory errors by providing more memory by default ([b4c287a](https://github.com/driftyco/ionic-app-scripts/commit/b4c287a))
+* **optimizations:** only store ionic and src files in memory ([f51314f](https://github.com/driftyco/ionic-app-scripts/commit/f51314f))
+* **uglify:** check for correct file extension ([d17f2e1](https://github.com/driftyco/ionic-app-scripts/commit/d17f2e1))
+* **uglify:** verify source maps are generated correctly for all bundles, tests ([fc44ca6](https://github.com/driftyco/ionic-app-scripts/commit/fc44ca6))
+* **utils:** assign correct type ([3c3666c](https://github.com/driftyco/ionic-app-scripts/commit/3c3666c))
+* **watch:** fixed bug where options.ignore was being ignored if it's an array ([7f1e54c](https://github.com/driftyco/ionic-app-scripts/commit/7f1e54c))
+* **watch:** queue builds ([06e4971](https://github.com/driftyco/ionic-app-scripts/commit/06e4971))
+* **watch:** queue buildUpdates events to avoid race conditions when bundling/building ([43caefa](https://github.com/driftyco/ionic-app-scripts/commit/43caefa))
+* **webpack:** don't overwrite css files when outputting webpack files ([a32649f](https://github.com/driftyco/ionic-app-scripts/commit/a32649f))
+
+
+### Features
+
+* **serve:** change http-server to use request hostname instead of the configured hostname. ([8e1e81a](https://github.com/driftyco/ionic-app-scripts/commit/8e1e81a))
+* **deep-linking:** generate default NgModule when missing by default ([90138fa](https://github.com/driftyco/ionic-app-scripts/commit/90138fa))
+* **deep-linking:** parsing deeplink decorator is now enabled by default, no longer experimental ([e097d4e](https://github.com/driftyco/ionic-app-scripts/commit/e097d4e))
+* **deep-linking:** upgrade script to generate NgModules for pages with [@DeepLink](https://github.com/DeepLink) decorator ([2943188](https://github.com/driftyco/ionic-app-scripts/commit/2943188))
+* **generators:** generators for page, component, directive, pipe, provider ([e2a45e4](https://github.com/driftyco/ionic-app-scripts/commit/e2a45e4))
+* **minification:** code-split bundles will be minified ([#814](https://github.com/driftyco/ionic-app-scripts/issues/814)) ([d8d9a4e](https://github.com/driftyco/ionic-app-scripts/commit/d8d9a4e))
+
+
+
 <a name="1.1.4"></a>
 ## [1.1.4](https://github.com/driftyco/ionic-app-scripts/compare/v1.1.3...v1.1.4) (2017-02-23)
 
