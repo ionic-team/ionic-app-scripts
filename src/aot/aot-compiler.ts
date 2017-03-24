@@ -143,7 +143,7 @@ function transpileFiles(context: BuildContext, tsConfig: ParsedTsConfig, fileSys
     if (diagnostics.length) {
       // darn, we've got some things wrong, transpile failed :(
       printDiagnostics(context, DiagnosticsType.TypeScript, diagnostics, true, true);
-      throw new BuildError();
+      throw new BuildError(new Error('Failed to transpile TypeScript'));
     }
 
     const jsFilePath = changeExtension(tsFile.path, '.js');
