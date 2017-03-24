@@ -5,6 +5,7 @@ import { lintFile, LintResult, processLintResults } from './lint/lint-utils';
 import { createProgram, getFileNames } from './lint/lint-factory';
 import { getUserConfigFile } from './util/config';
 import * as Constants from './util/constants';
+import { BuildError } from './util/errors';
 import { getBooleanPropertyValue } from './util/helpers';
 import { join } from 'path';
 import { Logger } from './logger/logger';
@@ -19,9 +20,9 @@ export function lint(context: BuildContext, configFile?: string) {
     .then(() => {
       logger.finish();
     })
-    .catch(err => {
+    .catch((err: Error) => {
       if (getBooleanPropertyValue(Constants.ENV_BAIL_ON_LINT_ERROR)) {
-        throw logger.fail(err);
+        throw logger.fail(new BuildError(err));
       }
       logger.finish();
     });
@@ -90,12 +91,12 @@ function getLintConfig(context: BuildContext, configFile: string): Promise<strin
 
     Logger.debug(`tslint config: ${configFile}`);
 
-    access(configFile, (err) => {
+    access(configFile, (err: Error) => {
       if (err) {
         // if the tslint.json file cannot be found that's fine, the
         // dev may not want to run tslint at all and to do that they
         // just don't have the file
-        reject();
+        reject(err);
         return;
       }
       resolve(configFile);
