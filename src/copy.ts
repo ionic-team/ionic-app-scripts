@@ -112,7 +112,8 @@ export function copyUpdate(changedFiles: ChangedFile[], context: BuildContext) {
     });
     return Promise.all(promises);
   }).then(() => {
-    logger.finish();
+    logger.finish('green', true);
+    Logger.newLine();
   }).catch(err => {
     throw logger.fail(err);
   });
