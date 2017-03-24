@@ -36,6 +36,7 @@ export interface BuildContext {
   transpileState?: BuildState;
   templateState?: BuildState;
   bundleState?: BuildState;
+  deepLinkState?: BuildState;
 
   // target examples: cordova, browser, electron
   target?: string;

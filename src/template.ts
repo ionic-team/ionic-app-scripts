@@ -52,6 +52,7 @@ export function templateUpdate(changedFiles: ChangedFile[], context: BuildContex
   } catch (ex) {
     Logger.debug(`templateUpdate error: ${ex.message}`);
     context.transpileState = BuildState.RequiresBuild;
+    context.deepLinkState = BuildState.RequiresBuild;
     context.bundleState = BuildState.RequiresUpdate;
     return Promise.resolve();
   }

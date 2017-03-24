@@ -1,7 +1,6 @@
 import * as path from 'path';
 
 import * as build from './build';
-import * as helpers from './util/helpers';
 import { BuildContext, BuildState, ChangedFile } from './util/interfaces';
 import { FileCache } from './util/file-cache';
 import * as watch from './watch';
@@ -19,6 +18,7 @@ describe('watch', () => {
       }];
       watch.runBuildUpdate(context, files);
       expect(context.transpileState).toEqual(BuildState.RequiresBuild);
+      expect(context.deepLinkState).toEqual(BuildState.RequiresBuild);
     });
 
     it('should require transpile full build for html file change and not already successful bundle', () => {
@@ -29,6 +29,7 @@ describe('watch', () => {
       }];
       watch.runBuildUpdate(context, files);
       expect(context.transpileState).toEqual(BuildState.RequiresBuild);
+      expect(context.deepLinkState).toEqual(BuildState.RequiresBuild);
     });
 
     it('should require template update for html file change and already successful bundle', () => {
@@ -91,6 +92,7 @@ describe('watch', () => {
       context.bundleState = BuildState.SuccessfulBuild;
       watch.runBuildUpdate(context, files);
       expect(context.transpileState).toEqual(BuildState.RequiresBuild);
+      expect(context.deepLinkState).toEqual(BuildState.RequiresBuild);
       expect(context.bundleState).toEqual(BuildState.RequiresUpdate);
     });
 
@@ -102,6 +104,7 @@ describe('watch', () => {
       }];
       watch.runBuildUpdate(context, files);
       expect(context.transpileState).toEqual(BuildState.RequiresBuild);
+      expect(context.deepLinkState).toEqual(BuildState.RequiresBuild);
       expect(context.bundleState).toEqual(BuildState.RequiresBuild);
     });
 
@@ -113,6 +116,7 @@ describe('watch', () => {
       }];
       watch.runBuildUpdate(context, files);
       expect(context.transpileState).toEqual(BuildState.RequiresBuild);
+      expect(context.deepLinkState).toEqual(BuildState.RequiresBuild);
       expect(context.bundleState).toEqual(BuildState.RequiresBuild);
     });
 
@@ -127,6 +131,7 @@ describe('watch', () => {
       context.fileCache.set(resolvedFilePath, { path: 'file1.ts', content: 'content' });
       watch.runBuildUpdate(context, files);
       expect(context.transpileState).toEqual(BuildState.RequiresUpdate);
+      expect(context.deepLinkState).toEqual(BuildState.RequiresUpdate);
       expect(context.bundleState).toEqual(BuildState.RequiresUpdate);
     });
 
@@ -140,6 +145,7 @@ describe('watch', () => {
       context.fileCache.set(resolvedFilePath, { path: 'file1.ts', content: 'content' });
       watch.runBuildUpdate(context, files);
       expect(context.transpileState).toEqual(BuildState.RequiresUpdate);
+      expect(context.deepLinkState).toEqual(BuildState.RequiresUpdate);
       expect(context.bundleState).toEqual(BuildState.RequiresBuild);
     });
 
@@ -155,6 +161,7 @@ describe('watch', () => {
       }];
       watch.runBuildUpdate(context, files);
       expect(context.transpileState).toEqual(BuildState.RequiresBuild);
+      expect(context.deepLinkState).toEqual(BuildState.RequiresBuild);
       expect(context.bundleState).toEqual(BuildState.RequiresBuild);
     });
 

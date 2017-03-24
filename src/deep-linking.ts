@@ -3,7 +3,7 @@ import { Logger } from './logger/logger';
 import * as Constants from './util/constants';
 import { BuildError } from './util/errors';
 import { getStringPropertyValue, setParsedDeepLinkConfig } from './util/helpers';
-import { BuildContext, ChangedFile, DeepLinkConfigEntry } from './util/interfaces';
+import { BuildContext, BuildState, ChangedFile, DeepLinkConfigEntry } from './util/interfaces';
 
 import { convertDeepLinkConfigEntriesToString, getDeepLinkData, hasExistingDeepLinkConfig, updateAppNgModuleAndFactoryWithDeepLinkConfig } from './deep-linking/util';
 
@@ -54,6 +54,14 @@ export function deepLinkingWorkerImpl(context: BuildContext, changedFiles: Chang
 }
 
 export function deepLinkingUpdate(changedFiles: ChangedFile[], context: BuildContext) {
+  if (context.deepLinkState === BuildState.RequiresBuild) {
+    return deepLinkingWorkerFullUpdate(context);
+  } else {
+    return deepLinkingUpdateImpl(changedFiles, context);
+  }
+}
+
+export function deepLinkingUpdateImpl(changedFiles: ChangedFile[], context: BuildContext) {
   const tsFiles = changedFiles.filter(changedFile => changedFile.ext === '.ts');
   if (tsFiles.length === 0) {
     return Promise.resolve();
@@ -69,3 +77,15 @@ export function deepLinkingUpdate(changedFiles: ChangedFile[], context: BuildCon
   });
 }
 
+export function deepLinkingWorkerFullUpdate(context: BuildContext) {
+  const logger = new Logger(`deeplinks update`);
+  return deepLinkingWorker(context).then((deepLinkConfigEntries: DeepLinkConfigEntry[]) => {
+      setParsedDeepLinkConfig(deepLinkConfigEntries);
+      logger.finish();
+    })
+    .catch((err: Error) => {
+      Logger.warn(err.message);
+      const error = new BuildError(err.message);
+      throw logger.fail(error);
+    });
+}

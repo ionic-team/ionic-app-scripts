@@ -31,6 +31,7 @@ export function watch(context?: BuildContext, configFile?: string) {
   context.sassState = BuildState.RequiresBuild;
   context.transpileState = BuildState.RequiresBuild;
   context.bundleState = BuildState.RequiresBuild;
+  context.deepLinkState = BuildState.RequiresBuild;
 
   const logger = new Logger('watch');
 
@@ -321,9 +322,11 @@ export function runBuildUpdate(context: BuildContext, changedFiles: ChangedFile[
     if (requiresFullBuild) {
       // .ts file was added or deleted, we need a full rebuild
       context.transpileState = BuildState.RequiresBuild;
+      context.deepLinkState = BuildState.RequiresBuild;
     } else {
       // .ts files have changed, so we can get away with doing an update
       context.transpileState = BuildState.RequiresUpdate;
+      context.deepLinkState = BuildState.RequiresUpdate;
     }
   }
 
@@ -352,6 +355,7 @@ export function runBuildUpdate(context: BuildContext, changedFiles: ChangedFile[
       // .html file was added/deleted
       // we should do a full transpile build because of this
       context.transpileState = BuildState.RequiresBuild;
+      context.deepLinkState = BuildState.RequiresBuild;
     }
   }
 
