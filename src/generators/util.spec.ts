@@ -376,13 +376,21 @@ $TAB_CONTENT
     const suppliedName = 'settings view';
 
     it('should return a succesful promise', () => {
-      let rejected = false;
+      spyOn(helpers, helpers.readFileAsync.name).and.returnValue(Promise.resolve('file content'));
+      spyOn(fs, 'readdirSync').and.returnValue([
+        '/path/to/nowhere',
+        'path/to/somewhere'
+      ]);
+      spyOn(helpers, helpers.writeFileAsync.name).and.returnValue(Promise.resolve());
+      spyOn(TypeScriptUtils, TypeScriptUtils.insertNamedImportIfNeeded.name).and.returnValue('file content');
+      spyOn(TypeScriptUtils, TypeScriptUtils.appendNgModuleDeclaration.name).and.returnValue('sliced string');
 
-      util.tabsModuleManipulation([['/src/pages/cool-tab-one/cool-tab-one.module.ts']], { name: suppliedName, className: className, fileName: fileName }, [{ name: suppliedName, className: className, fileName: fileName }]).catch(() => {
-        rejected = true;
+      const promise = util.tabsModuleManipulation([['/src/pages/cool-tab-one/cool-tab-one.module.ts']], { name: suppliedName, className: className, fileName: fileName }, [{ name: suppliedName, className: className, fileName: fileName }]);
+
+      return promise.then(() => {
+        expect(helpers.readFileAsync).toHaveBeenCalled();
+        expect(helpers.writeFileAsync).toHaveBeenCalled();
       });
-
-      expect(rejected).toBeFalsy();
     });
 
     it('should throw when files are not written succesfully', () => {
@@ -422,7 +430,7 @@ $TAB_CONTENT
       const promise = util.nonPageFileManipulation(context, 'coolStuff', '/src/pages/cool-tab-one/cool-tab-one.module.ts', 'pipe');
 
       // test
-      return promise.then((value: string[]) => {
+      return promise.then(() => {
         expect(helpers.readFileAsync).toHaveBeenCalled();
         expect(helpers.writeFileAsync).toHaveBeenCalled();
         expect(helpers.mkDirpAsync).toHaveBeenCalled();
