@@ -200,6 +200,14 @@ describe('watch', () => {
       expect(watcher.options.ignored).toEqual('/some/src/**/*.spec.ts');
     });
 
+    it('should set replacePathVars when options.ignored is an array of strings', () => {
+      const watcher: watch.Watcher = { options: { ignored: ['{{SRC}}/**/*.spec.ts', '{{SRC}}/index.html'] } };
+      const context: BuildContext = { srcDir: '/some/src/' };
+      watch.prepareWatcher(context, watcher);
+      expect((watcher.options.ignored as string[])[0]).toEqual('/some/src/**/*.spec.ts');
+      expect((watcher.options.ignored as string[])[1]).toEqual('/some/src/index.html');
+    });
+
     it('should set replacePathVars when paths is an array', () => {
       const watcher: watch.Watcher = { paths: [
         '{{SRC}}/some/path1',

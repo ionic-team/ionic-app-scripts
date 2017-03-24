@@ -82,6 +82,7 @@ function startWatcher(name: string, watcher: Watcher, context: BuildContext) {
       }
       reject(new BuildError(`A watch configured to watch the following paths failed to start. It likely that a file referenced does not exist: ${filesWatchedString}`));
     }, getIntPropertyValue(Constants.ENV_START_WATCH_TIMEOUT));
+
     prepareWatcher(context, watcher);
 
     if (!watcher.paths) {
@@ -157,15 +158,21 @@ export function prepareWatcher(context: BuildContext, watcher: Watcher) {
     watcher.options.ignoreInitial = true;
   }
 
-  if (typeof watcher.options.ignored === 'string') {
-    watcher.options.ignored = normalize(replacePathVars(context, watcher.options.ignored));
+  if (watcher.options.ignored) {
+    if (Array.isArray(watcher.options.ignored)) {
+      watcher.options.ignored = watcher.options.ignored.map(p => normalize(replacePathVars(context, p)));
+    } else if (typeof watcher.options.ignored === 'string') {
+      // it's a string, so just do it once and leave it
+      watcher.options.ignored = normalize(replacePathVars(context, watcher.options.ignored));
+    }
   }
 
-  if (typeof watcher.paths === 'string') {
-    watcher.paths = normalize(replacePathVars(context, watcher.paths));
-
-  } else if (Array.isArray(watcher.paths)) {
-    watcher.paths = watcher.paths.map(p => normalize(replacePathVars(context, p)));
+  if (watcher.paths) {
+    if (Array.isArray(watcher.paths)) {
+      watcher.paths = watcher.paths.map(p => normalize(replacePathVars(context, p)));
+    } else {
+      watcher.paths = normalize(replacePathVars(context, watcher.paths));
+    }
   }
 }
 
