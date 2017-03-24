@@ -9,7 +9,7 @@ import * as TypeScriptUtils from '../util/typescript-utils';
 
 describe('util', () => {
   describe('hydrateRequest', () => {
-    it('should take a request and return a hydrated request', () => {
+    it('should take a component request and return a hydrated component request', () => {
       // arrange
       const componentsDir = '/Users/noone/project/src/components';
       const context = {
@@ -29,6 +29,7 @@ describe('util', () => {
       const hydratedRequest = util.hydrateRequest(context, request);
 
       // assert
+      expect(hydratedRequest).toEqual({'className': 'SettingsViewComponent', 'dirToRead': '/Users/noone/project/node_modules/ionic-angular/templates/component', 'dirToWrite': '/Users/noone/project/src/components/settings-view', 'fileName': 'settings-view', 'includeNgModule': true, 'includeSpec': true, 'name': 'settings view', 'type': 'component'});
       expect(hydratedRequest.type).toEqual(Constants.COMPONENT);
       expect(hydratedRequest.name).toEqual(request.name);
       expect(hydratedRequest.includeNgModule).toBeTruthy();
@@ -37,6 +38,37 @@ describe('util', () => {
       expect(hydratedRequest.fileName).toEqual('settings-view');
       expect(hydratedRequest.dirToRead).toEqual(join(templateDir, Constants.COMPONENT));
       expect(hydratedRequest.dirToWrite).toEqual(join(componentsDir, hydratedRequest.fileName));
+    });
+
+    it('should take a page request and return a hydrated page request', () => {
+      // arrange
+      const pagesDir = '/Users/noone/project/src/pages';
+      const context = {
+        pagesDir: pagesDir
+      };
+      const request = {
+        type: Constants.PAGE,
+        name: 'settings view',
+        includeSpec: true,
+        includeNgModule: true
+      };
+
+      const templateDir = '/Users/noone/project/node_modules/ionic-angular/templates';
+      spyOn(helpers, helpers.getStringPropertyValue.name).and.returnValue(templateDir);
+
+      // act
+      const hydratedRequest = util.hydrateRequest(context, request);
+
+      // assert
+      expect(hydratedRequest).toEqual({'className': 'SettingsViewPage', 'dirToRead': '/Users/noone/project/node_modules/ionic-angular/templates/page', 'dirToWrite': '/Users/noone/project/src/pages/settings-view', 'fileName': 'settings-view', 'includeNgModule': true, 'includeSpec': true, 'name': 'settings view', 'type': 'page'});
+      expect(hydratedRequest.type).toEqual(Constants.PAGE);
+      expect(hydratedRequest.name).toEqual(request.name);
+      expect(hydratedRequest.includeNgModule).toBeTruthy();
+      expect(hydratedRequest.includeSpec).toBeTruthy();
+      expect(hydratedRequest.className).toEqual('SettingsViewPage');
+      expect(hydratedRequest.fileName).toEqual('settings-view');
+      expect(hydratedRequest.dirToRead).toEqual(join(templateDir, Constants.PAGE));
+      expect(hydratedRequest.dirToWrite).toEqual(join(pagesDir, hydratedRequest.fileName));
     });
   });
 
