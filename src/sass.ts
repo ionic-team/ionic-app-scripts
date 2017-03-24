@@ -242,7 +242,7 @@ function render(context: BuildContext, sassConfig: SassConfig): Promise<string> 
       if (diagnostics.length) {
         printDiagnostics(context, DiagnosticsType.Sass, diagnostics, true, true);
         // sass render error :(
-        reject(new BuildError());
+        reject(new BuildError('Failed to render sass to css'));
 
       } else {
         // sass render success :)
