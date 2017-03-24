@@ -3,7 +3,7 @@ import { Logger } from './logger/logger';
 import { fillConfigDefaults, getUserConfigFile, replacePathVars } from './util/config';
 import * as Constants from './util/constants';
 import { BuildError } from './util/errors';
-import { getBooleanPropertyValue, webpackStatsToDependencyMap, printDependencyMap, unlinkAsync } from './util/helpers';
+import { getBooleanPropertyValue, webpackStatsToDependencyMap, printDependencyMap } from './util/helpers';
 import { BuildContext, TaskInfo } from './util/interfaces';
 import { runWebpackFullBuild, WebpackConfig } from './webpack';
 import { purgeDecorators } from './optimization/decorators';
@@ -32,7 +32,8 @@ function optimizationWorker(context: BuildContext, configFile: string): Promise<
         printDependencyMap(dependencyMap);
         Logger.debug('Original Dependency Map End');
       }
-      return deleteOptimizationJsFile(join(webpackConfig.output.path, webpackConfig.output.filename));
+
+      purgeGeneratedFiles(context, webpackConfig.output.filename);
     }).then(() => {
       return doOptimizations(context, dependencyMap);
     });
@@ -41,8 +42,9 @@ function optimizationWorker(context: BuildContext, configFile: string): Promise<
   }
 }
 
-export function deleteOptimizationJsFile(fileToDelete: string) {
-  return unlinkAsync(fileToDelete);
+export function purgeGeneratedFiles(context: BuildContext, fileNameSuffix: string) {
+  const buildFiles = context.fileCache.getAll().filter(file => file.path.indexOf(context.buildDir) >= 0 && file.path.indexOf(fileNameSuffix) >= 0);
+  buildFiles.forEach(buildFile => context.fileCache.remove(buildFile.path));
 }
 
 export function doOptimizations(context: BuildContext, dependencyMap: Map<string, Set<string>>) {
