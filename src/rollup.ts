@@ -89,15 +89,18 @@ export function rollupWorker(context: BuildContext, configFile: string): Promise
         }
 
         const bundleOutput = bundle.generate({
-          format: rollupConfig.format
+          format: rollupConfig.format,
+          sourceMap: rollupConfig.sourceMap
         });
 
         // write the bundle
-        const jsFileToWrite = join(context.buildDir, rollupConfig.dest);
         const promises: Promise<any>[] = [];
-        promises.push(writeFileAsync(jsFileToWrite, bundleOutput.code));
+        promises.push(writeFileAsync(rollupConfig.dest, bundleOutput.code));
+        context.fileCache.set(rollupConfig.dest, { path: rollupConfig.dest, content: bundleOutput.code});
         if (bundleOutput.map) {
-          promises.push(writeFileAsync(jsFileToWrite + '.map', bundleOutput.map));
+          const sourceMapContent = bundleOutput.map.toString();
+          promises.push(writeFileAsync(rollupConfig.dest + '.map', sourceMapContent));
+          context.fileCache.set(rollupConfig.dest + '.map', { path: rollupConfig.dest + '.map', content: sourceMapContent});
         }
         return Promise.all(promises);
       })
