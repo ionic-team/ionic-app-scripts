@@ -44,7 +44,7 @@ export function deepLinkingWorkerImpl(context: BuildContext, changedFiles: Chang
     }
     const deepLinkConfigEntries = getDeepLinkData(appNgModulePath, context.fileCache, context.runAot);
     const hasExisting = hasExistingDeepLinkConfig(appNgModulePath, cachedUnmodifiedAppNgModuleFileContent);
-    if (!hasExisting) {
+    if (!hasExisting && deepLinkConfigEntries && deepLinkConfigEntries.length) {
       // only update the app's main ngModule if there isn't an existing config
       const deepLinkString = convertDeepLinkConfigEntriesToString(deepLinkConfigEntries);
       updateAppNgModuleAndFactoryWithDeepLinkConfig(context, deepLinkString, changedFiles, context.runAot);
