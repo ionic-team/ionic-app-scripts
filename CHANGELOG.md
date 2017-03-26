@@ -1,3 +1,14 @@
+<a name="1.2.1"></a>
+## [1.2.1](https://github.com/driftyco/ionic-app-scripts/compare/v1.2.0...v1.2.1) (2017-03-26)
+
+
+### Bug Fixes
+
+* **deep-linking:** only attempt to inject deep-link config if there isn't an existing config and the ([507f1a8](https://github.com/driftyco/ionic-app-scripts/commit/507f1a8))
+* **rollup:** fix bug with not generating source-map correctly ([3b1fd16](https://github.com/driftyco/ionic-app-scripts/commit/3b1fd16))
+
+
+
 <a name="1.2.0"></a>
 # [1.2.0](https://github.com/driftyco/ionic-app-scripts/compare/v1.1.4...v1.2.0) (2017-03-24)
 
