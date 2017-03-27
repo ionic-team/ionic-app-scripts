@@ -161,13 +161,7 @@ export function checkIfFunctionIsCalled(filePath: string, fileContent: string, f
 }
 
 export function getClassDeclarations(sourceFile: SourceFile) {
-  const classDeclarations = findNodes(sourceFile, sourceFile, SyntaxKind.ClassDeclaration, true) as ClassDeclaration[];
-  if (classDeclarations.length > 1) {
-    Logger.warn(`The following file has multiple class declarations in it:
-${sourceFile.fileName}
-In general, it's considered a best practice to have at most one class declaration per file.`);
-  }
-  return classDeclarations;
+  return findNodes(sourceFile, sourceFile, SyntaxKind.ClassDeclaration, true) as ClassDeclaration[];
 }
 
 export function getNgModuleClassName(filePath: string, fileContent: string) {
