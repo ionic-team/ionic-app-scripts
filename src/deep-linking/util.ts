@@ -357,16 +357,15 @@ export function generateDefaultDeepLinkNgModuleContent(pageFilePath: string, cla
 
   return `
 import { NgModule } from '@angular/core';
-import { DeepLinkModule } from 'ionic-angular';
+import { IonicPageModule } from 'ionic-angular';
 import { ${className} } from './${importFrom}';
-
 
 @NgModule({
   declarations: [
     ${className},
   ],
   imports: [
-    DeepLinkModule.forChild(${className})
+    IonicPageModule.forChild(${className})
   ]
 })
 export class ${className}Module {}
