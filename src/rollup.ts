@@ -88,10 +88,7 @@ export function rollupWorker(context: BuildContext, configFile: string): Promise
           cachedBundle = bundle;
         }
 
-        const bundleOutput = bundle.generate({
-          format: rollupConfig.format,
-          sourceMap: rollupConfig.sourceMap
-        });
+        const bundleOutput = bundle.generate(rollupConfig);
 
         // write the bundle
         const promises: Promise<any>[] = [];
