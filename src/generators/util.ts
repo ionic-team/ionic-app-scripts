@@ -2,11 +2,9 @@ import { basename, dirname, join, relative } from 'path';
 import { readdirSync } from 'fs';
 import { Logger} from '../logger/logger';
 
-import { camelCase, paramCase, pascalCase, sentenceCase, upperCaseFirst } from 'change-case';
-
 import * as Constants from '../util/constants';
 import * as GeneratorConstants from './constants';
-import { getStringPropertyValue, mkDirpAsync, readFileAsync, replaceAll, writeFileAsync } from '../util/helpers';
+import { camelCase, getStringPropertyValue, mkDirpAsync, paramCase, pascalCase, readFileAsync, replaceAll, sentenceCase, upperCaseFirst, writeFileAsync } from '../util/helpers';
 import { BuildContext } from '../util/interfaces';
 import { globAll, GlobResult } from '../util/glob-util';
 import { ensureSuffix, removeSuffix } from '../util/helpers';
