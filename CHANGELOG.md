@@ -1,3 +1,14 @@
+<a name="1.2.2"></a>
+## [1.2.2](https://github.com/driftyco/ionic-app-scripts/compare/v1.2.1...v1.2.2) (2017-03-27)
+
+
+### Bug Fixes
+
+* **generators:** use correct path and handle providers correctly ([e82d5ff](https://github.com/driftyco/ionic-app-scripts/commit/e82d5ff))
+* **rollup:** pass all config options to generate ([3502360](https://github.com/driftyco/ionic-app-scripts/commit/3502360))
+
+
+
 <a name="1.2.1"></a>
 ## [1.2.1](https://github.com/driftyco/ionic-app-scripts/compare/v1.2.0...v1.2.1) (2017-03-26)
 
