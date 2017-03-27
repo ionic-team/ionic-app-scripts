@@ -580,7 +580,7 @@ export function removeDecorators(fileName: string, source: string): string {
     it('should return non-aot adjusted paths when not in AoT', () => {
       const pageNgModuleContent = `
 import { NgModule } from '@angular/core';
-import { DeepLinkModule } from 'ionic-angular';
+import { IonicPageModule } from 'ionic-angular';
 
 import { HomePage } from './home';
 
@@ -589,7 +589,7 @@ import { HomePage } from './home';
     HomePage,
   ],
   imports: [
-    DeepLinkModule.forChild(HomePage),
+    IonicPageModule.forChild(HomePage),
   ]
 })
 export class HomePageModule {}
@@ -613,7 +613,7 @@ export class HomePageModule {}
     it('should return adjusted paths to account for AoT', () => {
       const pageNgModuleContent = `
 import { NgModule } from '@angular/core';
-import { DeepLinkModule } from 'ionic-angular';
+import { IonicPageModule } from 'ionic-angular';
 
 import { HomePage } from './home';
 
@@ -622,7 +622,7 @@ import { HomePage } from './home';
     HomePage,
   ],
   imports: [
-    DeepLinkModule.forChild(HomePage),
+    IonicPageModule.forChild(HomePage),
   ]
 })
 export class HomePageModule {}
@@ -676,14 +676,14 @@ export class PageOne {
       const pageOneNgModuleContent = `
 import { NgModule } from '@angular/core';
 import { PageOne } from './page-one';
-import { DeepLinkModule } from 'ionic-angular';
+import { IonicPageModule } from 'ionic-angular';
 
 @NgModule({
   declarations: [
     PageOne,
   ],
   imports: [
-    DeepLinkModule.forChild(PageOne)
+    IonicPageModule.forChild(PageOne)
   ],
   entryComponents: [
     PageOne
@@ -739,14 +739,14 @@ export class PageTwo {
       const pageTwoNgModuleContent = `
 import { NgModule } from '@angular/core';
 import { PageTwo } from './page-two';
-import { DeepLinkModule } from 'ionic-angular';
+import { IonicPageModule } from 'ionic-angular';
 
 @NgModule({
   declarations: [
     PageTwo,
   ],
   imports: [
-    DeepLinkModule.forChild(PageTwo)
+    IonicPageModule.forChild(PageTwo)
   ]
 })
 export class PageTwoModule {
@@ -786,14 +786,14 @@ export class PageThree {
       const pageSettingsNgModuleContent = `
 import { NgModule } from '@angular/core';
 import { PageThree } from './page-three';
-import { DeepLinkModule } from 'ionic-angular';
+import { IonicPageModule } from 'ionic-angular';
 
 @NgModule({
   declarations: [
     PageThree,
   ],
   imports: [
-    DeepLinkModule.forChild(PageThree)
+    IonicPageModule.forChild(PageThree)
   ]
 })
 export class PageThreeModule {
@@ -863,14 +863,14 @@ export class PageOne {
       const pageOneNgModuleContent = `
 import { NgModule } from '@angular/core';
 import { PageOne } from './page-one';
-import { DeepLinkModule } from 'ionic-angular';
+import { IonicPageModule } from 'ionic-angular';
 
 @NgModule({
   declarations: [
     PageOne,
   ],
   imports: [
-    DeepLinkModule.forChild(PageOne)
+    IonicPageModule.forChild(PageOne)
   ],
   entryComponents: [
     PageOne
@@ -926,14 +926,14 @@ export class PageTwo {
       const pageTwoNgModuleContent = `
 import { NgModule } from '@angular/core';
 import { PageTwo } from './page-two';
-import { DeepLinkModule } from 'ionic-angular';
+import { IonicPageModule } from 'ionic-angular';
 
 @NgModule({
   declarations: [
     PageTwo,
   ],
   imports: [
-    DeepLinkModule.forChild(PageTwo)
+    IonicPageModule.forChild(PageTwo)
   ]
 })
 export class PageTwoModule {
@@ -972,14 +972,14 @@ export class PageThree {
       const pageSettingsNgModuleContent = `
 import { NgModule } from '@angular/core';
 import { PageThree } from './page-three';
-import { DeepLinkModule } from 'ionic-angular';
+import { IonicPageModule } from 'ionic-angular';
 
 @NgModule({
   declarations: [
     PageThree,
   ],
   imports: [
-    DeepLinkModule.forChild(PageThree)
+    IonicPageModule.forChild(PageThree)
   ]
 })
 export class PageThreeModule {
@@ -1054,14 +1054,14 @@ export class PageOne {
       const pageOneNgModuleContent = `
 import { NgModule } from '@angular/core';
 import { PageOne } from './page-one';
-import { DeepLinkModule } from 'ionic-angular';
+import { IonicPageModule } from 'ionic-angular';
 
 @NgModule({
   declarations: [
     PageOne,
   ],
   imports: [
-    DeepLinkModule.forChild(PageOne)
+    IonicPageModule.forChild(PageOne)
   ],
   entryComponents: [
     PageOne
@@ -1119,14 +1119,14 @@ export class PageTwo {
       const pageTwoNgModuleContent = `
 import { NgModule } from '@angular/core';
 import { PageTwo } from './page-two';
-import { DeepLinkModule } from 'ionic-angular';
+import { IonicPageModule } from 'ionic-angular';
 
 @NgModule({
   declarations: [
     PageTwo,
   ],
   imports: [
-    DeepLinkModule.forChild(PageTwo)
+    IonicPageModule.forChild(PageTwo)
   ]
 })
 export class PageTwoModule {
@@ -1165,14 +1165,14 @@ export class PageThree {
       const pageSettingsNgModuleContent = `
 import { NgModule } from '@angular/core';
 import { PageThree } from './page-three';
-import { DeepLinkModule } from 'ionic-angular';
+import { IonicPageModule } from 'ionic-angular';
 
 @NgModule({
   declarations: [
     PageThree,
   ],
   imports: [
-    DeepLinkModule.forChild(PageThree)
+    IonicPageModule.forChild(PageThree)
   ]
 })
 export class PageThreeModule {
@@ -1272,14 +1272,14 @@ export class PageOne {
       const pageOneNgModuleContent = `
 import { NgModule } from '@angular/core';
 import { PageOne } from './page-one';
-import { DeepLinkModule } from 'ionic-angular';
+import { IonicPageModule } from 'ionic-angular';
 
 @NgModule({
   declarations: [
     PageOne,
   ],
   imports: [
-    DeepLinkModule.forChild(PageOne)
+    IonicPageModule.forChild(PageOne)
   ],
   entryComponents: [
     PageOne
@@ -1337,14 +1337,14 @@ export class PageTwo {
       const pageTwoNgModuleContent = `
 import { NgModule } from '@angular/core';
 import { PageTwo } from './page-two';
-import { DeepLinkModule } from 'ionic-angular';
+import { IonicPageModule } from 'ionic-angular';
 
 @NgModule({
   declarations: [
     PageTwo,
   ],
   imports: [
-    DeepLinkModule.forChild(PageTwo)
+    IonicPageModule.forChild(PageTwo)
   ]
 })
 export class PageTwoModule {
@@ -1383,14 +1383,14 @@ export class PageThree {
       const pageSettingsNgModuleContent = `
 import { NgModule } from '@angular/core';
 import { PageThree } from './page-three';
-import { DeepLinkModule } from 'ionic-angular';
+import { IonicPageModule } from 'ionic-angular';
 
 @NgModule({
   declarations: [
     PageThree,
   ],
   imports: [
-    DeepLinkModule.forChild(PageThree)
+    IonicPageModule.forChild(PageThree)
   ]
 })
 export class PageThreeModule {
@@ -1960,7 +1960,7 @@ class AppModuleInjector extends import0.ɵNgModuleInjector<import1.AppModule> {
   _FormsModule_4:import4.FormsModule;
   _ReactiveFormsModule_5:import4.ReactiveFormsModule;
   _IonicModule_6:import5.IonicModule;
-  _DeepLinkModule_7:import5.DeepLinkModule;
+  _IonicPageModule_7:import5.IonicPageModule;
   _HomePageModule_8:import6.HomePageModule;
   _AppModule_9:import1.AppModule;
   __LOCALE_ID_10:any;
@@ -2203,7 +2203,7 @@ class AppModuleInjector extends import0.ɵNgModuleInjector<import1.AppModule> {
     this._FormsModule_4 = new import4.FormsModule();
     this._ReactiveFormsModule_5 = new import4.ReactiveFormsModule();
     this._IonicModule_6 = new import5.IonicModule();
-    this._DeepLinkModule_7 = new import5.DeepLinkModule();
+    this._IonicPageModule_7 = new import5.IonicPageModule();
     this._HomePageModule_8 = new import6.HomePageModule();
     this._AppModule_9 = new import1.AppModule();
     this._ErrorHandler_12 = import3.ɵa();
@@ -2241,7 +2241,7 @@ class AppModuleInjector extends import0.ɵNgModuleInjector<import1.AppModule> {
     if ((token === import4.FormsModule)) { return this._FormsModule_4; }
     if ((token === import4.ReactiveFormsModule)) { return this._ReactiveFormsModule_5; }
     if ((token === import5.IonicModule)) { return this._IonicModule_6; }
-    if ((token === import5.DeepLinkModule)) { return this._DeepLinkModule_7; }
+    if ((token === import5.IonicPageModule)) { return this._IonicPageModule_7; }
     if ((token === import6.HomePageModule)) { return this._HomePageModule_8; }
     if ((token === import1.AppModule)) { return this._AppModule_9; }
     if ((token === import0.LOCALE_ID)) { return this._LOCALE_ID_10; }
@@ -2331,16 +2331,15 @@ export const AppModuleNgFactory:import0.NgModuleFactory<import1.AppModule> = new
     it('should generate a default NgModule for a DeepLinked component', () => {
       const knownFileContent = `
 import { NgModule } from '@angular/core';
-import { DeepLinkModule } from 'ionic-angular';
+import { IonicPageModule } from 'ionic-angular';
 import { PageOne } from './page-one';
-
 
 @NgModule({
   declarations: [
     PageOne,
   ],
   imports: [
-    DeepLinkModule.forChild(PageOne)
+    IonicPageModule.forChild(PageOne)
   ]
 })
 export class PageOneModule {}
@@ -2604,7 +2603,7 @@ class AppModuleInjector extends import0.ɵNgModuleInjector<import1.AppModule> {
   _FormsModule_4:import4.FormsModule;
   _ReactiveFormsModule_5:import4.ReactiveFormsModule;
   _IonicModule_6:import5.IonicModule;
-  _DeepLinkModule_7:import5.DeepLinkModule;
+  _IonicPageModule_7:import5.IonicPageModule;
   _HomePageModule_8:import6.HomePageModule;
   _AppModule_9:import1.AppModule;
   __LOCALE_ID_10:any;
@@ -2847,7 +2846,7 @@ class AppModuleInjector extends import0.ɵNgModuleInjector<import1.AppModule> {
     this._FormsModule_4 = new import4.FormsModule();
     this._ReactiveFormsModule_5 = new import4.ReactiveFormsModule();
     this._IonicModule_6 = new import5.IonicModule();
-    this._DeepLinkModule_7 = new import5.DeepLinkModule();
+    this._IonicPageModule_7 = new import5.IonicPageModule();
     this._HomePageModule_8 = new import6.HomePageModule();
     this._AppModule_9 = new import1.AppModule();
     this._ErrorHandler_12 = import3.ɵa();
@@ -2885,7 +2884,7 @@ class AppModuleInjector extends import0.ɵNgModuleInjector<import1.AppModule> {
     if ((token === import4.FormsModule)) { return this._FormsModule_4; }
     if ((token === import4.ReactiveFormsModule)) { return this._ReactiveFormsModule_5; }
     if ((token === import5.IonicModule)) { return this._IonicModule_6; }
-    if ((token === import5.DeepLinkModule)) { return this._DeepLinkModule_7; }
+    if ((token === import5.IonicPageModule)) { return this._IonicPageModule_7; }
     if ((token === import6.HomePageModule)) { return this._HomePageModule_8; }
     if ((token === import1.AppModule)) { return this._AppModule_9; }
     if ((token === import0.LOCALE_ID)) { return this._LOCALE_ID_10; }

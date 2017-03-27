@@ -100,6 +100,57 @@ describe('add default ngmodules upgrade script', () => {
 
       const ngModuleFileExtension = '.module.ts';
 
+      const knownNgModulePageOne = `
+import { NgModule } from '@angular/core';
+import { IonicPageModule } from 'ionic-angular';
+import { PageOne } from './page-one';
+
+@NgModule({
+  declarations: [
+    PageOne,
+  ],
+  imports: [
+    IonicPageModule.forChild(PageOne)
+  ]
+})
+export class PageOneModule {}
+
+`;
+
+      const knownNgModulePageTwo = `
+import { NgModule } from '@angular/core';
+import { IonicPageModule } from 'ionic-angular';
+import { PageTwo } from './page-two';
+
+@NgModule({
+  declarations: [
+    PageTwo,
+  ],
+  imports: [
+    IonicPageModule.forChild(PageTwo)
+  ]
+})
+export class PageTwoModule {}
+
+`;
+
+      const knownNgModuleModalPage = `
+import { NgModule } from '@angular/core';
+import { IonicPageModule } from 'ionic-angular';
+import { ModalOne } from './modal-one';
+
+@NgModule({
+  declarations: [
+    ModalOne,
+  ],
+  imports: [
+    IonicPageModule.forChild(ModalOne)
+  ]
+})
+export class ModalOneModule {}
+
+`;
+
       spyOn(helpers, helpers.getStringPropertyValue.name).and.returnValue(ngModuleFileExtension);
       const fsSpy = spyOn(fs, 'writeFileSync');
 
@@ -107,13 +158,13 @@ describe('add default ngmodules upgrade script', () => {
 
       expect(fsSpy.calls.count()).toEqual(3);
       expect(fsSpy.calls.argsFor(0)[0]).toEqual(helpers.changeExtension(knownFileOne, ngModuleFileExtension));
-      expect(fsSpy.calls.argsFor(0)[1]).toEqual(deeplinkUtils.generateDefaultDeepLinkNgModuleContent(knownFileOne, 'PageOne'));
+      expect(fsSpy.calls.argsFor(0)[1]).toEqual(knownNgModulePageOne);
 
       expect(fsSpy.calls.argsFor(1)[0]).toEqual(helpers.changeExtension(knownFileTwo, ngModuleFileExtension));
-      expect(fsSpy.calls.argsFor(1)[1]).toEqual(deeplinkUtils.generateDefaultDeepLinkNgModuleContent(knownFileTwo, 'PageTwo'));
+      expect(fsSpy.calls.argsFor(1)[1]).toEqual(knownNgModulePageTwo);
 
       expect(fsSpy.calls.argsFor(2)[0]).toEqual(helpers.changeExtension(knownFileSix, ngModuleFileExtension));
-      expect(fsSpy.calls.argsFor(2)[1]).toEqual(deeplinkUtils.generateDefaultDeepLinkNgModuleContent(knownFileSix, 'ModalOne'));
+      expect(fsSpy.calls.argsFor(2)[1]).toEqual(knownNgModuleModalPage);
     });
   });
 });
