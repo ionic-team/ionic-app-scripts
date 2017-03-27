@@ -262,5 +262,111 @@ export class AppModule {}
     const result = tsUtils.appendNgModuleDeclaration(knownPath, knownContent, 'CoolComponent');
     expect(result).toEqual(expectedContent);
   });
+
+  it('should return a modified file content for providers', () => {
+    const knownContent = `
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { IonicApp, IonicModule } from '../../../../..';
+
+import { AppComponent } from './app.component';
+import { RootPageModule } from '../pages/root-page/root-page.module';
+
+@NgModule({
+  declarations: [
+    AppComponent
+  ],
+  imports: [
+    BrowserModule,
+    IonicModule.forRoot(AppComponent),
+    RootPageModule
+  ],
+  bootstrap: [IonicApp],
+  providers: []
+})
+export class AppModule {}
+`;
+
+  const knownPath = '/some/fake/path';
+
+  const expectedContent = `
+import { NgModule } from \'@angular/core\';
+import { BrowserModule } from \'@angular/platform-browser\';
+import { IonicApp, IonicModule } from \'../../../../..\';
+
+import { AppComponent } from \'./app.component\';
+import { RootPageModule } from \'../pages/root-page/root-page.module\';
+
+@NgModule({
+  declarations: [
+    AppComponent
+  ],
+  imports: [
+    BrowserModule,
+    IonicModule.forRoot(AppComponent),
+    RootPageModule
+  ],
+  bootstrap: [IonicApp],
+  providers: [CoolProvider]
+})
+export class AppModule {}
+`;
+
+  const result = tsUtils.appendNgModuleDeclaration(knownPath, knownContent, 'CoolProvider', 'provider');
+  expect(result).toEqual(expectedContent);
+});
+
+  it('should return a modified file content for providers that already has one provider', () => {
+    const knownContent = `
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { IonicApp, IonicModule } from '../../../../..';
+
+import { AppComponent } from './app.component';
+import { RootPageModule } from '../pages/root-page/root-page.module';
+
+@NgModule({
+  declarations: [
+    AppComponent
+  ],
+  imports: [
+    BrowserModule,
+    IonicModule.forRoot(AppComponent),
+    RootPageModule
+  ],
+  bootstrap: [IonicApp],
+  providers: [AwesomeProvider]
+})
+export class AppModule {}
+`;
+
+  const knownPath = '/some/fake/path';
+
+  const expectedContent = `
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { IonicApp, IonicModule } from '../../../../..';
+
+import { AppComponent } from './app.component';
+import { RootPageModule } from '../pages/root-page/root-page.module';
+
+@NgModule({
+  declarations: [
+    AppComponent
+  ],
+  imports: [
+    BrowserModule,
+    IonicModule.forRoot(AppComponent),
+    RootPageModule
+  ],
+  bootstrap: [IonicApp],
+  providers: [AwesomeProvider, CoolProvider]
+})
+export class AppModule {}
+`;
+
+  const result = tsUtils.appendNgModuleDeclaration(knownPath, knownContent, 'CoolProvider', 'provider');
+  expect(result).toEqual(expectedContent);
+  });
 });
 

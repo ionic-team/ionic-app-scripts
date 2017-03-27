@@ -159,8 +159,12 @@ export function nonPageFileManipulation(context: BuildContext, name: string, ngM
     fileContent = content;
     return generateTemplates(context, hydratedRequest);
   }).then(() => {
-    fileContent = insertNamedImportIfNeeded(ngModulePath, fileContent, hydratedRequest.className, relative(dirname(ngModulePath), hydratedRequest.dirToWrite));
-    fileContent = appendNgModuleDeclaration(ngModulePath, fileContent, hydratedRequest.className);
+    fileContent = insertNamedImportIfNeeded(ngModulePath, fileContent, hydratedRequest.className, `${relative(dirname(ngModulePath), hydratedRequest.dirToWrite)}/${hydratedRequest.fileName}`);
+    if (type === 'provider') {
+      fileContent = appendNgModuleDeclaration(ngModulePath, fileContent, hydratedRequest.className, type);
+    } else {
+      fileContent = appendNgModuleDeclaration(ngModulePath, fileContent, hydratedRequest.className);
+    }
     return writeFileAsync(ngModulePath, fileContent);
   });
 }

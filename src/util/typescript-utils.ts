@@ -74,6 +74,10 @@ export function appendAfter(source: string, node: Node, toAppend: string): strin
   return stringSplice(source, node.getEnd(), 0, toAppend);
 }
 
+export function appendEmpty(source: string, position: number, toAppend: string): string {
+  return stringSplice(source, position, 0, toAppend);
+}
+
 export function appendBefore(filePath: string, fileContent: string, node: Node, toAppend: string): string {
   const sourceFile = getTypescriptSourceFile(filePath, fileContent, ScriptTarget.Latest, false);
   return stringSplice(fileContent, node.getStart(sourceFile), 0, toAppend);
@@ -229,13 +233,23 @@ export function findObjectLiteralElementByName(properties: NodeArray<ObjectLiter
   })[0];
 }
 
-export function appendNgModuleDeclaration(filePath: string, fileContent: string, declaration: string): string {
+export function appendNgModuleDeclaration(filePath: string, fileContent: string, declaration: string, type?: string): string {
   const sourceFile = getTypescriptSourceFile(filePath, fileContent, ScriptTarget.Latest, false);
   const decorator = getNgModuleDecorator(path.basename(filePath), sourceFile);
   const obj = getNgModuleObjectLiteralArg(decorator);
-  const properties = (findObjectLiteralElementByName(obj.properties, 'declarations') as PropertyAssignment);
-  const declarations = (properties.initializer as ArrayLiteralExpression).elements;
-  return appendAfter(fileContent, declarations[declarations.length - 1], `,\n    ${declaration}`);
+  if (type === 'provider') {
+    const properties = (findObjectLiteralElementByName(obj.properties, 'providers') as PropertyAssignment);
+    const declarations = (properties.initializer as ArrayLiteralExpression).elements;
+    if (declarations.length === 0) {
+      return appendEmpty(fileContent, declarations['end'], declaration);
+    } else {
+      return appendAfter(fileContent, declarations[declarations.length - 1], `, ${declaration}`);
+    }
+  } else {
+    const properties = (findObjectLiteralElementByName(obj.properties, 'declarations') as PropertyAssignment);
+    const declarations = (properties.initializer as ArrayLiteralExpression).elements;
+    return appendAfter(fileContent, declarations[declarations.length - 1], `,\n    ${declaration}`);
+  }
 }
 
 const NG_MODULE_DECORATOR_TEXT = 'NgModule';
