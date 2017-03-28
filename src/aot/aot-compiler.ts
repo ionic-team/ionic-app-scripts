@@ -43,7 +43,7 @@ export class AotCompiler {
     this.program = createProgram(this.tsConfig.parsed.fileNames, this.tsConfig.parsed.options, this.compilerHost);
   }
 
-  compile(): Promise<void> {
+  compile(): Promise<any> {
     return Promise.resolve().then(() => {
     }).then(() => {
       clearDiagnostics(this.context, DiagnosticsType.TypeScript);
@@ -59,7 +59,8 @@ export class AotCompiler {
         angularCompilerOptions: this.angularCompilerOptions,
         cliOptions: i18nOptions,
         program: this.program,
-        compilerHost: this.compilerHost
+        compilerHost: this.compilerHost,
+        compilerOptions: this.tsConfig.parsed.options
       });
     }).then(() => {
       Logger.debug('[AotCompiler] compile: starting codegen ... DONE');
