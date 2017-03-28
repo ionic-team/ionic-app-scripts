@@ -12,7 +12,7 @@ import * as tsUtils from '../util/typescript-utils';
 describe('util', () => {
   describe('filterTypescriptFilesForDeepLinks', () => {
     it('should return a list of files that are in the directory specified for deeplinking', () => {
-      const pagesDir = join('Users', 'noone', 'myApp', 'src', 'pages');
+      const pagesDir = join(process.cwd(), 'myApp', 'src', 'pages');
 
       const knownFileContent = 'Some string';
       const pageOneTs = join(pagesDir, 'page-one', 'page-one.ts');
@@ -96,7 +96,7 @@ export class HomePage {
 
       `;
 
-      const knownPath = '/some/fake/path';
+      const knownPath = join(process.cwd(), 'some', 'fake', 'path');
 
       const sourceFile = tsUtils.getTypescriptSourceFile(knownPath, knownContent);
 
@@ -154,7 +154,7 @@ export class HomePage {
 
       `;
 
-      const knownPath = '/some/fake/path';
+      const knownPath = join(process.cwd(), 'some', 'fake', 'path');
 
       const sourceFile = tsUtils.getTypescriptSourceFile(knownPath, knownContent);
 
@@ -211,7 +211,7 @@ export class HomePage {
 
       `;
 
-      const knownPath = '/some/fake/path';
+      const knownPath = join(process.cwd(), 'some', 'fake', 'path');
 
       const sourceFile = tsUtils.getTypescriptSourceFile(knownPath, knownContent);
 
@@ -267,7 +267,7 @@ export class HomePage {
 
       `;
 
-      const knownPath = '/some/fake/path';
+      const knownPath = join(process.cwd(), 'some', 'fake', 'path');
 
       const sourceFile = tsUtils.getTypescriptSourceFile(knownPath, knownContent);
 
@@ -322,7 +322,7 @@ export class HomePage {
 
       `;
 
-      const knownPath = '/some/fake/path';
+      const knownPath = join(process.cwd(), 'some', 'fake', 'path');
 
       const sourceFile = tsUtils.getTypescriptSourceFile(knownPath, knownContent);
 
@@ -376,7 +376,7 @@ export class HomePage {
 
       `;
 
-      const knownPath = '/some/fake/path';
+      const knownPath = join(process.cwd(), 'some', 'fake', 'path');
 
       const sourceFile = tsUtils.getTypescriptSourceFile(knownPath, knownContent);
 
@@ -434,7 +434,7 @@ export class HomePage {
 
       `;
 
-      const knownPath = '/some/fake/path';
+      const knownPath = join(process.cwd(), 'some', 'fake', 'path');
 
       const sourceFile = tsUtils.getTypescriptSourceFile(knownPath, knownContent);
       const knownErrorMsg = 'Should never get here';
@@ -487,7 +487,7 @@ export class HomePage {
 
       `;
 
-      const knownPath = '/some/fake/path';
+      const knownPath = join(process.cwd(), 'some', 'fake', 'path');
 
       const sourceFile = tsUtils.getTypescriptSourceFile(knownPath, knownContent);
       const result = util.getDeepLinkDecoratorContentForSourceFile(sourceFile);
@@ -530,7 +530,7 @@ export function removeDecorators(fileName: string, source: string): string {
 
       `;
 
-      const knownPath = '/some/fake/path';
+      const knownPath = join(process.cwd(), 'some', 'fake', 'path');
 
       const sourceFile = tsUtils.getTypescriptSourceFile(knownPath, knownContent);
       const result = util.getDeepLinkDecoratorContentForSourceFile(sourceFile);
@@ -540,7 +540,7 @@ export function removeDecorators(fileName: string, source: string): string {
 
   describe('getNgModuleDataFromCorrespondingPage', () => {
     it('should call the file cache with the path to an ngmodule', () => {
-      const basePath = join('Some', 'Fake', 'Path');
+      const basePath = join(process.cwd(), 'some', 'fake', 'path');
       const pagePath = join(basePath, 'my-page', 'my-page.ts');
       const ngModulePath = join(basePath, 'my-page', 'my-page.module.ts');
 
@@ -552,7 +552,7 @@ export function removeDecorators(fileName: string, source: string): string {
   });
 
   describe('getRelativePathToPageNgModuleFromAppNgModule', () => {
-    const prefix = join('Users', 'noone', 'myApp', 'src');
+    const prefix = join(process.cwd(), 'myApp', 'src');
     const appNgModulePath = join(prefix, 'app', 'app.module.ts');
     const pageNgModulePath = join(prefix, 'pages', 'page-one', 'page-one.module.ts');
     const result = util.getRelativePathToPageNgModuleFromAppNgModule(appNgModulePath, pageNgModulePath);
@@ -561,7 +561,7 @@ export function removeDecorators(fileName: string, source: string): string {
 
   describe('getNgModuleDataFromPage', () => {
     it('should throw when NgModule is not in cache and create default ngModule flag is off', () => {
-      const prefix = join('Users', 'noone', 'myApp', 'src');
+      const prefix = join(process.cwd(), 'myApp', 'src');
       const appNgModulePath = join(prefix, 'app', 'app.module.ts');
       const pagePath = join(prefix, 'pages', 'page-one', 'page-one.ts');
       const knownClassName = 'PageOne';
@@ -594,7 +594,7 @@ import { HomePage } from './home';
 })
 export class HomePageModule {}
       `;
-      const prefix = join('Users', 'noone', 'myApp', 'src');
+      const prefix = join(process.cwd(), 'myApp', 'src');
       const appNgModulePath = join(prefix, 'app', 'app.module.ts');
       const pageNgModulePath = join(prefix, 'pages', 'page-one', 'page-one.module.ts');
       const pagePath = join(prefix, 'pages', 'page-one', 'page-one.ts');
@@ -627,7 +627,7 @@ import { HomePage } from './home';
 })
 export class HomePageModule {}
       `;
-      const prefix = join('Users', 'noone', 'myApp', 'src');
+      const prefix = join(process.cwd(), 'myApp', 'src');
       const appNgModulePath = join(prefix, 'app', 'app.module.ts');
       const pageNgModulePath = join(prefix, 'pages', 'page-one', 'page-one.module.ts');
       const pagePath = join(prefix, 'pages', 'page-one', 'page-one.ts');
@@ -802,7 +802,7 @@ export class PageThreeModule {
 
       `;
 
-      const prefix = join('Users', 'noone', 'myApp', 'src');
+      const prefix = join(process.cwd(), 'myApp', 'src');
       const appNgModulePath = join(prefix, 'app', 'app.module.ts');
       const pageOneNgModulePath = join(prefix, 'pages', 'page-one', 'page-one.module.ts');
       const pageOnePath = join(prefix, 'pages', 'page-one', 'page-one.ts');
@@ -988,7 +988,7 @@ export class PageThreeModule {
 
       `;
 
-      const srcDir = join('Users', 'noone', 'myApp', 'src');
+      const srcDir = join(process.cwd(), 'myApp', 'src');
       const appNgModulePath = join(srcDir, 'app', 'app.module.ts');
       const pageOneNgModulePath = join(srcDir, 'pages', 'page-one', 'page-one.module.ts');
       const pageOnePath = join(srcDir, 'pages', 'page-one', 'page-one.ts');
@@ -1181,7 +1181,7 @@ export class PageThreeModule {
 
       `;
 
-      const srcDir = join('/Users', 'noone', 'myApp', 'src');
+      const srcDir = join(process.cwd(), 'myApp', 'src');
       const appNgModulePath = join(srcDir, 'app', 'app.module.ts');
       const pageOneNgModulePath = join(srcDir, 'pages', 'page-one', 'page-one.module.ts');
       const pageOnePath = join(srcDir, 'pages', 'page-one', 'page-one.ts');
@@ -1215,7 +1215,7 @@ export class PageThreeModule {
       expect(results[0].segment).toEqual(null);
       expect(results[0].priority).toEqual('low');
       expect(results[0].defaultHistory.length).toEqual(0);
-      expect(results[0].absolutePath).toEqual('/Users/noone/myApp/src/pages/page-one/page-one.module.ts');
+      expect(results[0].absolutePath).toEqual(join(srcDir, 'pages', 'page-one', 'page-one.module.ts'));
       expect(results[0].userlandModulePath).toEqual('../pages/page-one/page-one.module');
       expect(results[0].className).toEqual('PageOneModule');
 
@@ -1223,7 +1223,7 @@ export class PageThreeModule {
       expect(results[1].segment).toEqual(null);
       expect(results[1].priority).toEqual('low');
       expect(results[1].defaultHistory.length).toEqual(0);
-      expect(results[1].absolutePath).toEqual('/Users/noone/myApp/src/pages/page-two/page-two.module.ts');
+      expect(results[1].absolutePath).toEqual(join(srcDir, 'pages', 'page-two', 'page-two.module.ts'));
       expect(results[1].userlandModulePath).toEqual('../pages/page-two/page-two.module');
       expect(results[1].className).toEqual('PageTwoModule');
 
@@ -1233,7 +1233,7 @@ export class PageThreeModule {
       expect(results[2].defaultHistory.length).toEqual(2);
       expect(results[2].defaultHistory[0]).toEqual('page-one');
       expect(results[2].defaultHistory[1]).toEqual('page-two');
-      expect(results[2].absolutePath).toEqual('/Users/noone/myApp/src/pages/settings-page/fake-dir/settings-page.module.ts');
+      expect(results[2].absolutePath).toEqual(join(srcDir, 'pages', 'settings-page', 'fake-dir', 'settings-page.module.ts'));
       expect(results[2].userlandModulePath).toEqual('../pages/settings-page/fake-dir/settings-page.module');
       expect(results[2].className).toEqual('PageThreeModule');
     });
@@ -1399,7 +1399,7 @@ export class PageThreeModule {
 
       `;
 
-      const srcDir = join('/Users', 'noone', 'myApp', 'src');
+      const srcDir = join(process.cwd(), 'myApp', 'src');
       const appNgModulePath = join(srcDir, 'app', 'app.module.ts');
       const pageOneNgModulePath = join(srcDir, 'pages', 'page-one', 'page-one.not-module.ts');
       const pageOnePath = join(srcDir, 'pages', 'page-one', 'page-one.ts');
@@ -1499,7 +1499,7 @@ import { HomePageModule } from '../pages/home/home.module';
 export class AppModule {}
       `;
 
-      const knownPath = '/idk/yo/some/path';
+      const knownPath = join(process.cwd(), 'idk', 'some', 'fake', 'path');
 
       const result = util.hasExistingDeepLinkConfig(knownPath, knownContent);
       expect(result).toEqual(false);
@@ -1529,7 +1529,7 @@ import { HomePageModule } from '../pages/home/home.module';
 export class AppModule {}
       `;
 
-      const knownPath = '/idk/yo/some/path';
+      const knownPath = join(process.cwd(), 'idk', 'some', 'fake', 'path');
 
       const result = util.hasExistingDeepLinkConfig(knownPath, knownContent);
       expect(result).toEqual(false);
@@ -1544,7 +1544,7 @@ export class AppModule {}
         defaultHistory: [],
         priority: 'low',
         rawString: 'irrelevant for this test',
-        absolutePath: '/Users/noone/test/taco',
+        absolutePath: join(process.cwd(), 'myApp', 'pages', 'home-page', 'home-page.module.ts'),
         userlandModulePath: '../pages/home-page/home-page.module',
         className: 'HomePageModule'
       };
@@ -1560,7 +1560,7 @@ export class AppModule {}
         defaultHistory: ['page-two', 'page-three', 'page-four'],
         priority: 'low',
         rawString: 'irrelevant for this test',
-        absolutePath: '/Users/noone/test/taco',
+        absolutePath: join(process.cwd(), 'myApp', 'pages', 'home-page', 'home-page.module.ts'),
         userlandModulePath: '../pages/home-page/home-page.module',
         className: 'HomePageModule'
       };
@@ -1579,7 +1579,7 @@ export class AppModule {}
         defaultHistory: ['page-two', 'page-three', 'page-four'],
         priority: 'low',
         rawString: 'irrelevant for this test',
-        absolutePath: '/Users/noone/test/taco',
+        absolutePath: join(process.cwd(), 'myApp', 'pages', 'home-page', 'home-page.module.ts'),
         userlandModulePath: '../pages/home-page/home-page.module',
         className: 'HomePageModule'
       });
@@ -1589,7 +1589,7 @@ export class AppModule {}
         defaultHistory: [],
         priority: 'low',
         rawString: 'irrelevant for this test',
-        absolutePath: '/Users/noone/test/taco',
+        absolutePath: join(process.cwd(), 'myApp', 'pages', 'home-page', 'home-page.module.ts'),
         userlandModulePath: '../pages/page-two/page-two.module',
         className: 'PageTwoModule'
       });
@@ -1599,7 +1599,7 @@ export class AppModule {}
         defaultHistory: [],
         priority: 'low',
         rawString: 'irrelevant for this test',
-        absolutePath: '/Users/noone/test/taco',
+        absolutePath: join(process.cwd(), 'myApp', 'pages', 'home-page', 'home-page.module.ts'),
         userlandModulePath: '../pages/settings-page/setting-page.module',
         className: 'SettingsPageModule'
       });
@@ -1676,7 +1676,7 @@ import { HomePageModule } from '../pages/home/home.module';
 export class AppModule {}
       `;
 
-      const knownPath = '/idk/yo/some/path/app.module.ts';
+      const knownPath = join('some', 'fake', 'path');
 
       const result = util.getUpdatedAppNgModuleContentWithDeepLinkConfig(knownPath, knownContent, knownStringToInject);
       expect(result).toEqual(expectedResult);
@@ -1746,7 +1746,7 @@ import { HomePageModule } from '../pages/home/home.module';
 export class AppModule {}
       `;
 
-      const knownPath = '/idk/yo/some/path/app.module.ts';
+      const knownPath = join('some', 'fake', 'path');
 
       const result = util.getUpdatedAppNgModuleContentWithDeepLinkConfig(knownPath, knownContent, knownStringToInject);
       expect(result).toEqual(expectedResult);
@@ -1816,7 +1816,7 @@ import { HomePageModule } from '../pages/home/home.module';
 export class AppModule {}
       `;
 
-      const knownPath = '/idk/yo/some/path/app.module.ts';
+      const knownPath = join('some', 'fake', 'path');
 
       const result = util.getUpdatedAppNgModuleContentWithDeepLinkConfig(knownPath, knownContent, knownStringToInject);
       expect(result).toEqual(expectedResult);
@@ -1886,7 +1886,7 @@ import { HomePageModule } from '../pages/home/home.module';
 export class AppModule {}
       `;
 
-      const knownPath = '/idk/yo/some/path/app.module.ts';
+      const knownPath = join('some', 'fake', 'path');
 
       const result = util.getUpdatedAppNgModuleContentWithDeepLinkConfig(knownPath, knownContent, knownStringToInject);
       expect(result).toEqual(expectedResult);
@@ -2345,7 +2345,7 @@ import { PageOne } from './page-one';
 export class PageOneModule {}
 
 `;
-      const knownFilePath = '/someFakePath/myApp/src/pages/page-one/page-one.ts';
+      const knownFilePath = join(process.cwd(), 'myApp', 'src', 'pages', 'page-one', 'page-one.ts');
       const knownClassName = 'PageOne';
       const fileContent = util.generateDefaultDeepLinkNgModuleContent(knownFilePath, knownClassName);
       expect(fileContent).toEqual(knownFileContent);
@@ -2367,7 +2367,7 @@ export class PageOneModule {}
   ]
 }
 `;
-      const knownAppNgModulePath = '/some/fake/path/myApp/src/app.module.ts';
+      const knownAppNgModulePath = join(process.cwd(), 'myApp', 'src', 'app.module.ts');
       spyOn(helpers, helpers.getStringPropertyValue.name).and.returnValue(knownAppNgModulePath);
       spyOn(fileCache, 'get').and.callThrough();
 
@@ -2419,7 +2419,7 @@ import { HomePageModule } from '../pages/home/home.module';
 export class AppModule {}
 `;
 
-      const knownAppNgModulePath = '/some/fake/path/myApp/src/app.module.ts';
+      const knownAppNgModulePath = join(process.cwd(), 'myApp', 'src', 'app.module.ts');
       fileCache.set(knownAppNgModulePath, { path: knownAppNgModulePath, content: ngModuleContent});
       spyOn(helpers, helpers.getStringPropertyValue.name).and.returnValue(knownAppNgModulePath);
       spyOn(fileCache, 'get').and.callThrough();
@@ -2482,7 +2482,7 @@ import { HomePageModule } from '../pages/home/home.module';
 export class AppModule {}
 `;
 
-      const knownAppNgModulePath = '/some/fake/path/myApp/src/app.module.ts';
+      const knownAppNgModulePath = join(process.cwd(), 'myApp', 'src', 'app.module.ts');
       fileCache.set(knownAppNgModulePath, { path: knownAppNgModulePath, content: ngModuleContent});
       spyOn(helpers, helpers.getStringPropertyValue.name).and.returnValue(knownAppNgModulePath);
       spyOn(fileCache, 'get').and.callThrough();
@@ -2953,7 +2953,7 @@ class AppModuleInjector extends import0.ɵNgModuleInjector<import1.AppModule> {
 export const AppModuleNgFactory:import0.NgModuleFactory<import1.AppModule> = new import0.NgModuleFactory<any>(AppModuleInjector,import1.AppModule);
       `;
 
-      const knownAppNgModulePath = '/some/fake/path/myApp/src/app.module.ts';
+      const knownAppNgModulePath = join(process.cwd(), 'myApp', 'src', 'app.module.ts');
       const knownAppNgModuleFactoryPath = helpers.changeExtension(knownAppNgModulePath, '.ngfactory.ts');
       fileCache.set(knownAppNgModulePath, { path: knownAppNgModulePath, content: ngModuleContent});
       fileCache.set(knownAppNgModuleFactoryPath, { path: knownAppNgModuleFactoryPath, content: knownNgFactoryContent});
