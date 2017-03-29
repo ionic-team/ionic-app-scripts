@@ -14,6 +14,10 @@ export function hydrateRequest(context: BuildContext, request: GeneratorRequest)
   const hydrated = Object.assign({ includeNgModule: true }, request) as HydratedGeneratorRequest;
   const suffix = getSuffixFromGeneratorType(context, request.type);
 
+  if (request.name.indexOf('page') !== -1) {
+    request.name = request.name.replace('page', '');
+  };
+
   hydrated.className = ensureSuffix(pascalCase(request.name), upperCaseFirst(suffix));
   hydrated.fileName = removeSuffix(paramCase(request.name), `-${paramCase(suffix)}`);
 
