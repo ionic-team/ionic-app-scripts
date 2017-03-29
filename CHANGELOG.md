@@ -1,3 +1,15 @@
+<a name="1.2.3"></a>
+## [1.2.3](https://github.com/driftyco/ionic-app-scripts/compare/v1.2.2...v1.2.3) (2017-03-29)
+
+
+### Bug Fixes
+
+* **deep-linking:** Deep linking fixes for Windows and non-unix paths
+
+* **script:** linux only accepts one argument after shebang, so revert giving app-scripts more memory by default ([0999f23](https://github.com/driftyco/ionic-app-scripts/commit/0999f23)), closes [#838](https://github.com/driftyco/ionic-app-scripts/issues/838)
+
+
+
 <a name="1.2.2"></a>
 ## [1.2.2](https://github.com/driftyco/ionic-app-scripts/compare/v1.2.1...v1.2.2) (2017-03-27)
 
