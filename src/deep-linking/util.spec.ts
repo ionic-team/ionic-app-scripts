@@ -552,11 +552,13 @@ export function removeDecorators(fileName: string, source: string): string {
   });
 
   describe('getRelativePathToPageNgModuleFromAppNgModule', () => {
-    const prefix = join(process.cwd(), 'myApp', 'src');
-    const appNgModulePath = join(prefix, 'app', 'app.module.ts');
-    const pageNgModulePath = join(prefix, 'pages', 'page-one', 'page-one.module.ts');
-    const result = util.getRelativePathToPageNgModuleFromAppNgModule(appNgModulePath, pageNgModulePath);
-    expect(result).toEqual('../pages/page-one/page-one.module.ts');
+    it('should return the relative path', () => {
+      const prefix = join(process.cwd(), 'myApp', 'src');
+      const appNgModulePath = join(prefix, 'app', 'app.module.ts');
+      const pageNgModulePath = join(prefix, 'pages', 'page-one', 'page-one.module.ts');
+      const result = util.getRelativePathToPageNgModuleFromAppNgModule(appNgModulePath, pageNgModulePath);
+      expect(result).toEqual(join('..', 'pages', 'page-one', 'page-one.module.ts'));
+    });
   });
 
   describe('getNgModuleDataFromPage', () => {

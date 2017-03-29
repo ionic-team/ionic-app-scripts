@@ -17,7 +17,7 @@ import {
 import { Logger } from '../logger/logger';
 import * as Constants from '../util/constants';
 import { FileCache } from '../util/file-cache';
-import { changeExtension, getStringPropertyValue, replaceAll } from '../util/helpers';
+import { changeExtension, getStringPropertyValue, replaceAll, toUnixPath } from '../util/helpers';
 import { BuildContext, ChangedFile, DeepLinkConfigEntry, DeepLinkDecoratorAndClass, DeepLinkPathInfo, File } from '../util/interfaces';
 import {
   appendAfter,
@@ -81,7 +81,7 @@ export function getNgModuleDataFromPage(appNgModuleFilePath: string, filePath: s
 
   return {
     absolutePath: absolutePath,
-    userlandModulePath: userlandModulePath,
+    userlandModulePath: toUnixPath(userlandModulePath),
     className: namedExport
   };
 }
