@@ -72,6 +72,38 @@ describe('util', () => {
       expect(hydratedRequest.dirToRead).toEqual(join(templateDir, Constants.PAGE));
       expect(hydratedRequest.dirToWrite).toEqual(join(pagesDir, hydratedRequest.fileName));
     });
+
+    it('should take a page request and return a hydrated page request with a good file path', () => {
+			// arrange
+      const baseDir = join(process.cwd(), 'someDir', 'project');
+      const pagesDir = join(baseDir, 'src', 'pages');
+      const context = {
+        pagesDir: pagesDir
+      };
+      const request = {
+        type: Constants.PAGE,
+        name: 'settingspage',
+        includeSpec: true,
+        includeNgModule: true
+      };
+
+      const templateDir = join(baseDir, 'node_modules', 'ionic-angular', 'templates');
+      spyOn(helpers, helpers.getStringPropertyValue.name).and.returnValue(templateDir);
+
+			// act
+      const hydratedRequest = util.hydrateRequest(context, request);
+
+			// assert
+      expect(hydratedRequest).toEqual({'className': 'SettingsPage', 'dirToRead': join(templateDir, 'page'), 'dirToWrite': join(pagesDir, 'settings'), 'fileName': 'settings', 'includeNgModule': true, 'includeSpec': true, 'name': 'settingspage', 'type': 'page'});
+      expect(hydratedRequest.type).toEqual(Constants.PAGE);
+      expect(hydratedRequest.name).toEqual('settingspage');
+      expect(hydratedRequest.includeNgModule).toBeTruthy();
+      expect(hydratedRequest.includeSpec).toBeTruthy();
+      expect(hydratedRequest.className).toEqual('SettingsPage');
+      expect(hydratedRequest.fileName).toEqual('settings');
+      expect(hydratedRequest.dirToRead).toEqual(join(templateDir, Constants.PAGE));
+      expect(hydratedRequest.dirToWrite).toEqual(join(pagesDir, hydratedRequest.fileName));
+    });
   });
 
   describe('readTemplates', () => {
