@@ -1235,7 +1235,7 @@ export const AppModuleNgFactory = new import0.NgModuleFactory(AppModuleInjector,
     beforeEach(() => {
       originalEnv = process.env;
       let env: any = { };
-      env[Constants.ENV_VAR_IONIC_ANGULAR_DIR] = '/Users/noone/Dev/myApp3/node_modules/ionic-angular';
+      env[Constants.ENV_VAR_IONIC_ANGULAR_DIR] = join(process.cwd(), 'myApp', 'node_modules', 'ionic-angular');
       process.env = env;
     });
 
@@ -1928,9 +1928,10 @@ export const AppModuleNgFactory = new import0.NgModuleFactory(AppModuleInjector,
 //# sourceMappingURL=app.module.ngfactory.js.map
       `;
 
-      const nodeModulesPath = '/Users/noone/Dev/myApp3/node_modules';
+      const baseDir = join(process.cwd(), 'myApp');
+      const nodeModulesPath = join(baseDir, 'node_modules');
 
-      const appModuleNgFactoryPath = `/Users/noone/Dev/myApp3/src/app/app.module.ngfactory.js`;
+      const appModuleNgFactoryPath = join(baseDir, 'src', 'app', 'app.module.ngfactory.js');
       const controllerPath = join(nodeModulesPath, 'ionic-angular', 'components', 'action-sheet', 'action-sheet-controller.js');
       const controllerPath2 = join(nodeModulesPath, 'ionic-angular', 'components', 'alert', 'alert-controller.js');
 
