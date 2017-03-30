@@ -162,8 +162,6 @@ export function nonPageFileManipulation(context: BuildContext, name: string, ngM
   const hydratedRequest = hydrateRequest(context, { type, name });
   const componentsModulePath = `${context.componentsDir}/components.module.ts`;
 
-  console.log(hydratedRequest);
-
   let ngModuleContent = `
 import { NgModule } from '@angular/core';
 import { IonicModule } from 'ionic-angular';
@@ -181,15 +179,16 @@ export class ComponentsModule {}
 
   readFileAsync(componentsModulePath).then((content) => {
     // file already written, continue on
-    console.log(hydratedRequest);
-    console.log(componentsModulePath);
-
     let fileContent = content;
-    fileContent = insertNamedImportIfNeeded(componentsModulePath, content, hydratedRequest.className, '/' + relative(componentsModulePath, `${hydratedRequest.dirToWrite}/${hydratedRequest.fileName}`));
+    fileContent = insertNamedImportIfNeeded(componentsModulePath, content, hydratedRequest.className, './' + relative(dirname(componentsModulePath), `${hydratedRequest.dirToWrite}/${hydratedRequest.fileName}`));
+    fileContent = appendNgModuleDeclaration(componentsModulePath, fileContent, hydratedRequest.className, 'component');
+
     return writeFileAsync(componentsModulePath, fileContent);
   }).catch(() => {
     // file does not exist so we need to start writing
-    ngModuleContent = insertNamedImportIfNeeded(componentsModulePath, ngModuleContent, hydratedRequest.className, '/' + relative(componentsModulePath, `${hydratedRequest.dirToWrite}/${hydratedRequest.fileName}`));
+    let content = ngModuleContent;
+    ngModuleContent = insertNamedImportIfNeeded(componentsModulePath, content, hydratedRequest.className, './' + relative(dirname(componentsModulePath), `${hydratedRequest.dirToWrite}/${hydratedRequest.fileName}`));
+    ngModuleContent = appendNgModuleDeclaration(componentsModulePath, ngModuleContent, hydratedRequest.className, 'component');
     writeFileAsync(componentsModulePath, ngModuleContent).then((value) => {
       return generateTemplates(context, hydratedRequest);
     });

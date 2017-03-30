@@ -245,10 +245,30 @@ export function appendNgModuleDeclaration(filePath: string, fileContent: string,
     } else {
       return appendAfter(fileContent, declarations[declarations.length - 1], `, ${declaration}`);
     }
-  } else {
+  } /*else {
     const properties = (findObjectLiteralElementByName(obj.properties, 'declarations') as PropertyAssignment);
     const declarations = (properties.initializer as ArrayLiteralExpression).elements;
     return appendAfter(fileContent, declarations[declarations.length - 1], `,\n    ${declaration}`);
+  }*/
+  else if (type === 'component') {
+    let modContent = appendImportsExportsDeclaration(fileContent, obj, declaration, 'imports');
+    console.log(modContent);
+    let finalContent = appendImportsExportsDeclaration(modContent, obj, declaration, 'exports');
+    console.log(finalContent);
+    return modContent;
+  }
+}
+
+function appendImportsExportsDeclaration(fileContent: string, obj: any, declaration: string, whatToWrite: string) {
+  console.log(whatToWrite);
+  const properties = (findObjectLiteralElementByName(obj.properties, whatToWrite) as PropertyAssignment);
+  const declarations = (properties.initializer as ArrayLiteralExpression).elements;
+  console.log(declarations.length);
+  if (declarations.length === 0) {
+    console.log('im here');
+    return appendEmpty(fileContent, declarations['end'], declaration);
+  } else {
+    return appendAfter(fileContent, declarations[declarations.length - 1], `, ${declaration}`);
   }
 }
 
