@@ -262,4 +262,4 @@ Execute the following steps to publish a release:
 7. Run `npm version patch` to tick the version and generate a git tag
 8. Run `npm run github-release` to create the github release entry
 9. Run `npm publish` to publish the package to npm
-10. git push origin master - push changes to master
+10. `git push origin master` - push changes to master
