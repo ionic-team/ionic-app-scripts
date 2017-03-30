@@ -18,6 +18,8 @@ export function processDirectiveRequest(context: BuildContext, name: string, ngM
 }
 
 export function processComponentRequest(context: BuildContext, name: string, ngModulePath: string) {
+	console.log(ngModulePath);
+	console.log(context);
   return nonPageFileManipulation(context, name, ngModulePath, 'component');
 }
 

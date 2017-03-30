@@ -111,6 +111,10 @@ export function writeGeneratedFiles(request: HydratedGeneratorRequest, processed
   });
 }
 
+export function writeComponentModule(fileContent: string, pathToWrite: string): Promise<{}> {
+  return writeFileAsync(pathToWrite, fileContent);
+}
+
 function createDirAndWriteFile(filePath: string, fileContent: string) {
   const directory = dirname(filePath);
   return mkDirpAsync(directory).then(() => {
@@ -156,18 +160,39 @@ export function getDirToWriteToByType(context: BuildContext, type: string) {
 
 export function nonPageFileManipulation(context: BuildContext, name: string, ngModulePath: string, type: string) {
   const hydratedRequest = hydrateRequest(context, { type, name });
-  let fileContent: string;
-  return readFileAsync(ngModulePath).then((content) => {
-    fileContent = content;
-    return generateTemplates(context, hydratedRequest);
-  }).then(() => {
-    fileContent = insertNamedImportIfNeeded(ngModulePath, fileContent, hydratedRequest.className, `${relative(dirname(ngModulePath), hydratedRequest.dirToWrite)}/${hydratedRequest.fileName}`);
-    if (type === 'provider') {
-      fileContent = appendNgModuleDeclaration(ngModulePath, fileContent, hydratedRequest.className, type);
-    } else {
-      fileContent = appendNgModuleDeclaration(ngModulePath, fileContent, hydratedRequest.className);
-    }
-    return writeFileAsync(ngModulePath, fileContent);
+  const componentsModulePath = `${context.componentsDir}/components.module.ts`;
+
+  console.log(hydratedRequest);
+
+  let ngModuleContent = `
+import { NgModule } from '@angular/core';
+import { IonicModule } from 'ionic-angular';
+
+@NgModule({
+  imports: [
+    IonicModule
+  ],
+  exports: [
+    
+  ]
+})
+export class ComponentsModule {}
+  `;
+
+  readFileAsync(componentsModulePath).then((content) => {
+    // file already written, continue on
+    console.log(hydratedRequest);
+    console.log(componentsModulePath);
+
+    let fileContent = content;
+    fileContent = insertNamedImportIfNeeded(componentsModulePath, content, hydratedRequest.className, '/' + relative(componentsModulePath, `${hydratedRequest.dirToWrite}/${hydratedRequest.fileName}`));
+    return writeFileAsync(componentsModulePath, fileContent);
+  }).catch(() => {
+    // file does not exist so we need to start writing
+    ngModuleContent = insertNamedImportIfNeeded(componentsModulePath, ngModuleContent, hydratedRequest.className, '/' + relative(componentsModulePath, `${hydratedRequest.dirToWrite}/${hydratedRequest.fileName}`));
+    writeFileAsync(componentsModulePath, ngModuleContent).then((value) => {
+      return generateTemplates(context, hydratedRequest);
+    });
   });
 }
 
