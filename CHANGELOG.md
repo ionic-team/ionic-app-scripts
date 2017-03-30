@@ -1,3 +1,9 @@
+<a name="1.2.4"></a>
+## [1.2.4](https://github.com/driftyco/ionic-app-scripts/compare/v1.2.3...v1.2.4) (2017-03-30)
+
+### Refactor
+* **deep-linking:** set default segment value to filename without extension([5a97ba5](https://github.com/driftyco/ionic-app-scripts/commit/5a97ba5))
+
 <a name="1.2.3"></a>
 ## [1.2.3](https://github.com/driftyco/ionic-app-scripts/compare/v1.2.2...v1.2.3) (2017-03-29)
 
