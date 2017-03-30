@@ -217,7 +217,7 @@ export class HomePage {
 
       const result = util.getDeepLinkDecoratorContentForSourceFile(sourceFile);
       expect(result.name).toEqual('HomePage');
-      expect(result.segment).toEqual(null);
+      expect(result.segment).toEqual('path');
       expect(result.defaultHistory[0]).toEqual('page-one');
       expect(result.defaultHistory[1]).toEqual('page-two');
       expect(result.priority).toEqual('high');
@@ -267,13 +267,13 @@ export class HomePage {
 
       `;
 
-      const knownPath = join(process.cwd(), 'some', 'fake', 'path');
+      const knownPath = join(process.cwd(), 'myApp', 'src', 'pages', 'about.ts');
 
       const sourceFile = tsUtils.getTypescriptSourceFile(knownPath, knownContent);
 
       const result = util.getDeepLinkDecoratorContentForSourceFile(sourceFile);
       expect(result.name).toEqual('HomePage');
-      expect(result.segment).toEqual(null);
+      expect(result.segment).toEqual('about');
       expect(result.defaultHistory).toBeTruthy();
       expect(result.defaultHistory.length).toEqual(0);
       expect(result.priority).toEqual('high');
@@ -328,7 +328,7 @@ export class HomePage {
 
       const result = util.getDeepLinkDecoratorContentForSourceFile(sourceFile);
       expect(result.name).toEqual('HomePage');
-      expect(result.segment).toEqual(null);
+      expect(result.segment).toEqual('path');
       expect(result.defaultHistory).toBeTruthy();
       expect(result.defaultHistory.length).toEqual(0);
       expect(result.priority).toEqual('low');
@@ -376,13 +376,13 @@ export class HomePage {
 
       `;
 
-      const knownPath = join(process.cwd(), 'some', 'fake', 'path');
+      const knownPath = join(process.cwd(), 'some', 'fake', 'path.ts');
 
       const sourceFile = tsUtils.getTypescriptSourceFile(knownPath, knownContent);
 
       const result = util.getDeepLinkDecoratorContentForSourceFile(sourceFile);
       expect(result.name).toEqual('HomePage');
-      expect(result.segment).toEqual(null);
+      expect(result.segment).toEqual('path');
       expect(result.defaultHistory).toBeTruthy();
       expect(result.defaultHistory.length).toEqual(0);
       expect(result.priority).toEqual('low');
@@ -1214,7 +1214,7 @@ export class PageThreeModule {
       expect(results.length).toEqual(3);
 
       expect(results[0].name).toEqual('SomeOtherName');
-      expect(results[0].segment).toEqual(null);
+      expect(results[0].segment).toEqual('page-one');
       expect(results[0].priority).toEqual('low');
       expect(results[0].defaultHistory.length).toEqual(0);
       expect(results[0].absolutePath).toEqual(join(srcDir, 'pages', 'page-one', 'page-one.module.ts'));
@@ -1222,7 +1222,7 @@ export class PageThreeModule {
       expect(results[0].className).toEqual('PageOneModule');
 
       expect(results[1].name).toEqual('PageTwo');
-      expect(results[1].segment).toEqual(null);
+      expect(results[1].segment).toEqual('page-two');
       expect(results[1].priority).toEqual('low');
       expect(results[1].defaultHistory.length).toEqual(0);
       expect(results[1].absolutePath).toEqual(join(srcDir, 'pages', 'page-two', 'page-two.module.ts'));

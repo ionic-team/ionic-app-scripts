@@ -88,7 +88,7 @@ export function getNgModuleDataFromPage(appNgModuleFilePath: string, filePath: s
 
 export function getDeepLinkDecoratorContentForSourceFile(sourceFile: SourceFile): DeepLinkDecoratorAndClass {
   const classDeclarations = getClassDeclarations(sourceFile);
-
+  const defaultSegment = basename(changeExtension(sourceFile.fileName, ''));
   const list: DeepLinkDecoratorAndClass[] = [];
 
   classDeclarations.forEach(classDeclaration => {
@@ -107,7 +107,7 @@ export function getDeepLinkDecoratorContentForSourceFile(sourceFile: SourceFile)
           }
 
           const deepLinkName = getStringValueFromDeepLinkDecorator(sourceFile, propertyList, className, DEEPLINK_DECORATOR_NAME_ATTRIBUTE);
-          const deepLinkSegment = getStringValueFromDeepLinkDecorator(sourceFile, propertyList, null, DEEPLINK_DECORATOR_SEGMENT_ATTRIBUTE);
+          const deepLinkSegment = getStringValueFromDeepLinkDecorator(sourceFile, propertyList, defaultSegment, DEEPLINK_DECORATOR_SEGMENT_ATTRIBUTE);
           const deepLinkPriority = getStringValueFromDeepLinkDecorator(sourceFile, propertyList, 'low', DEEPLINK_DECORATOR_PRIORITY_ATTRIBUTE);
           const deepLinkDefaultHistory = getArrayValueFromDeepLinkDecorator(sourceFile, propertyList, [], DEEPLINK_DECORATOR_DEFAULT_HISTORY_ATTRIBUTE);
           const rawStringContent = getNodeStringContent(sourceFile, decorator.expression);
