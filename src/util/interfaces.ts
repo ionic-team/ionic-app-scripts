@@ -17,6 +17,8 @@ export interface BuildContext {
   wwwDir?: string;
   wwwIndex?: string;
   buildDir?: string;
+  outputJsFileName?: string;
+  outputCssFileName?: string;
   nodeModulesDir?: string;
   ionicAngularDir?: string;
   moduleFiles?: string[];

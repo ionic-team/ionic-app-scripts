@@ -175,13 +175,13 @@ export function generateContext(context?: BuildContext): BuildContext {
   setProcessEnvVar(Constants.ENV_CLOSURE_JAR, closureCompilerJarPath);
   Logger.debug(`closureCompilerJarPath set to ${closureCompilerJarPath}`);
 
-  const outputJsFileName = getConfigValue(context, '--outputJsFileName', null, Constants.ENV_OUTPUT_JS_FILE_NAME, Constants.ENV_OUTPUT_JS_FILE_NAME.toLowerCase(), 'main.js');
-  setProcessEnvVar(Constants.ENV_OUTPUT_JS_FILE_NAME, outputJsFileName);
-  Logger.debug(`outputJsFileName set to ${outputJsFileName}`);
+  context.outputJsFileName = getConfigValue(context, '--outputJsFileName', null, Constants.ENV_OUTPUT_JS_FILE_NAME, Constants.ENV_OUTPUT_JS_FILE_NAME.toLowerCase(), 'main.js');
+  setProcessEnvVar(Constants.ENV_OUTPUT_JS_FILE_NAME, context.outputJsFileName);
+  Logger.debug(`outputJsFileName set to ${context.outputJsFileName}`);
 
-  const outputCssFileName = getConfigValue(context, '--outputCssFileName', null, Constants.ENV_OUTPUT_CSS_FILE_NAME, Constants.ENV_OUTPUT_CSS_FILE_NAME.toLowerCase(), 'main.css');
-  setProcessEnvVar(Constants.ENV_OUTPUT_CSS_FILE_NAME, outputCssFileName);
-  Logger.debug(`outputCssFileName set to ${outputCssFileName}`);
+  context.outputCssFileName = getConfigValue(context, '--outputCssFileName', null, Constants.ENV_OUTPUT_CSS_FILE_NAME, Constants.ENV_OUTPUT_CSS_FILE_NAME.toLowerCase(), 'main.css');
+  setProcessEnvVar(Constants.ENV_OUTPUT_CSS_FILE_NAME, context.outputCssFileName);
+  Logger.debug(`outputCssFileName set to ${context.outputCssFileName}`);
 
   const webpackFactoryPath = join(getProcessEnvVar(Constants.ENV_VAR_APP_SCRIPTS_DIR), 'dist', 'webpack', 'ionic-webpack-factory.js');
   setProcessEnvVar(Constants.ENV_WEBPACK_FACTORY, webpackFactoryPath);
