@@ -1,3 +1,13 @@
+<a name="1.2.5"></a>
+## [1.2.5](https://github.com/driftyco/ionic-app-scripts/compare/v1.2.4...v1.2.5) (2017-03-31)
+
+
+### Bug Fixes
+
+* **webpack:** fixes bugs where some third party libs didn't load correctly ([e7559e5](https://github.com/driftyco/ionic-app-scripts/commit/e7559e5))
+
+
+
 <a name="1.2.4"></a>
 ## [1.2.4](https://github.com/driftyco/ionic-app-scripts/compare/v1.2.3...v1.2.4) (2017-03-30)
 
