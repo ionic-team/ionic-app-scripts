@@ -201,3 +201,8 @@ export interface WebpackModule {
 export interface WebpackDependency {
   moduleIdentifier: string;
 };
+
+export interface MagicString {
+  overwrite(startIndex: number, endIndex: number, newContent: string): void;
+  toString(): string;
+}

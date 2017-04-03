@@ -115,6 +115,10 @@ export function generateContext(context?: BuildContext): BuildContext {
   setProcessEnvVar(Constants.ENV_VAR_IONIC_ANGULAR_DIR, context.ionicAngularDir);
   Logger.debug(`ionicAngularDir set to ${context.ionicAngularDir}`);
 
+  const angularDir = resolve(getConfigValue(context, '--angularDir', null, Constants.ENV_VAR_AT_ANGULAR_DIR, Constants.ENV_VAR_AT_ANGULAR_DIR.toLowerCase(), join(context.nodeModulesDir, Constants.AT_ANGULAR)));
+  setProcessEnvVar(Constants.ENV_VAR_AT_ANGULAR_DIR, angularDir);
+  Logger.debug(`angularDir set to ${angularDir}`);
+
   const ionicAngularTemplatesDir = join(context.ionicAngularDir, 'templates');
   setProcessEnvVar(Constants.ENV_VAR_IONIC_ANGULAR_TEMPLATE_DIR, ionicAngularTemplatesDir);
   Logger.debug(`ionicAngularTemplatesDir set to ${ionicAngularTemplatesDir}`);
@@ -267,18 +271,19 @@ export function generateContext(context?: BuildContext): BuildContext {
   setProcessEnvVar(Constants.ENV_TOAST_VIEW_CONTROLLER_PATH, join(context.ionicAngularDir, 'components', 'toast', 'toast.js'));
   setProcessEnvVar(Constants.ENV_TOAST_COMPONENT_FACTORY_PATH, join(context.ionicAngularDir, 'components', 'toast', 'toast-component.ngfactory.js'));
 
-  /* Experimental Flags */
   const parseDeepLinks = getConfigValue(context, '--parseDeepLinks', null, Constants.ENV_PARSE_DEEPLINKS, Constants.ENV_PARSE_DEEPLINKS.toLowerCase(), 'true');
   setProcessEnvVar(Constants.ENV_PARSE_DEEPLINKS, parseDeepLinks);
   Logger.debug(`parseDeepLinks set to ${parseDeepLinks}`);
 
+  const purgeDecorators = getConfigValue(context, '--purgeDecorators', null, Constants.ENV_PURGE_DECORATORS, Constants.ENV_PURGE_DECORATORS.toLowerCase(), 'true');
+  setProcessEnvVar(Constants.ENV_PURGE_DECORATORS, purgeDecorators);
+  Logger.debug(`purgeDecorators set to ${purgeDecorators}`);
+
+  /* Experimental Flags */
+
   const experimentalManualTreeshaking = getConfigValue(context, '--experimentalManualTreeshaking', null, Constants.ENV_EXPERIMENTAL_MANUAL_TREESHAKING, Constants.ENV_EXPERIMENTAL_MANUAL_TREESHAKING.toLowerCase(), null);
   setProcessEnvVar(Constants.ENV_EXPERIMENTAL_MANUAL_TREESHAKING, experimentalManualTreeshaking);
   Logger.debug(`experimentalManualTreeshaking set to ${experimentalManualTreeshaking}`);
-
-  const experimentalPurgeDecorators = getConfigValue(context, '--experimentalPurgeDecorators', null, Constants.ENV_EXPERIMENTAL_PURGE_DECORATORS, Constants.ENV_EXPERIMENTAL_PURGE_DECORATORS.toLowerCase(), null);
-  setProcessEnvVar(Constants.ENV_EXPERIMENTAL_PURGE_DECORATORS, experimentalPurgeDecorators);
-  Logger.debug(`experimentalPurgeDecorators set to ${experimentalPurgeDecorators}`);
 
   const useExperimentalClosure = getConfigValue(context, '--useExperimentalClosure', null, Constants.ENV_USE_EXPERIMENTAL_CLOSURE, Constants.ENV_USE_EXPERIMENTAL_CLOSURE.toLowerCase(), null);
   setProcessEnvVar(Constants.ENV_USE_EXPERIMENTAL_CLOSURE, useExperimentalClosure);

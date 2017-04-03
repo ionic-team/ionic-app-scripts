@@ -81,6 +81,7 @@ describe('config', () => {
       expect(context.providersDir).toEqual(join(context.srcDir, 'providers'));
       expect(context.nodeModulesDir).toEqual(join(process.cwd(), Constants.NODE_MODULES));
       expect(context.ionicAngularDir).toEqual(join(process.cwd(), Constants.NODE_MODULES, Constants.IONIC_ANGULAR));
+      expect(fakeConfig[Constants.ENV_VAR_AT_ANGULAR_DIR]).toEqual(join(process.cwd(), Constants.NODE_MODULES, Constants.AT_ANGULAR));
       expect(fakeConfig[Constants.ENV_VAR_IONIC_ANGULAR_TEMPLATE_DIR]).toEqual(join(context.ionicAngularDir, 'templates'));
       expect(context.platform).toEqual(null);
       expect(context.target).toEqual(null);
@@ -148,7 +149,7 @@ describe('config', () => {
 
       expect(fakeConfig[Constants.ENV_PARSE_DEEPLINKS]).toBeTruthy();
       expect(fakeConfig[Constants.ENV_EXPERIMENTAL_MANUAL_TREESHAKING]).toBeFalsy();
-      expect(fakeConfig[Constants.ENV_EXPERIMENTAL_PURGE_DECORATORS]).toBeFalsy();
+      expect(fakeConfig[Constants.ENV_PURGE_DECORATORS]).toBeTruthy();
       expect(fakeConfig[Constants.ENV_USE_EXPERIMENTAL_CLOSURE]).toBeFalsy();
       expect(fakeConfig[Constants.ENV_USE_EXPERIMENTAL_BABILI]).toBeFalsy();
       expect(fakeConfig[Constants.ENV_BUILD_TO_ES5]).toEqual('true');
