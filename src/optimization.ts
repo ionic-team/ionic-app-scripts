@@ -1,4 +1,4 @@
-import { extname } from 'path';
+import { basename, extname } from 'path';
 
 import * as MagicString from 'magic-string';
 
@@ -84,7 +84,13 @@ function removeDecorators(context: BuildContext) {
     let magicString = new MagicString(jsFile.content);
     magicString = purgeStaticFieldDecorators(jsFile.path, jsFile.content, getStringPropertyValue(Constants.ENV_VAR_IONIC_ANGULAR_DIR), getStringPropertyValue(Constants.ENV_VAR_AT_ANGULAR_DIR), context.srcDir, magicString);
     jsFile.content = magicString.toString();
-    // jsFile.content = removeTSickleClosureDeclarations(jsFile.path, jsFile.content, getStringPropertyValue(Constants.ENV_VAR_IONIC_ANGULAR_DIR), context.srcDir);
+    const sourceMap = magicString.generateMap({
+      source: basename(jsFile.path),
+      file: basename(jsFile.path),
+      includeContent: true
+    });
+    const sourceMapPath = jsFile.path + '.map';
+    context.fileCache.set(sourceMapPath, { path: sourceMapPath, content: sourceMap.toString()});
   });
 }
 
