@@ -19,6 +19,7 @@ describe('optimization task', () => {
 
       spyOn(helpers, helpers.getBooleanPropertyValue.name).and.returnValue(false);
       spyOn(decorators, decorators.purgeStaticFieldDecorators.name);
+      spyOn(decorators, decorators.purgeTranspiledDecorators.name);
       spyOn(treeshake, treeshake.calculateUnusedComponents.name);
 
       // act
@@ -27,6 +28,7 @@ describe('optimization task', () => {
       // assert
       expect(result).toBeTruthy();
       expect(decorators.purgeStaticFieldDecorators).not.toHaveBeenCalled();
+      expect(decorators.purgeTranspiledDecorators).not.toHaveBeenCalled();
       expect(treeshake.calculateUnusedComponents).not.toHaveBeenCalled();
     });
   });

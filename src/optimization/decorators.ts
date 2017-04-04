@@ -1,6 +1,7 @@
 import {
   ArrayLiteralExpression,
   BinaryExpression,
+  CallExpression,
   ExpressionStatement,
   Identifier,
   ObjectLiteralExpression,
@@ -11,8 +12,58 @@ import {
 
 import { Logger } from '../logger/logger';
 import { MagicString } from '../util/interfaces';
-import { findNodes, getTypescriptSourceFile } from '../util/typescript-utils';
+import { getNodeStringContent, findNodes, getTypescriptSourceFile } from '../util/typescript-utils';
 
+export function purgeTranspiledDecorators(filePath: string, originalFileContent: string, ionicAngularDir: string, angularDir: string, srcDir: string, magicString: MagicString) {
+  if (filePath.indexOf(angularDir) >= 0 || filePath.indexOf(ionicAngularDir) >= 0 || filePath.indexOf(srcDir) >= 0) {
+    Logger.debug(`[decorators] purgeTranspiledDecorators: processing ${filePath} ...`);
+    const typescriptFile = getTypescriptSourceFile(filePath, originalFileContent);
+    const expressionsToRemove = getTranspiledDecoratorExpressionStatements(typescriptFile);
+    expressionsToRemove.forEach(expression => {
+      magicString.overwrite(expression.pos, expression.end, '');
+    });
+    Logger.debug(`[decorators] purgeTranspiledDecorators: processing ${filePath} ...`);
+  }
+  return magicString;
+}
+
+function getTranspiledDecoratorExpressionStatements(sourceFile: SourceFile) {
+  const expressionStatements = findNodes(sourceFile, sourceFile, SyntaxKind.ExpressionStatement, false) as ExpressionStatement[];
+  const toReturn: ExpressionStatement[] = [];
+  expressionStatements.forEach(expressionStatement => {
+    if (expressionStatement && expressionStatement.expression
+          && expressionStatement.expression.kind === SyntaxKind.CallExpression
+          && (expressionStatement.expression as CallExpression).expression
+          && ((expressionStatement.expression as CallExpression).expression as Identifier).text === '___decorate') {
+
+      toReturn.push(expressionStatement);
+
+    } else if (expressionStatement && expressionStatement.expression
+          && expressionStatement.expression.kind === SyntaxKind.BinaryExpression
+          && (expressionStatement.expression as BinaryExpression).right
+          && (expressionStatement.expression as BinaryExpression).right.kind === SyntaxKind.CallExpression
+          && ((expressionStatement.expression as BinaryExpression).right as CallExpression).expression
+          && (((expressionStatement.expression as BinaryExpression).right as CallExpression).expression as Identifier).text === '___decorate') {
+
+      ((expressionStatement.expression as BinaryExpression).right as CallExpression).arguments.forEach(argument => {
+        if (argument.kind === SyntaxKind.ArrayLiteralExpression) {
+          let injectableFound = false;
+          for (const element of (argument as ArrayLiteralExpression).elements) {
+            if (element.kind === SyntaxKind.CallExpression && (element as CallExpression).expression
+            && ((element as CallExpression).expression as Identifier).text === 'Injectable' ) {
+              injectableFound = true;
+              break;
+            }
+          }
+          if (!injectableFound) {
+            toReturn.push(expressionStatement);
+          }
+        }
+      });
+    }
+  });
+  return toReturn;
+}
 
 export function purgeStaticFieldDecorators(filePath: string, originalFileContent: string, ionicAngularDir: string, angularDir: string, srcDir: string, magicString: MagicString) {
   if (filePath.indexOf(angularDir) >= 0 || filePath.indexOf(ionicAngularDir) >= 0 || filePath.indexOf(srcDir) >= 0) {

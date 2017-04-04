@@ -999,4 +999,285 @@ let actionSheetIds = -1;
       expect(result.indexOf(propDecorators)).toEqual(-1);
     });
   });
+
+  describe('purgeTranspiledDecorators', () => {
+    it('should purge out transpiled decorators', () => {
+
+        const inputDecorator = `
+__decorate([
+    Input(),
+    __metadata("design:type", String)
+], AboutPage.prototype, "someVariable", void 0);
+        `;
+
+        const outputDecorator = `
+__decorate([
+    Output(),
+    __metadata("design:type", typeof (_a = typeof EventEmitter !== "undefined" && EventEmitter) === "function" && _a || Object)
+], AboutPage.prototype, "emitter", void 0);
+        `;
+
+        const viewChildDecorator = `
+__decorate([
+    ViewChild('test', { read: ElementRef }),
+    __metadata("design:type", Object)
+], AboutPage.prototype, "test", void 0);
+        `;
+
+        const viewChildrenDecorator = `
+__decorate([
+    ViewChildren('test'),
+    __metadata("design:type", Object)
+], AboutPage.prototype, "tests", void 0);
+        `;
+
+        const hostBindingDecorator = `
+__decorate([
+    HostBinding('class.searchbar-has-focus'),
+    __metadata("design:type", Boolean)
+], AboutPage.prototype, "_sbHasFocus", void 0);
+        `;
+
+        const hostListenerDecorator = `
+__decorate([
+    HostListener('click', ['$event']),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], AboutPage.prototype, "someFunction", null);
+        `;
+
+        const classDecorators = `
+AboutPage = __decorate([
+    IonicPage(),
+    Component({
+        selector: 'page-about',
+        templateUrl: 'about.html'
+    }),
+    __metadata("design:paramtypes", [typeof (_b = typeof NavController !== "undefined" && NavController) === "function" && _b || Object, typeof (_c = typeof PopoverController !== "undefined" && PopoverController) === "function" && _c || Object])
+], AboutPage);
+        `;
+
+        const knownContent = `
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+import { Component, ElementRef, EventEmitter, HostBinding, HostListener, Input, Output, ViewChild, ViewChildren } from '@angular/core';
+import { IonicPage, NavController, PopoverController } from 'ionic-angular';
+var AboutPage = (function () {
+    function AboutPage(navCtrl, popoverCtrl) {
+        this.navCtrl = navCtrl;
+        this.popoverCtrl = popoverCtrl;
+        this.conferenceDate = '2047-05-18';
+        this.someVariable = '';
+        this.emitter = new EventEmitter();
+    }
+    AboutPage.prototype.presentPopover = function (event) {
+        var popover = this.popoverCtrl.create('PopoverPage');
+        popover.present({ ev: event });
+    };
+    AboutPage.prototype.someFunction = function (event) {
+    };
+    return AboutPage;
+}());
+${inputDecorator}
+${outputDecorator}
+${viewChildDecorator}
+${viewChildrenDecorator}
+${hostBindingDecorator}
+${hostListenerDecorator}
+${classDecorators}
+export { AboutPage };
+var _a, _b, _c;
+//# sourceMappingURL=about.js.map
+        `;
+
+      let magicString = new MagicString(knownContent);
+      const filePath = join(ionicAngular, 'components', 'action-sheet', 'action-sheet-component.js');
+      magicString = decorators.purgeTranspiledDecorators(filePath, knownContent, ionicAngular, angularDir, srcDir, magicString);
+      const result: string = magicString.toString();
+      expect(result.indexOf(inputDecorator)).toEqual(-1);
+      expect(result.indexOf(outputDecorator)).toEqual(-1);
+      expect(result.indexOf(viewChildDecorator)).toEqual(-1);
+      expect(result.indexOf(viewChildrenDecorator)).toEqual(-1);
+      expect(result.indexOf(hostBindingDecorator)).toEqual(-1);
+      expect(result.indexOf(hostListenerDecorator)).toEqual(-1);
+      expect(result.indexOf(classDecorators)).toEqual(-1);
+    });
+
+    it('should not purge any injectable decorators', () => {
+
+        const injectableDecorator = `
+ConferenceData = __decorate([
+    Injectable(),
+    __metadata("design:paramtypes", [typeof (_a = typeof Http !== "undefined" && Http) === "function" && _a || Object, typeof (_b = typeof UserData !== "undefined" && UserData) === "function" && _b || Object])
+], ConferenceData);
+        `;
+
+        const knownContent = `
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+import { Injectable } from '@angular/core';
+import { Http } from '@angular/http';
+import { UserData } from './user-data';
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/observable/of';
+var ConferenceData = (function () {
+    function ConferenceData(http, user) {
+        this.http = http;
+        this.user = user;
+    }
+    ConferenceData.prototype.load = function () {
+        if (this.data) {
+            return Observable.of(this.data);
+        }
+        else {
+            return this.http.get('assets/data/data.json')
+                .map(this.processData, this);
+        }
+    };
+    ConferenceData.prototype.processData = function (data) {
+        var _this = this;
+        // just some good 'ol JS fun with objects and arrays
+        // build up the data by linking speakers to sessions
+        this.data = data.json();
+        this.data.tracks = [];
+        // loop through each day in the schedule
+        this.data.schedule.forEach(function (day) {
+            // loop through each timeline group in the day
+            day.groups.forEach(function (group) {
+                // loop through each session in the timeline group
+                group.sessions.forEach(function (session) {
+                    session.speakers = [];
+                    if (session.speakerNames) {
+                        session.speakerNames.forEach(function (speakerName) {
+                            var speaker = _this.data.speakers.find(function (s) { return s.name === speakerName; });
+                            if (speaker) {
+                                session.speakers.push(speaker);
+                                speaker.sessions = speaker.sessions || [];
+                                speaker.sessions.push(session);
+                            }
+                        });
+                    }
+                    if (session.tracks) {
+                        session.tracks.forEach(function (track) {
+                            if (_this.data.tracks.indexOf(track) < 0) {
+                                _this.data.tracks.push(track);
+                            }
+                        });
+                    }
+                });
+            });
+        });
+        return this.data;
+    };
+    ConferenceData.prototype.getTimeline = function (dayIndex, queryText, excludeTracks, segment) {
+        var _this = this;
+        if (queryText === void 0) { queryText = ''; }
+        if (excludeTracks === void 0) { excludeTracks = []; }
+        if (segment === void 0) { segment = 'all'; }
+        return this.load().map(function (data) {
+            var day = data.schedule[dayIndex];
+            day.shownSessions = 0;
+            queryText = queryText.toLowerCase().replace(/,|\.|-/g, ' ');
+            var queryWords = queryText.split(' ').filter(function (w) { return !!w.trim().length; });
+            day.groups.forEach(function (group) {
+                group.hide = true;
+                group.sessions.forEach(function (session) {
+                    // check if this session should show or not
+                    _this.filterSession(session, queryWords, excludeTracks, segment);
+                    if (!session.hide) {
+                        // if this session is not hidden then this group should show
+                        group.hide = false;
+                        day.shownSessions++;
+                    }
+                });
+            });
+            return day;
+        });
+    };
+    ConferenceData.prototype.filterSession = function (session, queryWords, excludeTracks, segment) {
+        var matchesQueryText = false;
+        if (queryWords.length) {
+            // of any query word is in the session name than it passes the query test
+            queryWords.forEach(function (queryWord) {
+                if (session.name.toLowerCase().indexOf(queryWord) > -1) {
+                    matchesQueryText = true;
+                }
+            });
+        }
+        else {
+            // if there are no query words then this session passes the query test
+            matchesQueryText = true;
+        }
+        // if any of the sessions tracks are not in the
+        // exclude tracks then this session passes the track test
+        var matchesTracks = false;
+        session.tracks.forEach(function (trackName) {
+            if (excludeTracks.indexOf(trackName) === -1) {
+                matchesTracks = true;
+            }
+        });
+        // if the segement is 'favorites', but session is not a user favorite
+        // then this session does not pass the segment test
+        var matchesSegment = false;
+        if (segment === 'favorites') {
+            if (this.user.hasFavorite(session.name)) {
+                matchesSegment = true;
+            }
+        }
+        else {
+            matchesSegment = true;
+        }
+        // all tests must be true if it should not be hidden
+        session.hide = !(matchesQueryText && matchesTracks && matchesSegment);
+    };
+    ConferenceData.prototype.getSpeakers = function () {
+        return this.load().map(function (data) {
+            return data.speakers.sort(function (a, b) {
+                var aName = a.name.split(' ').pop();
+                var bName = b.name.split(' ').pop();
+                return aName.localeCompare(bName);
+            });
+        });
+    };
+    ConferenceData.prototype.getTracks = function () {
+        return this.load().map(function (data) {
+            return data.tracks.sort();
+        });
+    };
+    ConferenceData.prototype.getMap = function () {
+        return this.load().map(function (data) {
+            return data.map;
+        });
+    };
+    return ConferenceData;
+}());
+${injectableDecorator}
+export { ConferenceData };
+var _a, _b;
+//# sourceMappingURL=conference-data.js.map
+        `;
+
+      let magicString = new MagicString(knownContent);
+      const filePath = join(ionicAngular, 'components', 'action-sheet', 'action-sheet-component.js');
+      magicString = decorators.purgeTranspiledDecorators(filePath, knownContent, ionicAngular, angularDir, srcDir, magicString);
+      const result: string = magicString.toString();
+      expect(result.indexOf(injectableDecorator)).toBeGreaterThan(1);
+    });
+  });
 });
