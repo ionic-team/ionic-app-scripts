@@ -148,11 +148,12 @@ describe('config', () => {
       expect(fakeConfig[Constants.ENV_TOAST_COMPONENT_FACTORY_PATH]).toEqual(join(context.ionicAngularDir, 'components', 'toast', 'toast-component.ngfactory.js'));
 
       expect(fakeConfig[Constants.ENV_PARSE_DEEPLINKS]).toBeTruthy();
-      expect(fakeConfig[Constants.ENV_EXPERIMENTAL_MANUAL_TREESHAKING]).toBeFalsy();
       expect(fakeConfig[Constants.ENV_PURGE_DECORATORS]).toBeTruthy();
+
+      expect(fakeConfig[Constants.ENV_EXPERIMENTAL_MANUAL_TREESHAKING]).toBeFalsy();
       expect(fakeConfig[Constants.ENV_USE_EXPERIMENTAL_CLOSURE]).toBeFalsy();
       expect(fakeConfig[Constants.ENV_USE_EXPERIMENTAL_BABILI]).toBeFalsy();
-      expect(fakeConfig[Constants.ENV_BUILD_TO_ES5]).toEqual('true');
+      expect(fakeConfig[Constants.ENV_BUILD_TO_ES5]).toBeFalsy();
       expect(context.bundler).toEqual('webpack');
     });
 
