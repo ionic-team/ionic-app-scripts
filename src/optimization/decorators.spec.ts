@@ -12,7 +12,7 @@ const srcDir = join(baseDir, 'src');
 describe('optimization', () => {
   describe('purgeStaticFieldDecorators', () => {
 
-    it('should remove the static decorator', () => {
+    it('should remove the static decorators', () => {
       // arrange
       const decoratorStatement = `
       import { Taco } from 'blah';
@@ -252,7 +252,7 @@ some more content
     });
 
     it('should not remove decorators when it has an injectable statement in it', () => {
-        const knownContent = `
+      const knownContent = `
 var ActionSheetController = (function () {
     /**
      * @param {?} _app
@@ -294,7 +294,7 @@ ActionSheetController.ctorParameters = function () { return [
     });
 
     it('should work with the ionic-angular index file', () => {
-        const ionicModuleDecorator = `
+      const ionicModuleDecorator = `
 IonicModule.decorators = [
     { type: NgModule, args: [{
                 imports: [
@@ -408,7 +408,7 @@ IonicModule.decorators = [
             },] },
 ];
         `;
-        const knownContent = `
+      const knownContent = `
 import { ANALYZE_FOR_ENTRY_COMPONENTS, APP_INITIALIZER, ComponentFactoryResolver, Inject, Injector, NgModule, NgZone, Optional } from '@angular/core';
 import { APP_BASE_HREF, Location, LocationStrategy, HashLocationStrategy, PathLocationStrategy, PlatformLocation } from '@angular/common';
 import { DOCUMENT } from '@angular/platform-browser';
@@ -782,14 +782,14 @@ export function provideLocationStrategy(platformLocationStrategy, baseHref, conf
       expect(result.indexOf(ionicModuleDecorator)).toEqual(-1);
     });
 
-    it('shoud process component file correctly', () => {
+    it('should process component file correctly', () => {
 
-        const propDecorators = `
+      const propDecorators = `
 ActionSheetCmp.propDecorators = {
     'keyUp': [{ type: HostListener, args: ['body:keyup', ['$event'],] },],
 };
 `;
-        const decoratorContent = `
+      const decoratorContent = `
 ActionSheetCmp.decorators = [
     { type: Component, args: [{
                 selector: 'ion-action-sheet',
@@ -821,7 +821,7 @@ ActionSheetCmp.decorators = [
             },] },
 ];
         `;
-        const knownContent = `
+      const knownContent = `
 import { Component, ElementRef, HostListener, Renderer, ViewEncapsulation } from '@angular/core';
 import { GestureController, BLOCK_ALL } from '../../gestures/gesture-controller';
 import { Config } from '../../config/config';
@@ -1003,42 +1003,42 @@ let actionSheetIds = -1;
   describe('purgeTranspiledDecorators', () => {
     it('should purge out transpiled decorators', () => {
 
-        const inputDecorator = `
+      const inputDecorator = `
 __decorate([
     Input(),
     __metadata("design:type", String)
 ], AboutPage.prototype, "someVariable", void 0);
         `;
 
-        const outputDecorator = `
+      const outputDecorator = `
 __decorate([
     Output(),
     __metadata("design:type", typeof (_a = typeof EventEmitter !== "undefined" && EventEmitter) === "function" && _a || Object)
 ], AboutPage.prototype, "emitter", void 0);
         `;
 
-        const viewChildDecorator = `
+      const viewChildDecorator = `
 __decorate([
     ViewChild('test', { read: ElementRef }),
     __metadata("design:type", Object)
 ], AboutPage.prototype, "test", void 0);
         `;
 
-        const viewChildrenDecorator = `
+      const viewChildrenDecorator = `
 __decorate([
     ViewChildren('test'),
     __metadata("design:type", Object)
 ], AboutPage.prototype, "tests", void 0);
         `;
 
-        const hostBindingDecorator = `
+      const hostBindingDecorator = `
 __decorate([
     HostBinding('class.searchbar-has-focus'),
     __metadata("design:type", Boolean)
 ], AboutPage.prototype, "_sbHasFocus", void 0);
         `;
 
-        const hostListenerDecorator = `
+      const hostListenerDecorator = `
 __decorate([
     HostListener('click', ['$event']),
     __metadata("design:type", Function),
@@ -1047,7 +1047,7 @@ __decorate([
 ], AboutPage.prototype, "someFunction", null);
         `;
 
-        const classDecorators = `
+      const classDecorators = `
 AboutPage = __decorate([
     IonicPage(),
     Component({
@@ -1058,7 +1058,7 @@ AboutPage = __decorate([
 ], AboutPage);
         `;
 
-        const knownContent = `
+      const knownContent = `
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -1113,14 +1113,14 @@ var _a, _b, _c;
 
     it('should not purge any injectable decorators', () => {
 
-        const injectableDecorator = `
+      const injectableDecorator = `
 ConferenceData = __decorate([
     Injectable(),
     __metadata("design:paramtypes", [typeof (_a = typeof Http !== "undefined" && Http) === "function" && _a || Object, typeof (_b = typeof UserData !== "undefined" && UserData) === "function" && _b || Object])
 ], ConferenceData);
         `;
 
-        const knownContent = `
+      const knownContent = `
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -1283,7 +1283,7 @@ var _a, _b;
 
   describe('addPureAnnotation', () => {
     it('should add the pure annotation to a transpiled class', () => {
-        const knownContent = `
+      const knownContent = `
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -1407,7 +1407,7 @@ function CardContent_tsickle_Closure_declarations() {
 //# sourceMappingURL=card-content.js.map
 `;
 
-const expectedContent = `
+      const expectedContent = `
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -1462,6 +1462,100 @@ function CardContent_tsickle_Closure_declarations() {
       magicString = decorators.addPureAnnotation(filePath, knownContent, ionicAngular, angularDir, srcDir, magicString);
       const result: string = magicString.toString();
       expect(result).toEqual(expectedContent);
+    });
+  });
+
+  describe('purgeStaticCtorFields', () => {
+    it('should purge the ctor field', () => {
+
+      const ctorParams = `
+Badge.ctorParameters = function () { return [
+    { type: Config, },
+    { type: ElementRef, },
+    { type: Renderer, },
+]; };
+`;
+      const knownContent = `
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+import { Directive, ElementRef, Renderer } from '@angular/core';
+import { Config } from '../../config/config';
+import { Ion } from '../ion';
+
+var Badge = (function (_super) {
+    __extends(Badge, _super);
+
+    function Badge(config, elementRef, renderer) {
+        return _super.call(this, config, elementRef, renderer, 'badge') || this;
+    }
+    return Badge;
+}(Ion));
+export { Badge };
+Badge.decorators = [
+    { type: Directive, args: [{
+                selector: 'ion-badge'
+            },] },
+];
+
+${ctorParams}
+function Badge_tsickle_Closure_declarations() {
+
+    Badge.decorators;
+
+    Badge.ctorParameters;
+}
+//# sourceMappingURL=badge.js.map
+`;
+
+
+
+      let magicString = new MagicString(knownContent);
+      const filePath = join(ionicAngular, 'components', 'badge', 'badge.js');
+      magicString = decorators.purgeStaticCtorFields(filePath, knownContent, ionicAngular, angularDir, srcDir, magicString);
+      const result: string = magicString.toString();
+      expect(result.indexOf(ctorParams)).toEqual(-1);
+    });
+
+    it('should purge an empty ctor field', () => {
+      const ctorParams = `
+Avatar.ctorParameters = function () { return []; };
+      `;
+      const knownContent = `
+
+var Avatar = (function () {
+    function Avatar() {
+    }
+    return Avatar;
+}());
+export { Avatar };
+Avatar.decorators = [
+    { type: Directive, args: [{
+                selector: 'ion-avatar'
+            },] },
+];
+
+${ctorParams}
+function Avatar_tsickle_Closure_declarations() {
+    Avatar.decorators;
+
+    Avatar.ctorParameters;
+}
+//# sourceMappingURL=avatar.js.map
+      `;
+
+      let magicString = new MagicString(knownContent);
+      const filePath = join(ionicAngular, 'components', 'badge', 'badge.js');
+      magicString = decorators.purgeStaticCtorFields(filePath, knownContent, ionicAngular, angularDir, srcDir, magicString);
+      const result: string = magicString.toString();
+      expect(result.indexOf(ctorParams)).toEqual(-1);
     });
   });
 });

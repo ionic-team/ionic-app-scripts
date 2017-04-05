@@ -13,8 +13,10 @@ import {
   SyntaxKind } from 'typescript';
 
 import { Logger } from '../logger/logger';
+import * as Constants from '../util/constants';
+import { getStringPropertyValue } from '../util/helpers';
 import { MagicString } from '../util/interfaces';
-import { findNodes, getTypescriptSourceFile } from '../util/typescript-utils';
+import { getNodeStringContent, findNodes, getTypescriptSourceFile } from '../util/typescript-utils';
 
 export function addPureAnnotation(filePath: string, originalFileContent: string, ionicAngularDir: string, angularDir: string, srcDir: string, magicString: MagicString) {
   Logger.debug(`[decorators] addPureAnnotation: processing ${filePath} ...`);
@@ -41,7 +43,6 @@ export function addPureAnnotation(filePath: string, originalFileContent: string,
         magicString.prependLeft(parenthesizedExpression.pos, PURE_ANNOTATION);
 
       }
-
     }
   });
   return magicString;
@@ -102,13 +103,67 @@ export function purgeStaticFieldDecorators(filePath: string, originalFileContent
   if (filePath.indexOf(angularDir) >= 0 || filePath.indexOf(ionicAngularDir) >= 0 || filePath.indexOf(srcDir) >= 0) {
     Logger.debug(`[decorators] purgeStaticFieldDecorators: processing ${filePath} ...`);
     const typescriptFile = getTypescriptSourceFile(filePath, originalFileContent);
+
     const decoratorExpressionStatements = getDecoratorsExpressionStatements(typescriptFile);
     removeDecorators(decoratorExpressionStatements, magicString);
+
     const propDecoratorsExpressionStatements = getPropDecoratorsExpressionStatements(typescriptFile);
     removePropDecorators(propDecoratorsExpressionStatements, magicString);
+
     Logger.debug(`[decorators] purgeStaticFieldDecorators: processing ${filePath} ... DONE`);
   }
   return magicString;
+}
+
+export function purgeStaticCtorFields(filePath: string, originalFileContent: string, ionicAngularDir: string, angularDir: string, srcDir: string, magicString: MagicString) {
+  // TODO - we could extend this to other libs and stuff too such as material 2, but that doesn't seem
+  // particularly maintainable
+  if ((filePath.indexOf(angularDir) >= 0 || filePath.indexOf(ionicAngularDir) >= 0) && !isIonicEntryComponent(filePath)) {
+    Logger.debug(`[decorators] purgeStaticCtorFields: processing ${filePath} ...`);
+    const typescriptFile = getTypescriptSourceFile(filePath, originalFileContent);
+    const expressionStatements = findNodes(typescriptFile, typescriptFile, SyntaxKind.ExpressionStatement, false) as ExpressionStatement[];
+    const toPurge: ExpressionStatement[] = [];
+    for (const expressionStatement of expressionStatements) {
+      if (expressionStatement.expression && expressionStatement.expression.kind === SyntaxKind.BinaryExpression
+          && (expressionStatement.expression as BinaryExpression).left
+          && (expressionStatement.expression as BinaryExpression).left.kind === SyntaxKind.PropertyAccessExpression
+          && ((expressionStatement.expression as BinaryExpression).left as PropertyAccessExpression).name
+          && ((expressionStatement.expression as BinaryExpression).left as PropertyAccessExpression).name.text === 'ctorParameters'
+          ) {
+
+        toPurge.push(expressionStatement);
+
+      }
+    }
+
+    toPurge.forEach(tsNode => {
+      magicString.overwrite(tsNode.pos, tsNode.end, '');
+    });
+
+    Logger.debug(`[decorators] purgeStaticFieldDecorators: processing ${filePath} ... DONE`);
+  }
+  return magicString;
+}
+
+function isIonicEntryComponent(filePath: string) {
+  if (filePath === getStringPropertyValue(Constants.ENV_ACTION_SHEET_COMPONENT_PATH)) {
+    return true;
+  } else if (filePath === getStringPropertyValue(Constants.ENV_ALERT_COMPONENT_PATH)) {
+    return true;
+  } else if (filePath === getStringPropertyValue(Constants.ENV_APP_ROOT_COMPONENT_PATH)) {
+    return true;
+  } else if (filePath === getStringPropertyValue(Constants.ENV_LOADING_COMPONENT_PATH)) {
+    return true;
+  } else if (filePath === getStringPropertyValue(Constants.ENV_MODAL_COMPONENT_PATH)) {
+    return true;
+  } else if (filePath === getStringPropertyValue(Constants.ENV_PICKER_COMPONENT_PATH)) {
+    return true;
+  } else if (filePath === getStringPropertyValue(Constants.ENV_POPOVER_COMPONENT_PATH)) {
+    return true;
+  } else if (filePath === getStringPropertyValue(Constants.ENV_TOAST_COMPONENT_PATH)) {
+    return true;
+  }
+  return false;
 }
 
 function getDecoratorsExpressionStatements(typescriptFile: SourceFile) {

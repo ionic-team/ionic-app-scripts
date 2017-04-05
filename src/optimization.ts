@@ -9,7 +9,7 @@ import { BuildError } from './util/errors';
 import { getBooleanPropertyValue, getStringPropertyValue, webpackStatsToDependencyMap, printDependencyMap } from './util/helpers';
 import { BuildContext, TaskInfo } from './util/interfaces';
 import { runWebpackFullBuild, WebpackConfig } from './webpack';
-import { addPureAnnotation, purgeStaticFieldDecorators, purgeTranspiledDecorators } from './optimization/decorators';
+import { addPureAnnotation, purgeStaticCtorFields, purgeStaticFieldDecorators, purgeTranspiledDecorators } from './optimization/decorators';
 import { getAppModuleNgFactoryPath, calculateUnusedComponents, purgeUnusedImportsAndExportsFromIndex, purgeComponentNgFactoryImportAndUsage, purgeProviderControllerImportAndUsage, purgeProviderClassNameFromIonicModuleForRoot } from './optimization/treeshake';
 
 export function optimization(context: BuildContext, configFile: string) {
@@ -83,6 +83,7 @@ function removeDecorators(context: BuildContext) {
   jsFiles.forEach(jsFile => {
     let magicString = new MagicString(jsFile.content);
     magicString = purgeStaticFieldDecorators(jsFile.path, jsFile.content, getStringPropertyValue(Constants.ENV_VAR_IONIC_ANGULAR_DIR), getStringPropertyValue(Constants.ENV_VAR_AT_ANGULAR_DIR), context.srcDir, magicString);
+    magicString = purgeStaticCtorFields(jsFile.path, jsFile.content, getStringPropertyValue(Constants.ENV_VAR_IONIC_ANGULAR_DIR), getStringPropertyValue(Constants.ENV_VAR_AT_ANGULAR_DIR), context.srcDir, magicString);
     magicString = purgeTranspiledDecorators(jsFile.path, jsFile.content, getStringPropertyValue(Constants.ENV_VAR_IONIC_ANGULAR_DIR), getStringPropertyValue(Constants.ENV_VAR_AT_ANGULAR_DIR), context.srcDir, magicString);
     magicString = addPureAnnotation(jsFile.path, jsFile.content, getStringPropertyValue(Constants.ENV_VAR_IONIC_ANGULAR_DIR), getStringPropertyValue(Constants.ENV_VAR_AT_ANGULAR_DIR), context.srcDir, magicString);
     jsFile.content = magicString.toString();
