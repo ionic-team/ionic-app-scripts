@@ -205,4 +205,5 @@ export interface WebpackDependency {
 export interface MagicString {
   overwrite(startIndex: number, endIndex: number, newContent: string): void;
   toString(): string;
+  prependLeft(index: number, contentToPrepend: string): string;
 }

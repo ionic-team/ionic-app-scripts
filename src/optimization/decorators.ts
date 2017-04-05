@@ -3,8 +3,10 @@ import {
   BinaryExpression,
   CallExpression,
   ExpressionStatement,
+  FunctionExpression,
   Identifier,
   ObjectLiteralExpression,
+  ParenthesizedExpression,
   PropertyAccessExpression,
   PropertyAssignment,
   SourceFile,
@@ -12,7 +14,38 @@ import {
 
 import { Logger } from '../logger/logger';
 import { MagicString } from '../util/interfaces';
-import { getNodeStringContent, findNodes, getTypescriptSourceFile } from '../util/typescript-utils';
+import { findNodes, getTypescriptSourceFile } from '../util/typescript-utils';
+
+export function addPureAnnotation(filePath: string, originalFileContent: string, ionicAngularDir: string, angularDir: string, srcDir: string, magicString: MagicString) {
+  Logger.debug(`[decorators] addPureAnnotation: processing ${filePath} ...`);
+  const typescriptFile = getTypescriptSourceFile(filePath, originalFileContent);
+  const parenthesizedExpressions = findNodes(typescriptFile, typescriptFile, SyntaxKind.ParenthesizedExpression, false) as ParenthesizedExpression[];
+  parenthesizedExpressions.forEach(parenthesizedExpression => {
+
+    if (parenthesizedExpression.expression && parenthesizedExpression.expression.kind === SyntaxKind.CallExpression
+        && (parenthesizedExpression.expression as CallExpression).expression
+        && (parenthesizedExpression.expression as CallExpression).expression.kind === SyntaxKind.FunctionExpression
+        && !((parenthesizedExpression.expression as CallExpression).expression as FunctionExpression).name
+        && ((parenthesizedExpression.expression as CallExpression).expression as FunctionExpression).parameters) {
+
+      // it's an iffe
+      if (((parenthesizedExpression.expression as CallExpression).expression as FunctionExpression).parameters.length === 0) {
+
+        magicString.prependLeft(parenthesizedExpression.pos, PURE_ANNOTATION);
+
+      } else if (((parenthesizedExpression.expression as CallExpression).expression as FunctionExpression).parameters[0]
+                && ((parenthesizedExpression.expression as CallExpression).expression as FunctionExpression).parameters[0].name
+                && (((parenthesizedExpression.expression as CallExpression).expression as FunctionExpression).parameters[0].name as Identifier).text === '_super') {
+
+
+        magicString.prependLeft(parenthesizedExpression.pos, PURE_ANNOTATION);
+
+      }
+
+    }
+  });
+  return magicString;
+}
 
 export function purgeTranspiledDecorators(filePath: string, originalFileContent: string, ionicAngularDir: string, angularDir: string, srcDir: string, magicString: MagicString) {
   if (filePath.indexOf(angularDir) >= 0 || filePath.indexOf(ionicAngularDir) >= 0 || filePath.indexOf(srcDir) >= 0) {
@@ -177,3 +210,5 @@ export const OUTPUT_DECORATOR = 'Output';
 export const PIPE_DECORATOR = 'Pipe';
 export const VIEW_CHILD_DECORATOR = 'ViewChild';
 export const VIEW_CHILDREN_DECORATOR = 'ViewChildren';
+
+export const PURE_ANNOTATION = ' /*#__PURE__*/';

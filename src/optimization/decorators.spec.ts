@@ -1280,4 +1280,188 @@ var _a, _b;
       expect(result.indexOf(injectableDecorator)).toBeGreaterThan(1);
     });
   });
+
+  describe('addPureAnnotation', () => {
+    it('should add the pure annotation to a transpiled class', () => {
+        const knownContent = `
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+import { Component, ElementRef, EventEmitter, HostBinding, HostListener, Input, Output, ViewChild, ViewChildren } from '@angular/core';
+import { IonicPage, NavController, PopoverController } from 'ionic-angular';
+var AboutPage = (function () {
+    function AboutPage(navCtrl, popoverCtrl) {
+        this.navCtrl = navCtrl;
+        this.popoverCtrl = popoverCtrl;
+        this.conferenceDate = '2047-05-18';
+        this.someVariable = '';
+        this.emitter = new EventEmitter();
+    }
+    AboutPage.prototype.presentPopover = function (event) {
+        var popover = this.popoverCtrl.create('PopoverPage');
+        popover.present({ ev: event });
+    };
+    AboutPage.prototype.someFunction = function (event) {
+    };
+    return AboutPage;
+}());
+export { AboutPage };
+var _a, _b, _c;
+//# sourceMappingURL=about.js.map
+        `;
+
+      const expectedContent = `
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+import { Component, ElementRef, EventEmitter, HostBinding, HostListener, Input, Output, ViewChild, ViewChildren } from '@angular/core';
+import { IonicPage, NavController, PopoverController } from 'ionic-angular';
+var AboutPage = /*#__PURE__*/ (function () {
+    function AboutPage(navCtrl, popoverCtrl) {
+        this.navCtrl = navCtrl;
+        this.popoverCtrl = popoverCtrl;
+        this.conferenceDate = '2047-05-18';
+        this.someVariable = '';
+        this.emitter = new EventEmitter();
+    }
+    AboutPage.prototype.presentPopover = function (event) {
+        var popover = this.popoverCtrl.create('PopoverPage');
+        popover.present({ ev: event });
+    };
+    AboutPage.prototype.someFunction = function (event) {
+    };
+    return AboutPage;
+}());
+export { AboutPage };
+var _a, _b, _c;
+//# sourceMappingURL=about.js.map
+        `;
+
+      let magicString = new MagicString(knownContent);
+      const filePath = join(ionicAngular, 'components', 'action-sheet', 'action-sheet-component.js');
+      magicString = decorators.addPureAnnotation(filePath, knownContent, ionicAngular, angularDir, srcDir, magicString);
+      const result: string = magicString.toString();
+      expect(result).toEqual(expectedContent);
+    });
+
+    it('should work with a class that extends another class', () => {
+      const knownContent = `
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+import { Directive, ElementRef, Renderer } from '@angular/core';
+import { Config } from '../../config/config';
+import { Ion } from '../ion';
+/**
+ * @hidden
+ */
+var CardContent = (function (_super) {
+    __extends(CardContent, _super);
+    /**
+     * @param {?} config
+     * @param {?} elementRef
+     * @param {?} renderer
+     */
+    function CardContent(config, elementRef, renderer) {
+        return _super.call(this, config, elementRef, renderer, 'card-content') || this;
+    }
+    return CardContent;
+}(Ion));
+export { CardContent };
+/**
+ * @nocollapse
+ */
+CardContent.ctorParameters = function () { return [
+    { type: Config, },
+    { type: ElementRef, },
+    { type: Renderer, },
+]; };
+function CardContent_tsickle_Closure_declarations() {
+    /** @type {?} */
+    CardContent.decorators;
+    /**
+     * @nocollapse
+     * @type {?}
+     */
+    CardContent.ctorParameters;
+}
+//# sourceMappingURL=card-content.js.map
+`;
+
+const expectedContent = `
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+import { Directive, ElementRef, Renderer } from '@angular/core';
+import { Config } from '../../config/config';
+import { Ion } from '../ion';
+/**
+ * @hidden
+ */
+var CardContent = /*#__PURE__*/ (function (_super) {
+    __extends(CardContent, _super);
+    /**
+     * @param {?} config
+     * @param {?} elementRef
+     * @param {?} renderer
+     */
+    function CardContent(config, elementRef, renderer) {
+        return _super.call(this, config, elementRef, renderer, 'card-content') || this;
+    }
+    return CardContent;
+}(Ion));
+export { CardContent };
+/**
+ * @nocollapse
+ */
+CardContent.ctorParameters = function () { return [
+    { type: Config, },
+    { type: ElementRef, },
+    { type: Renderer, },
+]; };
+function CardContent_tsickle_Closure_declarations() {
+    /** @type {?} */
+    CardContent.decorators;
+    /**
+     * @nocollapse
+     * @type {?}
+     */
+    CardContent.ctorParameters;
+}
+//# sourceMappingURL=card-content.js.map
+`;
+
+      let magicString = new MagicString(knownContent);
+      const filePath = join(ionicAngular, 'components', 'action-sheet', 'action-sheet-component.js');
+      magicString = decorators.addPureAnnotation(filePath, knownContent, ionicAngular, angularDir, srcDir, magicString);
+      const result: string = magicString.toString();
+      expect(result).toEqual(expectedContent);
+    });
+  });
 });
