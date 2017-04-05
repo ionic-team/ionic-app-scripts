@@ -1,3 +1,14 @@
+<a name="1.3.0"></a>
+# [1.3.0](https://github.com/driftyco/ionic-app-scripts/compare/v1.2.5...v1.3.0) (2017-04-05)
+
+
+### Features
+
+* **optimization:** purge decorators enabled by default ([b626e00](https://github.com/driftyco/ionic-app-scripts/commit/b626e00))
+* **optimizations:** purge transpiled decorators ([ba5e0cd](https://github.com/driftyco/ionic-app-scripts/commit/ba5e0cd))
+
+
+
 <a name="1.2.5"></a>
 ## [1.2.5](https://github.com/driftyco/ionic-app-scripts/compare/v1.2.4...v1.2.5) (2017-03-31)
 
