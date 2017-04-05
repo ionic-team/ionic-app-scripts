@@ -389,6 +389,15 @@ export function buildErrorToJson(buildError: BuildError) {
   };
 }
 
+export function jsonToBuildError(nonTypedBuildError: any) {
+  const error = new BuildError(new Error(nonTypedBuildError.message));
+  error.name = nonTypedBuildError.name;
+  error.stack = nonTypedBuildError.stack;
+  error.hasBeenLogged = nonTypedBuildError.hasBeenLogged;
+  error.isFatal = nonTypedBuildError.isFatal;
+  return error;
+}
+
 export function upperCaseFirst(input: string) {
   if (input.length > 1) {
     return input.charAt(0).toUpperCase() + input.substr(1);
