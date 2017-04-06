@@ -68,32 +68,47 @@ function getTranspiledDecoratorExpressionStatements(sourceFile: SourceFile) {
     if (expressionStatement && expressionStatement.expression
           && expressionStatement.expression.kind === SyntaxKind.CallExpression
           && (expressionStatement.expression as CallExpression).expression
-          && ((expressionStatement.expression as CallExpression).expression as Identifier).text === '___decorate') {
+          && ((expressionStatement.expression as CallExpression).expression as Identifier).text === '___decorate'
+          && (expressionStatement.expression as CallExpression).arguments
+          && (expressionStatement.expression as CallExpression).arguments.length > 0
+          && (expressionStatement.expression as CallExpression).arguments[0].kind === SyntaxKind.ArrayLiteralExpression
+          && ((expressionStatement.expression as CallExpression).arguments[0] as ArrayLiteralExpression).elements
+          && ((expressionStatement.expression as CallExpression).arguments[0] as ArrayLiteralExpression).elements.length > 0
+          && (((expressionStatement.expression as CallExpression).arguments[0] as ArrayLiteralExpression).elements[0] as CallExpression).expression
+          && (((expressionStatement.expression as CallExpression).arguments[0] as ArrayLiteralExpression).elements[0] as CallExpression).expression.kind === SyntaxKind.Identifier
+          && canRemoveDecoratorNode(((((expressionStatement.expression as CallExpression).arguments[0] as ArrayLiteralExpression).elements[0] as CallExpression).expression as Identifier).text)
+          ) {
 
       toReturn.push(expressionStatement);
 
     } else if (expressionStatement && expressionStatement.expression
-          && expressionStatement.expression.kind === SyntaxKind.BinaryExpression
-          && (expressionStatement.expression as BinaryExpression).right
-          && (expressionStatement.expression as BinaryExpression).right.kind === SyntaxKind.CallExpression
-          && ((expressionStatement.expression as BinaryExpression).right as CallExpression).expression
-          && (((expressionStatement.expression as BinaryExpression).right as CallExpression).expression as Identifier).text === '___decorate') {
+        && expressionStatement.expression.kind === SyntaxKind.BinaryExpression
+        && (expressionStatement.expression as BinaryExpression).right
+        && (expressionStatement.expression as BinaryExpression).right.kind === SyntaxKind.CallExpression
+        && ((expressionStatement.expression as BinaryExpression).right as CallExpression).expression
+        && (((expressionStatement.expression as BinaryExpression).right as CallExpression).expression as Identifier).text === '___decorate'
+        && ((expressionStatement.expression as BinaryExpression).right as CallExpression).arguments
+        && ((expressionStatement.expression as BinaryExpression).right as CallExpression).arguments.length > 0
+        && ((expressionStatement.expression as BinaryExpression).right as CallExpression).arguments[0].kind === SyntaxKind.ArrayLiteralExpression
+        && (((expressionStatement.expression as BinaryExpression).right as CallExpression).arguments[0] as ArrayLiteralExpression).elements
+        && (((expressionStatement.expression as BinaryExpression).right as CallExpression).arguments[0] as ArrayLiteralExpression).elements.length > 0 ) {
 
-      ((expressionStatement.expression as BinaryExpression).right as CallExpression).arguments.forEach(argument => {
-        if (argument.kind === SyntaxKind.ArrayLiteralExpression) {
-          let injectableFound = false;
-          for (const element of (argument as ArrayLiteralExpression).elements) {
-            if (element.kind === SyntaxKind.CallExpression && (element as CallExpression).expression
-            && ((element as CallExpression).expression as Identifier).text === 'Injectable' ) {
-              injectableFound = true;
-              break;
-            }
-          }
-          if (!injectableFound) {
-            toReturn.push(expressionStatement);
-          }
+      let immovableDecoratorFound = false;
+
+      // remove the last item in the array as it is always __metadata() and should not be considered here
+      const numElements = (((expressionStatement.expression as BinaryExpression).right as CallExpression).arguments[0] as ArrayLiteralExpression).elements.length - 1;
+      const elementsToEvaluate = (((expressionStatement.expression as BinaryExpression).right as CallExpression).arguments[0] as ArrayLiteralExpression).elements.slice(0, numElements);
+      for (const element of elementsToEvaluate) {
+        if (element.kind === SyntaxKind.CallExpression && (element as CallExpression).expression
+          && !canRemoveDecoratorNode(((element as CallExpression).expression as Identifier).text)) {
+
+          immovableDecoratorFound = true;
+          break;
         }
-      });
+      }
+      if (!immovableDecoratorFound) {
+        toReturn.push(expressionStatement);
+      }
     }
   });
   return toReturn;
@@ -170,7 +185,9 @@ function getDecoratorsExpressionStatements(typescriptFile: SourceFile) {
   const expressionStatements = findNodes(typescriptFile, typescriptFile, SyntaxKind.ExpressionStatement, false) as ExpressionStatement[];
   const decoratorExpressionStatements: ExpressionStatement[] = [];
   for (const expressionStatement of expressionStatements) {
-    if (expressionStatement.expression && (expressionStatement.expression as BinaryExpression).left && ((expressionStatement.expression as BinaryExpression).left as PropertyAccessExpression).name &&  ((expressionStatement.expression as BinaryExpression).left as PropertyAccessExpression).name.text === 'decorators') {
+    if (expressionStatement.expression && (expressionStatement.expression as BinaryExpression).left
+        && ((expressionStatement.expression as BinaryExpression).left as PropertyAccessExpression).name
+        &&  ((expressionStatement.expression as BinaryExpression).left as PropertyAccessExpression).name.text === 'decorators') {
       decoratorExpressionStatements.push(expressionStatement);
     }
   }
@@ -248,6 +265,8 @@ function canRemoveDecoratorNode(decoratorType: string) {
     return true;
   } else if (decoratorType === VIEW_CHILDREN_DECORATOR) {
     return true;
+  } else if (decoratorType === IONIC_PAGE_DECORATOR) {
+    return true;
   }
   return false;
 }
@@ -265,5 +284,6 @@ export const OUTPUT_DECORATOR = 'Output';
 export const PIPE_DECORATOR = 'Pipe';
 export const VIEW_CHILD_DECORATOR = 'ViewChild';
 export const VIEW_CHILDREN_DECORATOR = 'ViewChildren';
+export const IONIC_PAGE_DECORATOR = 'IonicPage';
 
 export const PURE_ANNOTATION = ' /*#__PURE__*/';

@@ -1279,6 +1279,57 @@ var _a, _b;
       const result: string = magicString.toString();
       expect(result.indexOf(injectableDecorator)).toBeGreaterThan(1);
     });
+
+    it('should not remove the third party decorators', () => {
+
+      const selectDecorator = `
+__decorate([
+    select(),
+    __metadata("design:type", Object)
+], DashPage.prototype, "user$", void 0);
+`;
+
+      const knownContent = `
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+import { Component } from '@angular/core';
+import { select } from '@angular-redux/store';
+var DashPage = (function () {
+    function DashPage() {
+    }
+    DashPage.prototype.ionViewDidLoad = function () {
+        var _this = this;
+        this.user$.subscribe(function (user) {
+            _this.user = user;
+        });
+    };
+    return DashPage;
+}());
+${selectDecorator}
+DashPage = __decorate([
+    Component({
+        selector: 'page-dash',
+        templateUrl: 'dash-page.html'
+    }),
+    __metadata("design:paramtypes", [])
+], DashPage);
+export { DashPage };
+//# sourceMappingURL=dash-page.js.map
+`;
+
+      let magicString = new MagicString(knownContent);
+      const filePath = join(ionicAngular, 'components', 'action-sheet', 'action-sheet-component.js');
+      magicString = decorators.purgeTranspiledDecorators(filePath, knownContent, ionicAngular, angularDir, srcDir, magicString);
+      const result: string = magicString.toString();
+      expect(result.indexOf(selectDecorator)).toBeGreaterThan(1);
+    });
   });
 
   describe('addPureAnnotation', () => {
