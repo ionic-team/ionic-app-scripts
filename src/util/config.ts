@@ -304,7 +304,7 @@ export function generateContext(context?: BuildContext): BuildContext {
 
   // default stand-alone builds to default to es5
   // if closure is being used, don't worry about this as it already automatically converts to ES5
-  const buildToEs5 = getConfigValue(context, '--buildToEs5', null, Constants.ENV_BUILD_TO_ES5, Constants.ENV_BUILD_TO_ES5.toLowerCase(), null);
+  const buildToEs5 = getConfigValue(context, '--buildToEs5', null, Constants.ENV_BUILD_TO_ES5, Constants.ENV_BUILD_TO_ES5.toLowerCase(), useExperimentalClosure ? null : 'true');
   setProcessEnvVar(Constants.ENV_BUILD_TO_ES5, buildToEs5);
   Logger.debug(`buildToEs5 set to ${buildToEs5}`);
 
