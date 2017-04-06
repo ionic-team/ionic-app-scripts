@@ -1,3 +1,17 @@
+<a name="1.3.1"></a>
+## [1.3.1](https://github.com/driftyco/ionic-app-scripts/compare/v1.3.0...v1.3.1) (2017-04-06)
+
+
+### Bug Fixes
+
+* **config:** revert change and once again transpile bundle by default. ([b558584](https://github.com/driftyco/ionic-app-scripts/commit/b558584))
+* **decorators:** don't remove third party transpiled (not static) decorators ([3a3259a](https://github.com/driftyco/ionic-app-scripts/commit/3a3259a))
+* **deep-linking:** don't force the main bundle to be re-built unless the deep link config changed ([02b8e97](https://github.com/driftyco/ionic-app-scripts/commit/02b8e97))
+* **errors:** better error msg reporting from worker threads ([d9d000a](https://github.com/driftyco/ionic-app-scripts/commit/d9d000a))
+* **uglifyjs:** better error msg reporting ([49c0afb](https://github.com/driftyco/ionic-app-scripts/commit/49c0afb))
+
+
+
 <a name="1.3.0"></a>
 # [1.3.0](https://github.com/driftyco/ionic-app-scripts/compare/v1.2.5...v1.3.0) (2017-04-05)
 
