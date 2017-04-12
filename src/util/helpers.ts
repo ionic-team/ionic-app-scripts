@@ -459,3 +459,7 @@ export function isIonicOrAngular(filePath: string) {
   return (filePath.startsWith(getStringPropertyValue(Constants.ENV_VAR_AT_ANGULAR_DIR))
     || filePath.startsWith(getStringPropertyValue(Constants.ENV_VAR_IONIC_ANGULAR_DIR)));
 }
+
+export function isIonic(filePath: string) {
+  return filePath.startsWith(getStringPropertyValue(Constants.ENV_VAR_IONIC_ANGULAR_DIR));
+}

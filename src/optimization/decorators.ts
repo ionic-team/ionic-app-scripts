@@ -133,7 +133,9 @@ export function purgeStaticFieldDecorators(filePath: string, originalFileContent
 export function purgeStaticCtorFields(filePath: string, originalFileContent: string, magicString: MagicString) {
   // TODO - we could extend this to other libs and stuff too such as material 2, but that doesn't seem
   // particularly maintainable
-  if (isIonicOrAngular(filePath) && !isIonicEntryComponent(filePath)) {
+  if (isIonicOrAngular(filePath) && !isIonicEntryComponent(filePath)
+        && !filePath.includes('@angular/platform-browser')
+        && !filePath.includes('@angular/core')) {
     Logger.debug(`[decorators] purgeStaticCtorFields: processing ${filePath} ...`);
     const typescriptFile = getTypescriptSourceFile(filePath, originalFileContent);
     const expressionStatements = findNodes(typescriptFile, typescriptFile, SyntaxKind.ExpressionStatement, false) as ExpressionStatement[];
