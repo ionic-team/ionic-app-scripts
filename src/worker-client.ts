@@ -21,6 +21,7 @@ export function runWorker(taskModule: string, taskWorker: string, context: Build
         wwwDir: context.wwwDir,
         wwwIndex: context.wwwIndex,
         buildDir: context.buildDir,
+        bundledFilePaths: context.bundledFilePaths,
         isProd: context.isProd,
         isWatch: context.isWatch,
         runAot: context.runAot,

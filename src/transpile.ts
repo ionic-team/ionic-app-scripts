@@ -8,7 +8,7 @@ import { EventEmitter } from 'events';
 import { fork, ChildProcess } from 'child_process';
 import { inlineTemplate } from './template';
 import { Logger } from './logger/logger';
-import { readFileSync, writeFileSync, readdirSync } from 'fs';
+import { readFileSync } from 'fs';
 import { runTypeScriptDiagnostics } from './logger/logger-typescript';
 import { printDiagnostics, clearDiagnostics, DiagnosticsType } from './logger/logger-diagnostics';
 import * as path from 'path';

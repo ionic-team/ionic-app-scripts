@@ -1,6 +1,3 @@
-import { readdirSync } from 'fs';
-import { extname, join } from 'path';
-
 import * as uglify from 'uglify-js';
 
 import { Logger } from './logger/logger';
@@ -36,23 +33,20 @@ export function uglifyjsWorker(context: BuildContext, configFile: string): Promi
 
 export function uglifyjsWorkerImpl(context: BuildContext, uglifyJsConfig: UglifyJsConfig) {
   return Promise.resolve().then(() => {
-    // provide a full path for the config options
-    const files = readdirSync(context.buildDir);
+    const jsFilePaths = context.bundledFilePaths.filter(bundledFilePath => bundledFilePath.endsWith('.js'));
     const promises: Promise<any>[] = [];
-    for (const file of files) {
-      if (extname(file) === '.js' && file.indexOf('polyfills') === -1 && file.indexOf('sw-toolbox') === -1 && file.indexOf('.map') === -1) {
-        uglifyJsConfig.sourceFile = join(context.buildDir, file);
-        uglifyJsConfig.inSourceMap = join(context.buildDir, file + '.map');
-        uglifyJsConfig.destFileName = join(context.buildDir, file);
-        uglifyJsConfig.outSourceMap = join(context.buildDir, file + '.map');
+    jsFilePaths.forEach(bundleFilePath => {
+      uglifyJsConfig.sourceFile = bundleFilePath;
+      uglifyJsConfig.inSourceMap = bundleFilePath + '.map';
+      uglifyJsConfig.destFileName = bundleFilePath;
+      uglifyJsConfig.outSourceMap = bundleFilePath + '.map';
 
-        const minifyOutput: uglify.MinifyOutput = runUglifyInternal(uglifyJsConfig);
-
-        promises.push(writeFileAsync(uglifyJsConfig.destFileName, minifyOutput.code.toString()));
+      const minifyOutput: uglify.MinifyOutput = runUglifyInternal(uglifyJsConfig);
+      promises.push(writeFileAsync(uglifyJsConfig.destFileName, minifyOutput.code.toString()));
+      if (minifyOutput.map) {
         promises.push(writeFileAsync(uglifyJsConfig.outSourceMap, minifyOutput.map.toString()));
       }
-    }
-
+    });
     return Promise.all(promises);
   }).catch((err: any) => {
     // uglify has it's own strange error format

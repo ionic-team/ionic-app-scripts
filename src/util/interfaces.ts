@@ -21,6 +21,7 @@ export interface BuildContext {
   outputCssFileName?: string;
   nodeModulesDir?: string;
   ionicAngularDir?: string;
+  bundledFilePaths?: string[];
   moduleFiles?: string[];
   appNgModulePath?: string;
   isProd?: boolean;
