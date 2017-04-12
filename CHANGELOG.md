@@ -1,3 +1,15 @@
+<a name="1.3.2"></a>
+## [1.3.2](https://github.com/driftyco/ionic-app-scripts/compare/v1.3.1...v1.3.2) (2017-04-12)
+
+
+### Bug Fixes
+
+* **deep-linking:** fix bug with null deep link config when modifying the main NgModule file (app.module.ts) ([759bb4f](https://github.com/driftyco/ionic-app-scripts/commit/759bb4f))
+* **optimization:** don't purge ctorParams for angular core or angular platform browser ([9562181](https://github.com/driftyco/ionic-app-scripts/commit/9562181))
+* **uglifyjs:** only minify files processed by webpack or rollup ([30ecdd8](https://github.com/driftyco/ionic-app-scripts/commit/30ecdd8))
+
+
+
 <a name="1.3.1"></a>
 ## [1.3.1](https://github.com/driftyco/ionic-app-scripts/compare/v1.3.0...v1.3.1) (2017-04-06)
 
