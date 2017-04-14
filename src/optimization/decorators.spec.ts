@@ -1577,7 +1577,7 @@ function Badge_tsickle_Closure_declarations() {
 
       let magicString = new MagicString(knownContent);
       const filePath = join(ionicAngular, 'components', 'badge', 'badge.js');
-      spyOn(helpers, helpers.isIonicOrAngular.name).and.returnValue(true);
+      spyOn(helpers, helpers.isIonic.name).and.returnValue(true);
       magicString = decorators.purgeStaticCtorFields(filePath, knownContent, magicString);
       const result: string = magicString.toString();
       expect(result.indexOf(ctorParams)).toEqual(-1);
@@ -1612,7 +1612,7 @@ function Avatar_tsickle_Closure_declarations() {
 
       let magicString = new MagicString(knownContent);
       const filePath = join(ionicAngular, 'components', 'badge', 'badge.js');
-      spyOn(helpers, helpers.isIonicOrAngular.name).and.returnValue(true);
+      spyOn(helpers, helpers.isIonic.name).and.returnValue(true);
       magicString = decorators.purgeStaticCtorFields(filePath, knownContent, magicString);
       const result: string = magicString.toString();
       expect(result.indexOf(ctorParams)).toEqual(-1);
