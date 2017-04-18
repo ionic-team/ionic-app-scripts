@@ -1,5 +1,6 @@
 import { join } from 'path';
-import { getParsedDeepLinkConfig } from '../util/helpers';
+import * as Constants from '../util/constants';
+import { getParsedDeepLinkConfig, getStringPropertyValue } from '../util/helpers';
 import { BuildContext , DeepLinkConfigEntry} from '../util/interfaces';
 import { Logger } from '../logger/logger';
 import { getInstance } from '../util/hybrid-file-system-factory';
@@ -21,7 +22,8 @@ export class IonicEnvironmentPlugin {
           return callback();
         }
 
-        const ngModuleLoaderDirectory = join('ionic-angular', 'util');
+        const ionicAngularDir = getStringPropertyValue(Constants.ENV_VAR_IONIC_ANGULAR_DIR);
+        const ngModuleLoaderDirectory = join(ionicAngularDir, 'util');
         if (!result.resource.endsWith(ngModuleLoaderDirectory)) {
           return callback(null, result);
         }
