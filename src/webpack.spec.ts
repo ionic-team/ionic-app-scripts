@@ -12,7 +12,8 @@ describe('Webpack Task', () => {
 
       const context = {
         fileCache: new FileCache(),
-        buildDir: buildDir
+        buildDir: buildDir,
+        outputJsFileName: 'main.js'
       };
 
       const fileOnePath = join(buildDir, 'main.js');
@@ -47,11 +48,14 @@ describe('Webpack Task', () => {
 
       return promise.then(() => {
         expect(writeFileSpy).toHaveBeenCalledTimes(6);
+
         expect(writeFileSpy.calls.all()[0].args[0]).toEqual(fileOnePath);
-        expect(writeFileSpy.calls.all()[0].args[1]).toEqual(fileOnePath + 'content');
+
+        // igore the appended ionic global
+        let mainBundleContent = fileOnePath + 'content';
+        expect(mainBundleContent.indexOf(writeFileSpy.calls.all()[0].args[1])).toEqual(-1);
 
         expect(writeFileSpy.calls.all()[1].args[0]).toEqual(fileTwoPath);
-        expect(writeFileSpy.calls.all()[1].args[1]).toEqual(fileTwoPath + 'content');
 
         expect(writeFileSpy.calls.all()[2].args[0]).toEqual(fileThreePath);
         expect(writeFileSpy.calls.all()[2].args[1]).toEqual(fileThreePath + 'content');

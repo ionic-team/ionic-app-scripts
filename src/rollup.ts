@@ -1,4 +1,5 @@
-import { join, isAbsolute, normalize, sep } from 'path';
+import { prependIonicGlobal } from './core/ionic-global';
+import { basename, join, isAbsolute, normalize, sep } from 'path';
 import * as rollupBundler from 'rollup';
 
 import { Logger } from './logger/logger';
@@ -89,6 +90,11 @@ export function rollupWorker(context: BuildContext, configFile: string): Promise
         }
 
         const bundleOutput = bundle.generate(rollupConfig);
+
+        const ionicBundle = prependIonicGlobal(context, basename(rollupConfig.dest), bundleOutput.code);
+
+        bundleOutput.code = ionicBundle.code;
+        bundleOutput.map = ionicBundle.map;
 
         // write the bundle
         const promises: Promise<any>[] = [];

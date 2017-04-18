@@ -21,6 +21,8 @@ export interface BuildContext {
   outputCssFileName?: string;
   nodeModulesDir?: string;
   ionicAngularDir?: string;
+  coreCompilerFilePath?: string;
+  coreDir?: string;
   bundledFilePaths?: string[];
   moduleFiles?: string[];
   appNgModulePath?: string;
@@ -207,4 +209,26 @@ export interface MagicString {
   overwrite(startIndex: number, endIndex: number, newContent: string): void;
   toString(): string;
   prependLeft(index: number, contentToPrepend: string): string;
+}
+
+
+export interface CoreCompiler {
+  bundle: {
+    (config: {
+      srcDir: string;
+      destDir: string;
+      packages: Packages;
+      debug?: boolean;
+    }): Promise<any>;
+  };
+}
+
+
+export interface Packages {
+  path?: any;
+  fs?: any;
+  typescript?: any;
+  nodeSass?: any;
+  rollup?: any;
+  uglify?: any;
 }

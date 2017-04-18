@@ -1,5 +1,6 @@
+import { prependIonicGlobal } from './core/ionic-global';
 import { EventEmitter } from 'events';
-import { dirname, extname, join } from 'path';
+import { dirname, join } from 'path';
 
 import * as webpackApi from 'webpack';
 
@@ -112,6 +113,20 @@ function webpackBuildComplete(stats: any, context: BuildContext, webpackConfig: 
 }
 
 export function writeBundleFilesToDisk(context: BuildContext) {
+  const mainJsPath = join(context.buildDir, context.outputJsFileName);
+  const mainJsMapPath = join(context.buildDir, context.outputJsFileName + '.map');
+
+  const mainJsFile = context.fileCache.get(mainJsPath);
+  const mainJsMapFile = context.fileCache.get(mainJsMapPath);
+  if (mainJsFile) {
+    const ionicBundle = prependIonicGlobal(context, context.outputJsFileName, mainJsFile.content);
+
+    mainJsFile.content = ionicBundle.code;
+    if (mainJsMapFile && ionicBundle.map) {
+      mainJsMapFile.content = ionicBundle.map.toString();
+    }
+  }
+
   const bundledFilesToWrite = context.fileCache.getAll().filter(file => {
     return dirname(file.path) === context.buildDir && (file.path.endsWith('.js') || file.path.endsWith('.js.map'));
   });

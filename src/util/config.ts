@@ -119,6 +119,16 @@ export function generateContext(context?: BuildContext): BuildContext {
   setProcessEnvVar(Constants.ENV_VAR_AT_ANGULAR_DIR, angularDir);
   Logger.debug(`angularDir set to ${angularDir}`);
 
+  const defaultCoreCompilerFilePath = join(context.ionicAngularDir, 'compiler');
+  context.coreCompilerFilePath = resolve(context.coreCompilerFilePath || getConfigValue(context, '--coreCompilerFilePath', null, Constants.ENV_VAR_CORE_COMPILER_FILE_PATH, Constants.ENV_VAR_CORE_COMPILER_FILE_PATH.toLowerCase(), defaultCoreCompilerFilePath));
+  setProcessEnvVar(Constants.ENV_VAR_CORE_COMPILER_FILE_PATH, context.coreCompilerFilePath);
+  Logger.debug(`coreCompilerFilePath set to ${context.coreCompilerFilePath}`);
+
+  const defaultCoreDir = context.ionicAngularDir;
+  context.coreDir = resolve(context.coreDir || getConfigValue(context, '--coreDir', null, Constants.ENV_VAR_CORE_DIR, Constants.ENV_VAR_CORE_DIR.toLowerCase(), defaultCoreDir));
+  setProcessEnvVar(Constants.ENV_VAR_CORE_DIR, context.coreDir);
+  Logger.debug(`coreDir set to ${context.coreDir}`);
+
   const rxjsDir = resolve(getConfigValue(context, '--rxjsDir', null, Constants.ENV_VAR_RXJS_DIR, Constants.ENV_VAR_RXJS_DIR.toLowerCase(), join(context.nodeModulesDir, Constants.RXJS)));
   setProcessEnvVar(Constants.ENV_VAR_RXJS_DIR, rxjsDir);
   Logger.debug(`rxjsDir set to ${rxjsDir}`);
