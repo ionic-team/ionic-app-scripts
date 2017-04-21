@@ -3,7 +3,7 @@ import { join } from 'path';
 import * as deepLinking from './deep-linking';
 import * as deeplinkUtils from './deep-linking/util';
 import * as Constants from './util/constants';
-import { ChangedFile } from './util/interfaces';
+import { BuildState, ChangedFile } from './util/interfaces';
 import { FileCache } from './util/file-cache';
 import * as helpers from './util/helpers';
 
@@ -333,6 +333,27 @@ export class AppModule { }
         expect(deeplinkUtils.convertDeepLinkConfigEntriesToString).toHaveBeenCalledWith(knownMockDeepLinkArray);
         expect(deeplinkUtils.convertDeepLinkConfigEntriesToString).toHaveBeenCalledTimes(2);
         expect(spy).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    describe('deepLinkingUpdate', () => {
+      it('should clear an existing cached deep link string so it can generate a new one', () => {
+        const context = {
+          deepLinkState: BuildState.RequiresBuild,
+          fileCache: new FileCache()
+        };
+
+        const somePath = 'somePath';
+        context.fileCache.set(somePath, { path: somePath, content: 'someContent'});
+        const originalCachedDeepLinkString = 'someKnownString';
+        deepLinking.setCachedDeepLinkString(originalCachedDeepLinkString);
+        spyOn(helpers, helpers.getStringPropertyValue.name).and.returnValue(somePath);
+        spyOn(deeplinkUtils, deeplinkUtils.hasExistingDeepLinkConfig.name).and.returnValue(false);
+        const setDeeplinkConfigSpy = spyOn(helpers, helpers.setParsedDeepLinkConfig.name);
+        return deepLinking.deepLinkingUpdate([], context).then(() => {
+          expect(setDeeplinkConfigSpy.calls.mostRecent().args[0].length).toEqual(0);
+          expect(deepLinking.cachedDeepLinkString).toEqual(null);
+        });
       });
     });
   });
