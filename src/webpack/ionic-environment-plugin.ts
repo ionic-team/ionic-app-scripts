@@ -15,13 +15,13 @@ export class IonicEnvironmentPlugin {
   apply(compiler: any) {
 
     compiler.plugin('context-module-factory', (contextModuleFactory: any) => {
-      const deepLinkConfig = getParsedDeepLinkConfig();
-      const webpackDeepLinkModuleDictionary = convertDeepLinkConfigToWebpackFormat(deepLinkConfig);
       contextModuleFactory.plugin('after-resolve', (result: any, callback: Function) => {
         if (!result) {
           return callback();
         }
 
+        const deepLinkConfig = getParsedDeepLinkConfig();
+        const webpackDeepLinkModuleDictionary = convertDeepLinkConfigToWebpackFormat(deepLinkConfig);
         const ionicAngularDir = getStringPropertyValue(Constants.ENV_VAR_IONIC_ANGULAR_DIR);
         const ngModuleLoaderDirectory = join(ionicAngularDir, 'util');
         if (!result.resource.endsWith(ngModuleLoaderDirectory)) {
@@ -52,7 +52,7 @@ export class IonicEnvironmentPlugin {
       hybridFileSystem.setFileSystem(compiler.inputFileSystem);
       compiler.inputFileSystem = hybridFileSystem;
       compiler.outputFileSystem = hybridFileSystem;
-      compiler.watchFileSystem = new WatchMemorySystem(this.context.fileCache);
+      compiler.watchFileSystem = new WatchMemorySystem(this.context.fileCache, this.context.srcDir);
 
       // do a bunch of webpack specific stuff here, so cast to an any
       // populate the content of the file system with any virtual files
