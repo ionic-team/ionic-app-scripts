@@ -410,6 +410,7 @@ $TAB_CONTENT
     const suppliedName = 'settings view';
 
     it('should return a succesful promise', () => {
+			// set up spies
       spyOn(helpers, helpers.readFileAsync.name).and.returnValue(Promise.resolve('file content'));
       spyOn(fs, 'readdirSync').and.returnValue([
         join(process.cwd(), 'path', 'to', 'nowhere'),
@@ -419,8 +420,10 @@ $TAB_CONTENT
       spyOn(TypeScriptUtils, TypeScriptUtils.insertNamedImportIfNeeded.name).and.returnValue('file content');
       spyOn(TypeScriptUtils, TypeScriptUtils.appendNgModuleDeclaration.name).and.returnValue('sliced string');
 
+			// what we want to test
       const promise = util.tabsModuleManipulation([['/src/pages/cool-tab-one/cool-tab-one.module.ts']], { name: suppliedName, className: className, fileName: fileName }, [{ name: suppliedName, className: className, fileName: fileName }]);
 
+      // test
       return promise.then(() => {
         expect(helpers.readFileAsync).toHaveBeenCalled();
         expect(helpers.writeFileAsync).toHaveBeenCalled();
@@ -428,13 +431,7 @@ $TAB_CONTENT
     });
 
     it('should throw when files are not written succesfully', () => {
-      /*spyOn(helpers, helpers.writeFileAsync.name).and.throwError;
-
-      expect(util.tabsModuleManipulation([['/src/pages/cool-tab-one/cool-tab-one.module.ts']], { name: suppliedName, className: className, fileName: fileName }, [{ name: suppliedName, className: className, fileName: fileName }])).toThrow();
-      */
-      // This test is not working correctly, it should look more like this below
-      /*
-      const knownErrorMsg = 'some known error';
+      const knownErrorMsg = `ENOENT: no such file or directory, open 'undefined/settings-view.module.ts'`;
       spyOn(helpers, helpers.writeFileAsync.name).and.returnValue(Promise.reject(new Error(knownErrorMsg)));
 
       const promise = util.tabsModuleManipulation([['/src/pages/cool-tab-one/cool-tab-one.module.ts']], { name: suppliedName, className: className, fileName: fileName }, [{ name: suppliedName, className: className, fileName: fileName }]);
@@ -443,7 +440,6 @@ $TAB_CONTENT
       }).catch((err: Error) => {
         expect(err.message).toEqual(knownErrorMsg);
       });
-      */
     });
 
   });
@@ -486,22 +482,15 @@ $TAB_CONTENT
     });
 
     it('should throw when files are not written succesfully', () => {
-      /*spyOn(helpers, helpers.writeFileAsync.name).and.throwError;
-
-      expect().toThrow();
-      */
-      // This above test is likely not working correctly
-      // it should look more like this
-      /*
-      const knownErrorMsg = 'some error';
+      const knownErrorMsg = `ENOENT: no such file or directory, open 'src/pages/cool-tab-one/cool-tab-one.module.ts'`;
       spyOn(helpers, helpers.writeFileAsync.name).and.returnValue(Promise.reject(new Error(knownErrorMsg)));
+
       const promise = util.nonPageFileManipulation(context, 'coolStuff', join('src', 'pages', 'cool-tab-one', 'cool-tab-one.module.ts'), 'pipe');
       return promise.then(() => {
         throw new Error('should never happen');
       }).catch((err: Error) => {
         expect(err.message).toEqual(knownErrorMsg);
       });
-      */
     });
   });
 });
