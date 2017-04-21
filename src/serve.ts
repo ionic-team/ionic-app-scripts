@@ -77,8 +77,10 @@ function onReady(config: ServeConfig, context: BuildContext) {
       .concat(platformOption(context) ? ['?ionicplatform=', platformOption(context)] : []);
 
     open(openOptions.join(''), browserToLaunch(context), (error: Error) => {
-      const errorMessage = error && error.message ? error.message : error.toString();
-      Logger.warn(`Failed to open the browser: ${errorMessage}`);
+      if (error) {
+        const errorMessage = error && error.message ? error.message : error.toString();
+        Logger.warn(`Failed to open the browser: ${errorMessage}`);
+      }
     });
   }
   Logger.info(`dev server running: ${config.hostBaseUrl}/`, 'green', true);
