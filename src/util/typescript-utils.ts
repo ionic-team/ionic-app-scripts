@@ -243,7 +243,7 @@ export function appendNgModuleDeclaration(filePath: string, fileContent: string,
     if (declarations.length === 0) {
       return appendEmpty(fileContent, declarations['end'], declaration);
     } else {
-      return appendAfter(fileContent, declarations[declarations.length - 1], `, ${declaration}`);
+      return appendAfter(fileContent, declarations[declarations.length - 1], `,\n    ${declaration}`);
     }
   } else {
     const properties = (findObjectLiteralElementByName(obj.properties, 'declarations') as PropertyAssignment);
