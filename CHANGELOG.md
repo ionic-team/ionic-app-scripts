@@ -1,3 +1,20 @@
+<a name="1.3.5"></a>
+## [1.3.5](https://github.com/driftyco/ionic-app-scripts/compare/v1.3.4...v1.3.5) (2017-04-26)
+
+
+### Bug Fixes
+
+* **build:** fix `extends` in `ts-config.json` ([#910](https://github.com/driftyco/ionic-app-scripts/issues/910)) ([0f01603](https://github.com/driftyco/ionic-app-scripts/commit/0f01603))
+* **deep-linking:** fix issue where deep link config ends up being null when full build is triggered via a change to a template file with the identical content ([68fc463](https://github.com/driftyco/ionic-app-scripts/commit/68fc463))
+* **serve:** Fix for browser not opening on linux, fixes [#425](https://github.com/driftyco/ionic-app-scripts/issues/425) ([#909](https://github.com/driftyco/ionic-app-scripts/issues/909)) ([77edbc6](https://github.com/driftyco/ionic-app-scripts/commit/77edbc6))
+
+
+### Features
+
+* **sass:** add option to pass addition postcss plugins ([#369](https://github.com/driftyco/ionic-app-scripts/issues/369)) ([be30a40](https://github.com/driftyco/ionic-app-scripts/commit/be30a40))
+
+
+
 <a name="1.3.4"></a>
 ## [1.3.4](https://github.com/driftyco/ionic-app-scripts/compare/v1.3.3...v1.3.4) (2017-04-18)
 
