@@ -1,3 +1,18 @@
+<a name="1.3.6"></a>
+## [1.3.6](https://github.com/driftyco/ionic-app-scripts/compare/v1.3.5...v1.3.6) (2017-04-27)
+
+
+### Bug Fixes
+
+* **webpack:** fix issue PR introduced with lazy loaded modules and webpack throwing an invalid error ([fb8b69a](https://github.com/driftyco/ionic-app-scripts/commit/fb8b69a))
+
+
+### Features
+
+* **optimization:** enable manual tree shaking by default ([1c57ee6](https://github.com/driftyco/ionic-app-scripts/commit/1c57ee6))
+
+
+
 <a name="1.3.5"></a>
 ## [1.3.5](https://github.com/driftyco/ionic-app-scripts/compare/v1.3.4...v1.3.5) (2017-04-26)
 
