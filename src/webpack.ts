@@ -142,7 +142,16 @@ export function runWebpackFullBuild(config: WebpackConfig) {
       if (err) {
         reject(new BuildError(err));
       } else {
-        resolve(stats);
+        const info = stats.toJson();
+
+        if (stats.hasErrors()) {
+          reject(new BuildError(info.errors));
+        } else if (stats.hasWarnings()) {
+          Logger.debug(info.warnings);
+          resolve(stats);
+        } else {
+          resolve(stats);
+        }
       }
     };
     const compiler = webpackApi(config);
