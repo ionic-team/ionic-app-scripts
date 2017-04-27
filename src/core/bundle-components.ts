@@ -6,6 +6,7 @@ import * as nodeSass from 'node-sass';
 import * as rollup from 'rollup';
 import * as typescript from 'typescript';
 import * as uglify from 'uglify-js';
+import * as cleanCss from 'clean-css';
 
 
 export function bundleCoreComponents(context: BuildContext) {
@@ -20,6 +21,7 @@ export function bundleCoreComponents(context: BuildContext) {
     srcDir: context.coreDir,
     destDir: context.buildDir,
     packages: {
+      cleanCss: cleanCss,
       fs: fs,
       path: path,
       nodeSass: nodeSass,
@@ -34,6 +36,11 @@ export function bundleCoreComponents(context: BuildContext) {
       results.errors.forEach((err: string) => {
         Logger.error(`compiler.bundle, results: ${err}`);
       });
+
+    } else if (results.componentRegistry) {
+      // add the component registry to the global window.Ionic
+      context.ionicGlobal = context.ionicGlobal || {};
+      context.ionicGlobal['components'] = results.componentRegistry;
     }
   }).catch(err => {
     Logger.error(`compiler.bundle: ${err}`);
@@ -49,22 +56,3 @@ function getCoreCompiler(context: BuildContext): CoreCompiler {
   }
   return null;
 }
-
-// In serve mode, we only want to do the look-up for the compiler once
-let cachedCompilerModuleResult: CompilerModuleResult = null;
-export function doesCompilerExist(context: BuildContext): boolean {
-  if (!cachedCompilerModuleResult) {
-    const result = getCoreCompiler(context);
-    cachedCompilerModuleResult = {
-      found: result ? true : false,
-      module: result ? result : null
-    };
-  }
-
-  return cachedCompilerModuleResult.found;
-}
-
-interface CompilerModuleResult {
-  found: boolean;
-  module: any;
-};

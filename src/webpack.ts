@@ -3,8 +3,6 @@ import { dirname, join } from 'path';
 
 import * as webpackApi from 'webpack';
 
-import { prependIonicGlobal } from './core/ionic-global';
-import { doesCompilerExist } from './core/bundle-components';
 import { Logger } from './logger/logger';
 import { fillConfigDefaults, getUserConfigFile, replacePathVars } from './util/config';
 import * as Constants from './util/constants';
@@ -114,20 +112,6 @@ function webpackBuildComplete(stats: any, context: BuildContext, webpackConfig: 
 }
 
 export function writeBundleFilesToDisk(context: BuildContext) {
-  const mainJsPath = join(context.buildDir, context.outputJsFileName);
-  const mainJsMapPath = join(context.buildDir, context.outputJsFileName + '.map');
-
-  const mainJsFile = context.fileCache.get(mainJsPath);
-  const mainJsMapFile = context.fileCache.get(mainJsMapPath);
-  if (mainJsFile && doesCompilerExist(context)) {
-    const ionicBundle = prependIonicGlobal(context, context.outputJsFileName, mainJsFile.content);
-
-    mainJsFile.content = ionicBundle.code;
-    if (mainJsMapFile && ionicBundle.map) {
-      mainJsMapFile.content = ionicBundle.map.toString();
-    }
-  }
-
   const bundledFilesToWrite = context.fileCache.getAll().filter(file => {
     return dirname(file.path) === context.buildDir && (file.path.endsWith('.js') || file.path.endsWith('.js.map'));
   });

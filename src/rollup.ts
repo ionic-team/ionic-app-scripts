@@ -1,9 +1,7 @@
-import { basename, join, isAbsolute, normalize, sep } from 'path';
+import { join, isAbsolute, normalize, sep } from 'path';
 
 import * as rollupBundler from 'rollup';
 
-import { prependIonicGlobal } from './core/ionic-global';
-import { doesCompilerExist } from './core/bundle-components';
 import { Logger } from './logger/logger';
 import { ionicRollupResolverPlugin, PLUGIN_NAME } from './rollup/ionic-rollup-resolver-plugin';
 import { fillConfigDefaults, getUserConfigFile, replacePathVars } from './util/config';
@@ -92,13 +90,6 @@ export function rollupWorker(context: BuildContext, configFile: string): Promise
         }
 
         const bundleOutput = bundle.generate(rollupConfig);
-
-        if (doesCompilerExist(context)) {
-          const ionicBundle = prependIonicGlobal(context, basename(rollupConfig.dest), bundleOutput.code);
-
-          bundleOutput.code = ionicBundle.code;
-          bundleOutput.map = ionicBundle.map;
-        }
 
         // write the bundle
         const promises: Promise<any>[] = [];

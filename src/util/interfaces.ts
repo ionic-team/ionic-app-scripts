@@ -36,6 +36,7 @@ export interface BuildContext {
   fileCache?: FileCache;
   inlineTemplates?: boolean;
   webpackWatch?: any;
+  ionicGlobal?: any;
 
   sassState?: BuildState;
   transpileState?: BuildState;

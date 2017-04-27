@@ -3,7 +3,6 @@ import { join } from 'path';
 import * as webpack from './webpack';
 import { FileCache } from './util/file-cache';
 import * as helpers from './util/helpers';
-import * as ionicGlobal from './core/ionic-global';
 import * as bundleComponents from './core/bundle-components';
 
 describe('Webpack Task', () => {
@@ -14,8 +13,7 @@ describe('Webpack Task', () => {
 
       const context = {
         fileCache: new FileCache(),
-        buildDir: buildDir,
-        outputJsFileName: 'main.js'
+        buildDir: buildDir
       };
 
       const fileOnePath = join(buildDir, 'main.js');
@@ -45,20 +43,16 @@ describe('Webpack Task', () => {
       context.fileCache.set(fileTwelvePath, { path: fileTwelvePath, content: fileTwelvePath + 'content'});
 
       const writeFileSpy = spyOn(helpers, helpers.writeFileAsync.name).and.returnValue(Promise.resolve());
-      spyOn(ionicGlobal, ionicGlobal.prependIonicGlobal.name);
-      spyOn(bundleComponents, bundleComponents.doesCompilerExist.name).and.returnValue(false);
 
       const promise = webpack.writeBundleFilesToDisk(context);
 
       return promise.then(() => {
         expect(writeFileSpy).toHaveBeenCalledTimes(6);
-
         expect(writeFileSpy.calls.all()[0].args[0]).toEqual(fileOnePath);
-
-        // igore the appended ionic global
         expect(writeFileSpy.calls.all()[0].args[1]).toEqual(fileOnePath + 'content');
 
         expect(writeFileSpy.calls.all()[1].args[0]).toEqual(fileTwoPath);
+        expect(writeFileSpy.calls.all()[1].args[1]).toEqual(fileTwoPath + 'content');
 
         expect(writeFileSpy.calls.all()[2].args[0]).toEqual(fileThreePath);
         expect(writeFileSpy.calls.all()[2].args[1]).toEqual(fileThreePath + 'content');
@@ -71,8 +65,6 @@ describe('Webpack Task', () => {
 
         expect(writeFileSpy.calls.all()[5].args[0]).toEqual(fileSixPath);
         expect(writeFileSpy.calls.all()[5].args[1]).toEqual(fileSixPath + 'content');
-
-        expect(ionicGlobal.prependIonicGlobal).not.toHaveBeenCalled();
       });
     });
 
@@ -92,14 +84,7 @@ describe('Webpack Task', () => {
       context.fileCache.set(fileOnePath, { path: fileOnePath, content: fileOnePath + 'content'});
       context.fileCache.set(fileTwoPath, { path: fileTwoPath, content: fileTwoPath + 'content'});
 
-      const prependIonicGlobalData = {
-        code: 'someCode',
-        map: 'someString'
-      };
-
       const writeFileSpy = spyOn(helpers, helpers.writeFileAsync.name).and.returnValue(Promise.resolve());
-      spyOn(ionicGlobal, ionicGlobal.prependIonicGlobal.name).and.returnValue(prependIonicGlobalData);
-      spyOn(bundleComponents, bundleComponents.doesCompilerExist.name).and.returnValue(true);
 
       const promise = webpack.writeBundleFilesToDisk(context);
 
@@ -108,12 +93,7 @@ describe('Webpack Task', () => {
 
         expect(writeFileSpy.calls.all()[0].args[0]).toEqual(fileOnePath);
 
-        // igore the appended ionic global
-        expect(writeFileSpy.calls.all()[0].args[1]).toEqual(prependIonicGlobalData.code);
-
         expect(writeFileSpy.calls.all()[1].args[0]).toEqual(fileTwoPath);
-
-        expect(ionicGlobal.prependIonicGlobal).toHaveBeenCalled();
       });
     });
   });
