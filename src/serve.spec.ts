@@ -37,7 +37,8 @@ describe('test serve', () => {
       notificationPort: 53703,
       useServerLogs: false,
       useProxy: true,
-      notifyOnConsoleLog: false
+      notifyOnConsoleLog: false,
+      bonjour: false
     };
     spyOn(network, 'findClosestOpenPorts').and.callFake((host: string, ports: number[]) => Promise.resolve(ports));
     spyOn(notificationServer, 'createNotificationServer');
