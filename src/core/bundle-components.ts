@@ -28,7 +28,8 @@ export function bundleCoreComponents(context: BuildContext) {
       rollup: rollup,
       typescript: typescript,
       uglify: uglify
-    }
+    },
+    watch: context.isWatch
   };
 
   return compiler.bundle(config).then(results => {
@@ -43,7 +44,15 @@ export function bundleCoreComponents(context: BuildContext) {
       context.ionicGlobal['components'] = results.componentRegistry;
     }
   }).catch(err => {
-    Logger.error(`compiler.bundle: ${err}`);
+    if (err) {
+      if (err.stack) {
+        Logger.error(`compiler.bundle: ${err.stack}`);
+      } else {
+        Logger.error(`compiler.bundle: ${err}`);
+      }
+    } else {
+      Logger.error(`compiler.bundle error`);
+    }
   });
 }
 
