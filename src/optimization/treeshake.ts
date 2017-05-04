@@ -165,11 +165,13 @@ function onlyNgModuleFactories(importeeSet: Set<string>) {
   const moduleNgFactoryTs = changeExtension(getStringPropertyValue(Constants.ENV_NG_MODULE_FILE_NAME_SUFFIX), '.ngfactory.ts');
   const moduleNgFactoryJs = changeExtension(getStringPropertyValue(Constants.ENV_NG_MODULE_FILE_NAME_SUFFIX), '.ngfactory.js');
   let onlyNgModuleFactories = true;
-  importeeSet.forEach(importee => {
-    if (onlyNgModuleFactories && !(importee.endsWith(moduleNgFactoryTs) || importee.endsWith(moduleNgFactoryJs)) ) {
-      onlyNgModuleFactories = false;
-    }
-  });
+  if (importeeSet) {
+    importeeSet.forEach(importee => {
+      if (onlyNgModuleFactories && !(importee.endsWith(moduleNgFactoryTs) || importee.endsWith(moduleNgFactoryJs)) ) {
+        onlyNgModuleFactories = false;
+      }
+    });
+  }
   return onlyNgModuleFactories;
 }
 
