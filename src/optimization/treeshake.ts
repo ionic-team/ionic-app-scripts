@@ -47,7 +47,13 @@ function requiredModule(modulePath: string) {
   const appModule = changeExtension(getStringPropertyValue(Constants.ENV_APP_NG_MODULE_PATH), '.js');
   const appModuleNgFactory = getAppModuleNgFactoryPath();
   const moduleFile = getIonicModuleFilePath();
-  return modulePath === mainJsFile || modulePath === mainTsFile || modulePath === appModule || modulePath === appModuleNgFactory || modulePath === moduleFile;
+  const menuTypes = join(dirname(getStringPropertyValue(Constants.ENV_VAR_IONIC_ANGULAR_ENTRY_POINT)), 'components', 'menu', 'menu-types.js');
+  return modulePath === mainJsFile
+        || modulePath === mainTsFile
+        || modulePath === appModule
+        || modulePath === appModuleNgFactory
+        || modulePath === moduleFile
+        || modulePath === menuTypes;
 }
 
 function filterMap(dependencyMap: Map<string, Set<string>>) {
@@ -103,45 +109,35 @@ function calculateUnusedIonicProviders(dependencyMap: Map<string, Set<string>>) 
 
   // check if the controllers were deleted, if so, purge the component too
   Logger.debug(`[treeshake] calculateUnusedIonicProviders: attempting to action sheet component`);
-  processIonicProviderComponents(dependencyMap, getStringPropertyValue(Constants.ENV_ACTION_SHEET_CONTROLLER_PATH), getStringPropertyValue(Constants.ENV_ACTION_SHEET_COMPONENT_FACTORY_PATH));
+  processIonicOverlayComponents(dependencyMap, getStringPropertyValue(Constants.ENV_ACTION_SHEET_VIEW_CONTROLLER_PATH), getStringPropertyValue(Constants.ENV_ACTION_SHEET_COMPONENT_PATH), getStringPropertyValue(Constants.ENV_ACTION_SHEET_COMPONENT_FACTORY_PATH));
   Logger.debug(`[treeshake] calculateUnusedIonicProviders: attempting to alert component`);
-  processIonicProviderComponents(dependencyMap, getStringPropertyValue(Constants.ENV_ALERT_CONTROLLER_PATH), getStringPropertyValue(Constants.ENV_ALERT_COMPONENT_FACTORY_PATH));
+  processIonicOverlayComponents(dependencyMap, getStringPropertyValue(Constants.ENV_ALERT_VIEW_CONTROLLER_PATH), getStringPropertyValue(Constants.ENV_ALERT_COMPONENT_PATH), getStringPropertyValue(Constants.ENV_ALERT_COMPONENT_FACTORY_PATH));
   Logger.debug(`[treeshake] calculateUnusedIonicProviders: attempting to loading component`);
-  processIonicProviderComponents(dependencyMap, getStringPropertyValue(Constants.ENV_LOADING_CONTROLLER_PATH), getStringPropertyValue(Constants.ENV_LOADING_COMPONENT_FACTORY_PATH));
+  processIonicOverlayComponents(dependencyMap, getStringPropertyValue(Constants.ENV_LOADING_VIEW_CONTROLLER_PATH), getStringPropertyValue(Constants.ENV_LOADING_COMPONENT_PATH), getStringPropertyValue(Constants.ENV_LOADING_COMPONENT_FACTORY_PATH));
   Logger.debug(`[treeshake] calculateUnusedIonicProviders: attempting to modal component`);
-  processIonicProviderComponents(dependencyMap, getStringPropertyValue(Constants.ENV_MODAL_CONTROLLER_PATH), getStringPropertyValue(Constants.ENV_MODAL_COMPONENT_FACTORY_PATH));
+  processIonicOverlayComponents(dependencyMap, getStringPropertyValue(Constants.ENV_MODAL_VIEW_CONTROLLER_PATH), getStringPropertyValue(Constants.ENV_MODAL_COMPONENT_PATH), getStringPropertyValue(Constants.ENV_MODAL_COMPONENT_FACTORY_PATH));
   Logger.debug(`[treeshake] calculateUnusedIonicProviders: attempting to picker component`);
-  processIonicProviderComponents(dependencyMap, getStringPropertyValue(Constants.ENV_PICKER_CONTROLLER_PATH), getStringPropertyValue(Constants.ENV_PICKER_COMPONENT_FACTORY_PATH));
+  processIonicOverlayComponents(dependencyMap, getStringPropertyValue(Constants.ENV_PICKER_VIEW_CONTROLLER_PATH), getStringPropertyValue(Constants.ENV_PICKER_COMPONENT_PATH), getStringPropertyValue(Constants.ENV_PICKER_COMPONENT_FACTORY_PATH));
   Logger.debug(`[treeshake] calculateUnusedIonicProviders: attempting to popover component`);
-  processIonicProviderComponents(dependencyMap, getStringPropertyValue(Constants.ENV_POPOVER_CONTROLLER_PATH), getStringPropertyValue(Constants.ENV_POPOVER_COMPONENT_FACTORY_PATH));
+  processIonicOverlayComponents(dependencyMap, getStringPropertyValue(Constants.ENV_POPOVER_VIEW_CONTROLLER_PATH), getStringPropertyValue(Constants.ENV_POPOVER_COMPONENT_PATH), getStringPropertyValue(Constants.ENV_POPOVER_COMPONENT_FACTORY_PATH));
   Logger.debug(`[treeshake] calculateUnusedIonicProviders: attempting to toast component`);
-  processIonicProviderComponents(dependencyMap, getStringPropertyValue(Constants.ENV_TOAST_CONTROLLER_PATH), getStringPropertyValue(Constants.ENV_TOAST_COMPONENT_FACTORY_PATH));
+  processIonicOverlayComponents(dependencyMap, getStringPropertyValue(Constants.ENV_TOAST_VIEW_CONTROLLER_PATH), getStringPropertyValue(Constants.ENV_TOAST_COMPONENT_PATH), getStringPropertyValue(Constants.ENV_TOAST_COMPONENT_FACTORY_PATH));
 
   // in this case, it's actually an entry component, not a provider
   processIonicProviders(dependencyMap, getStringPropertyValue(Constants.ENV_SELECT_POPOVER_COMPONENT_FACTORY_PATH));
-
-  restoreOverlayViewControllers(dependencyMap, getStringPropertyValue(Constants.ENV_ACTION_SHEET_CONTROLLER_PATH), getStringPropertyValue(Constants.ENV_ACTION_SHEET_VIEW_CONTROLLER_PATH));
-  restoreOverlayViewControllers(dependencyMap, getStringPropertyValue(Constants.ENV_ALERT_CONTROLLER_PATH), getStringPropertyValue(Constants.ENV_ALERT_VIEW_CONTROLLER_PATH));
-  restoreOverlayViewControllers(dependencyMap, getStringPropertyValue(Constants.ENV_LOADING_CONTROLLER_PATH), getStringPropertyValue(Constants.ENV_LOADING_VIEW_CONTROLLER_PATH));
-  restoreOverlayViewControllers(dependencyMap, getStringPropertyValue(Constants.ENV_MODAL_CONTROLLER_PATH), getStringPropertyValue(Constants.ENV_MODAL_VIEW_CONTROLLER_PATH));
-  restoreOverlayViewControllers(dependencyMap, getStringPropertyValue(Constants.ENV_PICKER_CONTROLLER_PATH), getStringPropertyValue(Constants.ENV_PICKER_VIEW_CONTROLLER_PATH));
-  restoreOverlayViewControllers(dependencyMap, getStringPropertyValue(Constants.ENV_POPOVER_CONTROLLER_PATH), getStringPropertyValue(Constants.ENV_POPOVER_VIEW_CONTROLLER_PATH));
-  restoreOverlayViewControllers(dependencyMap, getStringPropertyValue(Constants.ENV_TOAST_CONTROLLER_PATH), getStringPropertyValue(Constants.ENV_TOAST_VIEW_CONTROLLER_PATH));
 }
 
-function processIonicProviderComponents(dependencyMap: Map<string, Set<string>>, providerPath: string, componentPath: string) {
-  const importeeSet = dependencyMap.get(providerPath);
-  if (importeeSet && importeeSet.size === 0) {
-    processIonicProviders(dependencyMap, componentPath);
-  }
-}
-
-function restoreOverlayViewControllers(dependencyMap: Map<string, Set<string>>, providerPath: string, viewControllerPath: string) {
-  const providerImporteeSet = dependencyMap.get(providerPath);
-  if (providerImporteeSet && providerImporteeSet.size > 0) {
-    const viewControllerImportees = dependencyMap.get(viewControllerPath) || new Set<string>();
-    viewControllerImportees.add(providerPath);
-    dependencyMap.set(viewControllerPath, viewControllerImportees);
+function processIonicOverlayComponents(dependencyMap: Map<string, Set<string>>, viewControllerPath: string, componentPath: string, componentFactoryPath: string) {
+  const viewControllerImportees = dependencyMap.get(viewControllerPath);
+  const componentImportees = dependencyMap.get(componentPath);
+  if (viewControllerImportees && viewControllerImportees.size === 0 && componentImportees && componentImportees.size === 1 && componentImportees.has(componentFactoryPath)) {
+    const componentFactoryImportees = dependencyMap.get(componentFactoryPath);
+    const onlyNgModuleFactoryImportees = onlyNgModuleFactories(componentFactoryImportees);
+    if (onlyNgModuleFactoryImportees) {
+      // sweet, we can remove this bad boy
+      dependencyMap.set(componentFactoryPath, new Set<string>());
+      componentImportees.delete(componentFactoryPath);
+    }
   }
 }
 
@@ -154,13 +150,27 @@ export function getAppModuleNgFactoryPath() {
 function processIonicProviders(dependencyMap: Map<string, Set<string>>, providerPath: string) {
   const importeeSet = dependencyMap.get(providerPath);
   const appModuleNgFactoryPath = getAppModuleNgFactoryPath();
-  // we can only purge an ionic provider if it is imported from one module, which is the AppModuleNgFactory
-  if (importeeSet && importeeSet.has(appModuleNgFactoryPath)) {
+
+  // we can only purge providers that are only referenced in .module.ngfactory.js files
+  const onlyNgModuleFactoryImportees = onlyNgModuleFactories(importeeSet);
+  if (onlyNgModuleFactoryImportees && importeeSet && importeeSet.has(appModuleNgFactoryPath)) {
     Logger.debug(`[treeshake] processIonicProviders: Purging ${providerPath}`);
     importeeSet.delete(appModuleNgFactoryPath);
     // loop over the dependency map and remove this provider from importee sets
     processImportTreeForProviders(dependencyMap, providerPath);
   }
+}
+
+function onlyNgModuleFactories(importeeSet: Set<string>) {
+  const moduleNgFactoryTs = changeExtension(getStringPropertyValue(Constants.ENV_NG_MODULE_FILE_NAME_SUFFIX), '.ngfactory.ts');
+  const moduleNgFactoryJs = changeExtension(getStringPropertyValue(Constants.ENV_NG_MODULE_FILE_NAME_SUFFIX), '.ngfactory.js');
+  let onlyNgModuleFactories = true;
+  importeeSet.forEach(importee => {
+    if (onlyNgModuleFactories && !(importee.endsWith(moduleNgFactoryTs) || importee.endsWith(moduleNgFactoryJs)) ) {
+      onlyNgModuleFactories = false;
+    }
+  });
+  return onlyNgModuleFactories;
 }
 
 function processImportTreeForProviders(dependencyMap: Map<string, Set<string>>, importee: string) {
