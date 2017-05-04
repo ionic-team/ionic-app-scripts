@@ -1,3 +1,22 @@
+<a name="1.3.7"></a>
+## [1.3.7](https://github.com/driftyco/ionic-app-scripts/compare/v1.3.6...v1.3.7) (2017-05-04)
+
+
+### Bug Fixes
+
+* **config:** create new file cache if not defined, even on existing context object ([4359b3d](https://github.com/driftyco/ionic-app-scripts/commit/4359b3d))
+* **generators:** import paths correct on windows ([d778857](https://github.com/driftyco/ionic-app-scripts/commit/d778857))
+* **optimizations:** don't ever remove menu-types since it's not a side-effect in menu, it is used just for types ([d7a4d1e](https://github.com/driftyco/ionic-app-scripts/commit/d7a4d1e))
+* **optimizations:** fix multiple bugs (components not being purged, overlays not working from providers, etc) for manual tree shaking ([4b538c7](https://github.com/driftyco/ionic-app-scripts/commit/4b538c7))
+* **webpack:** fix issue where bundles output to build dir sub directo… ([#938](https://github.com/driftyco/ionic-app-scripts/issues/938)) ([aaa9d3c](https://github.com/driftyco/ionic-app-scripts/commit/aaa9d3c))
+
+
+### Features
+
+* **bonjour:** adds service auto-discovery ([c17e6df](https://github.com/driftyco/ionic-app-scripts/commit/c17e6df))
+
+
+
 <a name="1.3.6"></a>
 ## [1.3.6](https://github.com/driftyco/ionic-app-scripts/compare/v1.3.5...v1.3.6) (2017-04-27)
 
