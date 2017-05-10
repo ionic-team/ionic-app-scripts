@@ -127,7 +127,7 @@ function buildProject(context: BuildContext) {
       if (getBooleanPropertyValue(Constants.ENV_ENABLE_LINT)) {
         // kick off the tslint after everything else
         // nothing needs to wait on its completion unless bailing on lint error is enabled
-        const result = lint(context);
+        const result = lint(context, null, false);
         if (getBooleanPropertyValue(Constants.ENV_BAIL_ON_LINT_ERROR)) {
           return result;
         }
@@ -184,7 +184,7 @@ export function buildUpdate(changedFiles: ChangedFile[], context: BuildContext) 
           // a ts file changed, so let's lint it too, however
           // this task should run as an after thought
           if (getBooleanPropertyValue(Constants.ENV_ENABLE_LINT)) {
-            lintUpdate(changedFiles, context);
+            lintUpdate(changedFiles, context, false);
           }
         }
 

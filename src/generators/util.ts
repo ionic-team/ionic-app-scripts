@@ -202,14 +202,14 @@ export function generateTemplates(context: BuildContext, request: HydratedGenera
 export interface GeneratorOption {
   type: string;
   multiple: boolean;
-};
+}
 
 export interface GeneratorRequest {
   type?: string;
   name?: string;
   includeSpec?: boolean;
   includeNgModule?: boolean;
-};
+}
 
 export interface GeneratorTabRequest extends GeneratorRequest {
   tabs?: HydratedGeneratorRequest[];
@@ -222,4 +222,4 @@ export interface HydratedGeneratorRequest extends GeneratorRequest {
   tabVariables?: string;
   dirToRead?: string;
   dirToWrite?: string;
-};
+}

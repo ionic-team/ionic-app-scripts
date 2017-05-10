@@ -1,5 +1,4 @@
 import * as childProcess from 'child_process';
-import * as path from 'path';
 
 
 /**
@@ -43,7 +42,7 @@ export default function (target: string, appName: string | Function, callback?: 
     if (typeof appName === 'string') {
       opener = escape(appName);
     } else {
-      //use system installed Portlands xdg-open everywhere else
+      // use system installed Portlands xdg-open everywhere else
       opener = 'xdg-open';
     }
     break;

@@ -11,7 +11,7 @@ import {
   NamedImports,
   Node,
   NodeArray,
-  ObjectLiteralElement,
+  ObjectLiteralElement, // tslint:disable-line: no-unused-variable
   ObjectLiteralExpression,
   PropertyAssignment,
   ArrayLiteralExpression,
@@ -23,7 +23,6 @@ import {
 } from 'typescript';
 
 import { rangeReplace, stringSplice } from './helpers';
-import { Logger } from '../logger/logger';
 
 export function getTypescriptSourceFile(filePath: string, fileContent: string, languageVersion: ScriptTarget = ScriptTarget.Latest, setParentNodes: boolean = false): SourceFile {
   return createSourceFile(filePath, fileContent, languageVersion, setParentNodes);
@@ -138,7 +137,7 @@ export function replaceNamedImport(filePath: string, fileContent: string, namedI
     return namedImport.elements.forEach((element: ImportSpecifier) => {
       if (element.name.text === namedImportOriginal) {
         modifiedContent = replaceNode(filePath, modifiedContent, element, namedImportReplacement);
-      };
+      }
     });
   });
 

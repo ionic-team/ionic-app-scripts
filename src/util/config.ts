@@ -236,6 +236,10 @@ export function generateContext(context?: BuildContext): BuildContext {
   setProcessEnvVar(Constants.ENV_PRINT_WEBPACK_DEPENDENCY_TREE, printWebpackDependencyTree);
   Logger.debug(`printWebpackDependencyTree set to ${printWebpackDependencyTree}`);
 
+  const typeCheckOnLint = getConfigValue(context, '--typeCheckOnLint', null, Constants.ENV_TYPE_CHECK_ON_LINT, Constants.ENV_TYPE_CHECK_ON_LINT.toLowerCase(), null);
+  setProcessEnvVar(Constants.ENV_TYPE_CHECK_ON_LINT, typeCheckOnLint);
+  Logger.debug(`typeCheckOnLint set to ${typeCheckOnLint}`);
+
   const bailOnLintError = getConfigValue(context, '--bailOnLintError', null, Constants.ENV_BAIL_ON_LINT_ERROR, Constants.ENV_BAIL_ON_LINT_ERROR.toLowerCase(), null);
   setProcessEnvVar(Constants.ENV_BAIL_ON_LINT_ERROR, bailOnLintError);
   Logger.debug(`bailOnLintError set to ${bailOnLintError}`);

@@ -144,7 +144,7 @@ export interface FileSystem {
   readJson(path: string, callback: Function): any;
   readlink(path: string, callback: Function): any;
   purge(what: any): void;
-};
+}
 
 
 export interface VirtualFileSystem {
@@ -155,7 +155,7 @@ export interface VirtualFileSystem {
   getFileNamesInDirectory(directoryPath: string): string[];
   getAllFileStats():  { [filePath: string]: VirtualFileStats };
   getAllDirStats():  { [filePath: string]: VirtualDirStats };
-};
+}
 
 export interface DeepLinkDecoratorAndClass {
   name: string;
@@ -164,21 +164,21 @@ export interface DeepLinkDecoratorAndClass {
   priority: string;
   rawString: string;
   className: string;
-};
+}
 
 export interface DeepLinkPathInfo {
   absolutePath: string;
   userlandModulePath: string;
   className: string;
-};
+}
 
 export interface DeepLinkConfigEntry extends DeepLinkDecoratorAndClass, DeepLinkPathInfo {
-};
+}
 
 export interface AppNgModuleInfo {
   absolutePath: string;
   className: string;
-};
+}
 
 export interface CodegenOptions {
   angularCompilerOptions: AngularCompilerOptions;
@@ -186,25 +186,25 @@ export interface CodegenOptions {
   program: Program;
   compilerHost: CompilerHost;
   compilerOptions: CompilerOptions;
-};
+}
 
 export interface TreeShakeCalcResults {
   updatedDependencyMap: Map<string, Set<string>>;
   purgedModules: Map<string, Set<string>>;
-};
+}
 
 export interface WebpackStats {
   modules: WebpackModule[];
-};
+}
 
 export interface WebpackModule {
   identifier: string;
   reasons: WebpackDependency[];
-};
+}
 
 export interface WebpackDependency {
   moduleIdentifier: string;
-};
+}
 
 export interface MagicString {
   overwrite(startIndex: number, endIndex: number, newContent: string): void;

@@ -42,7 +42,7 @@ describe('template', () => {
         'some-file2.html': '<div>B</div>',
         'some-file.scss': 'body { color: red; }',
         'some-file.ts': sourceText,
-      }
+      };
       mockFs(d);
 
       const results = inlineTemplate(sourceText, join(baseDir, 'some-file.ts'));

@@ -3,7 +3,6 @@ import { join } from 'path';
 import * as webpack from './webpack';
 import { FileCache } from './util/file-cache';
 import * as helpers from './util/helpers';
-import * as bundleComponents from './core/bundle-components';
 
 describe('Webpack Task', () => {
   describe('writeBundleFilesToDisk', () => {

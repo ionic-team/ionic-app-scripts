@@ -129,6 +129,7 @@ npm run build --rollup ./config/rollup.config.js
 | output js file | `ionic_output_js_file_name`  | `--outputJsFileName` | `main.js` | name of js file generated in `buildDir` |
 | output css file | `ionic_output_css_file_name`  | `--outputCssFileName` | `main.css` | name of css file generated in `buildDir` |
 | bail on lint error | `ionic_bail_on_lint_error`  | `--bailOnLintError` | `null` | Set to `true` to make stand-alone lint commands fail with non-zero status code |
+| enable type checking during lint | `ionic_type_check_on_lint`  | `--typeCheckOnLint` | `null` | Set to `true` to enable [type checking](https://palantir.github.io/tslint/usage/type-checking) during lint |
 | write AoT files to disk | `ionic_aot_write_to_disk` | `--aotWriteToDisk` | `null` | Set to `true` to write files to disk for debugging |
 | print dependency tree | `ionic_print_original_dependency_tree` | `--printOriginalDependencyTree` | `null` | Set to `true` to print out the original dependency tree calculated during the optimize step |
 | print modified dependency tree | `ionic_print_modified_dependency_tree` | `--printModifiedDependencyTree` | `null` | Set to `true` to print out the modified dependency tree after purging unused modules |
@@ -174,6 +175,7 @@ These environment variables are automatically set to [Node's `process.env`](http
 | `IONIC_WEBPACK_FACTORY`    | The absolute path to Ionic's `webpack-factory` script                |
 | `IONIC_WEBPACK_LOADER`     | The absolute path to Ionic's custom webpack loader                   |
 | `IONIC_BAIL_ON_LINT_ERROR`     | Boolean determining whether to exit with a non-zero status code on error |
+| `IONIC_TYPE_CHECK_ON_LINT` | Boolean determining whether to type check code during lint or not |
 | `IONIC_AOT_WRITE_TO_DISK` | `--aotWriteToDisk` | `null` | Set to `true` to write files to disk for debugging |
 | `IONIC_PRINT_ORIGINAL_DEPENDENCY_TREE` | boolean to print out the original dependency tree calculated during the optimize step |
 | `IONIC_PRINT_MODIFIED_DEPENDENCY_TREE` | boolean to print out the modified dependency tree after purging unused modules |

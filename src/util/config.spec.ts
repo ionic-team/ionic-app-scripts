@@ -109,6 +109,7 @@ describe('config', () => {
       expect(fakeConfig[Constants.ENV_PRINT_ORIGINAL_DEPENDENCY_TREE]).toBeFalsy();
       expect(fakeConfig[Constants.ENV_PRINT_MODIFIED_DEPENDENCY_TREE]).toBeFalsy();
       expect(fakeConfig[Constants.ENV_PRINT_WEBPACK_DEPENDENCY_TREE]).toBeFalsy();
+      expect(fakeConfig[Constants.ENV_TYPE_CHECK_ON_LINT]).toBeFalsy();
       expect(fakeConfig[Constants.ENV_BAIL_ON_LINT_ERROR]).toBeFalsy();
       expect(fakeConfig[Constants.ENV_ENABLE_LINT]).toEqual('true');
       expect(fakeConfig[Constants.ENV_DISABLE_LOGGING]).toBeFalsy();

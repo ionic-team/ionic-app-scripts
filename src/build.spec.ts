@@ -20,8 +20,8 @@ describe('build', () => {
     spyOn(helpers, helpers.readFileAsync.name).and.returnValue(Promise.resolve());
     spyOn(transpile, transpile.getTsConfigAsync.name).and.callFake(() => {
       return Promise.resolve({
-        "options": {
-          "sourceMap": true
+        'options': {
+          'sourceMap': true
         }
       });
     });
@@ -207,8 +207,8 @@ describe('test project requirements before building', () => {
     spyOn(helpers, helpers.readFileAsync.name).and.returnValue(Promise.resolve());
     spyOn(transpile, transpile.transpile.name).and.returnValue(Promise.resolve());
     spyOn(transpile, transpile.getTsConfigAsync.name).and.returnValue(Promise.resolve({
-      "options": {
-        "sourceMap": true
+      'options': {
+        'sourceMap': true
       }
     }));
 

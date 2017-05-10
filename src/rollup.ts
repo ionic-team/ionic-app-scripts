@@ -194,14 +194,14 @@ export interface RollupConfig {
   dest?: string;
   cache?: RollupBundle;
   onwarn?: Function;
-};
+}
 
 export interface RollupBundle {
   // https://github.com/rollup/rollup/wiki/JavaScript-API
   write?: Function;
   modules: RollupModule[];
   generate: (config: RollupConfig) => RollupBundleOutput;
-};
+}
 
 export interface RollupBundleOutput {
   code: string;
@@ -211,7 +211,7 @@ export interface RollupBundleOutput {
 
 export interface RollupModule {
   id: string;
-};
+}
 
 export interface RollupWarning {
   code: string;
@@ -219,10 +219,10 @@ export interface RollupWarning {
   url: string;
   pos: number;
   loc: RollupLocationInfo;
-};
+}
 
 export interface RollupLocationInfo {
   file: string;
   line: number;
   column: number;
-};
+}

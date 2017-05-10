@@ -259,8 +259,8 @@ describe('treeshake', () => {
       expect(results.purgedModules.get(dependencyThree)).toBeTruthy();
       expect(results.purgedModules.get(alert)).toBeTruthy();
       expect(results.purgedModules.get(alertController)).toBeTruthy();
-      //expect(results.purgedModules.get(alertComponent)).toBeTruthy();
-      //expect(results.purgedModules.get(alertComponentNgFactory)).toBeTruthy();
+      // expect(results.purgedModules.get(alertComponent)).toBeTruthy();
+      // expect(results.purgedModules.get(alertComponentNgFactory)).toBeTruthy();
 
     });
   });
