@@ -68,6 +68,7 @@ export function serve(context: BuildContext) {
         throw err;
       } else {
         onReady(config, context);
+        return config;
       }
     });
 }
