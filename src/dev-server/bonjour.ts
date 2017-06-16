@@ -11,18 +11,17 @@ export function createBonjourService(config: ServeConfig) {
     .catch(() => 'ionic-app-scripts')
     .then(projectName => {
       try {
-        const bonjour = require('bonjour')();
+        const mdns = require('mdns');
         const name = projectName + ':' + config.httpPort;
-        bonjour.publish({
+        const service = mdns.createAdvertisement(mdns.tcp('ionicdev'), config.httpPort, {
           name: name,
-          type: 'ionicdev',
-          port: config.httpPort
         });
+        service.start();
         Logger.info(`publishing devapp service (${name})`);
 
       } catch (e) {
-        Logger.warn('bonjour failed when trying to publish service');
-        Logger.debug(e);
+        Logger.warn('mDNS failed when trying to publish service');
+        Logger.warn(e);
       }
     });
 }
