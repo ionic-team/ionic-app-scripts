@@ -1,9 +1,9 @@
 <a name="1.3.8"></a>
 ## [1.3.8](https://github.com/ionic-team/ionic-app-scripts/compare/v1.3.7...v1.3.8) (2017-06-21)
 
-
 ### Bug Fixes
 
+* **sass:** fixes issue with Node 8 and node-sass
 * **bonjour:** updates dependency + better error handling ([#1040](https://github.com/ionic-team/ionic-app-scripts/issues/1040)) ([e2f73c7](https://github.com/ionic-team/ionic-app-scripts/commit/e2f73c7))
 * **core:** use lower case attrs and not dash case ([0154791](https://github.com/ionic-team/ionic-app-scripts/commit/0154791))
 * **diagnostics:** change direction to always be ltr ([#1004](https://github.com/ionic-team/ionic-app-scripts/issues/1004)) ([6d5ef3c](https://github.com/ionic-team/ionic-app-scripts/commit/6d5ef3c))
