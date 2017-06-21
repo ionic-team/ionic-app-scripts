@@ -1,3 +1,18 @@
+<a name="1.3.8"></a>
+## [1.3.8](https://github.com/ionic-team/ionic-app-scripts/compare/v1.3.7...v1.3.8) (2017-06-21)
+
+
+### Bug Fixes
+
+* **bonjour:** updates dependency + better error handling ([#1040](https://github.com/ionic-team/ionic-app-scripts/issues/1040)) ([e2f73c7](https://github.com/ionic-team/ionic-app-scripts/commit/e2f73c7))
+* **core:** use lower case attrs and not dash case ([0154791](https://github.com/ionic-team/ionic-app-scripts/commit/0154791))
+* **diagnostics:** change direction to always be ltr ([#1004](https://github.com/ionic-team/ionic-app-scripts/issues/1004)) ([6d5ef3c](https://github.com/ionic-team/ionic-app-scripts/commit/6d5ef3c))
+* **lab:** allow params to be passed to iframes ([dabfdd1](https://github.com/ionic-team/ionic-app-scripts/commit/dabfdd1))
+* **sass:** fix .sass files not being watched ([#957](https://github.com/ionic-team/ionic-app-scripts/issues/957)) ([0803eca](https://github.com/ionic-team/ionic-app-scripts/commit/0803eca))
+* **serve:** if a build error occurs, return config if non-fatal ([e5a4134](https://github.com/ionic-team/ionic-app-scripts/commit/e5a4134))
+
+
+
 <a name="1.3.7"></a>
 ## [1.3.7](https://github.com/ionic-team/ionic-app-scripts/compare/v1.3.6...v1.3.7) (2017-05-04)
 
