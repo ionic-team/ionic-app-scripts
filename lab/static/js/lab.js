@@ -14,6 +14,57 @@ function loadSearchIndex() {
   })
 }
 
+function buildMenu() {
+  buildComponentsMenu();
+  const sidebar = $('#sidebar');
+  const topLevels = sidebar.querySelectorAll('#menu > li > a');
+  Array.prototype.map.call(topLevels, a => {
+    if(!a.href) {
+      a.addEventListener('click', e => {
+        if(a.parentNode.classList.contains('expanded')) {
+          a.parentNode.classList.remove('expanded');
+        } else {
+          a.parentNode.classList.add('expanded');
+        }
+        e.preventDefault();
+      });
+    }
+  })
+
+  $('#view-ad').addEventListener('click', (e) => {
+    var win = window.open('http://view.ionic.io/', '_blank');
+    win.focus();
+  })
+
+  const s = $('#sidebar');
+
+  const toggleMenu = e => {
+    if(s.classList.contains('hidden')) {
+      s.classList.remove('hidden');
+    } else {
+      s.classList.add('hidden');
+    }
+  }
+
+  $('#menu-toggle').addEventListener('click', toggleMenu);
+  $('#sidebar .close').addEventListener('click', toggleMenu);
+}
+
+function buildComponentsMenu() {
+  var items = [{"href":"http://ionicframework.com/docs/components/#overview","title":"Overview"},{"href":"http://ionicframework.com/docs/components/#action-sheets","title":"Action Sheets"},{"href":"http://ionicframework.com/docs/components/#alert","title":"Alerts"},{"href":"http://ionicframework.com/docs/components/#badges","title":"Badges"},{"href":"http://ionicframework.com/docs/components/#buttons","title":"Buttons"},{"href":"http://ionicframework.com/docs/components/#cards","title":"Cards"},{"href":"http://ionicframework.com/docs/components/#checkbox","title":"Checkbox"},{"href":"http://ionicframework.com/docs/components/#datetime","title":"DateTime"},{"href":"http://ionicframework.com/docs/components/#fabs","title":"FABs"},{"href":"http://ionicframework.com/docs/components/#gestures","title":"Gestures"},{"href":"http://ionicframework.com/docs/components/#grid","title":"Grid"},{"href":"http://ionicframework.com/docs/components/#icons","title":"Icons"},{"href":"http://ionicframework.com/docs/components/#inputs","title":"Inputs"},{"href":"http://ionicframework.com/docs/components/#lists","title":"Lists"},{"href":"http://ionicframework.com/docs/components/#loading","title":"Loading"},{"href":"http://ionicframework.com/docs/components/#menus","title":"Menus"},{"href":"http://ionicframework.com/docs/components/#modals","title":"Modals"},{"href":"http://ionicframework.com/docs/components/#navigation","title":"Navigation"},{"href":"http://ionicframework.com/docs/components/#popovers","title":"Popover"},{"href":"http://ionicframework.com/docs/components/#radio","title":"Radio"},{"href":"http://ionicframework.com/docs/components/#range","title":"Range"},{"href":"http://ionicframework.com/docs/components/#searchbar","title":"Searchbar"},{"href":"http://ionicframework.com/docs/components/#segment","title":"Segment"},{"href":"http://ionicframework.com/docs/components/#select","title":"Select"},{"href":"http://ionicframework.com/docs/components/#slides","title":"Slides"},{"href":"http://ionicframework.com/docs/components/#tabs","title":"Tabs"},{"href":"http://ionicframework.com/docs/components/#toast","title":"Toast"},{"href":"http://ionicframework.com/docs/components/#toggle","title":"Toggle"},{"href":"http://ionicframework.com/docs/components/#toolbar","title":"Toolbar"}];
+
+  const componentsMenu = $('#components-menu');
+  items.map(i => {
+    const l = document.createElement('li')
+    const a = document.createElement('a')
+    a.href = i.href
+    a.target = "_blank";
+    a.innerText = i.title
+    l.appendChild(a)
+    componentsMenu.appendChild(l)
+  })
+}
+
 function tryShowViewPopup() {
   var view = window.localStorage.getItem('ionic_viewpop');
 
@@ -118,8 +169,9 @@ function loadCordova() {
   req.send(null);
 }
 
-loadSearchIndex();
+//loadSearchIndex();
+buildMenu();
 showLastDevices();
 loadCordova();
 bindToggles();
-tryShowViewPopup();
+//tryShowViewPopup();
