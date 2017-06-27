@@ -1,6 +1,18 @@
+
+
 var $ = document.querySelector.bind(document);
 
 var API_ROOT = '/ionic-lab/api/v1';
+
+function loadSearchIndex() {
+  var index = 'http://ionicframework.com/docs/data/index.json';
+  fetch(index, {
+  }).then((r) => {
+    return r.json();
+  }).then(json => {
+    console.log('Loaded search index', json);
+  })
+}
 
 function tryShowViewPopup() {
   var view = window.localStorage.getItem('ionic_viewpop');
@@ -106,6 +118,7 @@ function loadCordova() {
   req.send(null);
 }
 
+loadSearchIndex();
 showLastDevices();
 loadCordova();
 bindToggles();
