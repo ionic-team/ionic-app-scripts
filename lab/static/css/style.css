@@ -59,7 +59,7 @@ h2 a {
 }
 .dropdown:hover .dropdown-toggle {
   /* increase the hit box when hovering */
-  padding-left: 100px;
+  /*padding-left: 100px;*/
 }
 .dropdown:hover .dropdown-menu {
   display: block;
@@ -127,6 +127,9 @@ h2 a {
 #header-left {
   float: left;
   line-height: 50px;
+}
+#header-left #menu-toggle {
+  margin-left: 13px;
 }
 #header a:hover {
   opacity: 1;
@@ -319,21 +322,85 @@ preview {
 }
 
 #sidebar {
-  width: 300px;
+  position: relative;
+  z-index: 1;
   background-color: #141A21;
+  height: 100%;
+  width: 300px;
+  box-sizing: border-box;
+  padding: 15px;
+  overflow: auto;
+}
+
+#sidebar.hidden {
+  display: none;
+}
+#sidebar .close {
+  cursor: pointer;
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  color: #a2a9b4;
+  font-size: 24px;
+}
+#sidebar .title {
+  font-size: 20px;
+  margin-top: 5px;
+  color: white;
 }
 
 #menu {
   padding: 0;
   margin: 0;
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+   -khtml-user-select: none; /* Konqueror HTML */
+     -moz-user-select: none; /* Firefox */
+      -ms-user-select: none; /* Internet Explorer/Edge */
+          user-select: none; /* Non-prefixed version, currently
+                                supported by Chrome and Opera */
 }
 #menu li {
   list-style: none;
-  margin: 15px;
+  margin: 15px 0;
 }
 #menu li a {
   color: #a2a9b4;
   text-decoration: none;
+  cursor: pointer;
+}
+#menu > li > ul {
+  display: none;
+  padding: 0;
+  margin: 0;
+}
+#menu > li > ul li {
+  padding-left: 15px;
+}
+#menu > li.expanded > ul {
+  display: block;
+}
+
+.ad {
+  background-color: #232A31;
+  cursor: pointer;
+  border-radius: 2px;
+  border: 1px solid #3f4650;
+  font-size: 13px;
+  color: white;
+  padding: 10px;
+  display: flex;
+  margin-top: 55px;
+}
+.ad .logo {
+  display: block;
+  margin-right: 15px;
+}
+.ad .content {
+  flex: 1;
+}
+.ad a {
+  color: #308EFD;
 }
 
 @media screen and (max-height: 800px) {
