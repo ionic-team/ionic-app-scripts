@@ -194,7 +194,7 @@ preview {
 
 .phone {
   display: inline-block;
-  margin: -80px 20px 0 20px;
+  margin: 0px 20px 0 20px;
   vertical-align: middle;
 }
 .phone h2 {
