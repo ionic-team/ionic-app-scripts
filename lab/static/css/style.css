@@ -335,6 +335,7 @@ preview {
 #sidebar.hidden {
   display: none;
 }
+
 #sidebar .close {
   cursor: pointer;
   position: absolute;
@@ -343,13 +344,14 @@ preview {
   color: #a2a9b4;
   font-size: 24px;
 }
+
 #sidebar .title {
   font-size: 20px;
   margin-top: 5px;
   color: white;
 }
 
-#menu {
+.menu {
   padding: 0;
   margin: 0;
   -webkit-touch-callout: none; /* iOS Safari */
@@ -360,25 +362,38 @@ preview {
           user-select: none; /* Non-prefixed version, currently
                                 supported by Chrome and Opera */
 }
-#menu li {
+.menu li {
   list-style: none;
   margin: 15px 0;
 }
-#menu li a {
+.menu li a {
   color: #a2a9b4;
   text-decoration: none;
   cursor: pointer;
 }
-#menu > li > ul {
+.menu > li > ul {
   display: none;
   padding: 0;
   margin: 0;
 }
-#menu > li > ul li {
+.menu > li > ul li {
   padding-left: 15px;
 }
-#menu > li.expanded > ul {
+.menu > li.expanded > ul {
   display: block;
+}
+.menu hr {
+  height: 1px;
+  border: 0;
+  background-color: #2b3642;
+}
+.menu .version {
+  color: #a2a9b4;
+  opacity: 0.5;
+  font-size: 12px;
+}
+
+#menu {
 }
 
 .ad {

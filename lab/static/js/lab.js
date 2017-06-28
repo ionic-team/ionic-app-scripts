@@ -1,23 +1,33 @@
-
-
 var $ = document.querySelector.bind(document);
 
 var API_ROOT = '/ionic-lab/api/v1';
 
-function loadSearchIndex() {
-  var index = 'http://ionicframework.com/docs/data/index.json';
-  fetch(index, {
-  }).then((r) => {
-    return r.json();
-  }).then(json => {
-    console.log('Loaded search index', json);
+var APP_CONFIG = {}
+
+function loadAppConfig() {
+  var req = new XMLHttpRequest();
+  req.addEventListener('load', function(e) {
+    setAppConfig(JSON.parse(req.response));
   })
+  req.open('GET', API_ROOT + '/app-config', true)
+  req.send(null);
 }
+
+function setAppConfig(data) {
+  APP_CONFIG = data;
+}
+
 
 function buildMenu() {
   buildComponentsMenu();
   const sidebar = $('#sidebar');
   const topLevels = sidebar.querySelectorAll('#menu > li > a');
+
+  const lastMenuConfig = window.localStorage.getItem('ionic_labmenu');
+  if(lastMenuConfig === 'true' || lastMenuConfig === null) {
+    sidebar.classList.remove('hidden');
+  }
+
   Array.prototype.map.call(topLevels, a => {
     if(!a.href) {
       a.addEventListener('click', e => {
@@ -36,13 +46,13 @@ function buildMenu() {
     win.focus();
   })
 
-  const s = $('#sidebar');
-
   const toggleMenu = e => {
-    if(s.classList.contains('hidden')) {
-      s.classList.remove('hidden');
+    if(sidebar.classList.contains('hidden')) {
+      sidebar.classList.remove('hidden');
+      window.localStorage.setItem('ionic_labmenu', 'true');
     } else {
-      s.classList.add('hidden');
+      sidebar.classList.add('hidden');
+      window.localStorage.setItem('ionic_labmenu', 'false');
     }
   }
 
@@ -170,6 +180,7 @@ function loadCordova() {
 }
 
 //loadSearchIndex();
+loadAppConfig();
 buildMenu();
 showLastDevices();
 loadCordova();
