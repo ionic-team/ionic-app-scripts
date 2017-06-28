@@ -1,3 +1,16 @@
+<a name="1.3.10"></a>
+## [1.3.10](https://github.com/ionic-team/ionic-app-scripts/compare/v1.3.9...v1.3.10) (2017-06-28)
+
+## Notes
+
+Ionic updated to npm 5 across the board, so please update to npm 5 to utilize our lock file when contributing.
+
+### Bug Fixes
+
+* **bonjour:** remove bonjour as its causing trouble for users on Windows without git ([e4b5c59](https://github.com/ionic-team/ionic-app-scripts/commit/e4b5c59))
+
+
+
 <a name="1.3.9"></a>
 ## [1.3.9](https://github.com/ionic-team/ionic-app-scripts/compare/v1.3.8...v1.3.9) (2017-06-28)
 
