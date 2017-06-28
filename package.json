@@ -99,16 +99,6 @@
     "typescript": "~2.3.4",
     "zone.js": "^0.8.12"
   },
-  "peerDependencies": {
-    "@angular/core": "*",
-    "@angular/compiler": "*",
-    "@angular/compiler-cli": "*",
-    "@angular/tsc-wrapped": "*",
-    "rxjs": "*",
-    "sw-toolbox": "*",
-    "typescript": "*",
-    "zone.js": "*"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ionic-team/ionic-app-scripts.git"
