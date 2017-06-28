@@ -1,3 +1,14 @@
+<a name="1.3.9"></a>
+## [1.3.9](https://github.com/ionic-team/ionic-app-scripts/compare/v1.3.8...v1.3.9) (2017-06-28)
+
+
+### Features
+
+* **lab:** first iteration of the new Ionic Lab design
+* **scripts:** push npm build to arbitrary tag ([#1060](https://github.com/ionic-team/ionic-app-scripts/issues/1060)) ([4e93f60](https://github.com/ionic-team/ionic-app-scripts/commit/4e93f60))
+
+
+
 <a name="1.3.8"></a>
 ## [1.3.8](https://github.com/ionic-team/ionic-app-scripts/compare/v1.3.7...v1.3.8) (2017-06-21)
 
