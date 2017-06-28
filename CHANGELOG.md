@@ -1,3 +1,11 @@
+<a name="1.3.11"></a>
+## [1.3.11](https://github.com/ionic-team/ionic-app-scripts/compare/v1.3.10...v1.3.11) (2017-06-28)
+
+## Notes
+
+Fixed a `peerDependency` issue that was popping up.
+
+
 <a name="1.3.10"></a>
 ## [1.3.10](https://github.com/ionic-team/ionic-app-scripts/compare/v1.3.9...v1.3.10) (2017-06-28)
 
