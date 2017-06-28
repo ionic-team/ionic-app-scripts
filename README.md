@@ -250,6 +250,8 @@ npm run lint --bailOnLintError true
 
 We welcome any PRs, issues, and feedback! Please be respectful and follow the [Code of Conduct](https://github.com/ionic-team/ionic/blob/master/CODE_OF_CONDUCT.md).
 
+We use Node 6, and NPM 5 for contributing.
+
 ### Publish a release
 
 Execute the following steps to publish a release:
