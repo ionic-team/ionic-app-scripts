@@ -200,6 +200,7 @@ preview {
 .phone h2 {
   text-align: left;
   vertical-align: middle;
+  margin-top: 0;
 }
 .phone-icon {
   display: inline-block;
