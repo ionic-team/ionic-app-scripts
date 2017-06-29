@@ -1,9 +1,17 @@
+<a name="1.3.12"></a>
+## [1.3.12](https://github.com/ionic-team/ionic-app-scripts/compare/v1.3.11...v1.3.12) (2017-06-29)
+
+## Bug Fixes
+
+* **dependencies:** Added `reflect-metadata` to the list of dependencies ([e6f8481](https://github.com/ionic-team/ionic-app-scripts/commit/e6f8481)
+
+
 <a name="1.3.11"></a>
 ## [1.3.11](https://github.com/ionic-team/ionic-app-scripts/compare/v1.3.10...v1.3.11) (2017-06-28)
 
-## Notes
+## Bug Fixes
 
-Fixed a `peerDependency` issue that was popping up.
+* **dependencies:** Removed `peerDependencies`. ([90cd59d](https://github.com/ionic-team/ionic-app-scripts/commit/90cd59d))
 
 
 <a name="1.3.10"></a>
