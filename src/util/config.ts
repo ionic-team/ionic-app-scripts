@@ -260,8 +260,8 @@ export function generateContext(context?: BuildContext): BuildContext {
   setProcessEnvVar(Constants.ENV_NG_MODULE_FILE_NAME_SUFFIX, ngModuleFileNameSuffix);
   Logger.debug(`ngModuleFileNameSuffix set to ${ngModuleFileNameSuffix}`);
 
-  const polyfillName = getConfigValue(context, '--polyfillName', null, Constants.ENV_POLYFILL_NAME, Constants.ENV_POLYFILL_NAME.toLowerCase(), 'polyfills');
-  setProcessEnvVar(Constants.ENV_POLYFILL_NAME, polyfillName);
+  const polyfillName = getConfigValue(context, '--polyfillFileName', null, Constants.ENV_POLYFILL_FILE_NAME, Constants.ENV_POLYFILL_FILE_NAME.toLowerCase(), 'polyfills.js');
+  setProcessEnvVar(Constants.ENV_POLYFILL_FILE_NAME, polyfillName);
   Logger.debug(`polyfillName set to ${polyfillName}`);
 
   /* Provider Path Stuff */
