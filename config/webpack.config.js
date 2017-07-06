@@ -2,6 +2,8 @@ var path = require('path');
 var webpack = require('webpack');
 var ionicWebpackFactory = require(process.env.IONIC_WEBPACK_FACTORY);
 
+var ModuleConcatPlugin = require('webpack/lib/optimize/ModuleConcatenationPlugin');
+
 module.exports = {
   entry: process.env.IONIC_APP_ENTRY_POINT,
   output: {
@@ -36,6 +38,7 @@ module.exports = {
 
   plugins: [
     ionicWebpackFactory.getIonicEnvironmentPlugin(),
+    new ModuleConcatPlugin()
   ],
 
   // Some libraries import Node modules but don't use them in the browser.
