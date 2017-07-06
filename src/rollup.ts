@@ -73,17 +73,6 @@ export function rollupWorker(context: BuildContext, configFile: string): Promise
 
         Logger.debug(`bundle.modules: ${bundle.modules.length}`);
 
-        // set the module files used in this bundle
-        // this reference can be used elsewhere in the build (sass)
-        context.moduleFiles = bundle.modules.map((m) => {
-          // sometimes, Rollup appends weird prefixes to the path like commonjs:proxy
-          const index = m.id.indexOf(sep);
-          if (index >= 0) {
-            return m.id.substring(index);
-          }
-          return m.id;
-        });
-
         // cache our bundle for later use
         if (context.isWatch) {
           cachedBundle = bundle;

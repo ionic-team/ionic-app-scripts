@@ -1,4 +1,4 @@
-import { basename, extname } from 'path';
+import { basename, dirname, extname, join } from 'path';
 
 import * as MagicString from 'magic-string';
 
@@ -76,6 +76,7 @@ export function doOptimizations(context: BuildContext, dependencyMap: Map<string
       modifiedMap = checkIfProviderIsUsedInSrc(context, modifiedMap);
       const results = calculateUnusedComponents(modifiedMap);
       purgeUnusedImports(context, results.purgedModules);
+      updateIonicComponentsUsed(context, dependencyMap, results.purgedModules);
     }
   }
 
@@ -86,6 +87,16 @@ export function doOptimizations(context: BuildContext, dependencyMap: Map<string
   }
 
   return modifiedMap;
+}
+
+function updateIonicComponentsUsed(context: BuildContext, originalDependencyMap: Map<string, Set<string>>, purgedModules: Map<string, Set<string>>) {
+  const includedModuleSet = new Set<string>();
+  originalDependencyMap.forEach((set: Set<string>, modulePath: string) => {
+    if (!purgedModules.has(modulePath)) {
+      includedModuleSet.add(modulePath);
+    }
+  });
+  context.moduleFiles = Array.from(includedModuleSet);
 }
 
 function optimizationEnabled() {
@@ -193,8 +204,8 @@ export function getConfig(context: BuildContext, configFile: string): WebpackCon
 
 const taskInfo: TaskInfo = {
   fullArg: '--optimization',
-  shortArg: '-dt',
-  envVar: 'IONIC_DEPENDENCY_TREE',
-  packageConfig: 'ionic_dependency_tree',
+  shortArg: '-op',
+  envVar: 'IONIC_OPTIMIZATION',
+  packageConfig: 'ionic_optimization',
   defaultConfigFile: 'optimization.config'
 };

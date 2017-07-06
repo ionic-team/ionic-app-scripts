@@ -93,21 +93,6 @@ function webpackBuildComplete(stats: any, context: BuildContext, webpackConfig: 
     Logger.debug('Webpack Dependency Map End');
   }
 
-  // set the module files used in this bundle
-  // this reference can be used elsewhere in the build (sass)
-  const files: string[] = stats.compilation.modules.map((webpackObj: any) => {
-    if (webpackObj.resource) {
-      return webpackObj.resource;
-    } else {
-      return webpackObj.context;
-    }
-  }).filter((path: string) => {
-    // just make sure the path is not null
-    return path && path.length > 0;
-  });
-
-  context.moduleFiles = files;
-
   return writeBundleFilesToDisk(context);
 }
 
