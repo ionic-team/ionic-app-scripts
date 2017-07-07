@@ -186,11 +186,16 @@ function addComponentSassFiles(componentPath: string, collectedSassFiles: string
 
 
 function getSiblingSassFiles(componentPath: string, sassConfig: SassConfig) {
-  return readdirSync(componentPath).filter(f => {
-    return isValidSassFile(f, sassConfig);
-  }).map(f => {
-    return join(componentPath, f);
-  });
+  try {
+    return readdirSync(componentPath).filter(f => {
+      return isValidSassFile(f, sassConfig);
+    }).map(f => {
+      return join(componentPath, f);
+    });
+  } catch (ex) {
+    // it's an invalid path
+    return [];
+  }
 }
 
 
