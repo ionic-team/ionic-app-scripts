@@ -1,9 +1,9 @@
-import * as uglify from 'uglify-js';
+import * as Uglify from 'uglify-js';
 
 import { Logger } from './logger/logger';
 import { fillConfigDefaults, generateContext, getUserConfigFile } from './util/config';
 import { BuildError } from './util/errors';
-import { writeFileAsync } from './util/helpers';
+import { readFileAsync, writeFileAsync } from './util/helpers';
 import { BuildContext, TaskInfo } from './util/interfaces';
 import { runWorker } from './worker-client';
 
@@ -31,37 +31,34 @@ export function uglifyjsWorker(context: BuildContext, configFile: string): Promi
   return uglifyjsWorkerImpl(context, uglifyJsConfig);
 }
 
-export function uglifyjsWorkerImpl(context: BuildContext, uglifyJsConfig: UglifyJsConfig) {
-  return Promise.resolve().then(() => {
+export async function uglifyjsWorkerImpl(context: BuildContext, uglifyJsConfig: UglifyJsConfig) {
+  try {
     const jsFilePaths = context.bundledFilePaths.filter(bundledFilePath => bundledFilePath.endsWith('.js'));
-    const promises: Promise<any>[] = [];
-    jsFilePaths.forEach(bundleFilePath => {
-      uglifyJsConfig.sourceFile = bundleFilePath;
-      uglifyJsConfig.inSourceMap = bundleFilePath + '.map';
-      uglifyJsConfig.destFileName = bundleFilePath;
-      uglifyJsConfig.outSourceMap = bundleFilePath + '.map';
-
-      const minifyOutput: uglify.MinifyOutput = runUglifyInternal(uglifyJsConfig);
-      promises.push(writeFileAsync(uglifyJsConfig.destFileName, minifyOutput.code.toString()));
-      if (minifyOutput.map) {
-        promises.push(writeFileAsync(uglifyJsConfig.outSourceMap, minifyOutput.map.toString()));
-      }
+    const promises = jsFilePaths.map(filePath => {
+      const sourceMapPath = filePath + '.map';
+      return runUglifyInternal(filePath, filePath, sourceMapPath, sourceMapPath, uglifyJsConfig);
     });
-    return Promise.all(promises);
-  }).catch((err: any) => {
+    return await Promise.all(promises);
+  } catch (ex) {
     // uglify has it's own strange error format
-    const errorString = `${err.message} in ${err.filename} at line ${err.line}, col ${err.col}, pos ${err.pos}`;
+    const errorString = `${ex.message} in ${ex.filename} at line ${ex.line}, col ${ex.col}, pos ${ex.pos}`;
     throw new BuildError(new Error(errorString));
-  });
+  }
 }
 
-function runUglifyInternal(uglifyJsConfig: UglifyJsConfig): uglify.MinifyOutput {
-  return uglify.minify(uglifyJsConfig.sourceFile, {
-    compress: uglifyJsConfig.compress,
-    mangle: uglifyJsConfig.mangle,
-    inSourceMap : uglifyJsConfig.inSourceMap,
-    outSourceMap: uglifyJsConfig.outSourceMap
+async function runUglifyInternal(sourceFilePath: string, destFilePath: string, sourceMapPath: string, destMapPath: string, configObject: any): Promise<any> {
+  const sourceFileContentPromise = readFileAsync(sourceFilePath);
+  const [sourceFileContent, sourceMapContent] = await Promise.all([readFileAsync(sourceFilePath), readFileAsync(sourceMapPath)]);
+  const uglifyConfig = Object.assign({}, configObject, {
+    sourceMap: {
+        content: sourceMapContent
+    }
   });
+  const result = Uglify.minify(sourceFileContent, uglifyConfig);
+  if (result.error) {
+    throw new BuildError(`Uglify failed: ${result.error.message}`);
+  }
+  return Promise.all([writeFileAsync(destFilePath, result.code), writeFileAsync(destMapPath, result.map)]);
 }
 
 export const taskInfo: TaskInfo = {
@@ -82,4 +79,9 @@ export interface UglifyJsConfig {
   mangle?: boolean;
   compress?: boolean;
   comments?: boolean;
+}
+
+export interface UglifyResponse {
+  code?: string;
+  map?: any;
 }
