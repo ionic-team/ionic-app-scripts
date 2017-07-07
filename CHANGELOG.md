@@ -3,7 +3,7 @@
 
 ### Breaking Changes
 
-In order to speed up the bundling process, we have separated `node_modules` code into a new, generated file called `vendor.js`. This means that on every change, `ionic-angular, `@angular`, etc won't need to be processed by `webpack` :tada:
+In order to speed up the bundling process, we have separated `node_modules` code into a new, generated file called `vendor.js`. This means that on every change, `ionic-angular`, `@angular`, etc won't need to be processed by `webpack` :tada:
 
 This means that `src/index.html` must be modified to include a new vendor script tag `<script src="build/vendor.js"></script>`. This new script tag must be placed above the `main.js` script tag. For example,
 
