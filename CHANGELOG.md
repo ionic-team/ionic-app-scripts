@@ -1,3 +1,55 @@
+<a name="2.0.0"></a>
+# [2.0.0](https://github.com/ionic-team/ionic-app-scripts/compare/v1.3.12...v2.0.0) (2017-07-07)
+
+### Breaking Changes
+
+In order to speed up the bundling process, we have separated `node_modules` code into a new, generated file called `vendor.js`. This means that on every change, `ionic-angular, `@angular`, etc won't need to be processed by `webpack` :tada:
+
+This means that `src/index.html` must be modified to include a new vendor script tag `<script src="build/vendor.js"></script>`. This new script tag must be placed above the `main.js` script tag. For example,
+
+```
+...
+<body>
+
+  <!-- Ionic's root component and where the app will load -->
+  <ion-app></ion-app>
+
+  <script src="cordova.js"></script>
+
+  <!-- The polyfills js is generated during the build process -->
+  <script src="build/polyfills.js"></script>
+
+  <!-- all code from node_modules directory is here -->
+  <script src="build/vendor.js"></script>
+
+  <!-- The bundle js is generated during the build process -->
+  <script src="build/main.js"></script>
+
+</body>
+...
+```
+
+Another side effect of this change is if you are overriding the `webpack` configuration, you will want to update your custom configuration based on the [new default configuration](https://github.com/ionic-team/ionic-app-scripts/blob/master/config/webpack.config.js). The main changes to the config are adding the `ModuleConcatenationPlugin` for scope hoisting for significantly faster apps, and adding the common chunks plugin for the `vendor.js` bundle.
+
+See commits [e14f819](https://github.com/ionic-team/ionic-app-scripts/commit/e14f819) and [141cb23](https://github.com/ionic-team/ionic-app-scripts/commit/141cb23) for the specifics of the `webpack.config.js` change.
+
+### Bug Fixes
+
+* **config:** updated polyname env variable to match convention and fix typo with it ([d64fcb1](https://github.com/ionic-team/ionic-app-scripts/commit/d64fcb1))
+* **lint:** improve linting performance ([106d82c](https://github.com/ionic-team/ionic-app-scripts/commit/106d82c))
+* **sass:** dont try to process invalid directories ([8af9430](https://github.com/ionic-team/ionic-app-scripts/commit/8af9430))
+* **sass:** fix a bug when calling sass task in stand alone fashion ([54bf3f6](https://github.com/ionic-team/ionic-app-scripts/commit/54bf3f6))
+
+
+### Features
+
+* **dev-server:** add support for path-based routing ([2441591](https://github.com/ionic-team/ionic-app-scripts/commit/2441591))
+* **webpack:** add scope hoisting to webpack, update sass to read scss files from disk ([e14f819](https://github.com/ionic-team/ionic-app-scripts/commit/e14f819))
+* **webpack:** use a vendor bundle to minimize code that needs re-bundling and source map generation ([141cb23](https://github.com/ionic-team/ionic-app-scripts/commit/141cb23))
+* **webpack:** webpack 3.1.0 holy speed upgrade! ([a3bde4a](https://github.com/ionic-team/ionic-app-scripts/commit/a3bde4a))
+
+
+
 <a name="1.3.12"></a>
 ## [1.3.12](https://github.com/ionic-team/ionic-app-scripts/compare/v1.3.11...v1.3.12) (2017-06-29)
 
