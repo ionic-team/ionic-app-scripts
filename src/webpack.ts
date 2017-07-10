@@ -93,16 +93,14 @@ function webpackBuildComplete(stats: any, context: BuildContext, webpackConfig: 
     Logger.debug('Webpack Dependency Map End');
   }
 
-  return writeBundleFilesToDisk(context);
+  return setBundledFiles(context);
 }
 
-export function writeBundleFilesToDisk(context: BuildContext) {
+export function setBundledFiles(context: BuildContext) {
   const bundledFilesToWrite = context.fileCache.getAll().filter(file => {
     return dirname(file.path).indexOf(context.buildDir) >= 0 && (file.path.endsWith('.js') || file.path.endsWith('.js.map'));
   });
   context.bundledFilePaths = bundledFilesToWrite.map(bundledFile => bundledFile.path);
-  const promises = bundledFilesToWrite.map(bundledFileToWrite => writeFileAsync(bundledFileToWrite.path, bundledFileToWrite.content));
-  return Promise.all(promises);
 }
 
 export function runWebpackFullBuild(config: WebpackConfig) {

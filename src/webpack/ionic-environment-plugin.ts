@@ -49,7 +49,8 @@ export class IonicEnvironmentPlugin {
     compiler.plugin('environment', (otherCompiler: any, callback: Function) => {
       Logger.debug('[IonicEnvironmentPlugin] apply: creating environment plugin');
       const hybridFileSystem = getInstance();
-      hybridFileSystem.setFileSystem(compiler.inputFileSystem);
+      hybridFileSystem.setInputFileSystem(compiler.inputFileSystem);
+      hybridFileSystem.setOutputFileSystem(compiler.outputFileSystem);
       compiler.inputFileSystem = hybridFileSystem;
       compiler.outputFileSystem = hybridFileSystem;
       compiler.watchFileSystem = new WatchMemorySystem(this.context.fileCache, this.context.srcDir);
