@@ -7,17 +7,22 @@ export class HybridFileSystem implements FileSystem, VirtualFileSystem {
 
   private filesStats: { [filePath: string]: VirtualFileStats } = {};
   private directoryStats: { [filePath: string]: VirtualDirStats } = {};
-  private originalFileSystem: FileSystem;
+  private inputFileSystem: FileSystem;
+  private outputFileSystem: FileSystem;
 
   constructor(private fileCache: FileCache) {
   }
 
-  setFileSystem(fs: FileSystem) {
-    this.originalFileSystem = fs;
+  setInputFileSystem(fs: FileSystem) {
+    this.inputFileSystem = fs;
+  }
+
+  setOutputFileSystem(fs: FileSystem) {
+    this.outputFileSystem = fs;
   }
 
   isSync() {
-    return this.originalFileSystem.isSync();
+    return this.inputFileSystem.isSync();
   }
 
   stat(path: string, callback: Function): any {
@@ -32,19 +37,19 @@ export class HybridFileSystem implements FileSystem, VirtualFileSystem {
       return callback(null, directoryStat);
     }
     // fallback to list
-    return this.originalFileSystem.stat(path, callback);
+    return this.inputFileSystem.stat(path, callback);
   }
 
   readdir(path: string, callback: Function): any {
-    return this.originalFileSystem.readdir(path, callback);
+    return this.inputFileSystem.readdir(path, callback);
   }
 
   readJson(path: string, callback: Function): any {
-    return this.originalFileSystem.readJson(path, callback);
+    return this.inputFileSystem.readJson(path, callback);
   }
 
   readlink(path: string, callback: Function): any {
-    return this.originalFileSystem.readlink(path, (err: Error, response: any) => {
+    return this.inputFileSystem.readlink(path, (err: Error, response: any) => {
       callback(err, response);
     });
   }
@@ -63,7 +68,7 @@ export class HybridFileSystem implements FileSystem, VirtualFileSystem {
       callback(null, new Buffer(file.content));
       return;
     }
-    return this.originalFileSystem.readFile(path, callback);
+    return this.inputFileSystem.readFile(path, callback);
   }
 
   addVirtualFile(filePath: string, fileContent: string) {
@@ -106,7 +111,19 @@ export class HybridFileSystem implements FileSystem, VirtualFileSystem {
   }
 
   mkdirp(filePath: string, callback: Function) {
-    callback();
+    return this.outputFileSystem.mkdirp(filePath, callback);
+  }
+
+  mkdir(filePath: string, callback: Function) {
+    return this.outputFileSystem.mkdir(filePath, callback);
+  }
+
+  rmdir(filePath: string, callback: Function) {
+    return this.outputFileSystem.rmdir(filePath, callback);
+  }
+
+  unlink(filePath: string, callback: Function) {
+    return this.outputFileSystem.unlink(filePath, callback);
   }
 
   join(dirPath: string, fileName: string) {
@@ -116,6 +133,6 @@ export class HybridFileSystem implements FileSystem, VirtualFileSystem {
   writeFile(filePath: string, fileContent: Buffer, callback: Function) {
     const stringContent = fileContent.toString();
     this.addVirtualFile(filePath, stringContent);
-    callback();
+    return this.outputFileSystem.writeFile(filePath, fileContent, callback);
   }
 }
