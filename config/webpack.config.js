@@ -4,6 +4,11 @@ var ionicWebpackFactory = require(process.env.IONIC_WEBPACK_FACTORY);
 
 var ModuleConcatPlugin = require('webpack/lib/optimize/ModuleConcatenationPlugin');
 
+var prodPlugins = [];
+if (process.env.IONIC_ENV === 'prod') {
+  prodPlugins.push(new ModuleConcatPlugin());
+}
+
 module.exports = {
   entry: process.env.IONIC_APP_ENTRY_POINT,
   output: {
@@ -39,8 +44,7 @@ module.exports = {
   plugins: [
     ionicWebpackFactory.getIonicEnvironmentPlugin(),
     ionicWebpackFactory.getCommonChunksPlugin(),
-    new ModuleConcatPlugin(),
-  ],
+  ].concat(prodPlugins),
 
   // Some libraries import Node modules but don't use them in the browser.
   // Tell Webpack to provide empty mocks for them so importing them works.
