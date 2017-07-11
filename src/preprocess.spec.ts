@@ -54,10 +54,6 @@ describe('Preprocess Task', () => {
         // assert
         expect(optimization.optimization).toHaveBeenCalled();
         expect(preprocess.writeFilesToDisk).not.toHaveBeenCalledWith();
-        expect(context.moduleFiles).toBeTruthy();
-        expect(context.moduleFiles.length).toEqual(2);
-        expect(context.moduleFiles[0]).toEqual(mockDirName);
-        expect(context.moduleFiles[1]).toEqual(mockDirName + '2');
       });
     });
   });
