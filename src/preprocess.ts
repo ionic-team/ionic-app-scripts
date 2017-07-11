@@ -27,8 +27,7 @@ export function preprocess(context: BuildContext) {
 function preprocessWorker(context: BuildContext) {
   const bundlePromise = bundleCoreComponents(context);
   const deepLinksPromise = getBooleanPropertyValue(Constants.ENV_PARSE_DEEPLINKS) ? deepLinking(context) : Promise.resolve();
-  const componentSassPromise = lookUpDefaultIonicComponentPaths(context);
-  return Promise.all([bundlePromise, deepLinksPromise, componentSassPromise])
+  return Promise.all([bundlePromise, deepLinksPromise])
     .then(() => {
       if (context.optimizeJs) {
         return optimization(context, null);
@@ -67,16 +66,4 @@ export function preprocessUpdate(changedFiles: ChangedFile[], context: BuildCont
   }
 
   return Promise.all(promises);
-}
-
-export function lookUpDefaultIonicComponentPaths(context: BuildContext) {
-  const componentsDirGlob = join(getStringPropertyValue(Constants.ENV_VAR_IONIC_ANGULAR_DIR), 'components', '**', '*.scss');
-  const srcDirGlob = join(getStringPropertyValue(Constants.ENV_VAR_SRC_DIR), '**', '*.scss');
-  return globAll([componentsDirGlob, srcDirGlob]).then((results: GlobResult[]) => {
-    const componentPathSet = new Set<string>();
-    results.forEach(result => {
-      componentPathSet.add(result.absolutePath);
-    });
-    context.moduleFiles = Array.from(componentPathSet);
-  });
 }
