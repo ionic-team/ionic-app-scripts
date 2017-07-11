@@ -3,7 +3,7 @@
 
 ## Upgrading from 1.x
 
-If you're upgrading directly from `1.3.12` or earlier, make sure you review the changelog for `2.0.0` and follow the instructions below. There were some very updates you'll need to make to your app.
+If you're upgrading directly from `1.3.12` or earlier, make sure you review the changelog for `2.0.0` and follow the [instructions here](https://github.com/ionic-team/ionic-app-scripts/releases/tag/v2.0.0). There were some very updates you'll need to make to your app.
 
 ### Bug Fixes
 
