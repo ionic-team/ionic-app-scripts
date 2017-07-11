@@ -1,3 +1,20 @@
+<a name="2.0.1"></a>
+## [2.0.1](https://github.com/ionic-team/ionic-app-scripts/compare/v2.0.0...v2.0.1) (2017-07-11)
+
+## Upgrading from 1.x
+
+If you're upgrading directly from `1.3.12` or earlier, make sure you review the changelog for `2.0.0` and follow the instructions below. There were some very updates you'll need to make to your app.
+
+### Bug Fixes
+
+* **generators:** no module by default ([#1096](https://github.com/ionic-team/ionic-app-scripts/issues/1096)) ([dfcaefa](https://github.com/ionic-team/ionic-app-scripts/commit/dfcaefa))
+* **http-server:** revert change for path-based routing since it broke proxies ([065912e](https://github.com/ionic-team/ionic-app-scripts/commit/065912e))
+* **sass:** use webpack/rollup modules for non-optimized build, use optimization data for prod/optimized buids ([0554201](https://github.com/ionic-team/ionic-app-scripts/commit/0554201))
+* **serve:** fix cached file issue by only using the webpack module concat plugin for prod builds, make sure you update custom configs ([feea7fe](https://github.com/ionic-team/ionic-app-scripts/commit/feea7fe))
+* **webpack:** webpack in-memory output file system was breaking some plugins ([574da39](https://github.com/ionic-team/ionic-app-scripts/commit/574da39))
+
+
+
 <a name="2.0.0"></a>
 # [2.0.0](https://github.com/ionic-team/ionic-app-scripts/compare/v1.3.12...v2.0.0) (2017-07-07)
 
