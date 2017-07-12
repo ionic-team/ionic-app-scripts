@@ -9,6 +9,7 @@ export class HybridFileSystem implements FileSystem, VirtualFileSystem {
   private directoryStats: { [filePath: string]: VirtualDirStats } = {};
   private inputFileSystem: FileSystem;
   private outputFileSystem: FileSystem;
+  private writeToDisk: boolean;
 
   constructor(private fileCache: FileCache) {
   }
@@ -19,6 +20,10 @@ export class HybridFileSystem implements FileSystem, VirtualFileSystem {
 
   setOutputFileSystem(fs: FileSystem) {
     this.outputFileSystem = fs;
+  }
+
+  setWriteToDisk(write: boolean) {
+    this.writeToDisk = write;
   }
 
   isSync() {
@@ -111,19 +116,31 @@ export class HybridFileSystem implements FileSystem, VirtualFileSystem {
   }
 
   mkdirp(filePath: string, callback: Function) {
-    return this.outputFileSystem.mkdirp(filePath, callback);
+    if (this.writeToDisk) {
+      return this.outputFileSystem.mkdirp(filePath, callback);
+    }
+    callback();
   }
 
   mkdir(filePath: string, callback: Function) {
-    return this.outputFileSystem.mkdir(filePath, callback);
+    if (this.writeToDisk) {
+      return this.outputFileSystem.mkdir(filePath, callback);
+    }
+    callback();
   }
 
   rmdir(filePath: string, callback: Function) {
-    return this.outputFileSystem.rmdir(filePath, callback);
+    if (this.writeToDisk) {
+      return this.outputFileSystem.rmdir(filePath, callback);
+    }
+    callback();
   }
 
   unlink(filePath: string, callback: Function) {
-    return this.outputFileSystem.unlink(filePath, callback);
+    if (this.writeToDisk) {
+      return this.outputFileSystem.unlink(filePath, callback);
+    }
+    callback();
   }
 
   join(dirPath: string, fileName: string) {
@@ -133,6 +150,9 @@ export class HybridFileSystem implements FileSystem, VirtualFileSystem {
   writeFile(filePath: string, fileContent: Buffer, callback: Function) {
     const stringContent = fileContent.toString();
     this.addVirtualFile(filePath, stringContent);
-    return this.outputFileSystem.writeFile(filePath, fileContent, callback);
+    if (this.writeToDisk) {
+      return this.outputFileSystem.writeFile(filePath, fileContent, callback);
+    }
+    callback();
   }
 }
