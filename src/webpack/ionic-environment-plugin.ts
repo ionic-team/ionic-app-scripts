@@ -9,7 +9,7 @@ import { WatchMemorySystem } from './watch-memory-system';
 import * as ContextElementDependency from 'webpack/lib/dependencies/ContextElementDependency';
 
 export class IonicEnvironmentPlugin {
-  constructor(private context: BuildContext) {
+  constructor(private context: BuildContext, private writeToDisk: boolean) {
   }
 
   apply(compiler: any) {
@@ -48,7 +48,7 @@ export class IonicEnvironmentPlugin {
 
     compiler.plugin('environment', (otherCompiler: any, callback: Function) => {
       Logger.debug('[IonicEnvironmentPlugin] apply: creating environment plugin');
-      const hybridFileSystem = getInstance();
+      const hybridFileSystem = getInstance(this.writeToDisk);
       hybridFileSystem.setInputFileSystem(compiler.inputFileSystem);
       hybridFileSystem.setOutputFileSystem(compiler.outputFileSystem);
       compiler.inputFileSystem = hybridFileSystem;

@@ -6,7 +6,7 @@ let instance: NgcCompilerHost = null;
 
 export function getInstance(options: CompilerOptions) {
   if (!instance) {
-    instance = new NgcCompilerHost(options, getFileSystemInstance());
+    instance = new NgcCompilerHost(options, getFileSystemInstance(false));
   }
   return instance;
 }

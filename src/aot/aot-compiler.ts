@@ -38,7 +38,7 @@ export class AotCompiler {
       entryPoint: this.options.entryPoint
     });
 
-    this.fileSystem = getHybridFileSystem();
+    this.fileSystem = getHybridFileSystem(false);
     this.compilerHost = getInstance(this.tsConfig.parsed.options);
     this.program = createProgram(this.tsConfig.parsed.fileNames, this.tsConfig.parsed.options, this.compilerHost);
   }

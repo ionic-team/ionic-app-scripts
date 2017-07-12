@@ -5,7 +5,12 @@ import { getContext } from '../util/helpers';
 
 export function getIonicEnvironmentPlugin() {
   const context = getContext();
-  return new IonicEnvironmentPlugin(context);
+  return new IonicEnvironmentPlugin(context, true);
+}
+
+export function getIonicOptimizationEnvironmentPlugin() {
+  const context = getContext();
+  return new IonicEnvironmentPlugin(context, false);
 }
 
 export function getSourceMapperFunction(): Function {
