@@ -108,12 +108,14 @@ function generateSassData(context: BuildContext, sassConfig: SassConfig) {
    */
 
   const moduleDirectories: string[] = [];
-  context.moduleFiles.forEach(moduleFile => {
-    const moduleDirectory = dirname(moduleFile);
-    if (moduleDirectories.indexOf(moduleDirectory) < 0) {
-      moduleDirectories.push(moduleDirectory);
-    }
-  });
+  if (context.moduleFiles) {
+    context.moduleFiles.forEach(moduleFile => {
+      const moduleDirectory = dirname(moduleFile);
+      if (moduleDirectories.indexOf(moduleDirectory) < 0) {
+        moduleDirectories.push(moduleDirectory);
+      }
+    });
+  }
 
   Logger.debug(`sass moduleDirectories: ${moduleDirectories.length}`);
 
