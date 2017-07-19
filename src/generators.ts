@@ -35,7 +35,8 @@ export function processTabsRequest(context: BuildContext, name: string, tabs: st
     });
 
     return Promise.all(promises);
-  }).then((tabs) => {
+  })
+  .then((tabs) => {
     tabsModuleManipulation(tabs, hydratedRequest, tabHydratedRequests);
   });
 }
