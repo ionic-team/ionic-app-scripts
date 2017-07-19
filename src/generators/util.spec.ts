@@ -1,3 +1,4 @@
+import { BuildContext } from '../util/interfaces';
 import { basename, join } from 'path';
 import * as fs from 'fs';
 import * as Constants from '../util/constants';
@@ -30,7 +31,7 @@ describe('util', () => {
       const hydratedRequest = util.hydrateRequest(context, request);
 
       // assert
-      expect(hydratedRequest).toEqual({'className': 'SettingsViewComponent', 'dirToRead': join(templateDir, 'component'), 'dirToWrite': join(componentsDir, 'settings-view'), 'fileName': 'settings-view', 'includeNgModule': true, 'includeSpec': true, 'name': 'settings view', 'type': 'component'});
+      expect(hydratedRequest).toEqual({ 'className': 'SettingsViewComponent', 'dirToRead': join(templateDir, 'component'), 'dirToWrite': join(componentsDir, 'settings-view'), 'fileName': 'settings-view', 'includeNgModule': true, 'includeSpec': true, 'name': 'settings view', 'type': 'component' });
       expect(hydratedRequest.type).toEqual(Constants.COMPONENT);
       expect(hydratedRequest.name).toEqual(request.name);
       expect(hydratedRequest.includeNgModule).toBeTruthy();
@@ -62,7 +63,7 @@ describe('util', () => {
       const hydratedRequest = util.hydrateRequest(context, request);
 
       // assert
-      expect(hydratedRequest).toEqual({'className': 'SettingsViewPage', 'dirToRead': join(templateDir, 'page'), 'dirToWrite': join(pagesDir, 'settings-view'), 'fileName': 'settings-view', 'includeNgModule': true, 'includeSpec': true, 'name': 'settings view', 'type': 'page'});
+      expect(hydratedRequest).toEqual({ 'className': 'SettingsViewPage', 'dirToRead': join(templateDir, 'page'), 'dirToWrite': join(pagesDir, 'settings-view'), 'fileName': 'settings-view', 'includeNgModule': true, 'includeSpec': true, 'name': 'settings view', 'type': 'page' });
       expect(hydratedRequest.type).toEqual(Constants.PAGE);
       expect(hydratedRequest.name).toEqual(request.name);
       expect(hydratedRequest.includeNgModule).toBeTruthy();
@@ -71,6 +72,64 @@ describe('util', () => {
       expect(hydratedRequest.fileName).toEqual('settings-view');
       expect(hydratedRequest.dirToRead).toEqual(join(templateDir, Constants.PAGE));
       expect(hydratedRequest.dirToWrite).toEqual(join(pagesDir, hydratedRequest.fileName));
+    });
+  });
+
+  describe('hydrateTabRequest', () => {
+    it('should take a lazy loaded page set the tab root to a string', () => {
+      // arrange
+      const baseDir = join(process.cwd(), 'someDir', 'project');
+      const pagesDir = join(baseDir, 'src', 'pages');
+      const templateDir = join(baseDir, 'node_modules', 'ionic-angular', 'templates');
+      const context: BuildContext = { pagesDir };
+      const request = {
+        type: 'tabs',
+        name: 'stooges',
+        includeNgModule: true,
+        tabs: [
+          {
+            includeNgModule: true,
+            type: 'page',
+            name: 'moe',
+            className: 'MoePage',
+            fileName: 'moe',
+            'dirToRead': join(templateDir, 'page'),
+            'dirToWrite': join(pagesDir, 'moe'),
+          }]
+      };
+      spyOn(helpers, helpers.getStringPropertyValue.name).and.returnValue(templateDir);
+      // act
+      const hydatedTabRequest = util.hydrateTabRequest(context, request);
+      // assert
+      expect(hydatedTabRequest.tabVariables).toEqual('  moeRoot = \'MoePage\'\n');
+    });
+
+    it('should take a page set the tab root to a component ref', () => {
+      // arrange
+      const baseDir = join(process.cwd(), 'someDir', 'project');
+      const pagesDir = join(baseDir, 'src', 'pages');
+      const templateDir = join(baseDir, 'node_modules', 'ionic-angular', 'templates');
+      const context: BuildContext = { pagesDir };
+      const request = {
+        type: 'tabs',
+        name: 'stooges',
+        includeNgModule: false,
+        tabs: [
+          {
+            includeNgModule: false,
+            type: 'page',
+            name: 'moe',
+            className: 'MoePage',
+            fileName: 'moe',
+            'dirToRead': join(templateDir, 'page'),
+            'dirToWrite': join(pagesDir, 'moe'),
+          }]
+      };
+      spyOn(helpers, helpers.getStringPropertyValue.name).and.returnValue(templateDir);
+      // act
+      const hydatedTabRequest = util.hydrateTabRequest(context, request);
+      // assert
+      expect(hydatedTabRequest.tabVariables).toEqual('  moeRoot = MoePage\n');
     });
   });
 
@@ -109,7 +168,7 @@ describe('util', () => {
       map.set(join(templateDir, knownValues[3]), fileContent);
       map.set(join(templateDir, knownValues[4]), fileContent);
 
-      const newMap = util.filterOutTemplates({includeNgModule: true, includeSpec: true}, map);
+      const newMap = util.filterOutTemplates({ includeNgModule: true, includeSpec: true }, map);
       expect(newMap.size).toEqual(knownValues.length);
     });
 
@@ -124,7 +183,7 @@ describe('util', () => {
       map.set(join(templateDir, knownValues[3]), fileContent);
       map.set(join(templateDir, knownValues[4]), fileContent);
 
-      const newMap = util.filterOutTemplates({includeNgModule: true, includeSpec: false}, map);
+      const newMap = util.filterOutTemplates({ includeNgModule: true, includeSpec: false }, map);
       expect(newMap.size).toEqual(4);
       expect(newMap.get(join(templateDir, knownValues[0]))).toBeTruthy();
       expect(newMap.get(join(templateDir, knownValues[1]))).toBeTruthy();
@@ -144,7 +203,7 @@ describe('util', () => {
       map.set(join(templateDir, knownValues[3]), fileContent);
       map.set(join(templateDir, knownValues[4]), fileContent);
 
-      const newMap = util.filterOutTemplates({includeNgModule: false, includeSpec: false}, map);
+      const newMap = util.filterOutTemplates({ includeNgModule: false, includeSpec: false }, map);
       expect(newMap.size).toEqual(3);
       expect(newMap.get(join(templateDir, knownValues[0]))).toBeTruthy();
       expect(newMap.get(join(templateDir, knownValues[1]))).toBeTruthy();
@@ -276,7 +335,7 @@ $TAB_CONTENT
       const fileName = 'settings-view';
       const suppliedName = 'settings view';
 
-      const results = util.applyTemplates({ name: suppliedName, className: className, fileName: fileName}, map);
+      const results = util.applyTemplates({ name: suppliedName, className: className, fileName: fileName }, map);
       const modifiedContentOne = results.get(fileOne);
       const modifiedContentTwo = results.get(fileTwo);
       const modifiedContentThree = results.get(fileThree);
@@ -404,7 +463,7 @@ $TAB_CONTENT
     });
   });
 
-  describe('tabsModuleManipulation' , () => {
+  describe('tabsModuleManipulation', () => {
     const className = 'SettingsView';
     const fileName = 'settings-view';
     const suppliedName = 'settings view';

@@ -1,4 +1,4 @@
-import { basename, dirname, join, relative, sep } from 'path';
+import { basename, dirname, extname, join, relative, sep } from 'path';
 import { readdirSync } from 'fs';
 import { Logger} from '../logger/logger';
 import { toUnixPath } from '../util/helpers';
@@ -8,7 +8,7 @@ import * as GeneratorConstants from './constants';
 import { camelCase, getStringPropertyValue, mkDirpAsync, paramCase, pascalCase, readFileAsync, replaceAll, sentenceCase, upperCaseFirst, writeFileAsync } from '../util/helpers';
 import { BuildContext } from '../util/interfaces';
 import { globAll, GlobResult } from '../util/glob-util';
-import { ensureSuffix, removeSuffix } from '../util/helpers';
+import { changeExtension, ensureSuffix, removeSuffix } from '../util/helpers';
 import { appendNgModuleDeclaration, insertNamedImportIfNeeded } from '../util/typescript-utils';
 
 export function hydrateRequest(context: BuildContext, request: GeneratorRequest) {
@@ -36,7 +36,11 @@ export function hydrateTabRequest(context: BuildContext, request: GeneratorTabRe
 
   for (let i = 0; i < request.tabs.length; i++) {
     const tabVar = `${camelCase(request.tabs[i].name)}Root`;
-    hydrated.tabVariables += `  ${tabVar} = '${request.tabs[i].className}'\n`;
+    if (hydrated.includeNgModule ) {
+      hydrated.tabVariables += `  ${tabVar} = '${request.tabs[i].className}'\n`;
+    } else {
+      hydrated.tabVariables += `  ${tabVar} = ${request.tabs[i].className}\n`;
+    }
 
     // If this is the last ion-tab to insert
     // then we do not want a new line
@@ -171,19 +175,39 @@ export function nonPageFileManipulation(context: BuildContext, name: string, ngM
 }
 
 export function tabsModuleManipulation(tabs: string[][], hydratedRequest: HydratedGeneratorRequest, tabHydratedRequests: HydratedGeneratorRequest[]): Promise<any> {
+  tabHydratedRequests.forEach((tabRequest, index) => {
+    tabRequest.generatedFileNames = tabs[index];
+  });
   const ngModulePath = tabs[0].find((element: any): boolean => {
     return element.indexOf('module') !== -1;
   });
-  const tabsNgModulePath = `${hydratedRequest.dirToWrite}${sep}${hydratedRequest.fileName}.module.ts`;
-  const importPath = toUnixPath(relative(dirname(tabsNgModulePath), ngModulePath.replace('.module.ts', '')));
+  if (ngModulePath) {
+    const tabsNgModulePath = `${hydratedRequest.dirToWrite}${sep}${hydratedRequest.fileName}.module.ts`;
+    const importPath = toUnixPath(relative(dirname(tabsNgModulePath), ngModulePath.replace('.module.ts', '')));
 
-  return readFileAsync(tabsNgModulePath).then((content) => {
-    let fileContent = content;
-    fileContent = insertNamedImportIfNeeded(tabsNgModulePath, fileContent, tabHydratedRequests[0].className, importPath);
-    fileContent = appendNgModuleDeclaration(tabsNgModulePath, fileContent, tabHydratedRequests[0].className);
+    return readFileAsync(tabsNgModulePath).then((content) => {
+      let fileContent = content;
+      fileContent = insertNamedImportIfNeeded(tabsNgModulePath, fileContent, tabHydratedRequests[0].className, importPath);
+      fileContent = appendNgModuleDeclaration(tabsNgModulePath, fileContent, tabHydratedRequests[0].className);
 
-    return writeFileAsync(tabsNgModulePath, fileContent);
-  });
+      return writeFileAsync(tabsNgModulePath, fileContent);
+    });
+  } else {
+
+    // Static imports
+    const tabsPath = join(hydratedRequest.dirToWrite, `${hydratedRequest.fileName}.ts`);
+
+    let modifiedContent: string = null;
+    return readFileAsync(tabsPath).then(content => {
+      tabHydratedRequests.forEach((tabRequest) => {
+        const typescriptFilePath = changeExtension(tabRequest.generatedFileNames.filter(path => extname(path) === '.ts')[0], '');
+        const importPath = toUnixPath(relative(dirname(tabsPath), typescriptFilePath));
+        modifiedContent = insertNamedImportIfNeeded(tabsPath, content, tabRequest.className, importPath);
+        content = modifiedContent;
+      });
+      return writeFileAsync(tabsPath, modifiedContent);
+    });
+  }
 }
 
 export function generateTemplates(context: BuildContext, request: HydratedGeneratorRequest): Promise<string[]> {
@@ -222,4 +246,5 @@ export interface HydratedGeneratorRequest extends GeneratorRequest {
   tabVariables?: string;
   dirToRead?: string;
   dirToWrite?: string;
+  generatedFileNames?: string[];
 }
