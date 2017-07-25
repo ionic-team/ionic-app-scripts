@@ -1,3 +1,18 @@
+<a name="2.1.0"></a>
+# [2.1.0](https://github.com/ionic-team/ionic-app-scripts/compare/v2.0.2...v2.1.0) (2017-07-25)
+
+
+### Bug Fixes
+
+* **generators:** handle no ngModule in tabs ([653d9f2](https://github.com/ionic-team/ionic-app-scripts/commit/653d9f2))
+
+
+### Features
+
+* **generators:** refactor generators ([beaf0d3](https://github.com/ionic-team/ionic-app-scripts/commit/beaf0d3))
+
+
+
 <a name="2.0.2"></a>
 ## [2.0.2](https://github.com/ionic-team/ionic-app-scripts/compare/v2.0.1...v2.0.2) (2017-07-13)
 
