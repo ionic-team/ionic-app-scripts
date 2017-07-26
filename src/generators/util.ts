@@ -43,7 +43,7 @@ export function hydrateRequest(context: BuildContext, request: GeneratorRequest)
 export function createCommonModule(envVar: string, requestType: string) {
   let className = requestType.charAt(0).toUpperCase() + requestType.slice(1) + 's';
   let tmplt = `import { NgModule } from '@angular/core';\n@NgModule({\n\tdeclarations: [],\n\timports: [],\n\texports: []\n})\nexport class ${className}Module {}\n`;
-  return writeFileAsync(envVar, tmplt);
+  writeFileSync(envVar, tmplt)
 }
 
 export function hydrateTabRequest(context: BuildContext, request: GeneratorTabRequest) {
