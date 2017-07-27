@@ -1,3 +1,13 @@
+<a name="2.1.2"></a>
+## [2.1.2](https://github.com/ionic-team/ionic-app-scripts/compare/v2.1.1...v2.1.2) (2017-07-27)
+
+
+### Bug Fixes
+
+* **generators:** handle old cli ([6fd622c](https://github.com/ionic-team/ionic-app-scripts/commit/6fd622c))
+
+
+
 <a name="2.1.1"></a>
 ## [2.1.1](https://github.com/ionic-team/ionic-app-scripts/compare/v2.1.0...v2.1.1) (2017-07-27)
 
