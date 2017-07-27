@@ -1,3 +1,13 @@
+<a name="2.1.3"></a>
+## [2.1.3](https://github.com/ionic-team/ionic-app-scripts/compare/v2.1.2...v2.1.3) (2017-07-27)
+
+
+### Bug Fixes
+
+* **lab:** remove es6 features from lab ([41a1335](https://github.com/ionic-team/ionic-app-scripts/commit/41a1335))
+
+
+
 <a name="2.1.2"></a>
 ## [2.1.2](https://github.com/ionic-team/ionic-app-scripts/compare/v2.1.1...v2.1.2) (2017-07-27)
 
