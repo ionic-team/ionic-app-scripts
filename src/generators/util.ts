@@ -43,7 +43,7 @@ export function hydrateRequest(context: BuildContext, request: GeneratorRequest)
 export function createCommonModule(envVar: string, requestType: string) {
   let className = requestType.charAt(0).toUpperCase() + requestType.slice(1) + 's';
   let tmplt = `import { NgModule } from '@angular/core';\n@NgModule({\n\tdeclarations: [],\n\timports: [],\n\texports: []\n})\nexport class ${className}Module {}\n`;
-  writeFileSync(envVar, tmplt)
+  writeFileSync(envVar, tmplt);
 }
 
 export function hydrateTabRequest(context: BuildContext, request: GeneratorTabRequest) {
@@ -194,9 +194,9 @@ export async function nonPageFileManipulation(context: BuildContext, name: strin
   let importPath;
   let fileContent: string;
   let templatesArray: string[] = await generateTemplates(context, hydratedRequest, false);
-
-  if (!existsSync(envVar)) createCommonModule(envVar, hydratedRequest.type);
-
+  if (hydratedRequest.type === 'pipe' || hydratedRequest.type === 'component' || hydratedRequest.type === 'directive') {
+    if (!existsSync(envVar)) createCommonModule(envVar, hydratedRequest.type);
+  }
   const typescriptFilePath = changeExtension(templatesArray.filter(path => extname(path) === '.ts')[0], '');
 
 
