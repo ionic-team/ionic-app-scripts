@@ -1,3 +1,19 @@
+<a name="2.1.1"></a>
+## [2.1.1](https://github.com/ionic-team/ionic-app-scripts/compare/v2.1.0...v2.1.1) (2017-07-27)
+
+
+### Bug Fixes
+
+* **generator:** write file sync ([b0bcb05](https://github.com/ionic-team/ionic-app-scripts/commit/b0bcb05))
+* **generators:** add exception for providers ([db9c793](https://github.com/ionic-team/ionic-app-scripts/commit/db9c793))
+
+
+### Features
+
+* **webpack:** update to latest webpack ([67907b6](https://github.com/ionic-team/ionic-app-scripts/commit/67907b6))
+
+
+
 <a name="2.1.0"></a>
 # [2.1.0](https://github.com/ionic-team/ionic-app-scripts/compare/v2.0.2...v2.1.0) (2017-07-25)
 
