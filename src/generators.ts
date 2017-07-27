@@ -4,10 +4,14 @@ import { hydrateRequest, hydrateTabRequest, getNgModules, GeneratorOption, Gener
 
 export { getNgModules, GeneratorOption, GeneratorRequest };
 
-export function processPageRequest(context: BuildContext, name: string, commandOptions: any) {
-
-  const hydratedRequest = hydrateRequest(context, { type: 'page', name, includeNgModule: commandOptions.module });
-  return generateTemplates(context, hydratedRequest, commandOptions.constants);
+export function processPageRequest(context: BuildContext, name: string, commandOptions?: { module?: boolean; constants?: boolean; }) {
+  if (commandOptions) {
+    const hydratedRequest = hydrateRequest(context, { type: 'page', name, includeNgModule: commandOptions.module });
+    return generateTemplates(context, hydratedRequest, commandOptions.constants);
+  }else {
+    const hydratedRequest = hydrateRequest(context, { type: 'page', name, includeNgModule: false });
+    return generateTemplates(context, hydratedRequest);
+  }
 }
 
 export function processPipeRequest(context: BuildContext, name: string, ngModulePath: string) {
@@ -26,9 +30,11 @@ export function processProviderRequest(context: BuildContext, name: string, ngMo
   return nonPageFileManipulation(context, name, ngModulePath, 'provider');
 }
 
-export function processTabsRequest(context: BuildContext, name: string, tabs: any[], commandOptions: any) {
-  const includePageConstants = commandOptions.constants;
-  const includeNgModule = commandOptions.module;
+export function processTabsRequest(context: BuildContext, name: string, tabs: any[],  commandOptions?: { module?: boolean; constants?: boolean; }) {
+
+  const includePageConstants = commandOptions ? commandOptions.constants : false;
+  const includeNgModule = commandOptions ? commandOptions.module : false;
+
   const tabHydratedRequests = tabs.map((tab) => hydrateRequest(context, { type: 'page', name: tab, includeNgModule}));
   const hydratedRequest = hydrateTabRequest(context, { type: 'tabs', name, includeNgModule, tabs: tabHydratedRequests });
 

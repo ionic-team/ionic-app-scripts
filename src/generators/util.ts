@@ -244,7 +244,7 @@ export function tabsModuleManipulation(tabs: string[][], hydratedRequest: Hydrat
 
 }
 
-export function generateTemplates(context: BuildContext, request: HydratedGeneratorRequest, includePageConstants: any): Promise<string[]> {
+export function generateTemplates(context: BuildContext, request: HydratedGeneratorRequest, includePageConstants?: boolean): Promise<string[]> {
   Logger.debug('[Generators] generateTemplates: Reading templates ...');
 
   let pageConstantFile = join(context.pagesDir, 'pages.constants.ts');
