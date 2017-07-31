@@ -11,12 +11,7 @@ export function createBonjourService(config: ServeConfig) {
     .catch(() => 'ionic-app-scripts')
     .then(projectName => {
       try {
-        const mdns = require('mdns');
-        const name = projectName + ':' + config.httpPort;
-        const service = mdns.createAdvertisement(mdns.tcp('ionicdev'), config.httpPort, {
-          name: name,
-        });
-        service.start();
+        const name = startDevApp(projectName, config.httpPort);
         Logger.info(`publishing devapp service (${name})`);
 
       } catch (e) {
@@ -24,4 +19,14 @@ export function createBonjourService(config: ServeConfig) {
         Logger.warn(e);
       }
     });
+}
+
+function startDevApp(projectName: string, port: number) {
+  const mdns = require('mdns');
+  const name = projectName + ':' + port;
+  const service = mdns.createAdvertisement(mdns.tcp('ionicdev'), port, {
+    name: name,
+  });
+  service.start();
+  return name;
 }
