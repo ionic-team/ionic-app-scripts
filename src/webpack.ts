@@ -95,29 +95,29 @@ function webpackBuildComplete(stats: any, context: BuildContext, webpackConfig: 
 
   // set the module files used in this bundle
   // this reference can be used elsewhere in the build (sass)
-  const files: string[] = stats.compilation.modules.map((webpackObj: any) => {
-    if (webpackObj.resource) {
-      return webpackObj.resource;
-    } else {
-      return webpackObj.context;
-    }
-  }).filter((path: string) => {
-    // just make sure the path is not null
-    return path && path.length > 0;
-  });
+  if (!context.isProd || !context.optimizeJs) {
+    const files: string[] = stats.compilation.modules.map((webpackObj: any) => {
+      if (webpackObj.resource) {
+        return webpackObj.resource;
+      } else {
+        return webpackObj.context;
+      }
+    }).filter((path: string) => {
+      // just make sure the path is not null
+      return path && path.length > 0;
+    });
 
-  context.moduleFiles = files;
+    context.moduleFiles = files;
+  }
 
-  return writeBundleFilesToDisk(context);
+  return setBundledFiles(context);
 }
 
-export function writeBundleFilesToDisk(context: BuildContext) {
+export function setBundledFiles(context: BuildContext) {
   const bundledFilesToWrite = context.fileCache.getAll().filter(file => {
     return dirname(file.path).indexOf(context.buildDir) >= 0 && (file.path.endsWith('.js') || file.path.endsWith('.js.map'));
   });
   context.bundledFilePaths = bundledFilesToWrite.map(bundledFile => bundledFile.path);
-  const promises = bundledFilesToWrite.map(bundledFileToWrite => writeFileAsync(bundledFileToWrite.path, bundledFileToWrite.content));
-  return Promise.all(promises);
 }
 
 export function runWebpackFullBuild(config: WebpackConfig) {

@@ -4,7 +4,7 @@ import { basename, dirname, join, relative } from 'path';
 import { Logger } from './logger/logger';
 import * as Constants from './util/constants';
 import { BuildError } from './util/errors';
-import { getBooleanPropertyValue } from './util/helpers';
+import { getBooleanPropertyValue, getStringPropertyValue } from './util/helpers';
 import { BuildContext, ChangedFile } from './util/interfaces';
 import { optimization } from './optimization';
 import { deepLinking, deepLinkingUpdate } from './deep-linking';
@@ -26,7 +26,6 @@ export function preprocess(context: BuildContext) {
 function preprocessWorker(context: BuildContext) {
   const bundlePromise = bundleCoreComponents(context);
   const deepLinksPromise = getBooleanPropertyValue(Constants.ENV_PARSE_DEEPLINKS) ? deepLinking(context) : Promise.resolve();
-
   return Promise.all([bundlePromise, deepLinksPromise])
     .then(() => {
       if (context.optimizeJs) {

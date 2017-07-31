@@ -115,6 +115,7 @@ describe('config', () => {
       expect(fakeConfig[Constants.ENV_DISABLE_LOGGING]).toBeFalsy();
       expect(fakeConfig[Constants.ENV_START_WATCH_TIMEOUT]).toEqual('3000');
       expect(fakeConfig[Constants.ENV_NG_MODULE_FILE_NAME_SUFFIX]).toEqual('.module.ts');
+      expect(fakeConfig[Constants.ENV_POLYFILL_FILE_NAME]).toEqual('polyfills.js');
 
       expect(fakeConfig[Constants.ENV_ACTION_SHEET_CONTROLLER_CLASSNAME]).toEqual('ActionSheetController');
       expect(fakeConfig[Constants.ENV_ACTION_SHEET_CONTROLLER_PATH]).toEqual(join(context.ionicAngularDir, 'components', 'action-sheet', 'action-sheet-controller.js'));

@@ -26,6 +26,9 @@ export interface BuildContext {
   bundledFilePaths?: string[];
   moduleFiles?: string[];
   appNgModulePath?: string;
+  componentsNgModulePath?: string;
+  pipesNgModulePath?: string;
+  directivesNgModulePath?: string;
   isProd?: boolean;
   isWatch?: boolean;
   runAot?: boolean;
@@ -144,6 +147,11 @@ export interface FileSystem {
   readJson(path: string, callback: Function): any;
   readlink(path: string, callback: Function): any;
   purge(what: any): void;
+  writeFile(filePath: string, fileContent: Buffer, callback: Function): void;
+  mkdirp(filePath: string, callback: Function): void;
+  mkdir(filePath: string, callback: Function): void;
+  rmdir(filePath: string, callback: Function): void;
+  unlink(filePath: string, callback: Function): void;
 }
 
 

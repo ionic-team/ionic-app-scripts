@@ -1,3 +1,179 @@
+<a name="2.1.3"></a>
+## [2.1.3](https://github.com/ionic-team/ionic-app-scripts/compare/v2.1.2...v2.1.3) (2017-07-27)
+
+
+### Bug Fixes
+
+* **lab:** remove es6 features from lab ([41a1335](https://github.com/ionic-team/ionic-app-scripts/commit/41a1335))
+
+
+
+<a name="2.1.2"></a>
+## [2.1.2](https://github.com/ionic-team/ionic-app-scripts/compare/v2.1.1...v2.1.2) (2017-07-27)
+
+
+### Bug Fixes
+
+* **generators:** handle old cli ([6fd622c](https://github.com/ionic-team/ionic-app-scripts/commit/6fd622c))
+
+
+
+<a name="2.1.1"></a>
+## [2.1.1](https://github.com/ionic-team/ionic-app-scripts/compare/v2.1.0...v2.1.1) (2017-07-27)
+
+
+### Bug Fixes
+
+* **generator:** write file sync ([b0bcb05](https://github.com/ionic-team/ionic-app-scripts/commit/b0bcb05))
+* **generators:** add exception for providers ([db9c793](https://github.com/ionic-team/ionic-app-scripts/commit/db9c793))
+
+
+### Features
+
+* **webpack:** update to latest webpack ([67907b6](https://github.com/ionic-team/ionic-app-scripts/commit/67907b6))
+
+
+
+<a name="2.1.0"></a>
+# [2.1.0](https://github.com/ionic-team/ionic-app-scripts/compare/v2.0.2...v2.1.0) (2017-07-25)
+
+
+### Bug Fixes
+
+* **generators:** handle no ngModule in tabs ([653d9f2](https://github.com/ionic-team/ionic-app-scripts/commit/653d9f2))
+
+
+### Features
+
+* **generators:** refactor generators ([beaf0d3](https://github.com/ionic-team/ionic-app-scripts/commit/beaf0d3))
+
+
+
+<a name="2.0.2"></a>
+## [2.0.2](https://github.com/ionic-team/ionic-app-scripts/compare/v2.0.1...v2.0.2) (2017-07-13)
+
+## Upgrading
+Make sure you follow the instructions below for upgrading from `1.x` to `2.x`. In the `2.0.2` release, we had to make a small change to the `optimization` config. If you override this config, please review the [change](https://github.com/ionic-team/ionic-app-scripts/commit/785e044) and update your config accordingly.
+
+### Bug Fixes
+
+* **sass:** fix potential null pointer, though it really should never happen ([427e556](https://github.com/ionic-team/ionic-app-scripts/commit/427e556))
+* **webpack:** don't output deptree.js, this requires a minor tweak to the optimization config if you have it customized ([785e044](https://github.com/ionic-team/ionic-app-scripts/commit/785e044))
+* **webpack:** upgrade to webpack 3.2.0 to fix some bugs within Webpack surrounding the ModuleConcatenationPlugin ([f85ade0](https://github.com/ionic-team/ionic-app-scripts/commit/f85ade0))
+
+
+
+<a name="2.0.1"></a>
+## [2.0.1](https://github.com/ionic-team/ionic-app-scripts/compare/v2.0.0...v2.0.1) (2017-07-11)
+
+## Upgrading from 1.x
+
+If you're upgrading directly from `1.3.12` or earlier, make sure you review the changelog for `2.0.0` and follow the [instructions here](https://github.com/ionic-team/ionic-app-scripts/releases/tag/v2.0.0). There were some very updates you'll need to make to your app.
+
+If you're customizing the build process and have a dependency that utilized `webpack@2.x`, it may be best to add an explicit `devDependency` on `webpack@3.1.0` to the project's `package.json` file. There have been a couple reports of non-standard 3rd party dependencies causing trouble with the `webpack` version.
+
+### Bug Fixes
+
+* **generators:** no module by default ([#1096](https://github.com/ionic-team/ionic-app-scripts/issues/1096)) ([dfcaefa](https://github.com/ionic-team/ionic-app-scripts/commit/dfcaefa))
+* **http-server:** revert change for path-based routing since it broke proxies ([065912e](https://github.com/ionic-team/ionic-app-scripts/commit/065912e))
+* **sass:** use webpack/rollup modules for non-optimized build, use optimization data for prod/optimized buids ([0554201](https://github.com/ionic-team/ionic-app-scripts/commit/0554201))
+* **serve:** fix cached file issue by only using the webpack module concat plugin for prod builds, make sure you update custom configs ([feea7fe](https://github.com/ionic-team/ionic-app-scripts/commit/feea7fe))
+* **webpack:** webpack in-memory output file system was breaking some plugins ([574da39](https://github.com/ionic-team/ionic-app-scripts/commit/574da39))
+
+
+
+<a name="2.0.0"></a>
+# [2.0.0](https://github.com/ionic-team/ionic-app-scripts/compare/v1.3.12...v2.0.0) (2017-07-07)
+
+### Breaking Changes
+
+In order to speed up the bundling process, we have separated `node_modules` code into a new, generated file called `vendor.js`. This means that on every change, `ionic-angular`, `@angular`, etc won't need to be processed by `webpack` :tada:
+
+This means that `src/index.html` must be modified to include a new vendor script tag `<script src="build/vendor.js"></script>`. This new script tag must be placed above the `main.js` script tag. For example,
+
+```
+...
+<body>
+
+  <!-- Ionic's root component and where the app will load -->
+  <ion-app></ion-app>
+
+  <script src="cordova.js"></script>
+
+  <!-- The polyfills js is generated during the build process -->
+  <script src="build/polyfills.js"></script>
+
+  <!-- all code from node_modules directory is here -->
+  <script src="build/vendor.js"></script>
+
+  <!-- The bundle js is generated during the build process -->
+  <script src="build/main.js"></script>
+
+</body>
+...
+```
+
+Another side effect of this change is if you are overriding the `webpack` configuration, you will want to update your custom configuration based on the [new default configuration](https://github.com/ionic-team/ionic-app-scripts/blob/master/config/webpack.config.js). The main changes to the config are adding the `ModuleConcatenationPlugin` for scope hoisting for significantly faster apps, and adding the common chunks plugin for the `vendor.js` bundle.
+
+See commits [e14f819](https://github.com/ionic-team/ionic-app-scripts/commit/e14f819) and [141cb23](https://github.com/ionic-team/ionic-app-scripts/commit/141cb23) for the specifics of the `webpack.config.js` change.
+
+### Bug Fixes
+
+* **config:** updated polyname env variable to match convention and fix typo with it ([d64fcb1](https://github.com/ionic-team/ionic-app-scripts/commit/d64fcb1))
+* **lint:** improve linting performance ([106d82c](https://github.com/ionic-team/ionic-app-scripts/commit/106d82c))
+* **sass:** dont try to process invalid directories ([8af9430](https://github.com/ionic-team/ionic-app-scripts/commit/8af9430))
+* **sass:** fix a bug when calling sass task in stand alone fashion ([54bf3f6](https://github.com/ionic-team/ionic-app-scripts/commit/54bf3f6))
+
+
+### Features
+
+* **dev-server:** add support for path-based routing ([2441591](https://github.com/ionic-team/ionic-app-scripts/commit/2441591))
+* **webpack:** add scope hoisting to webpack, update sass to read scss files from disk ([e14f819](https://github.com/ionic-team/ionic-app-scripts/commit/e14f819))
+* **webpack:** use a vendor bundle to minimize code that needs re-bundling and source map generation ([141cb23](https://github.com/ionic-team/ionic-app-scripts/commit/141cb23))
+* **webpack:** webpack 3.1.0 holy speed upgrade! ([a3bde4a](https://github.com/ionic-team/ionic-app-scripts/commit/a3bde4a))
+
+
+
+<a name="1.3.12"></a>
+## [1.3.12](https://github.com/ionic-team/ionic-app-scripts/compare/v1.3.11...v1.3.12) (2017-06-29)
+
+## Bug Fixes
+
+* **dependencies:** Added `reflect-metadata` to the list of dependencies ([e6f8481](https://github.com/ionic-team/ionic-app-scripts/commit/e6f8481)
+
+
+<a name="1.3.11"></a>
+## [1.3.11](https://github.com/ionic-team/ionic-app-scripts/compare/v1.3.10...v1.3.11) (2017-06-28)
+
+## Bug Fixes
+
+* **dependencies:** Removed `peerDependencies`. ([90cd59d](https://github.com/ionic-team/ionic-app-scripts/commit/90cd59d))
+
+
+<a name="1.3.10"></a>
+## [1.3.10](https://github.com/ionic-team/ionic-app-scripts/compare/v1.3.9...v1.3.10) (2017-06-28)
+
+## Notes
+
+Ionic updated to npm 5 across the board, so please update to npm 5 to utilize our lock file when contributing.
+
+### Bug Fixes
+
+* **bonjour:** remove bonjour as its causing trouble for users on Windows without git ([e4b5c59](https://github.com/ionic-team/ionic-app-scripts/commit/e4b5c59))
+
+
+
+<a name="1.3.9"></a>
+## [1.3.9](https://github.com/ionic-team/ionic-app-scripts/compare/v1.3.8...v1.3.9) (2017-06-28)
+
+
+### Features
+
+* **lab:** first iteration of the new Ionic Lab design
+* **scripts:** push npm build to arbitrary tag ([#1060](https://github.com/ionic-team/ionic-app-scripts/issues/1060)) ([4e93f60](https://github.com/ionic-team/ionic-app-scripts/commit/4e93f60))
+
+
+
 <a name="1.3.8"></a>
 ## [1.3.8](https://github.com/ionic-team/ionic-app-scripts/compare/v1.3.7...v1.3.8) (2017-06-21)
 

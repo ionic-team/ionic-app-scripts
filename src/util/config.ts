@@ -180,6 +180,19 @@ export function generateContext(context?: BuildContext): BuildContext {
   setProcessEnvVar(Constants.ENV_APP_NG_MODULE_PATH, context.appNgModulePath);
   Logger.debug(`appNgModulePath set to ${context.appNgModulePath}`);
 
+
+  context.componentsNgModulePath = resolve(getConfigValue(context, '--componentsNgModulePath', null, Constants.ENV_COMPONENTS_NG_MODULE_PATH, Constants.ENV_COMPONENTS_NG_MODULE_PATH.toLowerCase(), join(context.srcDir, 'components', 'components.module.ts')));
+  setProcessEnvVar(Constants.ENV_COMPONENTS_NG_MODULE_PATH, context.componentsNgModulePath);
+  Logger.debug(`componentsNgModulePath set to ${context.componentsNgModulePath}`);
+
+  context.pipesNgModulePath = resolve(getConfigValue(context, '--pipesNgModulePath', null, Constants.ENV_PIPES_NG_MODULE_PATH, Constants.ENV_PIPES_NG_MODULE_PATH.toLowerCase(), join(context.srcDir, 'PIPES', 'pipes.module.ts')));
+  setProcessEnvVar(Constants.ENV_PIPES_NG_MODULE_PATH, context.pipesNgModulePath);
+  Logger.debug(`pipesNgModulePath set to ${context.pipesNgModulePath}`);
+
+  context.directivesNgModulePath = resolve(getConfigValue(context, '--directivesNgModulePath', null, Constants.ENV_DIRECTIVES_NG_MODULE_PATH, Constants.ENV_DIRECTIVES_NG_MODULE_PATH.toLowerCase(), join(context.srcDir, 'directives', 'directives.module.ts')));
+  setProcessEnvVar(Constants.ENV_DIRECTIVES_NG_MODULE_PATH, context.directivesNgModulePath);
+  Logger.debug(`directivesNgModulePath set to ${context.directivesNgModulePath}`);
+
   const appNgModuleClass = getConfigValue(context, '--appNgModuleClass', null, Constants.ENV_APP_NG_MODULE_CLASS, Constants.ENV_APP_NG_MODULE_CLASS.toLowerCase(), 'AppModule');
   setProcessEnvVar(Constants.ENV_APP_NG_MODULE_CLASS, appNgModuleClass);
   Logger.debug(`appNgModuleClass set to ${appNgModuleClass}`);
@@ -259,6 +272,10 @@ export function generateContext(context?: BuildContext): BuildContext {
   const ngModuleFileNameSuffix = getConfigValue(context, '--ngModuleFileNameSuffix', null, Constants.ENV_NG_MODULE_FILE_NAME_SUFFIX, Constants.ENV_NG_MODULE_FILE_NAME_SUFFIX.toLowerCase(), '.module.ts');
   setProcessEnvVar(Constants.ENV_NG_MODULE_FILE_NAME_SUFFIX, ngModuleFileNameSuffix);
   Logger.debug(`ngModuleFileNameSuffix set to ${ngModuleFileNameSuffix}`);
+
+  const polyfillName = getConfigValue(context, '--polyfillFileName', null, Constants.ENV_POLYFILL_FILE_NAME, Constants.ENV_POLYFILL_FILE_NAME.toLowerCase(), 'polyfills.js');
+  setProcessEnvVar(Constants.ENV_POLYFILL_FILE_NAME, polyfillName);
+  Logger.debug(`polyfillName set to ${polyfillName}`);
 
   /* Provider Path Stuff */
   setProcessEnvVar(Constants.ENV_ACTION_SHEET_CONTROLLER_CLASSNAME, 'ActionSheetController');
