@@ -2,7 +2,7 @@ import { Logger } from '../logger/logger';
 import { getProjectJson } from '../util/ionic-project';
 import { ServeConfig } from './serve-config';
 
-export function createBonjourService(config: ServeConfig) {
+export function createDevAppService(config: ServeConfig) {
   if (!config.devapp) {
     return;
   }
@@ -21,12 +21,10 @@ export function createBonjourService(config: ServeConfig) {
     });
 }
 
-function startDevApp(projectName: string, port: number) {
-  const mdns = require('mdns');
-  const name = projectName + ':' + port;
-  const service = mdns.createAdvertisement(mdns.tcp('ionicdev'), port, {
-    name: name,
-  });
+function startDevApp(name: string, port: number): string {
+  const Publisher = require('@ionic/discover').Publisher;
+  const service = new Publisher(name, port);
   service.start();
   return name;
 }
+
