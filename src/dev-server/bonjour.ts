@@ -27,4 +27,3 @@ function startDevApp(name: string, port: number): string {
   service.start();
   return name;
 }
-
