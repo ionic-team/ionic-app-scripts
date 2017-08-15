@@ -90,6 +90,10 @@ export function generateContext(context?: BuildContext): BuildContext {
   setProcessEnvVar(Constants.ENV_VAR_BUILD_DIR, context.buildDir);
   Logger.debug(`buildDir set to ${context.buildDir}`);
 
+  context.sourcemapDir = resolve(context.sourcemapDir || getConfigValue(context, '--sourcemapDir', null, Constants.ENV_VAR_SOURCEMAP_DIR, Constants.ENV_VAR_SOURCEMAP_DIR.toLowerCase(), Constants.SOURCEMAP_DIR));
+  setProcessEnvVar(Constants.ENV_VAR_SOURCEMAP_DIR, context.sourcemapDir);
+  Logger.debug(`sourcemapDir set to ${context.sourcemapDir}`);
+
   context.pagesDir = resolve(context.pagesDir || getConfigValue(context, '--pagesDir', null, Constants.ENV_VAR_PAGES_DIR, Constants.ENV_VAR_PAGES_DIR.toLowerCase(), join(context.srcDir, 'pages')));
   setProcessEnvVar(Constants.ENV_VAR_PAGES_DIR, context.pagesDir);
   Logger.debug(`pagesDir set to ${context.pagesDir}`);
@@ -163,6 +167,10 @@ export function generateContext(context?: BuildContext): BuildContext {
   const sourceMapTypeValue = getConfigValue(context, '--sourceMapType', null, Constants.ENV_VAR_SOURCE_MAP_TYPE, Constants.ENV_VAR_SOURCE_MAP_TYPE.toLowerCase(), Constants.SOURCE_MAP_TYPE_EXPENSIVE);
   setProcessEnvVar(Constants.ENV_VAR_SOURCE_MAP_TYPE, sourceMapTypeValue);
   Logger.debug(`sourceMapType set to ${sourceMapTypeValue}`);
+
+  const moveSourceMaps = getConfigValue(context, '--moveSourceMaps', null, Constants.ENV_VAR_MOVE_SOURCE_MAPS, Constants.ENV_VAR_MOVE_SOURCE_MAPS.toLowerCase(), 'true');
+  setProcessEnvVar(Constants.ENV_VAR_MOVE_SOURCE_MAPS, moveSourceMaps);
+  Logger.debug(`moveSourceMaps set to ${moveSourceMaps}`);
 
   const tsConfigPathValue = resolve(getConfigValue(context, '--tsconfig', null, Constants.ENV_TS_CONFIG, Constants.ENV_TS_CONFIG.toLowerCase(), join(context.rootDir, 'tsconfig.json')));
   setProcessEnvVar(Constants.ENV_TS_CONFIG, tsConfigPathValue);

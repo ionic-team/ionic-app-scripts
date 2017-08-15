@@ -1,6 +1,7 @@
-import { join } from 'path';
+import { join, relative, basename } from 'path';
+import { mkdirpSync } from 'fs-extra';
 import * as Constants from './constants';
-import { getBooleanPropertyValue, readDirAsync, unlinkAsync } from './helpers';
+import { copyFileAsync, getBooleanPropertyValue, readDirAsync, unlinkAsync } from './helpers';
 import { BuildContext } from './interfaces';
 
 export function purgeSourceMapsIfNeeded(context: BuildContext): Promise<any> {
@@ -12,8 +13,18 @@ export function purgeSourceMapsIfNeeded(context: BuildContext): Promise<any> {
     const sourceMaps = fileNames.filter(fileName => fileName.endsWith('.map'));
     const fullPaths = sourceMaps.map(sourceMap => join(context.buildDir, sourceMap));
     const promises: Promise<void>[] = [];
+    const copyBeforePurge = getBooleanPropertyValue(Constants.ENV_VAR_MOVE_SOURCE_MAPS);
     for (const fullPath of fullPaths) {
-      promises.push(unlinkAsync(fullPath));
+      if (copyBeforePurge) {
+        mkdirpSync(context.sourcemapDir)
+        const relativeTo = relative(fullPath, context.sourcemapDir)
+        const fileName = basename(fullPath)
+        promises.push(copyFileAsync(fullPath, join(context.sourcemapDir, fileName)).then(() => {
+          return unlinkAsync(fullPath)
+        }))
+      } else {
+        promises.push(unlinkAsync(fullPath))
+      }
     }
     return Promise.all(promises);
   });
