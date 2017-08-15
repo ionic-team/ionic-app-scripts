@@ -4,11 +4,7 @@ import * as Constants from './constants';
 import { copyFileAsync, getBooleanPropertyValue, readDirAsync, unlinkAsync } from './helpers';
 import { BuildContext } from './interfaces';
 
-export function purgeSourceMapsIfNeeded(context: BuildContext): Promise<any> {
-  if (getBooleanPropertyValue(Constants.ENV_VAR_GENERATE_SOURCE_MAP)) {
-    // keep the source maps and just return
-    return Promise.resolve([]);
-  }
+function copySourcemaps(context: BuildContext, shouldPurge: boolean) {
   return readDirAsync(context.buildDir).then((fileNames) => {
     const sourceMaps = fileNames.filter(fileName => fileName.endsWith('.map'));
     const fullPaths = sourceMaps.map(sourceMap => join(context.buildDir, sourceMap));
@@ -18,14 +14,25 @@ export function purgeSourceMapsIfNeeded(context: BuildContext): Promise<any> {
       if (copyBeforePurge) {
         mkdirpSync(context.sourcemapDir)
         const relativeTo = relative(fullPath, context.sourcemapDir)
-        const fileName = basename(fullPath)
-        promises.push(copyFileAsync(fullPath, join(context.sourcemapDir, fileName)).then(() => {
-          return unlinkAsync(fullPath)
-        }))
-      } else {
+        const fileName = basename(fullPath);
+        if (fileName.indexOf('vendor.js') < 0) {
+          promises.push(copyFileAsync(fullPath, join(context.sourcemapDir, fileName)));
+        }
+      }
+
+      if (shouldPurge) {
         promises.push(unlinkAsync(fullPath))
       }
     }
     return Promise.all(promises);
   });
+}
+
+export function purgeSourceMapsIfNeeded(context: BuildContext): Promise<any> {
+  if (getBooleanPropertyValue(Constants.ENV_VAR_GENERATE_SOURCE_MAP)) {
+    // keep the source maps and just return
+    return copySourcemaps(context, false);
+  }
+
+  return copySourcemaps(context, true);
 }
