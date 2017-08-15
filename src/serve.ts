@@ -65,7 +65,10 @@ export function serve(context: BuildContext) {
       if (err && err.isFatal) {
         throw err;
       } else {
-        onReady(config, context);
+        if (config) {
+          onReady(config, context);
+        }
+
         return config;
       }
     });
