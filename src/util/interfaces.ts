@@ -40,6 +40,7 @@ export interface BuildContext {
   inlineTemplates?: boolean;
   webpackWatch?: any;
   ionicGlobal?: any;
+  sourcemapDir?: string;
 
   sassState?: BuildState;
   transpileState?: BuildState;

@@ -1,3 +1,22 @@
+<a name="2.1.4"></a>
+## [2.1.4](https://github.com/ionic-team/ionic-app-scripts/compare/v2.1.3...v2.1.4) (2017-08-16)
+
+
+### Bug Fixes
+
+* make --lab respect --nobrowser ([8db3be5](https://github.com/ionic-team/ionic-app-scripts/commit/8db3be5))
+* **serve:** allow multiple arguments in console.log ([5c00970](https://github.com/ionic-team/ionic-app-scripts/commit/5c00970))
+* **serve:** fix --consolelogs/--serverlogs usage with Cordova console plugin ([8e64407](https://github.com/ionic-team/ionic-app-scripts/commit/8e64407))
+* **serve:** fix 'launchBrowser' of undefined ([8f71e35](https://github.com/ionic-team/ionic-app-scripts/commit/8f71e35))
+
+
+### Features
+
+* **sourcemaps:** copy for prod and dev ([a1ccc17](https://github.com/ionic-team/ionic-app-scripts/commit/a1ccc17))
+* **sourcemaps:** preserve prod sourcemaps out of code dir ([ee3e41b](https://github.com/ionic-team/ionic-app-scripts/commit/ee3e41b))
+
+
+
 <a name="2.1.3"></a>
 ## [2.1.3](https://github.com/ionic-team/ionic-app-scripts/compare/v2.1.2...v2.1.3) (2017-07-27)
 

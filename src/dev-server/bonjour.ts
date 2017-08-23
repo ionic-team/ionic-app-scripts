@@ -8,7 +8,7 @@ export function createDevAppService(config: ServeConfig) {
   }
   getProjectJson()
     .then(project => project.name)
-    .catch(() => 'ionic-app-scripts')
+    .catch(() => 'app-scripts')
     .then(projectName => {
       try {
         const name = startDevApp(projectName, config.httpPort);
@@ -23,7 +23,8 @@ export function createDevAppService(config: ServeConfig) {
 
 function startDevApp(name: string, port: number): string {
   const Publisher = require('@ionic/discover').Publisher;
-  const service = new Publisher(name, port);
+  name = name + '@' + port;
+  const service = new Publisher('devapp', name, port);
   service.start();
   return name;
 }
