@@ -103,7 +103,7 @@ export function getDeepLinkDecoratorContentForSourceFile(sourceFile: SourceFile)
           }
           let propertyList: Node[] = [];
           if (deepLinkObject && deepLinkObject.properties) {
-            propertyList = deepLinkObject.properties;
+            propertyList = deepLinkObject.properties as any as Node[]; // TODO this typing got jacked up
           }
 
           const deepLinkName = getStringValueFromDeepLinkDecorator(sourceFile, propertyList, className, DEEPLINK_DECORATOR_NAME_ATTRIBUTE);

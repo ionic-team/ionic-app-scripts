@@ -31,7 +31,7 @@ function minifyWorker(context: BuildContext) {
 }
 
 
-export function minifyJs(context: BuildContext): Promise<void> {
+export function minifyJs(context: BuildContext): Promise<any> {
   return isClosureSupported(context).then((result: boolean) => {
     if (result) {
       return closure(context);
