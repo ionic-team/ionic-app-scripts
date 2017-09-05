@@ -138,7 +138,7 @@ export function runWebpackFullBuild(config: WebpackConfig) {
         }
       }
     };
-    const compiler = webpackApi(config);
+    const compiler = webpackApi(config as any);
     compiler.run(callback);
   });
 }
@@ -193,7 +193,7 @@ function handleWebpackBuildSuccess(resolve: Function, reject: Function, stats: a
 
 function startWebpackWatch(context: BuildContext, config: WebpackConfig) {
   Logger.debug('Starting Webpack watch');
-  const compiler = webpackApi(config);
+  const compiler = webpackApi(config as any);
   context.webpackWatch = compiler.watch({}, (err: Error, stats: any) => {
     if (err) {
       eventEmitter.emit(INCREMENTAL_BUILD_FAILED, err);

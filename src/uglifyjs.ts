@@ -54,7 +54,7 @@ async function runUglifyInternal(sourceFilePath: string, destFilePath: string, s
         content: sourceMapContent
     }
   });
-  const result = Uglify.minify(sourceFileContent, uglifyConfig);
+  const result = Uglify.minify(sourceFileContent, uglifyConfig) as any;
   if (result.error) {
     throw new BuildError(`Uglify failed: ${result.error.message}`);
   }

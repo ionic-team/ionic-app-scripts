@@ -233,6 +233,10 @@ export function generateContext(context?: BuildContext): BuildContext {
   setProcessEnvVar(Constants.ENV_WEBPACK_LOADER, webpackLoaderPath);
   Logger.debug(`webpackLoaderPath set to ${webpackLoaderPath}`);
 
+  const cacheLoaderPath = join(getProcessEnvVar(Constants.ENV_VAR_APP_SCRIPTS_DIR), 'dist', 'webpack', 'cache-loader.js');
+  setProcessEnvVar(Constants.ENV_CACHE_LOADER, cacheLoaderPath);
+  Logger.debug(`cacheLoaderPath set to ${cacheLoaderPath}`);
+
   const webpackTranspileLoaderPath = join(getProcessEnvVar(Constants.ENV_VAR_APP_SCRIPTS_DIR), 'dist', 'webpack', 'transpile-loader.js');
   setProcessEnvVar(Constants.ENV_WEBPACK_TRANSPILE_LOADER, webpackTranspileLoaderPath);
   Logger.debug(`webpackTranspileLoaderPath set to ${webpackTranspileLoaderPath}`);
