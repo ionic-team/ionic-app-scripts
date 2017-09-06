@@ -205,12 +205,18 @@ function startWebpackWatch(context: BuildContext, config: WebpackConfig) {
 
 export function getWebpackConfig(context: BuildContext, configFile: string): WebpackConfig {
   configFile = getUserConfigFile(context, taskInfo, configFile);
-
-  let webpackConfig: WebpackConfig = fillConfigDefaults(configFile, taskInfo.defaultConfigFile);
+  const webpackConfig: WebpackConfig = fillConfigDefaults(configFile, getDefaultConfigFileName(context));
   webpackConfig.entry = replacePathVars(context, webpackConfig.entry);
   webpackConfig.output.path = replacePathVars(context, webpackConfig.output.path);
 
   return webpackConfig;
+}
+
+export function getDefaultConfigFileName(context: BuildContext) {
+  if (context.runAot) {
+    return taskInfo.defaultConfigFile + '.prod';
+  }
+  return taskInfo.defaultConfigFile + '.dev';
 }
 
 

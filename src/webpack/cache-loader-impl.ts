@@ -12,7 +12,6 @@ export function cacheLoader(source: string, map: any, webpackContex: any) {
 
     if (getBooleanPropertyValue(Constants.ENV_AOT_WRITE_TO_DISK)) {
       const jsPath = changeExtension(resolve(normalize(webpackContex.resourcePath)), '.js');
-      console.log('jsPath: ', jsPath);
       const newSourceFile = { path: jsPath, content: source};
       context.fileCache.set(jsPath, newSourceFile);
 

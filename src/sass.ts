@@ -110,7 +110,6 @@ function generateSassData(context: BuildContext, sassConfig: SassConfig) {
   const moduleDirectories: string[] = [];
   if (context.moduleFiles) {
     context.moduleFiles.forEach(moduleFile => {
-      // console.log('moduleFile: ', moduleFile);
       const moduleDirectory = dirname(moduleFile);
       if (moduleDirectories.indexOf(moduleDirectory) < 0) {
         moduleDirectories.push(moduleDirectory);
