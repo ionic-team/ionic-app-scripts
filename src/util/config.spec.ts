@@ -99,15 +99,12 @@ describe('config', () => {
       expect(fakeConfig[Constants.ENV_APP_NG_MODULE_CLASS]).toEqual('AppModule');
       expect(fakeConfig[Constants.ENV_GLOB_UTIL]).toEqual(join(fakeConfig[Constants.ENV_VAR_APP_SCRIPTS_DIR], 'dist', 'util', 'glob-util.js'));
       expect(fakeConfig[Constants.ENV_CLEAN_BEFORE_COPY]).toBeFalsy();
-      expect(fakeConfig[Constants.ENV_CLOSURE_JAR]).toEqual(join(fakeConfig[Constants.ENV_VAR_APP_SCRIPTS_DIR], 'bin', 'closure-compiler.jar'));
       expect(fakeConfig[Constants.ENV_OUTPUT_JS_FILE_NAME]).toEqual('main.js');
       expect(fakeConfig[Constants.ENV_OUTPUT_CSS_FILE_NAME]).toEqual('main.css');
       expect(fakeConfig[Constants.ENV_WEBPACK_FACTORY]).toEqual(join(fakeConfig[Constants.ENV_VAR_APP_SCRIPTS_DIR], 'dist', 'webpack', 'ionic-webpack-factory.js'));
       expect(fakeConfig[Constants.ENV_WEBPACK_LOADER]).toEqual(join(fakeConfig[Constants.ENV_VAR_APP_SCRIPTS_DIR], 'dist', 'webpack', 'loader.js'));
       expect(fakeConfig[Constants.ENV_OPTIMIZATION_LOADER]).toEqual(join(fakeConfig[Constants.ENV_VAR_APP_SCRIPTS_DIR], 'dist', 'webpack', 'optimization-loader.js'));
       expect(fakeConfig[Constants.ENV_AOT_WRITE_TO_DISK]).toBeFalsy();
-      expect(fakeConfig[Constants.ENV_PRINT_ORIGINAL_DEPENDENCY_TREE]).toBeFalsy();
-      expect(fakeConfig[Constants.ENV_PRINT_MODIFIED_DEPENDENCY_TREE]).toBeFalsy();
       expect(fakeConfig[Constants.ENV_PRINT_WEBPACK_DEPENDENCY_TREE]).toBeFalsy();
       expect(fakeConfig[Constants.ENV_TYPE_CHECK_ON_LINT]).toBeFalsy();
       expect(fakeConfig[Constants.ENV_BAIL_ON_LINT_ERROR]).toBeFalsy();
@@ -162,11 +159,6 @@ describe('config', () => {
       expect(fakeConfig[Constants.ENV_TOAST_COMPONENT_FACTORY_PATH]).toEqual(join(context.ionicAngularDir, 'components', 'toast', 'toast-component.ngfactory.js'));
 
       expect(fakeConfig[Constants.ENV_PARSE_DEEPLINKS]).toBeTruthy();
-      expect(fakeConfig[Constants.ENV_PURGE_DECORATORS]).toBeTruthy();
-      expect(fakeConfig[Constants.ENV_MANUAL_TREESHAKING]).toBeTruthy();
-
-      expect(fakeConfig[Constants.ENV_USE_EXPERIMENTAL_CLOSURE]).toBeFalsy();
-      expect(fakeConfig[Constants.ENV_USE_EXPERIMENTAL_BABILI]).toBeFalsy();
       expect(fakeConfig[Constants.ENV_BUILD_TO_ES5]).toEqual('true');
       expect(context.bundler).toEqual('webpack');
     });
@@ -303,63 +295,12 @@ describe('config', () => {
 
   describe('config.bundlerStrategy', () => {
 
-    it('should get rollup by full arg', () => {
-      config.addArgv('--rollup');
-      config.addArgv('my.rollup.confg.js');
-      const bundler = config.bundlerStrategy(context);
-      expect(bundler).toEqual('rollup');
-    });
-
-    it('should get rollup by short arg', () => {
-      config.addArgv('-r');
-      config.addArgv('my.rollup.confg.js');
-      const bundler = config.bundlerStrategy(context);
-      expect(bundler).toEqual('rollup');
-    });
-
-    it('should get rollup by bundler arg', () => {
-      config.addArgv('--bundler');
-      config.addArgv('rollup');
-      const bundler = config.bundlerStrategy(context);
-      expect(bundler).toEqual('rollup');
-    });
-
-    it('should get rollup by env var', () => {
-      config.setProcessEnv({
-        ionic_bundler: 'rollup'
-      });
-      config.setAppPackageJsonData({ config: { ionic_bundler: 'rollup' } });
-      const bundler = config.bundlerStrategy(context);
-      expect(bundler).toEqual('rollup');
-    });
-
-    it('should get rollup by package.json config', () => {
-      config.setAppPackageJsonData({ config: { ionic_bundler: 'rollup' } });
-      const bundler = config.bundlerStrategy(context);
-      expect(bundler).toEqual('rollup');
-    });
-
     it('should get webpack with invalid env var', () => {
       config.setProcessEnv({
         ionic_bundler: 'bobsBundler'
       });
       const bundler = config.bundlerStrategy(context);
       expect(bundler).toEqual('webpack');
-    });
-
-    it('should get rollup by env var', () => {
-      config.setProcessEnv({
-        ionic_bundler: 'rollup'
-      });
-      config.setAppPackageJsonData({ config: { ionic_bundler: 'rollup' } });
-      const bundler = config.bundlerStrategy(context);
-      expect(bundler).toEqual('rollup');
-    });
-
-    it('should get rollup by package.json config', () => {
-      config.setAppPackageJsonData({ config: { ionic_bundler: 'rollup' } });
-      const bundler = config.bundlerStrategy(context);
-      expect(bundler).toEqual('rollup');
     });
 
     it('should get webpack by default', () => {

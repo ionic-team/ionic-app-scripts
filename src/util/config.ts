@@ -213,10 +213,6 @@ export function generateContext(context?: BuildContext): BuildContext {
   setProcessEnvVar(Constants.ENV_CLEAN_BEFORE_COPY, cleanBeforeCopy);
   Logger.debug(`cleanBeforeCopy set to ${cleanBeforeCopy}`);
 
-  const closureCompilerJarPath = join(getProcessEnvVar(Constants.ENV_VAR_APP_SCRIPTS_DIR), 'bin', 'closure-compiler.jar');
-  setProcessEnvVar(Constants.ENV_CLOSURE_JAR, closureCompilerJarPath);
-  Logger.debug(`closureCompilerJarPath set to ${closureCompilerJarPath}`);
-
   context.outputJsFileName = getConfigValue(context, '--outputJsFileName', null, Constants.ENV_OUTPUT_JS_FILE_NAME, Constants.ENV_OUTPUT_JS_FILE_NAME.toLowerCase(), 'main.js');
   setProcessEnvVar(Constants.ENV_OUTPUT_JS_FILE_NAME, context.outputJsFileName);
   Logger.debug(`outputJsFileName set to ${context.outputJsFileName}`);
@@ -249,18 +245,9 @@ export function generateContext(context?: BuildContext): BuildContext {
   setProcessEnvVar(Constants.ENV_AOT_WRITE_TO_DISK, aotWriteToDisk);
   Logger.debug(`aotWriteToDisk set to ${aotWriteToDisk}`);
 
-  const printOriginalDependencyTree = getConfigValue(context, '--printOriginalDependencyTree', null, Constants.ENV_PRINT_ORIGINAL_DEPENDENCY_TREE, Constants.ENV_PRINT_ORIGINAL_DEPENDENCY_TREE.toLowerCase(), null);
-  setProcessEnvVar(Constants.ENV_PRINT_ORIGINAL_DEPENDENCY_TREE, printOriginalDependencyTree);
-  Logger.debug(`printOriginalDependencyTree set to ${printOriginalDependencyTree}`);
-
-  const printModifiedDependencyTree = getConfigValue(context, '--printModifiedDependencyTree', null, Constants.ENV_PRINT_MODIFIED_DEPENDENCY_TREE, Constants.ENV_PRINT_MODIFIED_DEPENDENCY_TREE.toLowerCase(), null);
-  setProcessEnvVar(Constants.ENV_PRINT_MODIFIED_DEPENDENCY_TREE, printModifiedDependencyTree);
-  Logger.debug(`printModifiedDependencyTree set to ${printModifiedDependencyTree}`);
-
   const printWebpackDependencyTree = getConfigValue(context, '--printWebpackDependencyTree', null, Constants.ENV_PRINT_WEBPACK_DEPENDENCY_TREE, Constants.ENV_PRINT_WEBPACK_DEPENDENCY_TREE.toLowerCase(), null);
   setProcessEnvVar(Constants.ENV_PRINT_WEBPACK_DEPENDENCY_TREE, printWebpackDependencyTree);
   Logger.debug(`printWebpackDependencyTree set to ${printWebpackDependencyTree}`);
-
   const typeCheckOnLint = getConfigValue(context, '--typeCheckOnLint', null, Constants.ENV_TYPE_CHECK_ON_LINT, Constants.ENV_TYPE_CHECK_ON_LINT.toLowerCase(), null);
   setProcessEnvVar(Constants.ENV_TYPE_CHECK_ON_LINT, typeCheckOnLint);
   Logger.debug(`typeCheckOnLint set to ${typeCheckOnLint}`);
@@ -342,27 +329,10 @@ export function generateContext(context?: BuildContext): BuildContext {
   setProcessEnvVar(Constants.ENV_PARSE_DEEPLINKS, parseDeepLinks);
   Logger.debug(`parseDeepLinks set to ${parseDeepLinks}`);
 
-  const purgeDecorators = getConfigValue(context, '--purgeDecorators', null, Constants.ENV_PURGE_DECORATORS, Constants.ENV_PURGE_DECORATORS.toLowerCase(), 'true');
-  setProcessEnvVar(Constants.ENV_PURGE_DECORATORS, purgeDecorators);
-  Logger.debug(`purgeDecorators set to ${purgeDecorators}`);
-
-  const manualTreeshaking = getConfigValue(context, '--manualTreeshaking', null, Constants.ENV_MANUAL_TREESHAKING, Constants.ENV_MANUAL_TREESHAKING.toLowerCase(), 'true');
-  setProcessEnvVar(Constants.ENV_MANUAL_TREESHAKING, manualTreeshaking);
-  Logger.debug(`manualTreeshaking set to ${manualTreeshaking}`);
-
-  /* Experimental Flags */
-  const useExperimentalClosure = getConfigValue(context, '--useExperimentalClosure', null, Constants.ENV_USE_EXPERIMENTAL_CLOSURE, Constants.ENV_USE_EXPERIMENTAL_CLOSURE.toLowerCase(), null);
-  setProcessEnvVar(Constants.ENV_USE_EXPERIMENTAL_CLOSURE, useExperimentalClosure);
-  Logger.debug(`useExperimentalClosure set to ${useExperimentalClosure}`);
-
-  const useExperimentalBabili = getConfigValue(context, '--useExperimentalBabili', null, Constants.ENV_USE_EXPERIMENTAL_BABILI, Constants.ENV_USE_EXPERIMENTAL_BABILI.toLowerCase(), null);
-  setProcessEnvVar(Constants.ENV_USE_EXPERIMENTAL_BABILI, useExperimentalBabili);
-  Logger.debug(`useExperimentalBabili set to ${useExperimentalBabili}`);
-
   // default stand-alone builds to default to es5
   // if closure is being used, don't worry about this as it already automatically converts to ES5
 
-  const buildToEs5 = getConfigValue(context, '--buildToEs5', null, Constants.ENV_BUILD_TO_ES5, Constants.ENV_BUILD_TO_ES5.toLowerCase(), useExperimentalClosure ? null : 'true');
+  const buildToEs5 = getConfigValue(context, '--buildToEs5', null, Constants.ENV_BUILD_TO_ES5, Constants.ENV_BUILD_TO_ES5.toLowerCase(), 'true');
   setProcessEnvVar(Constants.ENV_BUILD_TO_ES5, buildToEs5);
   Logger.debug(`buildToEs5 set to ${buildToEs5}`);
 
