@@ -23,8 +23,9 @@ export function createDevAppService(config: ServeConfig) {
 
 function startDevApp(name: string, port: number): string {
   const Publisher = require('@ionic/discover').Publisher;
-  name = name + '@' + port;
+  name = `${name}@${port}`;
   const service = new Publisher('devapp', name, port);
+  service.path = '/?devapp=true';
   service.start();
   return name;
 }
