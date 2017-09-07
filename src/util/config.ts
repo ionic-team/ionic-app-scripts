@@ -90,6 +90,10 @@ export function generateContext(context?: BuildContext): BuildContext {
   setProcessEnvVar(Constants.ENV_VAR_BUILD_DIR, context.buildDir);
   Logger.debug(`buildDir set to ${context.buildDir}`);
 
+  const fontsDir = resolve(getConfigValue(context, '--fontsDir', null, Constants.ENV_VAR_FONTS_DIR, Constants.ENV_VAR_FONTS_DIR.toLowerCase(), join(context.wwwDir, 'assets', 'fonts')));
+  setProcessEnvVar(Constants.ENV_VAR_FONTS_DIR, fontsDir);
+  Logger.debug(`fontsDir set to ${fontsDir}`);
+
   context.sourcemapDir = resolve(context.sourcemapDir || getConfigValue(context, '--sourcemapDir', null, Constants.ENV_VAR_SOURCEMAP_DIR, Constants.ENV_VAR_SOURCEMAP_DIR.toLowerCase(), Constants.SOURCEMAP_DIR));
   setProcessEnvVar(Constants.ENV_VAR_SOURCEMAP_DIR, context.sourcemapDir);
   Logger.debug(`sourcemapDir set to ${context.sourcemapDir}`);
@@ -275,6 +279,10 @@ export function generateContext(context?: BuildContext): BuildContext {
   const polyfillName = getConfigValue(context, '--polyfillFileName', null, Constants.ENV_POLYFILL_FILE_NAME, Constants.ENV_POLYFILL_FILE_NAME.toLowerCase(), 'polyfills.js');
   setProcessEnvVar(Constants.ENV_POLYFILL_FILE_NAME, polyfillName);
   Logger.debug(`polyfillName set to ${polyfillName}`);
+
+  const purgeUnusedFonts = getConfigValue(context, '--purgeUnusedFonts', null, Constants.ENV_PURGE_UNUSED_FONTS, Constants.ENV_PURGE_UNUSED_FONTS.toLowerCase(), 'true');
+  setProcessEnvVar(Constants.ENV_PURGE_UNUSED_FONTS, purgeUnusedFonts);
+  Logger.debug(`purgeUnusedFonts set to ${purgeUnusedFonts}`);
 
   /* Provider Path Stuff */
   setProcessEnvVar(Constants.ENV_ACTION_SHEET_CONTROLLER_CLASSNAME, 'ActionSheetController');

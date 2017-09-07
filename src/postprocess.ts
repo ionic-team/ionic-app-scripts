@@ -22,27 +22,32 @@ export function postprocess(context: BuildContext) {
 
 
 function postprocessWorker(context: BuildContext) {
-  return Promise.all([
-    purgeSourceMapsIfNeeded(context),
-    removeUnusedFonts(context),
-    updateIndexHtml(context),
-    writeFilesToDisk(context)
-  ]);
+  const promises: Promise<any>[] = [];
+  promises.push(purgeSourceMapsIfNeeded(context));
+  promises.push(updateIndexHtml(context));
+
+  if (getBooleanPropertyValue(Constants.ENV_AOT_WRITE_TO_DISK)) {
+    promises.push(writeFilesToDisk(context));
+  }
+
+  if (context.optimizeJs && getBooleanPropertyValue(Constants.ENV_PURGE_UNUSED_FONTS)) {
+    promises.push(removeUnusedFonts(context));
+  }
+
+  return Promise.all(promises);
 }
 
 export function writeFilesToDisk(context: BuildContext) {
-  if (getBooleanPropertyValue(Constants.ENV_AOT_WRITE_TO_DISK)) {
-    emptyDirSync(context.tmpDir);
-    const files = context.fileCache.getAll();
-    files.forEach(file => {
-      const dirName = dirname(file.path);
-      const relativePath = relative(process.cwd(), dirName);
-      const tmpPath = join(context.tmpDir, relativePath);
-      const fileName = basename(file.path);
-      const fileToWrite = join(tmpPath, fileName);
-      mkdirpSync(tmpPath);
-      writeFileSync(fileToWrite, file.content);
-    });
-  }
+  emptyDirSync(context.tmpDir);
+  const files = context.fileCache.getAll();
+  files.forEach(file => {
+    const dirName = dirname(file.path);
+    const relativePath = relative(process.cwd(), dirName);
+    const tmpPath = join(context.tmpDir, relativePath);
+    const fileName = basename(file.path);
+    const fileToWrite = join(tmpPath, fileName);
+    mkdirpSync(tmpPath);
+    writeFileSync(fileToWrite, file.content);
+  });
   return Promise.resolve();
 }

@@ -74,6 +74,7 @@ describe('config', () => {
       expect(context.wwwDir).toEqual(join(process.cwd(), Constants.WWW_DIR));
       expect(context.wwwIndex).toEqual('index.html');
       expect(context.buildDir).toEqual(join(process.cwd(), Constants.WWW_DIR, Constants.BUILD_DIR));
+      expect(fakeConfig[Constants.ENV_VAR_FONTS_DIR]).toEqual(join(context.wwwDir, 'assets', 'fonts'));
       expect(context.pagesDir).toEqual(join(context.srcDir, 'pages'));
       expect(context.componentsDir).toEqual(join(context.srcDir, 'components'));
       expect(context.directivesDir).toEqual(join(context.srcDir, 'directives'));

@@ -22,6 +22,7 @@ export const PROVIDER = 'provider';
 export const TABS = 'tabs';
 export const AT_ANGULAR = '@angular';
 export const RXJS = 'rxjs';
+export const CORDOVA = 'cordova';
 
 export const ENV_VAR_PROD = 'prod';
 export const ENV_VAR_DEV = 'dev';
@@ -36,6 +37,7 @@ export const ENV_VAR_PIPES_DIR = 'IONIC_PIPES_DIR';
 export const ENV_VAR_PROVIDERS_DIR = 'IONIC_PROVIDERS_DIR';
 export const ENV_VAR_TMP_DIR = 'IONIC_TMP_DIR';
 export const ENV_VAR_WWW_DIR = 'IONIC_WWW_DIR';
+export const ENV_VAR_FONTS_DIR = 'IONIC_FONTS_DIR';
 export const ENV_VAR_SOURCEMAP_DIR = 'IONIC_SOURCEMAP_DIR';
 export const ENV_VAR_HTML_TO_SERVE = 'IONIC_HTML_TO_SERVE';
 export const ENV_VAR_BUILD_DIR = 'IONIC_BUILD_DIR';
@@ -83,7 +85,7 @@ export const ENV_NG_MODULE_FILE_NAME_SUFFIX = 'IONIC_NG_MODULE_FILENAME_SUFFIX';
 export const ENV_POLYFILL_FILE_NAME = 'IONIC_POLYFILL_FILE_NAME';
 export const ENV_PRINT_WEBPACK_DEPENDENCY_TREE = 'IONIC_PRINT_WEBPACK_DEPENDENCY_TREE';
 export const ENV_PARSE_DEEPLINKS = 'IONIC_PARSE_DEEPLINKS';
-
+export const ENV_PURGE_UNUSED_FONTS = 'IONIC_PURGE_UNUSED_FONTS';
 
 
 /* Providers */
