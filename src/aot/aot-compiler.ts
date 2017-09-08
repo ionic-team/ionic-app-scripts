@@ -51,7 +51,8 @@ export class AotCompiler {
         i18nFile: undefined,
         i18nFormat: undefined,
         locale: undefined,
-        basePath: this.options.rootDir
+        basePath: this.options.rootDir,
+        missingTranslation: null
       };
 
       Logger.debug('[AotCompiler] compile: starting codegen ... ');

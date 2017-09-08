@@ -6,7 +6,7 @@ import { Logger } from '../logger/logger';
 import { getInstance } from '../util/hybrid-file-system-factory';
 import { WatchMemorySystem } from './watch-memory-system';
 
-import * as ContextElementDependency from 'webpack/lib/dependencies/ContextElementDependency';
+const ContextElementDependency = require('webpack/lib/dependencies/ContextElementDependency');
 
 export class IonicEnvironmentPlugin {
   constructor(private context: BuildContext, private writeToDisk: boolean) {

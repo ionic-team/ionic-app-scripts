@@ -138,7 +138,7 @@ export function runWebpackFullBuild(config: WebpackConfig) {
         }
       }
     };
-    const compiler = webpackApi(config);
+    const compiler = webpackApi(config as any);
     compiler.run(callback);
   });
 }
@@ -193,7 +193,7 @@ function handleWebpackBuildSuccess(resolve: Function, reject: Function, stats: a
 
 function startWebpackWatch(context: BuildContext, config: WebpackConfig) {
   Logger.debug('Starting Webpack watch');
-  const compiler = webpackApi(config);
+  const compiler = webpackApi(config as any);
   context.webpackWatch = compiler.watch({}, (err: Error, stats: any) => {
     if (err) {
       eventEmitter.emit(INCREMENTAL_BUILD_FAILED, err);
@@ -205,12 +205,18 @@ function startWebpackWatch(context: BuildContext, config: WebpackConfig) {
 
 export function getWebpackConfig(context: BuildContext, configFile: string): WebpackConfig {
   configFile = getUserConfigFile(context, taskInfo, configFile);
-
-  let webpackConfig: WebpackConfig = fillConfigDefaults(configFile, taskInfo.defaultConfigFile);
+  const webpackConfig: WebpackConfig = fillConfigDefaults(configFile, getDefaultConfigFileName(context));
   webpackConfig.entry = replacePathVars(context, webpackConfig.entry);
   webpackConfig.output.path = replacePathVars(context, webpackConfig.output.path);
 
   return webpackConfig;
+}
+
+export function getDefaultConfigFileName(context: BuildContext) {
+  if (context.runAot) {
+    return taskInfo.defaultConfigFile + '.prod';
+  }
+  return taskInfo.defaultConfigFile + '.dev';
 }
 
 
