@@ -45,8 +45,9 @@ export function preprocessUpdate(changedFiles: ChangedFile[], context: BuildCont
 
 export function lookUpDefaultIonicComponentPaths(context: BuildContext) {
   const componentsDirGlob = join(getStringPropertyValue(Constants.ENV_VAR_IONIC_ANGULAR_DIR), 'components', '**', '*.scss');
+  const platformDirGlob = join(getStringPropertyValue(Constants.ENV_VAR_IONIC_ANGULAR_DIR), 'platform', '**', '*.scss');
   const srcDirGlob = join(getStringPropertyValue(Constants.ENV_VAR_SRC_DIR), '**', '*.scss');
-  return globAll([componentsDirGlob, srcDirGlob]).then((results: GlobResult[]) => {
+  return globAll([componentsDirGlob, platformDirGlob, srcDirGlob]).then((results: GlobResult[]) => {
     const componentPathSet = new Set<string>();
     results.forEach(result => {
       componentPathSet.add(result.absolutePath);
