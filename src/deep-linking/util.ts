@@ -6,6 +6,7 @@ import {
   ClassDeclaration,
   createClassDeclaration,
   createIdentifier,
+  createNamedImports,
   Decorator,
   Expression,
   Identifier,
@@ -24,6 +25,8 @@ import {
   TransformerFactory,
   updateCall,
   updateClassDeclaration,
+  updateImportClause,
+  updateImportDeclaration,
   updateSourceFile,
   visitEachChild,
   VisitResult
@@ -378,51 +381,87 @@ export class ${className}Module {}
 }
 
 export function purgeDeepLinkDecoratorTSTransform(): TransformerFactory<SourceFile> {
-  return (transformContext: TransformationContext) => {
+  return purgeDeepLinkDecoratorTSTransformImpl;
+}
 
-    function visitClassDeclaration(classDeclaration: ClassDeclaration) {
-      let hasDeepLinkDecorator = false;
-      const diffDecorators: Decorator[] = [];
-      for (const decorator of classDeclaration.decorators || []) {
-        if (decorator.expression && (decorator.expression as CallExpression).expression
-          && ((decorator.expression as CallExpression).expression as Identifier).escapedText === DEEPLINK_DECORATOR_TEXT) {
-          hasDeepLinkDecorator = true;
-        } else {
-          diffDecorators.push(decorator);
+export function purgeDeepLinkDecoratorTSTransformImpl(transformContext: TransformationContext) {
+  function visitClassDeclaration(classDeclaration: ClassDeclaration) {
+    let hasDeepLinkDecorator = false;
+    const diffDecorators: Decorator[] = [];
+    for (const decorator of classDeclaration.decorators || []) {
+      if (decorator.expression && (decorator.expression as CallExpression).expression
+        && ((decorator.expression as CallExpression).expression as Identifier).escapedText === DEEPLINK_DECORATOR_TEXT) {
+        hasDeepLinkDecorator = true;
+      } else {
+        diffDecorators.push(decorator);
+      }
+    }
+
+    if (hasDeepLinkDecorator) {
+      return updateClassDeclaration(
+        classDeclaration,
+        diffDecorators,
+        classDeclaration.modifiers,
+        classDeclaration.name,
+        classDeclaration.typeParameters,
+        classDeclaration.heritageClauses,
+        classDeclaration.members
+      );
+
+    }
+
+    return classDeclaration;
+  }
+
+  function visitImportDeclaration(importDeclaration: ImportDeclaration, sourceFile: SourceFile): ImportDeclaration {
+
+    if (importDeclaration.moduleSpecifier
+        && (importDeclaration.moduleSpecifier as StringLiteral).text === 'ionic-angular'
+        && importDeclaration.importClause
+        && importDeclaration.importClause.namedBindings
+        && (importDeclaration.importClause.namedBindings as NamedImports).elements
+    ) {
+      // loop over each import and store it
+      const importSpecifiers: ImportSpecifier[] = [];
+      (importDeclaration.importClause.namedBindings as NamedImports).elements.forEach((importSpecifier: ImportSpecifier) => {
+
+        if (importSpecifier.name.escapedText !== DEEPLINK_DECORATOR_TEXT) {
+          importSpecifiers.push(importSpecifier);
         }
-      }
+      });
+      const emptyNamedImports = createNamedImports(importSpecifiers);
+      const newImportClause = updateImportClause(importDeclaration.importClause, importDeclaration.importClause.name, emptyNamedImports);
 
-      if (hasDeepLinkDecorator) {
-        return updateClassDeclaration(
-          classDeclaration,
-          diffDecorators,
-          classDeclaration.modifiers,
-          classDeclaration.name,
-          classDeclaration.typeParameters,
-          classDeclaration.heritageClauses,
-          classDeclaration.members
-        );
-      }
-
-      return classDeclaration;
+      return updateImportDeclaration(
+        importDeclaration,
+        importDeclaration.decorators,
+        importDeclaration.modifiers,
+        newImportClause,
+        importDeclaration.moduleSpecifier
+      );
     }
 
-    function visit(node: Node): VisitResult<Node> {
-      switch (node.kind) {
 
-        case SyntaxKind.ClassDeclaration:
-          return visitClassDeclaration(node as ClassDeclaration);
+    return importDeclaration;
+  }
 
-        default:
-          return visitEachChild(node, (node) => {
-            return visit(node);
-          }, transformContext);
-      }
+  function visit(node: Node, sourceFile: SourceFile): VisitResult<Node> {
+    switch (node.kind) {
+
+      case SyntaxKind.ClassDeclaration:
+        return visitClassDeclaration(node as ClassDeclaration);
+
+      case SyntaxKind.ImportDeclaration:
+        return visitImportDeclaration(node as ImportDeclaration, sourceFile);
+      default:
+        return visitEachChild(node, (node) => {
+          return visit(node, sourceFile);
+        }, transformContext);
     }
+  }
 
-    return (sourceFile: SourceFile) => {
-      return visit(sourceFile) as SourceFile;
-    };
+  return (sourceFile: SourceFile) => {
+    return visit(sourceFile, sourceFile) as SourceFile;
   };
 }
 
@@ -442,7 +481,51 @@ export function purgeDeepLinkDecorator(inputText: string): string {
   toRemove.forEach(node => {
     toReturn = replaceNode('', inputText, node, '');
   });
+
+  toReturn = purgeDeepLinkImport(toReturn);
   return toReturn;
+}
+
+export function purgeDeepLinkImport(inputText: string): string {
+  const sourceFile = getTypescriptSourceFile('', inputText);
+  const importDeclarations = findNodes(sourceFile, sourceFile, SyntaxKind.ImportDeclaration) as ImportDeclaration[];
+
+  importDeclarations.forEach(importDeclaration => {
+    if (importDeclaration.moduleSpecifier
+        && (importDeclaration.moduleSpecifier as StringLiteral).text === 'ionic-angular'
+        && importDeclaration.importClause
+        && importDeclaration.importClause.namedBindings
+        && (importDeclaration.importClause.namedBindings as NamedImports).elements
+    ) {
+      // loop over each import and store it
+      let decoratorIsImported = false;
+      const namedImportStrings: string[] = [];
+      (importDeclaration.importClause.namedBindings as NamedImports).elements.forEach((importSpecifier: ImportSpecifier) => {
+
+        if (importSpecifier.name.escapedText === DEEPLINK_DECORATOR_TEXT) {
+          decoratorIsImported = true;
+        } else {
+          namedImportStrings.push(importSpecifier.name.escapedText as string);
+        }
+      });
+
+      // okay, cool. If namedImportStrings is empty, then just remove the entire import statement
+      // otherwise, just replace the named imports with the namedImportStrings separated by a comma
+      if (decoratorIsImported) {
+        if (namedImportStrings.length) {
+          // okay cool, we only want to remove some of these homies
+          const stringRepresentation = namedImportStrings.join(', ');
+          const namedImportString = `{ ${stringRepresentation} }`;
+          inputText = replaceNode('', inputText, importDeclaration.importClause.namedBindings, namedImportString);
+        } else {
+          // remove the entire import statement
+          inputText = replaceNode('', inputText, importDeclaration, '');
+        }
+      }
+    }
+  });
+
+  return inputText;
 }
 
 export function getInjectDeepLinkConfigTypescriptTransform() {

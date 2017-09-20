@@ -2039,7 +2039,7 @@ export class AboutPage {
 const expectedContent = `
 import { Component } from '@angular/core';
 
-import { IonicPage, PopoverController } from 'ionic-angular';
+import { PopoverController } from 'ionic-angular';
 
 
 @Component({
@@ -2061,4 +2061,157 @@ export class AboutPage {
       expect(result).toEqual(expectedContent);
     });
   });
+
+  describe('purgeDeepLinkImport', () => {
+    it('should remove the IonicPage decorator but preserve others', () => {
+      const input = `
+import { Component } from '@angular/core';
+
+import { IonicPage, PopoverController } from 'ionic-angular';
+
+@IonicPage()
+@Component({
+  selector: 'page-about',
+  templateUrl: 'about.html'
+})
+export class AboutPage {
+  conferenceDate = '2047-05-17';
+
+  constructor(public popoverCtrl: PopoverController) { }
+
+  presentPopover(event: Event) {
+    let popover = this.popoverCtrl.create('PopoverPage');
+    popover.present({ ev: event });
+  }
+}
+`;
+      const expectedText = `
+import { Component } from '@angular/core';
+
+import { PopoverController } from 'ionic-angular';
+
+@IonicPage()
+@Component({
+  selector: 'page-about',
+  templateUrl: 'about.html'
+})
+export class AboutPage {
+  conferenceDate = '2047-05-17';
+
+  constructor(public popoverCtrl: PopoverController) { }
+
+  presentPopover(event: Event) {
+    let popover = this.popoverCtrl.create('PopoverPage');
+    popover.present({ ev: event });
+  }
+}
+`;
+      const result = util.purgeDeepLinkImport(input);
+      expect(result).toEqual(expectedText);
+    });
+
+    it('should remove the entire import statement', () => {
+      const input = `
+import { Component } from '@angular/core';
+
+import { IonicPage } from 'ionic-angular';
+
+@IonicPage()
+@Component({
+  selector: 'page-about',
+  templateUrl: 'about.html'
+})
+export class AboutPage {
+  conferenceDate = '2047-05-17';
+
+  constructor(public popoverCtrl: PopoverController) { }
+
+  presentPopover(event: Event) {
+    let popover = this.popoverCtrl.create('PopoverPage');
+    popover.present({ ev: event });
+  }
+}
+`;
+      const expectedText = `
+import { Component } from '@angular/core';
+
+
+
+@IonicPage()
+@Component({
+  selector: 'page-about',
+  templateUrl: 'about.html'
+})
+export class AboutPage {
+  conferenceDate = '2047-05-17';
+
+  constructor(public popoverCtrl: PopoverController) { }
+
+  presentPopover(event: Event) {
+    let popover = this.popoverCtrl.create('PopoverPage');
+    popover.present({ ev: event });
+  }
+}
+`;
+      const result = util.purgeDeepLinkImport(input);
+      expect(result).toEqual(expectedText);
+    });
+  });
+
+  describe('purgeDeepLinkDecoratorTSTransform', () => {
+    it('should do something', () => {
+      const input = `
+import { Component } from '@angular/core';
+
+import { IonicPage } from 'ionic-angular';
+
+@IonicPage()
+@Component({
+  selector: 'page-about',
+  templateUrl: 'about.html'
+})
+export class AboutPage {
+  conferenceDate = '2047-05-17';
+
+  constructor(public popoverCtrl: PopoverController) { }
+
+  presentPopover(event: Event) {
+    let popover = this.popoverCtrl.create('PopoverPage');
+    popover.present({ ev: event });
+  }
+}
+`;
+
+const expected = `import { Component } from "@angular/core";
+import { } from "ionic-angular";
+@Component({
+    selector: "page-about",
+    templateUrl: "about.html"
+})
+export class AboutPage {
+    conferenceDate = "2047-05-17";
+    constructor(public popoverCtrl: PopoverController) { }
+    presentPopover(event: Event) {
+        let popover = this.popoverCtrl.create("PopoverPage");
+        popover.present({ ev: event });
+    }
+}
+`;
+      const result = transformSourceFile(input, [util.purgeDeepLinkDecoratorTSTransformImpl]);
+      expect(result).toEqual(expected);
+    });
+  });
 });
+
+
+
+export function transformSourceFile(sourceText: string, transformers: ts.TransformerFactory<ts.SourceFile>[]) {
+  const transformed = ts.transform(ts.createSourceFile('source.ts', sourceText, ts.ScriptTarget.ES2015), transformers);
+  const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed }, {
+      onEmitNode: transformed.emitNodeWithNotification,
+      substituteNode: transformed.substituteNode
+  });
+  const result = printer.printBundle(ts.createBundle(transformed.transformed));
+  transformed.dispose();
+  return result;
+}
