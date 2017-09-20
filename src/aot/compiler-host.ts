@@ -7,7 +7,7 @@ export interface OnErrorFn {
   (message: string): void;
 }
 
-export class NgcCompilerHost implements CompilerHost {
+export class InMemoryCompilerHost implements CompilerHost {
   private sourceFileMap: Map<string, SourceFile>;
   private diskCompilerHost: CompilerHost;
 
@@ -68,7 +68,6 @@ export class NgcCompilerHost implements CompilerHost {
       this.sourceFileMap.set(filePath, typescriptSourceFile);
       return typescriptSourceFile;
     }
-    // dang, it's not in memory, load it from disk and cache it
     const diskSourceFile = this.diskCompilerHost.getSourceFile(filePath, languageVersion, onError);
     this.sourceFileMap.set(filePath, diskSourceFile);
     return diskSourceFile;

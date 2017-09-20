@@ -3,24 +3,41 @@ import { basename, dirname, extname, relative } from 'path';
 import {
   ArrayLiteralExpression,
   CallExpression,
+  ClassDeclaration,
+  createClassDeclaration,
+  createIdentifier,
   Decorator,
   Expression,
   Identifier,
+  ImportDeclaration,
+  ImportSpecifier,
+  NamedImports,
   Node,
+  NodeArray,
   ObjectLiteralExpression,
   PropertyAccessExpression,
   PropertyAssignment,
   SourceFile,
-  SyntaxKind
+  StringLiteral,
+  SyntaxKind,
+  TransformationContext,
+  TransformerFactory,
+  updateCall,
+  updateClassDeclaration,
+  updateSourceFile,
+  visitEachChild,
+  VisitResult
 } from 'typescript';
 
 import { Logger } from '../logger/logger';
 import * as Constants from '../util/constants';
 import { FileCache } from '../util/file-cache';
-import { changeExtension, getStringPropertyValue, replaceAll, toUnixPath } from '../util/helpers';
+import { changeExtension, getParsedDeepLinkConfig, getStringPropertyValue, replaceAll, toUnixPath } from '../util/helpers';
 import { BuildContext, ChangedFile, DeepLinkConfigEntry, DeepLinkDecoratorAndClass, DeepLinkPathInfo, File } from '../util/interfaces';
 import {
+  NG_MODULE_DECORATOR_TEXT,
   appendAfter,
+  findNodes,
   getClassDeclarations,
   getNgModuleClassName,
   getNgModuleDecorator,
@@ -32,10 +49,11 @@ import {
 
 import { transpileTsString } from '../transpile';
 
-export function getDeepLinkData(appNgModuleFilePath: string, fileCache: FileCache, isAot: boolean): DeepLinkConfigEntry[] {
+export function getDeepLinkData(appNgModuleFilePath: string, fileCache: FileCache, isAot: boolean): Map<string, DeepLinkConfigEntry> {
   // we only care about analyzing a subset of typescript files, so do that for efficiency
   const typescriptFiles = filterTypescriptFilesForDeepLinks(fileCache);
-  const deepLinkConfigEntries: DeepLinkConfigEntry[] = [];
+  const deepLinkConfigEntries = new Map<string, DeepLinkConfigEntry>();
+  const segmentSet = new Set<string>();
   typescriptFiles.forEach(file => {
     const sourceFile = getTypescriptSourceFile(file.path, file.content);
     const deepLinkDecoratorData = getDeepLinkDecoratorContentForSourceFile(sourceFile);
@@ -44,7 +62,19 @@ export function getDeepLinkData(appNgModuleFilePath: string, fileCache: FileCach
       // sweet, the page has a DeepLinkDecorator, which means it meets the criteria to process that bad boy
       const pathInfo = getNgModuleDataFromPage(appNgModuleFilePath, file.path, deepLinkDecoratorData.className, fileCache, isAot);
       const deepLinkConfigEntry = Object.assign({}, deepLinkDecoratorData, pathInfo);
-      deepLinkConfigEntries.push(deepLinkConfigEntry);
+
+      if (deepLinkConfigEntries.has(deepLinkConfigEntry.name)) {
+        // gadzooks, it's a duplicate name
+        throw new Error(`There are multiple entries in the deeplink config with the name of ${deepLinkConfigEntry.name}`);
+      }
+
+      if (segmentSet.has(deepLinkConfigEntry.segment)) {
+        // gadzooks, it's a duplicate segment
+        throw new Error(`There are multiple entries in the deeplink config with the segment of ${deepLinkConfigEntry.segment}`);
+      }
+
+      segmentSet.add(deepLinkConfigEntry.segment);
+      deepLinkConfigEntries.set(deepLinkConfigEntry.name, deepLinkConfigEntry);
     }
   });
   return deepLinkConfigEntries;
@@ -96,6 +126,7 @@ export function getDeepLinkDecoratorContentForSourceFile(sourceFile: SourceFile)
       classDeclaration.decorators.forEach(decorator => {
         const className = (classDeclaration.name as Identifier).text;
         if (decorator.expression && (decorator.expression as CallExpression).expression && ((decorator.expression as CallExpression).expression as Identifier).text === DEEPLINK_DECORATOR_TEXT) {
+
           const deepLinkArgs = (decorator.expression as CallExpression).arguments;
           let deepLinkObject: ObjectLiteralExpression = null;
           if (deepLinkArgs && deepLinkArgs.length) {
@@ -238,8 +269,11 @@ function getIonicModuleForRootCall(decorator: Decorator) {
   return ionicModuleFunctionCalls[0] as CallExpression;
 }
 
-export function convertDeepLinkConfigEntriesToString(entries: DeepLinkConfigEntry[]) {
-  const individualLinks = entries.map(entry => convertDeepLinkEntryToJsObjectString(entry));
+export function convertDeepLinkConfigEntriesToString(entries: Map<string, DeepLinkConfigEntry>) {
+  const individualLinks: string[] = [];
+  entries.forEach(entry => {
+    individualLinks.push(convertDeepLinkEntryToJsObjectString(entry));
+  });
   const deepLinkConfigString =
 `
 {
@@ -256,7 +290,7 @@ export function convertDeepLinkEntryToJsObjectString(entry: DeepLinkConfigEntry)
   return `{ loadChildren: '${entry.userlandModulePath}${LOAD_CHILDREN_SEPARATOR}${entry.className}', name: '${entry.name}', segment: ${segmentString}, priority: '${entry.priority}', defaultHistory: [${defaultHistoryWithQuotes.join(', ')}] }`;
 }
 
-export function updateAppNgModuleAndFactoryWithDeepLinkConfig(context: BuildContext, deepLinkString: string, changedFiles: ChangedFile[], isAot: boolean) {
+export function updateAppNgModuleWithDeepLinkConfig(context: BuildContext, deepLinkString: string, changedFiles: ChangedFile[]) {
   const appNgModulePath = getStringPropertyValue(Constants.ENV_APP_NG_MODULE_PATH);
   const appNgModuleFile = context.fileCache.get(appNgModulePath);
 
@@ -267,42 +301,12 @@ export function updateAppNgModuleAndFactoryWithDeepLinkConfig(context: BuildCont
   const updatedAppNgModuleContent = getUpdatedAppNgModuleContentWithDeepLinkConfig(appNgModulePath, appNgModuleFile.content, deepLinkString);
   context.fileCache.set(appNgModulePath, { path: appNgModulePath, content: updatedAppNgModuleContent});
 
-  const appNgModuleOutput = transpileTsString(context, appNgModulePath, updatedAppNgModuleContent);
-  const appNgModuleSourceMapPath = changeExtension(appNgModulePath, '.js.map');
-  const appNgModulePathJsFile = changeExtension(appNgModulePath, '.js');
-  context.fileCache.set(appNgModuleSourceMapPath, { path: appNgModuleSourceMapPath, content: appNgModuleOutput.sourceMapText});
-  context.fileCache.set(appNgModulePathJsFile, { path: appNgModulePathJsFile, content: appNgModuleOutput.outputText});
-
   if (changedFiles) {
     changedFiles.push({
       event: 'change',
       filePath: appNgModulePath,
       ext: extname(appNgModulePath).toLowerCase()
     });
-  }
-
-  if (isAot) {
-    const appNgModuleFactoryPath = changeExtension(appNgModulePath, '.ngfactory.ts');
-    const appNgModuleFactoryFile = context.fileCache.get(appNgModuleFactoryPath);
-    if (!appNgModuleFactoryFile) {
-      throw new Error(`App NgModule Factory ${appNgModuleFactoryPath} not found in cache`);
-    }
-    const updatedAppNgModuleFactoryContent = getUpdatedAppNgModuleFactoryContentWithDeepLinksConfig(appNgModuleFactoryFile.content, deepLinkString);
-    context.fileCache.set(appNgModuleFactoryPath, { path: appNgModuleFactoryPath, content: updatedAppNgModuleFactoryContent});
-    const appNgModuleFactoryOutput = transpileTsString(context, appNgModuleFactoryPath, updatedAppNgModuleFactoryContent);
-
-    const appNgModuleFactorySourceMapPath = changeExtension(appNgModuleFactoryPath, '.js.map');
-    const appNgModuleFactoryPathJsFile = changeExtension(appNgModuleFactoryPath, '.js');
-    context.fileCache.set(appNgModuleFactorySourceMapPath, { path: appNgModuleFactorySourceMapPath, content: appNgModuleFactoryOutput.sourceMapText});
-    context.fileCache.set(appNgModuleFactoryPathJsFile, { path: appNgModuleFactoryPathJsFile, content: appNgModuleFactoryOutput.outputText});
-
-    if (changedFiles) {
-      changedFiles.push({
-        event: 'change',
-        filePath: appNgModuleFactoryPath,
-        ext: extname(appNgModuleFactoryPath).toLowerCase()
-      });
-    }
   }
 }
 
@@ -373,7 +377,146 @@ export class ${className}Module {}
 `;
 }
 
+export function purgeDeepLinkDecoratorTSTransform(): TransformerFactory<SourceFile> {
+  return (transformContext: TransformationContext) => {
 
+    function visitClassDeclaration(classDeclaration: ClassDeclaration) {
+      let hasDeepLinkDecorator = false;
+      const diffDecorators: Decorator[] = [];
+      for (const decorator of classDeclaration.decorators || []) {
+        if (decorator.expression && (decorator.expression as CallExpression).expression
+          && ((decorator.expression as CallExpression).expression as Identifier).escapedText === DEEPLINK_DECORATOR_TEXT) {
+          hasDeepLinkDecorator = true;
+        } else {
+          diffDecorators.push(decorator);
+        }
+      }
+
+      if (hasDeepLinkDecorator) {
+        return updateClassDeclaration(
+          classDeclaration,
+          diffDecorators,
+          classDeclaration.modifiers,
+          classDeclaration.name,
+          classDeclaration.typeParameters,
+          classDeclaration.heritageClauses,
+          classDeclaration.members
+        );
+      }
+
+      return classDeclaration;
+    }
+
+    function visit(node: Node): VisitResult<Node> {
+      switch (node.kind) {
+
+        case SyntaxKind.ClassDeclaration:
+          return visitClassDeclaration(node as ClassDeclaration);
+
+        default:
+          return visitEachChild(node, (node) => {
+            return visit(node);
+          }, transformContext);
+      }
+    }
+
+    return (sourceFile: SourceFile) => {
+      return visit(sourceFile) as SourceFile;
+    };
+  };
+}
+
+export function purgeDeepLinkDecorator(inputText: string): string {
+  const sourceFile = getTypescriptSourceFile('', inputText);
+  const classDeclarations = getClassDeclarations(sourceFile);
+  const toRemove: Node[] = [];
+  let toReturn: string = inputText;
+  for (const classDeclaration of classDeclarations) {
+    for (const decorator of classDeclaration.decorators || []) {
+      if (decorator.expression && (decorator.expression as CallExpression).expression
+        && ((decorator.expression as CallExpression).expression as Identifier).escapedText === DEEPLINK_DECORATOR_TEXT) {
+        toRemove.push(decorator);
+      }
+    }
+  }
+  toRemove.forEach(node => {
+    toReturn = replaceNode('', inputText, node, '');
+  });
+  return toReturn;
+}
+
+export function getInjectDeepLinkConfigTypescriptTransform() {
+  const deepLinkString = convertDeepLinkConfigEntriesToString(getParsedDeepLinkConfig());
+  const appNgModulePath = getStringPropertyValue(Constants.ENV_APP_NG_MODULE_PATH);
+  return injectDeepLinkConfigTypescriptTransform(deepLinkString, appNgModulePath);
+}
+
+export function injectDeepLinkConfigTypescriptTransform(deepLinkString: string, appNgModuleFilePath: string): TransformerFactory<SourceFile> {
+
+  function visitDecoratorNode(decorator: Decorator, sourceFile: SourceFile): Decorator {
+    if (decorator.expression && (decorator.expression as CallExpression).expression && ((decorator.expression as CallExpression).expression as Identifier).escapedText === NG_MODULE_DECORATOR_TEXT) {
+
+      // okay cool, we have the ng module
+      let functionCall = getIonicModuleForRootCall(decorator);
+
+      const updatedArgs: any[] = functionCall.arguments as any as any[];
+
+      if (updatedArgs.length === 1) {
+        updatedArgs.push(createIdentifier('{ }'));
+      }
+
+      if (updatedArgs.length === 2) {
+        updatedArgs.push(createIdentifier(deepLinkString));
+      }
+
+      functionCall = updateCall(
+        functionCall,
+        functionCall.expression,
+        functionCall.typeArguments,
+        updatedArgs
+      );
+
+      // loop over the parent elements and replace the IonicModule expression with ours'
+
+      for (let i = 0; i < ((functionCall.parent as any).elements || []).length; i++) {
+        const element = (functionCall.parent as any).elements[i];
+        if (element.king === SyntaxKind.CallExpression
+            && element.expression
+            && element.expression.expression
+            && element.expression.expression.escapedText === 'IonicModule'
+        ) {
+          (functionCall.parent as any).elements[i] = functionCall;
+        }
+      }
+    }
+
+    return decorator;
+  }
+
+  return (transformContext: TransformationContext) => {
+
+    function visit(node: Node, sourceFile: SourceFile, sourceFilePath: string): VisitResult<Node> {
+      if (sourceFilePath !== appNgModuleFilePath) {
+        return node;
+      }
+
+      switch (node.kind) {
+        case SyntaxKind.Decorator:
+          return visitDecoratorNode(node as Decorator, sourceFile);
+
+        default:
+          return visitEachChild(node, (node) => {
+            return visit(node, sourceFile, sourceFilePath);
+          }, transformContext);
+      }
+
+    }
+
+    return (sourceFile: SourceFile) => {
+      return visit(sourceFile, sourceFile, sourceFile.fileName) as SourceFile;
+    };
+  };
+}
 
 const DEEPLINK_DECORATOR_TEXT = 'IonicPage';
 const DEEPLINK_DECORATOR_NAME_ATTRIBUTE = 'name';

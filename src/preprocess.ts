@@ -6,7 +6,6 @@ import { BuildError } from './util/errors';
 import { GlobResult, globAll } from './util/glob-util';
 import { getBooleanPropertyValue, getStringPropertyValue } from './util/helpers';
 import { BuildContext, ChangedFile } from './util/interfaces';
-import { deepLinking, deepLinkingUpdate } from './deep-linking';
 import { bundleCoreComponents } from './core/bundle-components';
 
 
@@ -24,9 +23,9 @@ export function preprocess(context: BuildContext) {
 
 function preprocessWorker(context: BuildContext) {
   const bundlePromise = bundleCoreComponents(context);
-  const deepLinksPromise = getBooleanPropertyValue(Constants.ENV_PARSE_DEEPLINKS) ? deepLinking(context) : Promise.resolve();
+
   const componentSassPromise = lookUpDefaultIonicComponentPaths(context);
-  return Promise.all([bundlePromise, deepLinksPromise, componentSassPromise]);
+  return Promise.all([bundlePromise, componentSassPromise]);
 }
 
 export function preprocessUpdate(changedFiles: ChangedFile[], context: BuildContext) {
@@ -34,10 +33,6 @@ export function preprocessUpdate(changedFiles: ChangedFile[], context: BuildCont
 
   if (changedFiles.some(cf => cf.ext === '.scss')) {
     promises.push(bundleCoreComponents(context));
-  }
-
-  if (getBooleanPropertyValue(Constants.ENV_PARSE_DEEPLINKS)) {
-    promises.push(deepLinkingUpdate(changedFiles, context));
   }
 
   return Promise.all(promises);
