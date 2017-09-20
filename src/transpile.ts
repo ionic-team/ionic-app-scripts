@@ -29,7 +29,8 @@ export function transpile(context: BuildContext) {
     writeInMemory: true,
     sourceMaps: true,
     cache: true,
-    inlineTemplate: context.inlineTemplates
+    inlineTemplate: context.inlineTemplates,
+    useTransforms: true
   };
 
   const logger = new Logger('transpile');
@@ -52,7 +53,8 @@ export function transpileUpdate(changedFiles: ChangedFile[], context: BuildConte
     writeInMemory: true,
     sourceMaps: true,
     cache: false,
-    inlineTemplate: context.inlineTemplates
+    inlineTemplate: context.inlineTemplates,
+    useTransforms: true
   };
 
   const logger = new Logger('transpile update');
@@ -113,7 +115,7 @@ export function transpileWorker(context: BuildContext, workerConfig: TranspileWo
 
     const beforeArray: ts.TransformerFactory<ts.SourceFile>[] = [];
 
-    if (getBooleanPropertyValue(Constants.ENV_PARSE_DEEPLINKS)) {
+    if (workerConfig.useTransforms && getBooleanPropertyValue(Constants.ENV_PARSE_DEEPLINKS)) {
       beforeArray.push(purgeDeepLinkDecoratorTSTransform());
       beforeArray.push(getInjectDeepLinkConfigTypescriptTransform());
     }
@@ -179,7 +181,7 @@ function transpileUpdateWorker(event: string, filePath: string, context: BuildCo
 
     const beforeArray: ts.TransformerFactory<ts.SourceFile>[] = [];
 
-    if (getBooleanPropertyValue(Constants.ENV_PARSE_DEEPLINKS)) {
+    if (workerConfig.useTransforms && getBooleanPropertyValue(Constants.ENV_PARSE_DEEPLINKS)) {
       beforeArray.push(purgeDeepLinkDecoratorTSTransform());
       beforeArray.push(getInjectDeepLinkConfigTypescriptTransform());
     }
@@ -408,4 +410,5 @@ export interface TranspileWorkerConfig {
   sourceMaps: boolean;
   cache: boolean;
   inlineTemplate: boolean;
+  useTransforms: boolean;
 }
