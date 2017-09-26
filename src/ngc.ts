@@ -1,5 +1,4 @@
 import { RawSourceMap, SourceMapConsumer, SourceMapGenerator } from 'source-map';
-import { buildOptimizer, purify } from '@angular-devkit/build-optimizer';
 
 import { AotCompiler } from './aot/aot-compiler';
 import {
