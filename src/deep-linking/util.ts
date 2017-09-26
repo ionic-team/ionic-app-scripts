@@ -84,9 +84,14 @@ export function getDeepLinkData(appNgModuleFilePath: string, fileCache: FileCach
 }
 
 export function filterTypescriptFilesForDeepLinks(fileCache: FileCache): File[] {
+  return fileCache.getAll().filter(file => isDeepLinkingFile(file.path));
+}
+
+export function isDeepLinkingFile(filePath: string) {
   const deepLinksDir = getStringPropertyValue(Constants.ENV_VAR_DEEPLINKS_DIR);
   const moduleSuffix = getStringPropertyValue(Constants.ENV_NG_MODULE_FILE_NAME_SUFFIX);
-  return fileCache.getAll().filter(file => extname(file.path) === '.ts' && file.path.indexOf(moduleSuffix) === -1 && file.path.indexOf(deepLinksDir) >= 0);
+  const result = extname(filePath) === '.ts' && filePath.indexOf(moduleSuffix) === -1 && filePath.indexOf(deepLinksDir) >= 0;
+  return result;
 }
 
 export function getNgModulePathFromCorrespondingPage(filePath: string) {
@@ -390,7 +395,7 @@ export function purgeDeepLinkDecoratorTSTransformImpl(transformContext: Transfor
     const diffDecorators: Decorator[] = [];
     for (const decorator of classDeclaration.decorators || []) {
       if (decorator.expression && (decorator.expression as CallExpression).expression
-        && ((decorator.expression as CallExpression).expression as Identifier).escapedText === DEEPLINK_DECORATOR_TEXT) {
+        && ((decorator.expression as CallExpression).expression as Identifier).text === DEEPLINK_DECORATOR_TEXT) {
         hasDeepLinkDecorator = true;
       } else {
         diffDecorators.push(decorator);
@@ -425,7 +430,7 @@ export function purgeDeepLinkDecoratorTSTransformImpl(transformContext: Transfor
       const importSpecifiers: ImportSpecifier[] = [];
       (importDeclaration.importClause.namedBindings as NamedImports).elements.forEach((importSpecifier: ImportSpecifier) => {
 
-        if (importSpecifier.name.escapedText !== DEEPLINK_DECORATOR_TEXT) {
+        if (importSpecifier.name.text !== DEEPLINK_DECORATOR_TEXT) {
           importSpecifiers.push(importSpecifier);
         }
       });
@@ -440,7 +445,6 @@ export function purgeDeepLinkDecoratorTSTransformImpl(transformContext: Transfor
         importDeclaration.moduleSpecifier
       );
     }
-
 
     return importDeclaration;
   }
@@ -473,7 +477,7 @@ export function purgeDeepLinkDecorator(inputText: string): string {
   for (const classDeclaration of classDeclarations) {
     for (const decorator of classDeclaration.decorators || []) {
       if (decorator.expression && (decorator.expression as CallExpression).expression
-        && ((decorator.expression as CallExpression).expression as Identifier).escapedText === DEEPLINK_DECORATOR_TEXT) {
+        && ((decorator.expression as CallExpression).expression as Identifier).text === DEEPLINK_DECORATOR_TEXT) {
         toRemove.push(decorator);
       }
     }
@@ -502,10 +506,10 @@ export function purgeDeepLinkImport(inputText: string): string {
       const namedImportStrings: string[] = [];
       (importDeclaration.importClause.namedBindings as NamedImports).elements.forEach((importSpecifier: ImportSpecifier) => {
 
-        if (importSpecifier.name.escapedText === DEEPLINK_DECORATOR_TEXT) {
+        if (importSpecifier.name.text === DEEPLINK_DECORATOR_TEXT) {
           decoratorIsImported = true;
         } else {
-          namedImportStrings.push(importSpecifier.name.escapedText as string);
+          namedImportStrings.push(importSpecifier.name.text as string);
         }
       });
 
@@ -530,14 +534,14 @@ export function purgeDeepLinkImport(inputText: string): string {
 
 export function getInjectDeepLinkConfigTypescriptTransform() {
   const deepLinkString = convertDeepLinkConfigEntriesToString(getParsedDeepLinkConfig());
-  const appNgModulePath = getStringPropertyValue(Constants.ENV_APP_NG_MODULE_PATH);
+  const appNgModulePath = toUnixPath(getStringPropertyValue(Constants.ENV_APP_NG_MODULE_PATH));
   return injectDeepLinkConfigTypescriptTransform(deepLinkString, appNgModulePath);
 }
 
 export function injectDeepLinkConfigTypescriptTransform(deepLinkString: string, appNgModuleFilePath: string): TransformerFactory<SourceFile> {
 
   function visitDecoratorNode(decorator: Decorator, sourceFile: SourceFile): Decorator {
-    if (decorator.expression && (decorator.expression as CallExpression).expression && ((decorator.expression as CallExpression).expression as Identifier).escapedText === NG_MODULE_DECORATOR_TEXT) {
+    if (decorator.expression && (decorator.expression as CallExpression).expression && ((decorator.expression as CallExpression).expression as Identifier).text === NG_MODULE_DECORATOR_TEXT) {
 
       // okay cool, we have the ng module
       let functionCall = getIonicModuleForRootCall(decorator);

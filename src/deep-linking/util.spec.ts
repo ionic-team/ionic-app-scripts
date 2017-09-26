@@ -43,7 +43,12 @@ describe('util', () => {
       fileCache.set(pageThreeModule, { path: pageThreeModule, content: knownFileContent});
       fileCache.set(someOtherFile, { path: someOtherFile, content: knownFileContent});
 
-      spyOn(helpers, helpers.getStringPropertyValue.name).and.returnValues(pagesDir, '.module.ts');
+      spyOn(helpers, helpers.getStringPropertyValue.name).and.callFake((input: string) => {
+        if (input === Constants.ENV_VAR_DEEPLINKS_DIR) {
+          return pagesDir;
+        }
+        return '.module.ts';
+      });
 
       const results = util.filterTypescriptFilesForDeepLinks(fileCache);
       expect(results.length).toEqual(3);
