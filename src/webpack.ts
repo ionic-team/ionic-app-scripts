@@ -205,18 +205,20 @@ function startWebpackWatch(context: BuildContext, config: WebpackConfig) {
 
 export function getWebpackConfig(context: BuildContext, configFile: string): WebpackConfig {
   configFile = getUserConfigFile(context, taskInfo, configFile);
-  const webpackConfig: WebpackConfig = fillConfigDefaults(configFile, getDefaultConfigFileName(context));
+  const webpackConfigDictionary = fillConfigDefaults(configFile, taskInfo.defaultConfigFile);
+  const webpackConfig: WebpackConfig = getWebpackConfigFromDictionary(context, webpackConfigDictionary);
   webpackConfig.entry = replacePathVars(context, webpackConfig.entry);
   webpackConfig.output.path = replacePathVars(context, webpackConfig.output.path);
 
   return webpackConfig;
 }
 
-export function getDefaultConfigFileName(context: BuildContext) {
+export function getWebpackConfigFromDictionary(context: BuildContext, webpackConfigDictionary: any): WebpackConfig {
+  // todo, support more ENV here
   if (context.runAot) {
-    return taskInfo.defaultConfigFile + '.prod';
+    return webpackConfigDictionary['prod'];
   }
-  return taskInfo.defaultConfigFile + '.dev';
+  return webpackConfigDictionary['dev'];
 }
 
 
