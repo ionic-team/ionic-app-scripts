@@ -57,10 +57,8 @@ var optimizedProdLoaders = [
 
 function getProdLoaders() {
   if (process.env.IONIC_OPTIMIZE_JS === 'true') {
-    console.log('using prod loaders');
     return optimizedProdLoaders;
   }
-  console.log('using dev loaders');
   return devConfig.module.loaders;
 }
 
