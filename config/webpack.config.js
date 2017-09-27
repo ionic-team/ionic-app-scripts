@@ -14,6 +14,55 @@ var ionicWebpackFactory = require(process.env.IONIC_WEBPACK_FACTORY);
 var ModuleConcatPlugin = require('webpack/lib/optimize/ModuleConcatenationPlugin');
 var PurifyPlugin = require('@angular-devkit/build-optimizer').PurifyPlugin;
 
+var optimizedProdLoaders = [
+  {
+    test: /\.json$/,
+    loader: 'json-loader'
+  },
+  {
+    test: /\.js$/,
+    loader: [
+      {
+        loader: process.env.IONIC_CACHE_LOADER
+      },
+
+      {
+        loader: '@angular-devkit/build-optimizer/webpack-loader',
+        options: {
+          sourceMap: true
+        }
+      },
+    ]
+  },
+  {
+    test: /\.ts$/,
+    loader: [
+      {
+        loader: process.env.IONIC_CACHE_LOADER
+      },
+
+      {
+        loader: '@angular-devkit/build-optimizer/webpack-loader',
+        options: {
+          sourceMap: true
+        }
+      },
+
+      {
+        loader: process.env.IONIC_WEBPACK_LOADER
+      }
+    ]
+  }
+];
+
+function getProdLoaders() {
+  if (process.env.IONIC_OPTIMIZE_JS === 'true') {
+    console.log('using prod loaders');
+    return optimizedProdLoaders;
+  }
+  console.log('using dev loaders');
+  return devConfig.module.loaders;
+}
 
 var devConfig = {
   entry: process.env.IONIC_APP_ENTRY_POINT,
@@ -73,46 +122,7 @@ var prodConfig = {
   },
 
   module: {
-    loaders: [
-      {
-        test: /\.json$/,
-        loader: 'json-loader'
-      },
-      {
-        test: /\.js$/,
-        loader: [
-          {
-            loader: process.env.IONIC_CACHE_LOADER
-          },
-
-          {
-            loader: '@angular-devkit/build-optimizer/webpack-loader',
-            options: {
-              sourceMap: true
-            }
-          },
-        ]
-      },
-      {
-        test: /\.ts$/,
-        loader: [
-          {
-            loader: process.env.IONIC_CACHE_LOADER
-          },
-
-          {
-            loader: '@angular-devkit/build-optimizer/webpack-loader',
-            options: {
-              sourceMap: true
-            }
-          },
-
-          {
-            loader: process.env.IONIC_WEBPACK_LOADER
-          }
-        ]
-      }
-    ]
+    loaders: getProdLoaders()
   },
 
   plugins: [
