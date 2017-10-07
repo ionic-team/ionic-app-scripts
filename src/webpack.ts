@@ -95,25 +95,22 @@ function webpackBuildComplete(stats: any, context: BuildContext, webpackConfig: 
 
   // set the module files used in this bundle
   // this reference can be used elsewhere in the build (sass)
-  if (!context.isProd || !context.optimizeJs) {
+  const files: string[] = [];
+  stats.compilation.modules.forEach((webpackModule: any) => {
+    if (webpackModule.resource) {
+      files.push(webpackModule.resource);
+    } else if (webpackModule.context) {
+      files.push(webpackModule.context);
+    } else if (webpackModule.fileDependencies) {
+      webpackModule.fileDependencies.forEach((filePath: string) => {
+        files.push(filePath);
+      });
+    }
+  });
 
-    const files: string[] = [];
-    stats.compilation.modules.forEach((webpackModule: any) => {
-      if (webpackModule.resource) {
-        files.push(webpackModule.resource);
-      } else if (webpackModule.context) {
-        files.push(webpackModule.context);
-      } else if (webpackModule.fileDependencies) {
-        webpackModule.fileDependencies.forEach((filePath: string) => {
-          files.push(filePath);
-        });
-      }
-    });
+  const trimmedFiles = files.filter(file => file && file.length > 0);
 
-    const trimmedFiles = files.filter(file => file && file.length > 0);
-
-    context.moduleFiles = trimmedFiles;
-  }
+  context.moduleFiles = trimmedFiles;
 
   return setBundledFiles(context);
 }
