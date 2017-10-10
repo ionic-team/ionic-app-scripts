@@ -234,7 +234,17 @@ export function hasExistingDeepLinkConfig(appNgModuleFilePath: string, appNgModu
   }
 
   const deepLinkConfigArg = functionCall.arguments[2];
-  return deepLinkConfigArg.kind === SyntaxKind.ObjectLiteralExpression;
+  if (deepLinkConfigArg.kind === SyntaxKind.NullKeyword || deepLinkConfigArg.kind === SyntaxKind.UndefinedKeyword) {
+    return false;
+  }
+
+  if (deepLinkConfigArg.kind === SyntaxKind.ObjectLiteralExpression) {
+    return true;
+  }
+
+  if ((deepLinkConfigArg as Identifier).text && (deepLinkConfigArg as Identifier).text.length > 0) {
+    return true;
+  }
 }
 
 function getIonicModuleForRootCall(decorator: Decorator) {
