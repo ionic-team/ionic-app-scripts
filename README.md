@@ -127,7 +127,7 @@ npm run build --webpack ./config/webpack.dev.config.js
 | write AoT files to disk | `ionic_aot_write_to_disk` | `--aotWriteToDisk` | `null` | Set to `true` to write files to disk for debugging |
 | print webpack dependency tree | `ionic_print_webpack_dependency_tree` | `--printWebpackDependencyTree` | `null` | Set to `true` to print out a dependency tree after running Webpack |
 | parse deeplink config | `ionic_parse_deeplinks` | `--parseDeepLinks` | `true` | Parses and extracts data from the `@IonicPage` decorator |
-| convert bundle to ES5 | `ionic_build_to_es5` | `--buildToEs5` | `true` | Convert bundle to ES5 for for production deployments |
+| convert bundle to ES5 | `ionic_build_to_es5` | `--buildToEs5` | `true` | Convert bundle to ES5 for production deployments |
 | default watch timeout | `ionic_start_watch_timeout` | `--startWatchTimeout` | `3000` | Milliseconds controlling the default watch timeout |
 | choose the polyfill  | `ionic_polyfill_name` | `--polyfillName` | `polyfills` | Change with polyfills.modern or polyfills.ng (all options)[https://github.com/driftyco/ionic/tree/master/scripts/polyfill] |
 | enable linting | `ionic_enable_lint` | `--enableLint` | `true` | Set to `false` for skipping the linting after the build |
@@ -169,7 +169,7 @@ These environment variables are automatically set to [Node's `process.env`](http
 | `IONIC_AOT_WRITE_TO_DISK` | `--aotWriteToDisk` | `null` | Set to `true` to write files to disk for debugging |
 | `IONIC_PRINT_WEBPACK_DEPENDENCY_TREE` | boolean to print out a dependency tree after running Webpack |
 | `IONIC_PARSE_DEEPLINKS` | boolean to enable parsing the Ionic 3.x deep links API for lazy loading |
-| `IONIC_BUILD_TO_ES5` | boolean to enable converting bundle to ES5 for for production deployments |
+| `IONIC_BUILD_TO_ES5` | boolean to enable converting bundle to ES5 for production deployments |
 | `IONIC_START_WATCH_TIMEOUT` | Milliseconds controlling the default watch timeout |
 
 
