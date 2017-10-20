@@ -1,3 +1,21 @@
+<a name="3.0.1"></a>
+## [3.0.1](https://github.com/ionic-team/ionic-app-scripts/compare/v3.0.0...v3.0.1) (2017-10-20)
+
+
+### Bug Fixes
+
+* **cleancss:** update to latest version of clean-css to mitigate issue with purging some css that should not be purged ([564bd61](https://github.com/ionic-team/ionic-app-scripts/commit/564bd61))
+* **deep-linking:** ensure hasExistingDeepLinkConfig returns true where there is a config referenced by a variable ([2e40340](https://github.com/ionic-team/ionic-app-scripts/commit/2e40340))
+* **deep-linking:** ensure the deepLinkDir ends in path.sep ([496af40](https://github.com/ionic-team/ionic-app-scripts/commit/496af40))
+* set context right immediately ([802b329](https://github.com/ionic-team/ionic-app-scripts/commit/802b329))
+* **dev-server:** fix for --nolivereload flag to stop reloading ([#1200](https://github.com/ionic-team/ionic-app-scripts/issues/1200)) ([d62f5da](https://github.com/ionic-team/ionic-app-scripts/commit/d62f5da))
+* **html:** limit regex to only applicable script tags for replacing content ([93db0ef](https://github.com/ionic-team/ionic-app-scripts/commit/93db0ef))
+* **proxy:** add a cookieRewrite option which is passed to proxy-middleware. ([#1226](https://github.com/ionic-team/ionic-app-scripts/issues/1226))  ([771ee63](https://github.com/ionic-team/ionic-app-scripts/commit/771ee63))
+* **source-maps:** fix race condition between copying and purging source maps ([f5529b5](https://github.com/ionic-team/ionic-app-scripts/commit/f5529b5))
+* **webpack:** always use modules output from webpack to form default basis of where to look for sass files ([c199ea4](https://github.com/ionic-team/ionic-app-scripts/commit/c199ea4))
+
+
+
 <a name="3.0.0"></a>
 # [3.0.0](https://github.com/ionic-team/ionic-app-scripts/compare/v2.1.4...v3.0.0) (2017-09-28)
 
