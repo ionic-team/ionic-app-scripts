@@ -2,7 +2,7 @@ import { Stats } from 'fs';
 
 const dev = Math.floor(Math.random() * 10000);
 
-export class VirtualStats implements Stats {
+export class VirtualStats {
   protected _ctime = new Date();
   protected _mtime = new Date();
   protected _atime = new Date();
@@ -10,8 +10,8 @@ export class VirtualStats implements Stats {
   protected _dev = dev;
   protected _ino = Math.floor(Math.random() * 100000);
   protected _mode = parseInt('777', 8);  // RWX for everyone.
-  protected _uid = process.env['UID'] || 0;
-  protected _gid = process.env['GID'] || 0;
+  protected _uid = process.env['UID'] ? parseInt(process.env['UID'], 0) : 0;
+  protected _gid = process.env['GID'] ? parseInt(process.env['GID'], 0) : 0;
 
   constructor(protected _path: string) {}
 
