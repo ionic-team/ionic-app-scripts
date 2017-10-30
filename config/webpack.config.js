@@ -26,13 +26,12 @@ var optimizedProdLoaders = [
         loader: process.env.IONIC_CACHE_LOADER
       },
 
-      /*{
+      {
         loader: '@angular-devkit/build-optimizer/webpack-loader',
         options: {
           sourceMap: true
         }
       },
-      */
     ]
   },
   {
@@ -42,13 +41,12 @@ var optimizedProdLoaders = [
         loader: process.env.IONIC_CACHE_LOADER
       },
 
-      /*{
+      {
         loader: '@angular-devkit/build-optimizer/webpack-loader',
         options: {
           sourceMap: true
         }
       },
-      */
 
       {
         loader: process.env.IONIC_WEBPACK_LOADER
