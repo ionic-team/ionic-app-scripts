@@ -1,4 +1,5 @@
 declare module 'autoprefixer';
+declare module 'chalk';
 declare module 'cross-spawn';
 declare module 'mime-types';
 declare module 'proxyquire';
