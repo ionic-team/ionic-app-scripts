@@ -22,6 +22,7 @@ export async function runAot(context: BuildContext, options: AotOptions) {
 
   const angularCompilerOptions = Object.assign({}, {
     basePath: options.rootDir,
+    genDir: options.rootDir,
     entryPoint: options.entryPoint
   });
 
@@ -38,7 +39,7 @@ export async function runAot(context: BuildContext, options: AotOptions) {
     await runNg5Aot(tsConfig, aggregateCompilerOption, compilerHost);
   } else {
     await runNg4Aot({
-      angularCompilerOptions: angularCompilerOptions,
+      angularCompilerOptions: aggregateCompilerOption,
       cliOptions: {
         i18nFile: undefined,
         i18nFormat: undefined,
@@ -55,7 +56,8 @@ export async function runAot(context: BuildContext, options: AotOptions) {
   errorCheckProgram(context, tsConfig, compilerHost, tsProgram);
 
   // update bootstrap in main.ts
-  const mainFile = context.fileCache.get(changeExtension(options.entryPoint, '.js'));
+  const mailFilePath = isNg5(context.angularVersion) ? changeExtension(options.entryPoint, '.js') : options.entryPoint;
+  const mainFile = context.fileCache.get(mailFilePath);
   const modifiedBootstrapContent = replaceBootstrap(mainFile, options.appNgModulePath, options.appNgModuleClass, options);
   mainFile.content = modifiedBootstrapContent;
 
