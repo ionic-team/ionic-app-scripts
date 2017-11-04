@@ -1,11 +1,11 @@
 import { randomBytes } from 'crypto';
 import { basename, dirname, extname, join } from 'path';
-import { createReadStream, createWriteStream, ensureDir, readdir, readFile, readFileSync, readJsonSync, remove, unlink, writeFile } from 'fs-extra';
+import { createReadStream, createWriteStream, ensureDir, readdir, readFile, readFileSync, readJson, readJsonSync, remove, unlink, writeFile } from 'fs-extra';
 import * as osName from 'os-name';
 
 import * as Constants from './constants';
 import { BuildError } from './errors';
-import { BuildContext, DeepLinkConfigEntry, File, WebpackStats } from './interfaces';
+import { BuildContext, DeepLinkConfigEntry, File, WebpackStats, SemverVersion } from './interfaces';
 import { Logger } from '../logger/logger';
 import { CAMEL_CASE_REGEXP } from './helpers/camel-case-regexp';
 import { CAMEL_CASE_UPPER_REGEXP } from './helpers/camel-case-upper-regexp';
@@ -133,6 +133,18 @@ export function readFileAsync(filePath: string) {
     });
   });
 }
+
+export function readJsonAsync(filePath: string): Promise<any> {
+  return new Promise((resolve, reject) => {
+    readJson(filePath, {}, (err, object) => {
+      if (err) {
+        return reject(err);
+      }
+      return resolve(object);
+    });
+  });
+}
+
 
 export function readAndCacheFile(filePath: string, purge: boolean = false): Promise<string> {
   const file = _context.fileCache.get(filePath);
@@ -343,7 +355,7 @@ export function processStatsImpl(webpackStats: WebpackStats) {
 }
 
 export function purgeWebpackPrefixFromPath(filePath: string) {
-  return filePath.replace(process.env[Constants.ENV_OPTIMIZATION_LOADER], '').replace(process.env[Constants.ENV_WEBPACK_LOADER], '').replace('!', '');
+  return filePath.replace(process.env[Constants.ENV_WEBPACK_LOADER], '').replace('!', '');
 }
 
 export function replaceAll(input: string, toReplace: string, replacement: string) {
@@ -447,18 +459,11 @@ export function removeCaseFromString(input: string, inReplacement?: string) {
   return modified.toLowerCase();
 }
 
-export function isSrcOrIonicOrIonicDeps(filePath: string) {
-  return (filePath.startsWith(getStringPropertyValue(Constants.ENV_VAR_AT_ANGULAR_DIR))
-    || filePath.startsWith(getStringPropertyValue(Constants.ENV_VAR_IONIC_ANGULAR_DIR))
-    || filePath.startsWith(getStringPropertyValue(Constants.ENV_VAR_RXJS_DIR))
-    || filePath.startsWith(getStringPropertyValue(Constants.ENV_VAR_SRC_DIR)));
-}
-
-export function isIonicOrAngular(filePath: string) {
-  return (filePath.startsWith(getStringPropertyValue(Constants.ENV_VAR_AT_ANGULAR_DIR))
-    || filePath.startsWith(getStringPropertyValue(Constants.ENV_VAR_IONIC_ANGULAR_DIR)));
-}
-
-export function isIonic(filePath: string) {
-  return filePath.startsWith(getStringPropertyValue(Constants.ENV_VAR_IONIC_ANGULAR_DIR));
+export function semverStringToObject(semverString: string): SemverVersion {
+  const versionArray = semverString.split('.');
+  return {
+    major: parseInt(versionArray[0], 10),
+    minor: parseInt(versionArray[1], 10),
+    patch: parseInt(versionArray[2], 10)
+  };
 }

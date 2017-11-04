@@ -141,9 +141,15 @@ export function generateContext(context?: BuildContext): BuildContext {
   setProcessEnvVar(Constants.ENV_VAR_IONIC_ANGULAR_DIR, context.ionicAngularDir);
   Logger.debug(`ionicAngularDir set to ${context.ionicAngularDir}`);
 
-  const angularDir = resolve(getConfigValue(context, '--angularDir', null, Constants.ENV_VAR_AT_ANGULAR_DIR, Constants.ENV_VAR_AT_ANGULAR_DIR.toLowerCase(), join(context.nodeModulesDir, Constants.AT_ANGULAR)));
-  setProcessEnvVar(Constants.ENV_VAR_AT_ANGULAR_DIR, angularDir);
+  const angularDir = resolve(getConfigValue(context, '--angularDir', null, Constants.ENV_VAR_ANGULAR_CORE_DIR, Constants.ENV_VAR_ANGULAR_CORE_DIR.toLowerCase(), join(context.nodeModulesDir, Constants.AT_ANGULAR, 'core')));
+  setProcessEnvVar(Constants.ENV_VAR_ANGULAR_CORE_DIR, angularDir);
   Logger.debug(`angularDir set to ${angularDir}`);
+  context.angularCoreDir = angularDir;
+
+  const typescriptDir = resolve(getConfigValue(context, '--typescriptDir', null, Constants.ENV_VAR_TYPESCRIPT_DIR, Constants.ENV_VAR_TYPESCRIPT_DIR.toLowerCase(), join(context.nodeModulesDir, Constants.TYPESCRIPT)));
+  setProcessEnvVar(Constants.ENV_VAR_TYPESCRIPT_DIR, typescriptDir);
+  Logger.debug(`typescriptDir set to ${typescriptDir}`);
+  context.typescriptDir = typescriptDir;
 
   const defaultCoreCompilerFilePath = join(context.ionicAngularDir, 'compiler');
   context.coreCompilerFilePath = resolve(context.coreCompilerFilePath || getConfigValue(context, '--coreCompilerFilePath', null, Constants.ENV_VAR_CORE_COMPILER_FILE_PATH, Constants.ENV_VAR_CORE_COMPILER_FILE_PATH.toLowerCase(), defaultCoreCompilerFilePath));
@@ -251,14 +257,6 @@ export function generateContext(context?: BuildContext): BuildContext {
   const cacheLoaderPath = join(getProcessEnvVar(Constants.ENV_VAR_APP_SCRIPTS_DIR), 'dist', 'webpack', 'cache-loader.js');
   setProcessEnvVar(Constants.ENV_CACHE_LOADER, cacheLoaderPath);
   Logger.debug(`cacheLoaderPath set to ${cacheLoaderPath}`);
-
-  const webpackTranspileLoaderPath = join(getProcessEnvVar(Constants.ENV_VAR_APP_SCRIPTS_DIR), 'dist', 'webpack', 'transpile-loader.js');
-  setProcessEnvVar(Constants.ENV_WEBPACK_TRANSPILE_LOADER, webpackTranspileLoaderPath);
-  Logger.debug(`webpackTranspileLoaderPath set to ${webpackTranspileLoaderPath}`);
-
-  const optimizationLoaderPath = join(getProcessEnvVar(Constants.ENV_VAR_APP_SCRIPTS_DIR), 'dist', 'webpack', 'optimization-loader.js');
-  setProcessEnvVar(Constants.ENV_OPTIMIZATION_LOADER, optimizationLoaderPath);
-  Logger.debug(`optimizationLoaderPath set to ${optimizationLoaderPath}`);
 
   const aotWriteToDisk = getConfigValue(context, '--aotWriteToDisk', null, Constants.ENV_AOT_WRITE_TO_DISK, Constants.ENV_AOT_WRITE_TO_DISK.toLowerCase(), null);
   setProcessEnvVar(Constants.ENV_AOT_WRITE_TO_DISK, aotWriteToDisk);

@@ -26,7 +26,7 @@ export function createNotificationServer(config: ServeConfig) {
     if (options.hasOwnProperty('broadcast') && options.broadcast) {
       sendMethod = wss.broadcast;
     }
-    if (sendMethod && wss.clients.length > 0) {
+    if (sendMethod && wss.clients.size > 0) {
       let msg: any;
       while (msg = msgToClient.shift()) {
         try {

@@ -614,7 +614,7 @@ export class HomePageModule {}
 
       const result = util.getNgModuleDataFromPage(appNgModulePath, pagePath, knownClassName, fileCache, false);
 
-      expect(result.absolutePath).toEqual(pageNgModulePath);
+      expect(result.absolutePath).toEqual(helpers.changeExtension(pageNgModulePath, '.js'));
       expect(result.userlandModulePath).toEqual('../pages/page-one/page-one.module');
       expect(result.className).toEqual('HomePageModule');
     });
@@ -646,7 +646,7 @@ export class HomePageModule {}
       spyOn(helpers, helpers.getStringPropertyValue.name).and.returnValue('.module.ts');
 
       const result = util.getNgModuleDataFromPage(appNgModulePath, pagePath, knownClassName, fileCache, true);
-      expect(result.absolutePath).toEqual(helpers.changeExtension(pageNgModulePath, '.ngfactory.ts'));
+      expect(result.absolutePath).toEqual(helpers.changeExtension(pageNgModulePath, '.ngfactory.js'));
       expect(result.userlandModulePath).toEqual('../pages/page-one/page-one.module.ngfactory');
       expect(result.className).toEqual('HomePageModuleNgFactory');
     });
@@ -1224,7 +1224,7 @@ export class PageThreeModule {
       expect(entryOne.segment).toEqual('page-one');
       expect(entryOne.priority).toEqual('low');
       expect(entryOne.defaultHistory.length).toEqual(0);
-      expect(entryOne.absolutePath).toEqual(join(srcDir, 'pages', 'page-one', 'page-one.module.ts'));
+      expect(entryOne.absolutePath).toEqual(join(srcDir, 'pages', 'page-one', 'page-one.module.js'));
       expect(entryOne.userlandModulePath).toEqual('../pages/page-one/page-one.module');
       expect(entryOne.className).toEqual('PageOneModule');
 
@@ -1233,7 +1233,7 @@ export class PageThreeModule {
       expect(entryTwo.segment).toEqual('page-two');
       expect(entryTwo.priority).toEqual('low');
       expect(entryTwo.defaultHistory.length).toEqual(0);
-      expect(entryTwo.absolutePath).toEqual(join(srcDir, 'pages', 'page-two', 'page-two.module.ts'));
+      expect(entryTwo.absolutePath).toEqual(join(srcDir, 'pages', 'page-two', 'page-two.module.js'));
       expect(entryTwo.userlandModulePath).toEqual('../pages/page-two/page-two.module');
       expect(entryTwo.className).toEqual('PageTwoModule');
 
@@ -1244,7 +1244,7 @@ export class PageThreeModule {
       expect(entryThree.defaultHistory.length).toEqual(2);
       expect(entryThree.defaultHistory[0]).toEqual('page-one');
       expect(entryThree.defaultHistory[1]).toEqual('page-two');
-      expect(entryThree.absolutePath).toEqual(join(srcDir, 'pages', 'settings-page', 'fake-dir', 'settings-page.module.ts'));
+      expect(entryThree.absolutePath).toEqual(join(srcDir, 'pages', 'settings-page', 'fake-dir', 'settings-page.module.js'));
       expect(entryThree.userlandModulePath).toEqual('../pages/settings-page/fake-dir/settings-page.module');
       expect(entryThree.className).toEqual('PageThreeModule');
     });

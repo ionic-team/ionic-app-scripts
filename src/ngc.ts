@@ -1,6 +1,6 @@
 import { RawSourceMap, SourceMapConsumer, SourceMapGenerator } from 'source-map';
 
-import { AotCompiler } from './aot/aot-compiler';
+import { runAot } from './aot/aot-compiler';
 import {
   convertDeepLinkConfigEntriesToString,
   getUpdatedAppNgModuleContentWithDeepLinkConfig,
@@ -35,13 +35,12 @@ export function ngcWorker(context: BuildContext, configFile: string): Promise<an
 }
 
 export function runNgc(context: BuildContext, configFile: string): Promise<any> {
-  const compiler = new AotCompiler(context, { entryPoint: process.env[Constants.ENV_APP_ENTRY_POINT],
+  return runAot(context, { entryPoint: process.env[Constants.ENV_APP_ENTRY_POINT],
     rootDir: context.rootDir,
     tsConfigPath: process.env[Constants.ENV_TS_CONFIG],
     appNgModuleClass: process.env[Constants.ENV_APP_NG_MODULE_CLASS],
     appNgModulePath: process.env[Constants.ENV_APP_NG_MODULE_PATH]
   });
-  return compiler.compile();
 }
 
 export function transformTsForDeepLinking(context: BuildContext) {

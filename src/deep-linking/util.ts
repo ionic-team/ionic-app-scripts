@@ -113,7 +113,7 @@ export function getNgModuleDataFromPage(appNgModuleFilePath: string, filePath: s
   const exportedClassName = getNgModuleClassName(ngModuleFile.path, ngModuleFile.content);
   const relativePathToAppNgModule = getRelativePathToPageNgModuleFromAppNgModule(appNgModuleFilePath, ngModulePath);
 
-  const absolutePath = isAot ? changeExtension(ngModulePath, '.ngfactory.ts') : ngModulePath;
+  const absolutePath = isAot ? changeExtension(ngModulePath, '.ngfactory.js') : changeExtension(ngModulePath, '.js');
   const userlandModulePath = isAot ? changeExtension(relativePathToAppNgModule, '.ngfactory') : changeExtension(relativePathToAppNgModule, '');
   const namedExport = isAot ? `${exportedClassName}NgFactory` : exportedClassName;
 

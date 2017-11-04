@@ -1,9 +1,14 @@
 import * as CompilerCLI from '@angular/compiler-cli';
-import AngularCompilerOptions from '@angular/tsc-wrapped/src/options';
 import { CompilerHost, CompilerOptions, Program } from 'typescript';
 
 import { FileCache } from './file-cache';
 import { VirtualDirStats, VirtualFileStats } from './virtual-file-utils';
+
+export interface SemverVersion {
+  major: number;
+  minor: number;
+  patch: number;
+}
 
 export interface BuildContext {
   rootDir?: string;
@@ -20,6 +25,8 @@ export interface BuildContext {
   outputJsFileName?: string;
   outputCssFileName?: string;
   nodeModulesDir?: string;
+  angularCoreDir?: string;
+  typescriptDir?: string;
   ionicAngularDir?: string;
   coreCompilerFilePath?: string;
   coreDir?: string;
@@ -53,6 +60,10 @@ export interface BuildContext {
 
   // platform examples: ios, android, windows
   platform?: string;
+
+  angularVersion?: SemverVersion;
+  ionicAngularVersion?: SemverVersion;
+  typescriptVersion?: SemverVersion;
 }
 
 
@@ -190,8 +201,8 @@ export interface AppNgModuleInfo {
 }
 
 export interface CodegenOptions {
-  angularCompilerOptions: AngularCompilerOptions;
-  cliOptions: CompilerCLI.NgcCliOptions;
+  angularCompilerOptions: any;
+  cliOptions: any;
   program: Program;
   compilerHost: CompilerHost;
   compilerOptions: CompilerOptions;

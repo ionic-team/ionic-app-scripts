@@ -87,7 +87,8 @@ describe('config', () => {
       expect(context.providersDir).toEqual(join(context.srcDir, 'providers'));
       expect(context.nodeModulesDir).toEqual(join(process.cwd(), Constants.NODE_MODULES));
       expect(context.ionicAngularDir).toEqual(join(process.cwd(), Constants.NODE_MODULES, Constants.IONIC_ANGULAR));
-      expect(fakeConfig[Constants.ENV_VAR_AT_ANGULAR_DIR]).toEqual(join(process.cwd(), Constants.NODE_MODULES, Constants.AT_ANGULAR));
+      expect(fakeConfig[Constants.ENV_VAR_ANGULAR_CORE_DIR]).toEqual(join(process.cwd(), Constants.NODE_MODULES, Constants.AT_ANGULAR, 'core'));
+      expect(fakeConfig[Constants.ENV_VAR_TYPESCRIPT_DIR]).toEqual(join(process.cwd(), Constants.NODE_MODULES, Constants.TYPESCRIPT));
       expect(context.coreCompilerFilePath).toEqual(join(context.ionicAngularDir, 'compiler'));
       expect(context.coreDir).toEqual(context.ionicAngularDir);
       expect(fakeConfig[Constants.ENV_VAR_RXJS_DIR]).toEqual(join(process.cwd(), Constants.NODE_MODULES, Constants.RXJS));
@@ -109,7 +110,6 @@ describe('config', () => {
       expect(fakeConfig[Constants.ENV_OUTPUT_CSS_FILE_NAME]).toEqual('main.css');
       expect(fakeConfig[Constants.ENV_WEBPACK_FACTORY]).toEqual(join(fakeConfig[Constants.ENV_VAR_APP_SCRIPTS_DIR], 'dist', 'webpack', 'ionic-webpack-factory.js'));
       expect(fakeConfig[Constants.ENV_WEBPACK_LOADER]).toEqual(join(fakeConfig[Constants.ENV_VAR_APP_SCRIPTS_DIR], 'dist', 'webpack', 'loader.js'));
-      expect(fakeConfig[Constants.ENV_OPTIMIZATION_LOADER]).toEqual(join(fakeConfig[Constants.ENV_VAR_APP_SCRIPTS_DIR], 'dist', 'webpack', 'optimization-loader.js'));
       expect(fakeConfig[Constants.ENV_AOT_WRITE_TO_DISK]).toBeFalsy();
       expect(fakeConfig[Constants.ENV_PRINT_WEBPACK_DEPENDENCY_TREE]).toBeFalsy();
       expect(fakeConfig[Constants.ENV_TYPE_CHECK_ON_LINT]).toBeFalsy();

@@ -114,7 +114,7 @@ function importAndEnableProdMode(filePath: string, fileContent: string) {
   return modifiedFileContent;
 }
 
-export function replaceBootstrap(filePath: string, fileContent: string, appNgModulePath: string, appNgModuleClassName: string) {
+export function replaceBootstrapImpl(filePath: string, fileContent: string, appNgModulePath: string, appNgModuleClassName: string) {
   if (!fileContent.match(/\bbootstrapModule\b/)) {
     throw new Error(`Could not find bootstrapModule in ${filePath}`);
   }

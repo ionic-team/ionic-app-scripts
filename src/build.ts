@@ -1,10 +1,13 @@
 import { join } from 'path';
-import { scanSrcTsFiles } from './build/util';
-import * as Constants from './util/constants';
-import { BuildContext, BuildState, BuildUpdateMessage, ChangedFile } from './util/interfaces';
-import { BuildError } from './util/errors';
-import { emit, EventType } from './util/events';
-import { getBooleanPropertyValue, readFileAsync, setContext } from './util/helpers';
+
+import {
+  readVersionOfDependencies,
+  scanSrcTsFiles,
+  validateRequiredFilesExist,
+  validateTsConfigSettings
+} from './build/util';
+
+
 import { bundle, bundleUpdate } from './bundle';
 import { clean } from './clean';
 import { copy } from './copy';
@@ -19,6 +22,11 @@ import { preprocess, preprocessUpdate } from './preprocess';
 import { sass, sassUpdate } from './sass';
 import { templateUpdate } from './template';
 import { transpile, transpileUpdate, transpileDiagnosticsOnly } from './transpile';
+import * as Constants from './util/constants';
+import { BuildError } from './util/errors';
+import { emit, EventType } from './util/events';
+import { getBooleanPropertyValue, readFileAsync, setContext } from './util/helpers';
+import { BuildContext, BuildState, BuildUpdateMessage, ChangedFile } from './util/interfaces';
 
 export function build(context: BuildContext) {
   setContext(context);
@@ -35,63 +43,15 @@ export function build(context: BuildContext) {
     });
 }
 
-function buildWorker(context: BuildContext) {
-  return Promise.resolve().then(() => {
-    // load any 100% required files to ensure they exist
-    return validateRequiredFilesExist(context);
-  })
-    .then(([_, tsConfigContents]) => {
-      return validateTsConfigSettings(tsConfigContents);
-    })
-    .then(() => {
-      return buildProject(context);
-    });
-}
+async function buildWorker(context: BuildContext) {
+  const promises: Promise<any>[] = [];
+  promises.push(validateRequiredFilesExist(context));
+  promises.push(readVersionOfDependencies(context));
+  const results = await Promise.all(promises);
+  const tsConfigContents = results[0][1];
+  await validateTsConfigSettings(tsConfigContents);
+  await buildProject(context);
 
-function validateRequiredFilesExist(context: BuildContext) {
-  return Promise.all([
-    readFileAsync(process.env[Constants.ENV_APP_ENTRY_POINT]),
-    getTsConfigAsync(context, process.env[Constants.ENV_TS_CONFIG])
-  ]).catch((error) => {
-    if (error.code === 'ENOENT' && error.path === process.env[Constants.ENV_APP_ENTRY_POINT]) {
-      error = new BuildError(`${error.path} was not found. The "main.dev.ts" and "main.prod.ts" files have been deprecated. Please create a new file "main.ts" containing the content of "main.dev.ts", and then delete the deprecated files.
-                            For more information, please see the default Ionic project main.ts file here:
-                            https://github.com/ionic-team/ionic2-app-base/tree/master/src/app/main.ts`);
-      error.isFatal = true;
-      throw error;
-    }
-    if (error.code === 'ENOENT' && error.path === process.env[Constants.ENV_TS_CONFIG]) {
-      error = new BuildError([`${error.path} was not found. The "tsconfig.json" file is missing. This file is required.`,
-        'For more information please see the default Ionic project tsconfig.json file here:',
-        'https://github.com/ionic-team/ionic2-app-base/blob/master/tsconfig.json'].join('\n'));
-      error.isFatal = true;
-      throw error;
-    }
-    error.isFatal = true;
-    throw error;
-  });
-}
-
-function validateTsConfigSettings(tsConfigFileContents: TsConfig) {
-
-  return new Promise((resolve, reject) => {
-    try {
-      const isValid = tsConfigFileContents.options &&
-        tsConfigFileContents.options.sourceMap === true;
-      if (!isValid) {
-        const error = new BuildError(['The "tsconfig.json" file must have compilerOptions.sourceMap set to true.',
-          'For more information please see the default Ionic project tsconfig.json file here:',
-          'https://github.com/ionic-team/ionic2-app-base/blob/master/tsconfig.json'].join('\n'));
-        error.isFatal = true;
-        return reject(error);
-      }
-      resolve();
-    } catch (e) {
-      const error = new BuildError('The "tsconfig.json" file contains malformed JSON.');
-      error.isFatal = true;
-      return reject(error);
-    }
-  });
 }
 
 function buildProject(context: BuildContext) {

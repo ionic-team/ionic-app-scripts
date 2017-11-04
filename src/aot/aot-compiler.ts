@@ -2,112 +2,72 @@ import { readFileSync } from 'fs-extra';
 import { extname, normalize, resolve } from 'path';
 
 import 'reflect-metadata';
-import { CompilerOptions, createProgram, ParsedCommandLine, Program,  transpileModule, TranspileOptions, TranspileOutput } from 'typescript';
-import { NgcCliOptions }from '@angular/compiler-cli';
-import { tsc } from '@angular/tsc-wrapped/src/tsc';
-import AngularCompilerOptions from '@angular/tsc-wrapped/src/options';
+import { CompilerHost, CompilerOptions, ParsedCommandLine, Program,  transpileModule, TranspileOptions, TranspileOutput, createProgram } from 'typescript';
 
 import { HybridFileSystem } from '../util/hybrid-file-system';
 import { getInstance as getHybridFileSystem } from '../util/hybrid-file-system-factory';
 import { getInMemoryCompilerHostInstance } from './compiler-host-factory';
 import { InMemoryCompilerHost } from './compiler-host';
-import { getFallbackMainContent, replaceBootstrap } from './utils';
+import { getFallbackMainContent, replaceBootstrapImpl } from './utils';
 import { Logger } from '../logger/logger';
 import { printDiagnostics, clearDiagnostics, DiagnosticsType } from '../logger/logger-diagnostics';
 import { runTypeScriptDiagnostics } from '../logger/logger-typescript';
+import { getTsConfig, TsConfig } from '../transpile';
 import { BuildError } from '../util/errors';
-import { changeExtension } from '../util/helpers';
-import { BuildContext } from '../util/interfaces';
+import { changeExtension, readFileAsync } from '../util/helpers';
+import { BuildContext, CodegenOptions, File, SemverVersion } from '../util/interfaces';
 
-import { doCodegen } from './codegen';
+export async function runAot(context: BuildContext, options: AotOptions) {
+  const tsConfig = getTsConfig(context);
 
-export class AotCompiler {
+  const angularCompilerOptions = Object.assign({}, {
+    basePath: options.rootDir,
+    entryPoint: options.entryPoint
+  });
 
-  private tsConfig: ParsedTsConfig;
-  private angularCompilerOptions: AngularCompilerOptions;
-  private program: Program;
-  private compilerHost: InMemoryCompilerHost;
-  private fileSystem: HybridFileSystem;
-  private lazyLoadedModuleDictionary: any;
+  const aggregateCompilerOption = Object.assign(tsConfig.options, angularCompilerOptions);
 
-  constructor(private context: BuildContext, private options: AotOptions) {
-    this.tsConfig = getNgcConfig(this.context, this.options.tsConfigPath);
+  const fileSystem = getHybridFileSystem(false);
+  const compilerHost = getInMemoryCompilerHostInstance(tsConfig.options);
+  // todo, consider refactoring at some point
+  const tsProgram = createProgram(tsConfig.fileNames, tsConfig.options, compilerHost);
 
-    this.angularCompilerOptions = Object.assign({}, this.tsConfig.ngOptions, {
-      basePath: this.options.rootDir,
-      entryPoint: this.options.entryPoint
-    });
+  clearDiagnostics(context, DiagnosticsType.TypeScript);
 
-    this.fileSystem = getHybridFileSystem(false);
-    this.compilerHost = getInMemoryCompilerHostInstance(this.tsConfig.parsed.options);
-    this.program = createProgram(this.tsConfig.parsed.fileNames, this.tsConfig.parsed.options, this.compilerHost);
-  }
-
-  compile(): Promise<any> {
-    return Promise.resolve().then(() => {
-    }).then(() => {
-      clearDiagnostics(this.context, DiagnosticsType.TypeScript);
-      const i18nOptions: NgcCliOptions = {
+  if (isNg5(context.angularVersion)) {
+    await runNg5Aot(tsConfig, aggregateCompilerOption, compilerHost);
+  } else {
+    await runNg4Aot({
+      angularCompilerOptions: angularCompilerOptions,
+      cliOptions: {
         i18nFile: undefined,
         i18nFormat: undefined,
         locale: undefined,
-        basePath: this.options.rootDir,
+        basePath: options.rootDir,
         missingTranslation: null
-      };
-
-      Logger.debug('[AotCompiler] compile: starting codegen ... ');
-      return doCodegen({
-        angularCompilerOptions: this.angularCompilerOptions,
-        cliOptions: i18nOptions,
-        program: this.program,
-        compilerHost: this.compilerHost,
-        compilerOptions: this.tsConfig.parsed.options
-      });
-    }).then(() => {
-      Logger.debug('[AotCompiler] compile: starting codegen ... DONE');
-      Logger.debug('[AotCompiler] compile: Creating and validating new TypeScript Program ...');
-      this.program = errorCheckProgram(this.context, this.tsConfig, this.compilerHost, this.program);
-      Logger.debug('[AotCompiler] compile: Creating and validating new TypeScript Program ... DONE');
-    }).then(() => {
-      Logger.debug('[AotCompiler] compile: Starting to process and modify entry point ...');
-      const mainFile = this.context.fileCache.get(this.options.entryPoint);
-      if (!mainFile) {
-        throw new BuildError(new Error(`Could not find entry point (bootstrap file) ${this.options.entryPoint}`));
-      }
-      Logger.debug('[AotCompiler] compile: Resolving NgModule from entry point');
-      let modifiedFileContent: string = null;
-      try {
-        Logger.debug('[AotCompiler] compile: Dynamically changing entry point content to AOT mode content');
-        modifiedFileContent = replaceBootstrap(mainFile.path, mainFile.content, this.options.appNgModulePath, this.options.appNgModuleClass);
-      } catch (ex) {
-        Logger.debug(`Failed to parse bootstrap: `, ex.message);
-        Logger.warn(`Failed to parse and update ${this.options.entryPoint} content for AoT compilation.
-                    For now, the default fallback content will be used instead.
-                    Please consider updating ${this.options.entryPoint} with the content from the following link:
-                    https://github.com/ionic-team/ionic2-app-base/tree/master/src/app/main.ts`);
-        modifiedFileContent = getFallbackMainContent();
-      }
-
-      Logger.debug(`[AotCompiler] compile: Modified File Content: ${modifiedFileContent}`);
-      this.context.fileCache.set(this.options.entryPoint, { path: this.options.entryPoint, content: modifiedFileContent});
-      Logger.debug('[AotCompiler] compile: Starting to process and modify entry point ... DONE');
-    })
-    .then(() => {
-      Logger.debug('[AotCompiler] compile: Transpiling files ...');
-      transpileFiles(this.context, this.tsConfig, this.fileSystem);
-      Logger.debug('[AotCompiler] compile: Transpiling files ... DONE');
-    }).then(() => {
-      return {
-        lazyLoadedModuleDictionary: this.lazyLoadedModuleDictionary
-      };
+      },
+      program: tsProgram,
+      compilerHost: compilerHost,
+      compilerOptions: tsConfig.options
     });
+  }
+
+  errorCheckProgram(context, tsConfig, compilerHost, tsProgram);
+
+  // update bootstrap in main.ts
+  const mainFile = context.fileCache.get(changeExtension(options.entryPoint, '.js'));
+  const modifiedBootstrapContent = replaceBootstrap(mainFile, options.appNgModulePath, options.appNgModuleClass, options);
+  mainFile.content = modifiedBootstrapContent;
+
+  if (isTranspileRequired(context.angularVersion)) {
+    transpileFiles(context, tsConfig, fileSystem);
   }
 }
 
-function errorCheckProgram(context: BuildContext, tsConfig: ParsedTsConfig, compilerHost: InMemoryCompilerHost, cachedProgram: Program) {
+function errorCheckProgram(context: BuildContext, tsConfig: TsConfig, compilerHost: InMemoryCompilerHost, cachedProgram: Program) {
   // Create a new Program, based on the old one. This will trigger a resolution of all
   // transitive modules, which include files that might just have been generated.
-  const program = createProgram(tsConfig.parsed.fileNames, tsConfig.parsed.options, compilerHost, cachedProgram);
+  const program = createProgram(tsConfig.fileNames, tsConfig.options, compilerHost, cachedProgram);
   const globalDiagnostics = program.getGlobalDiagnostics();
   const tsDiagnostics = program.getSyntacticDiagnostics()
                     .concat(program.getSemanticDiagnostics())
@@ -126,11 +86,34 @@ function errorCheckProgram(context: BuildContext, tsConfig: ParsedTsConfig, comp
   return program;
 }
 
-function transpileFiles(context: BuildContext, tsConfig: ParsedTsConfig, fileSystem: HybridFileSystem) {
+function replaceBootstrap(mainFile: File, appNgModulePath: string, appNgModuleClass: string, options: AotOptions) {
+  if (!mainFile) {
+    throw new BuildError(new Error(`Could not find entry point (bootstrap file) ${options.entryPoint}`));
+  }
+  let modifiedFileContent: string = null;
+  try {
+    Logger.debug('[AotCompiler] compile: Dynamically changing entry point content to AOT mode content');
+    modifiedFileContent = replaceBootstrapImpl(mainFile.path, mainFile.content, appNgModulePath, appNgModuleClass);
+  } catch (ex) {
+    Logger.debug(`Failed to parse bootstrap: `, ex.message);
+    Logger.warn(`Failed to parse and update ${options.entryPoint} content for AoT compilation.
+                For now, the default fallback content will be used instead.
+                Please consider updating ${options.entryPoint} with the content from the following link:
+                https://github.com/ionic-team/ionic2-app-base/tree/master/src/app/main.ts`);
+    modifiedFileContent = getFallbackMainContent();
+  }
+  return modifiedFileContent;
+}
+
+export function isTranspileRequired(angularVersion: SemverVersion) {
+  return angularVersion.major <= 4;
+}
+
+export function transpileFiles(context: BuildContext, tsConfig: TsConfig, fileSystem: HybridFileSystem) {
   const tsFiles = context.fileCache.getAll().filter(file => extname(file.path) === '.ts' && file.path.indexOf('.d.ts') === -1);
   for (const tsFile of tsFiles) {
     Logger.debug(`[AotCompiler] transpileFiles: Transpiling file ${tsFile.path} ...`);
-    const transpileOutput = transpileFileContent(tsFile.path, tsFile.content, tsConfig.parsed.options);
+    const transpileOutput = transpileFileContent(tsFile.path, tsFile.content, tsConfig.options);
     const diagnostics = runTypeScriptDiagnostics(context, transpileOutput.diagnostics);
     if (diagnostics.length) {
       // darn, we've got some things wrong, transpile failed :(
@@ -156,6 +139,48 @@ function transpileFileContent(fileName: string, sourceText: string, options: Com
   return transpileModule(sourceText, transpileOptions);
 }
 
+export function isNg5(version: SemverVersion) {
+  return version.major >= 5;
+}
+
+export async function runNg4Aot(options: CodegenOptions) {
+  const module = await import('@angular/compiler-cli');
+  return await module.__NGTOOLS_PRIVATE_API_2.codeGen({
+    angularCompilerOptions: options.angularCompilerOptions,
+    basePath: options.cliOptions.basePath,
+    program: options.program,
+    host: options.compilerHost,
+    compilerOptions: options.compilerOptions,
+    i18nFile: options.cliOptions.i18nFile,
+    i18nFormat: options.cliOptions.i18nFormat,
+    locale: options.cliOptions.locale,
+    readResource: (fileName: string) => {
+      return readFileAsync(fileName);
+    }
+  });
+}
+
+export async function runNg5Aot(tsConfig: TsConfig, aggregateCompilerOptions: CompilerOptions, compilerHost: CompilerHost) {
+  const ngTools2 = await import('@angular/compiler-cli/ngtools2');
+  const angularCompilerHost = ngTools2.createCompilerHost({options: aggregateCompilerOptions, tsHost: compilerHost});
+  const program = ngTools2.createProgram({
+    rootNames: tsConfig.fileNames,
+    options: aggregateCompilerOptions,
+    host: angularCompilerHost,
+    oldProgram: null
+  });
+
+  await program.loadNgStructureAsync();
+
+  const transformations: any[] = [];
+
+  const transformers = {
+    beforeTs: transformations
+  };
+
+  program.emit({ emitFlags: ngTools2.EmitFlags.Default, customTransformers: transformers });
+}
+
 export interface AotOptions {
   tsConfigPath: string;
   rootDir: string;
@@ -163,19 +188,3 @@ export interface AotOptions {
   appNgModulePath: string;
   appNgModuleClass: string;
 }
-
-export function getNgcConfig(context: BuildContext, tsConfigPath?: string): ParsedTsConfig {
-
-  const tsConfigFile = tsc.readConfiguration(tsConfigPath, process.cwd());
-  if (!tsConfigFile) {
-    throw new BuildError(`tsconfig: invalid tsconfig file, "${tsConfigPath}"`);
-
-  }
-  return tsConfigFile;
-}
-
-export interface ParsedTsConfig {
-  parsed: ParsedCommandLine;
-  ngOptions: AngularCompilerOptions;
-}
-

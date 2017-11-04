@@ -29,6 +29,9 @@ describe('build', () => {
     });
 
     spyOn(buildUtils, buildUtils.scanSrcTsFiles.name).and.returnValue(Promise.resolve());
+    spyOn(buildUtils, buildUtils.validateRequiredFilesExist.name).and.returnValue(Promise.resolve(['fileOneContent', 'fileTwoContent']));
+    spyOn(buildUtils, buildUtils.validateTsConfigSettings.name).and.returnValue(Promise.resolve());
+    spyOn(buildUtils, buildUtils.readVersionOfDependencies.name).and.returnValue(Promise.resolve());
     spyOn(bundle, bundle.bundle.name).and.returnValue(Promise.resolve());
     spyOn(copy, copy.copy.name).and.returnValue(Promise.resolve());
     spyOn(deepLinking, deepLinking.deepLinking.name).and.returnValue(Promise.resolve());
@@ -55,7 +58,6 @@ describe('build', () => {
 
     return build.build(context).then(() => {
       expect(buildUtils.scanSrcTsFiles).toHaveBeenCalled();
-      expect(helpers.readFileAsync).toHaveBeenCalled();
       expect(copy.copy).toHaveBeenCalled();
       expect(deepLinking.deepLinking).toHaveBeenCalled();
       expect(ngc.ngc).toHaveBeenCalled();
@@ -83,7 +85,6 @@ describe('build', () => {
 
     return build.build(context).then(() => {
       expect(buildUtils.scanSrcTsFiles).toHaveBeenCalled();
-      expect(helpers.readFileAsync).toHaveBeenCalled();
       expect(copy.copy).toHaveBeenCalled();
       expect(deepLinking.deepLinking).toHaveBeenCalled();
       expect(transpile.transpile).toHaveBeenCalled();
@@ -112,7 +113,6 @@ describe('build', () => {
 
     return build.build(context).then(() => {
       expect(buildUtils.scanSrcTsFiles).toHaveBeenCalled();
-      expect(helpers.readFileAsync).toHaveBeenCalled();
       expect(copy.copy).toHaveBeenCalled();
       expect(transpile.transpile).toHaveBeenCalled();
       expect(bundle.bundle).toHaveBeenCalled();
@@ -168,6 +168,8 @@ describe('test project requirements before building', () => {
       }
       `);
     });
+    spyOn(buildUtils, buildUtils.scanSrcTsFiles.name).and.returnValue(Promise.resolve());
+    spyOn(buildUtils, buildUtils.readVersionOfDependencies.name).and.returnValue(Promise.resolve());
 
     return build.build({}).catch((e) => {
       expect(transpile.getTsConfigAsync).toHaveBeenCalledTimes(1);
@@ -186,39 +188,12 @@ describe('test project requirements before building', () => {
       }
       `);
     });
+    spyOn(buildUtils, buildUtils.scanSrcTsFiles.name).and.returnValue(Promise.resolve());
+    spyOn(buildUtils, buildUtils.readVersionOfDependencies.name).and.returnValue(Promise.resolve());
 
     return build.build({}).catch((e) => {
       expect(transpile.getTsConfigAsync).toHaveBeenCalledTimes(1);
       expect(e.isFatal).toBeTruthy();
-    });
-  });
-
-  it('should succeed if IONIC_TS_CONFIG file contains compilerOptions.sourceMap is true', () => {
-    process.env[Constants.ENV_APP_ENTRY_POINT] = 'src/app/main.ts';
-    process.env[Constants.ENV_TS_CONFIG] = 'tsConfig.js';
-
-    spyOn(buildUtils, buildUtils.scanSrcTsFiles.name).and.returnValue(Promise.resolve());
-    spyOn(bundle, bundle.bundle.name).and.returnValue(Promise.resolve());
-    spyOn(clean, clean.clean.name);
-    spyOn(copy, copy.copy.name).and.returnValue(Promise.resolve());
-    spyOn(minify, minify.minifyCss.name).and.returnValue(Promise.resolve());
-    spyOn(minify, minify.minifyJs.name).and.returnValue(Promise.resolve());
-    spyOn(lint, lint.lint.name).and.returnValue(Promise.resolve());
-    spyOn(ngc, ngc.ngc.name).and.returnValue(Promise.resolve());
-    spyOn(postprocess, postprocess.postprocess.name).and.returnValue(Promise.resolve());
-    spyOn(preprocess, preprocess.preprocess.name).and.returnValue(Promise.resolve());
-    spyOn(sass, sass.sass.name).and.returnValue(Promise.resolve());
-    spyOn(helpers, helpers.readFileAsync.name).and.returnValue(Promise.resolve());
-    spyOn(transpile, transpile.transpile.name).and.returnValue(Promise.resolve());
-    spyOn(transpile, transpile.getTsConfigAsync.name).and.returnValue(Promise.resolve({
-      'options': {
-        'sourceMap': true
-      }
-    }));
-
-    return build.build({}).then(() => {
-      expect(transpile.getTsConfigAsync).toHaveBeenCalledTimes(1);
-      expect(helpers.readFileAsync).toHaveBeenCalledTimes(1);
     });
   });
 });
