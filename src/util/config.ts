@@ -350,12 +350,10 @@ export function generateContext(context?: BuildContext): BuildContext {
   setProcessEnvVar(Constants.ENV_PARSE_DEEPLINKS, parseDeepLinks);
   Logger.debug(`parseDeepLinks set to ${parseDeepLinks}`);
 
-  // default stand-alone builds to default to es5
-  // if closure is being used, don't worry about this as it already automatically converts to ES5
+  const skipReadIonicAngular = getConfigValue(context, '--skipIonicAngularVersion', null, Constants.ENV_SKIP_IONIC_ANGULAR_VERSION, Constants.ENV_SKIP_IONIC_ANGULAR_VERSION.toLowerCase(), 'false');
+  setProcessEnvVar(Constants.ENV_SKIP_IONIC_ANGULAR_VERSION, skipReadIonicAngular);
+  Logger.debug(`skipReadIonicAngular set to ${skipReadIonicAngular}`);
 
-  const buildToEs5 = getConfigValue(context, '--buildToEs5', null, Constants.ENV_BUILD_TO_ES5, Constants.ENV_BUILD_TO_ES5.toLowerCase(), 'true');
-  setProcessEnvVar(Constants.ENV_BUILD_TO_ES5, buildToEs5);
-  Logger.debug(`buildToEs5 set to ${buildToEs5}`);
 
   if (!isValidBundler(context.bundler)) {
     context.bundler = bundlerStrategy(context);

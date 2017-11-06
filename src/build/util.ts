@@ -4,7 +4,7 @@ import { getTsConfigAsync, TsConfig } from '../transpile';
 import * as Constants from '../util/constants';
 import { BuildError } from '../util/errors';
 import { GlobResult, globAll } from '../util/glob-util';
-import { getStringPropertyValue, readFileAsync, readJsonAsync, semverStringToObject } from '../util/helpers';
+import { getBooleanPropertyValue, getStringPropertyValue, readFileAsync, readJsonAsync, semverStringToObject } from '../util/helpers';
 import { BuildContext, } from '../util/interfaces';
 
 export function scanSrcTsFiles(context: BuildContext) {
@@ -77,13 +77,18 @@ export async function readVersionOfDependencies(context: BuildContext) {
   // read the package.json version from ionic, angular/core, and typescript
   const promises: Promise<any>[] = [];
   promises.push(readPackageVersion(context.angularCoreDir));
-  promises.push(readPackageVersion(context.ionicAngularDir));
+  if (!getBooleanPropertyValue(Constants.ENV_SKIP_IONIC_ANGULAR_VERSION)) {
+    promises.push(readPackageVersion(context.ionicAngularDir));
+  }
   promises.push(readPackageVersion(context.typescriptDir));
 
   const versions = await Promise.all(promises);
   context.angularVersion = semverStringToObject(versions[0]);
-  context.ionicAngularVersion = semverStringToObject(versions[1]);
-  context.typescriptVersion = semverStringToObject(versions[2]);
+  if (!getBooleanPropertyValue(Constants.ENV_SKIP_IONIC_ANGULAR_VERSION)) {
+    context.ionicAngularVersion = semverStringToObject(versions[1]);
+  }
+  // index could be 1 or 2 depending on if you read ionic-angular, its always the last one bro
+  context.typescriptVersion = semverStringToObject(versions[versions.length - 1]);
 }
 
 export async function readPackageVersion(packageDir: string) {
