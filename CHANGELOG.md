@@ -1,3 +1,25 @@
+<a name="3.1.0"></a>
+# [3.1.0](https://github.com/ionic-team/ionic-app-scripts/compare/v3.0.1...v3.1.0) (2017-11-08)
+
+## Features
+
+Supports Angular 5
+
+### Bug Fixes
+
+* **aot:** pass genDir to ng4 ([7506764](https://github.com/ionic-team/ionic-app-scripts/commit/7506764))
+* **config:** only read ionic-angular package json for version info in apps, not in the Ionic repo itself ([700ca04](https://github.com/ionic-team/ionic-app-scripts/commit/700ca04))
+* **deep-linking:** use .ts file extension for lazy loading in dev mode, and .js in AoT mode since the AoT compiler no longer emits an ngfactory.ts file ([dd99f14](https://github.com/ionic-team/ionic-app-scripts/commit/dd99f14))
+* **live-server:** content.toString() crash ([#1288](https://github.com/ionic-team/ionic-app-scripts/issues/1288)) ([07e7e05](https://github.com/ionic-team/ionic-app-scripts/commit/07e7e05))
+* **templates:** escape strings in template ([484d90d](https://github.com/ionic-team/ionic-app-scripts/commit/484d90d))
+
+
+### Performance Improvements
+
+* **uglifyjs:** remove unused `readFileAsync` during uglify ([#1305](https://github.com/ionic-team/ionic-app-scripts/issues/1305)) ([e9217c2](https://github.com/ionic-team/ionic-app-scripts/commit/e9217c2))
+
+
+
 <a name="3.0.1"></a>
 ## [3.0.1](https://github.com/ionic-team/ionic-app-scripts/compare/v3.0.0...v3.0.1) (2017-10-20)
 
