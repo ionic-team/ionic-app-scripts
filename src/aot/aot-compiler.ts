@@ -2,7 +2,18 @@ import { readFileSync } from 'fs-extra';
 import { extname, normalize, resolve } from 'path';
 
 import 'reflect-metadata';
-import { CompilerHost, CompilerOptions, ParsedCommandLine, Program,  transpileModule, TranspileOptions, TranspileOutput, createProgram } from 'typescript';
+
+import {
+  CompilerHost,
+  CompilerOptions,
+  DiagnosticCategory,
+  ParsedCommandLine,
+  Program,
+  transpileModule,
+  TranspileOptions,
+  TranspileOutput,
+  createProgram
+} from 'typescript';
 
 import { HybridFileSystem } from '../util/hybrid-file-system';
 import { getInstance as getHybridFileSystem } from '../util/hybrid-file-system-factory';
@@ -36,7 +47,7 @@ export async function runAot(context: BuildContext, options: AotOptions) {
   clearDiagnostics(context, DiagnosticsType.TypeScript);
 
   if (isNg5(context.angularVersion)) {
-    await runNg5Aot(tsConfig, aggregateCompilerOption, compilerHost);
+    await runNg5Aot(context, tsConfig, aggregateCompilerOption, compilerHost);
   } else {
     await runNg4Aot({
       angularCompilerOptions: aggregateCompilerOption,
@@ -162,7 +173,7 @@ export async function runNg4Aot(options: CodegenOptions) {
   });
 }
 
-export async function runNg5Aot(tsConfig: TsConfig, aggregateCompilerOptions: CompilerOptions, compilerHost: CompilerHost) {
+export async function runNg5Aot(context: BuildContext, tsConfig: TsConfig, aggregateCompilerOptions: CompilerOptions, compilerHost: CompilerHost) {
   const ngTools2 = await import('@angular/compiler-cli/ngtools2');
   const angularCompilerHost = ngTools2.createCompilerHost({options: aggregateCompilerOptions, tsHost: compilerHost});
   const program = ngTools2.createProgram({
@@ -180,7 +191,22 @@ export async function runNg5Aot(tsConfig: TsConfig, aggregateCompilerOptions: Co
     beforeTs: transformations
   };
 
-  program.emit({ emitFlags: ngTools2.EmitFlags.Default, customTransformers: transformers });
+  const result = program.emit({ emitFlags: ngTools2.EmitFlags.Default, customTransformers: transformers });
+
+  // Report diagnostics.
+  const errors = result.diagnostics.filter((diag) => diag.category === DiagnosticCategory.Error);
+  const warnings = result.diagnostics.filter((diag) => diag.category === DiagnosticCategory.Warning);
+
+  if (warnings.length) {
+    const diagnostics = runTypeScriptDiagnostics(context, warnings);
+    printDiagnostics(context, DiagnosticsType.TypeScript, diagnostics, true, false);
+  }
+
+  if (errors.length) {
+    const diagnostics = runTypeScriptDiagnostics(context, errors);
+    printDiagnostics(context, DiagnosticsType.TypeScript, diagnostics, true, false);
+    throw new BuildError(new Error('The Angular AoT build failed. See the issues above'));
+  }
 }
 
 export interface AotOptions {
