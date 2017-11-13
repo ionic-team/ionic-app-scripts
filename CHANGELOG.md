@@ -1,3 +1,13 @@
+<a name="3.1.2"></a>
+## [3.1.2](https://github.com/ionic-team/ionic-app-scripts/compare/v3.1.1...v3.1.2) (2017-11-13)
+
+
+### Bug Fixes
+
+* **webpack:** revert to 3.6.0 for faster builds ([2553ca6](https://github.com/ionic-team/ionic-app-scripts/commit/2553ca6))
+
+
+
 <a name="3.1.1"></a>
 ## [3.1.1](https://github.com/ionic-team/ionic-app-scripts/compare/v3.1.0...v3.1.1) (2017-11-13)
 
