@@ -1,3 +1,13 @@
+<a name="3.1.3"></a>
+## [3.1.3](https://github.com/ionic-team/ionic-app-scripts/compare/v3.1.2...v3.1.3) (2017-11-29)
+
+
+### Bug Fixes
+
+* **aot:** fix error reporting with ng 5.0.1 or greater ([dece391](https://github.com/ionic-team/ionic-app-scripts/commit/dece391))
+
+
+
 <a name="3.1.2"></a>
 ## [3.1.2](https://github.com/ionic-team/ionic-app-scripts/compare/v3.1.1...v3.1.2) (2017-11-13)
 
