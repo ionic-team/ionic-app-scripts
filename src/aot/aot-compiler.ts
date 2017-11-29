@@ -193,17 +193,23 @@ export async function runNg5Aot(context: BuildContext, tsConfig: TsConfig, aggre
 
   const result = program.emit({ emitFlags: ngTools2.EmitFlags.Default, customTransformers: transformers });
 
-  // Report diagnostics.
-  const errors = result.diagnostics.filter((diag) => diag.category === DiagnosticCategory.Error);
-  const warnings = result.diagnostics.filter((diag) => diag.category === DiagnosticCategory.Warning);
+  const tsDiagnostics = program.getTsSyntacticDiagnostics()
+                                .concat(program.getTsOptionDiagnostics())
+                                .concat(program.getTsSemanticDiagnostics());
 
-  if (warnings.length) {
-    const diagnostics = runTypeScriptDiagnostics(context, warnings);
+  const angularDiagnostics = program.getNgSemanticDiagnostics()
+                              .concat(program.getNgStructuralDiagnostics())
+                              .concat(program.getNgOptionDiagnostics());
+
+
+  if (tsDiagnostics.length) {
+    const diagnostics = runTypeScriptDiagnostics(context, tsDiagnostics);
     printDiagnostics(context, DiagnosticsType.TypeScript, diagnostics, true, false);
+    throw new BuildError(new Error('The Angular AoT build failed. See the issues above'));
   }
 
-  if (errors.length) {
-    const diagnostics = runTypeScriptDiagnostics(context, errors);
+  if (angularDiagnostics.length) {
+    const diagnostics = runTypeScriptDiagnostics(context, angularDiagnostics as any[]);
     printDiagnostics(context, DiagnosticsType.TypeScript, diagnostics, true, false);
     throw new BuildError(new Error('The Angular AoT build failed. See the issues above'));
   }
