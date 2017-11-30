@@ -1,3 +1,13 @@
+<a name="3.1.4"></a>
+## [3.1.4](https://github.com/ionic-team/ionic-app-scripts/compare/v3.1.3...v3.1.4) (2017-11-30)
+
+
+### Bug Fixes
+
+* **aot:** remove template validation until we can properly handle the error message format ([d7c7136](https://github.com/ionic-team/ionic-app-scripts/commit/d7c7136))
+
+
+
 <a name="3.1.3"></a>
 ## [3.1.3](https://github.com/ionic-team/ionic-app-scripts/compare/v3.1.2...v3.1.3) (2017-11-29)
 
