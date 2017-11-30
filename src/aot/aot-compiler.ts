@@ -197,8 +197,7 @@ export async function runNg5Aot(context: BuildContext, tsConfig: TsConfig, aggre
                                 .concat(program.getTsOptionDiagnostics())
                                 .concat(program.getTsSemanticDiagnostics());
 
-  const angularDiagnostics = program.getNgSemanticDiagnostics()
-                              .concat(program.getNgStructuralDiagnostics())
+  const angularDiagnostics = program.getNgStructuralDiagnostics()
                               .concat(program.getNgOptionDiagnostics());
 
 
