@@ -1,3 +1,13 @@
+<a name="3.1.5"></a>
+## [3.1.5](https://github.com/ionic-team/ionic-app-scripts/compare/v3.1.4...v3.1.5) (2017-12-07)
+
+
+### Bug Fixes
+
+* **dependencies:** update angular build optimizer for a source map fix ([a5df139](https://github.com/ionic-team/ionic-app-scripts/commit/a5df139))
+
+
+
 <a name="3.1.4"></a>
 ## [3.1.4](https://github.com/ionic-team/ionic-app-scripts/compare/v3.1.3...v3.1.4) (2017-11-30)
 
