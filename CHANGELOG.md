@@ -1,3 +1,13 @@
+<a name="3.1.6"></a>
+## [3.1.6](https://github.com/ionic-team/ionic-app-scripts/compare/v3.1.5...v3.1.6) (2017-12-18)
+
+
+### Bug Fixes
+
+* pin ws version ([db0cc4d](https://github.com/ionic-team/ionic-app-scripts/commit/db0cc4d))
+
+
+
 <a name="3.1.5"></a>
 ## [3.1.5](https://github.com/ionic-team/ionic-app-scripts/compare/v3.1.4...v3.1.5) (2017-12-07)
 
