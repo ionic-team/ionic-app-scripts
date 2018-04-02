@@ -30,7 +30,7 @@ function loadDiagnostic(context: BuildContext, tsDiagnostic: ts.Diagnostic) {
     lines: []
   };
 
-  if (tsDiagnostic.file) {
+  if (tsDiagnostic.file && tsDiagnostic.file.getText) {
     d.absFileName = tsDiagnostic.file.fileName;
     d.relFileName = Logger.formatFileName(context.rootDir, d.absFileName);
 
