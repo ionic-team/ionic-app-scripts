@@ -1,3 +1,15 @@
+<a name="3.1.9"></a>
+## [3.1.9](https://github.com/ionic-team/ionic-app-scripts/compare/v3.1.8...v3.1.9) (2018-04-18)
+
+
+### Bug Fixes
+
+* **2889:** fix build error with --prod ([94e5f7c](https://github.com/ionic-team/ionic-app-scripts/commit/94e5f7c))
+* **live-server:** update android platform path ([#1407](https://github.com/ionic-team/ionic-app-scripts/issues/1407)) ([1591c81](https://github.com/ionic-team/ionic-app-scripts/commit/1591c81))
+* **serve:** start listening when watch is ready ([06bbd06](https://github.com/ionic-team/ionic-app-scripts/commit/06bbd06))
+
+
+
 <a name="3.1.8"></a>
 ## [3.1.8](https://github.com/ionic-team/ionic-app-scripts/compare/v3.1.7...v3.1.8) (2018-01-18)
 
