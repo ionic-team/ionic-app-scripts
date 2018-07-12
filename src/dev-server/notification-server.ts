@@ -69,7 +69,7 @@ export function createNotificationServer(config: ServeConfig) {
   });
 
   // create web socket server
-  const wss = new WebSocketServer({ port: config.notificationPort });
+  const wss = new WebSocketServer({ host: config.host, port: config.notificationPort });
   wss.broadcast = function broadcast(data: any) {
     wss.clients.forEach(function each(client: any) {
       client.send(data);
