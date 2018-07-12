@@ -1,3 +1,13 @@
+<a name="3.1.11"></a>
+## [3.1.11](https://github.com/ionic-team/ionic-app-scripts/compare/v3.1.10...v3.1.11) (2018-07-12)
+
+
+### Bug Fixes
+
+* **serve:** fix EADDRINUSE issue with dev logger server ([271a6e1](https://github.com/ionic-team/ionic-app-scripts/commit/271a6e1))
+
+
+
 <a name="3.1.10"></a>
 ## [3.1.10](https://github.com/ionic-team/ionic-app-scripts/compare/v3.1.9...v3.1.10) (2018-06-11)
 
