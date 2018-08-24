@@ -1,3 +1,19 @@
+<a name="3.2.0"></a>
+# [3.2.0](https://github.com/ionic-team/ionic-app-scripts/compare/v3.1.11...v3.2.0) (2018-08-24)
+
+
+### Bug Fixes
+
+* **sass:** remove PostCSS warning ([#1364](https://github.com/ionic-team/ionic-app-scripts/issues/1364)) ([1e2035e](https://github.com/ionic-team/ionic-app-scripts/commit/1e2035e)), closes [#1359](https://github.com/ionic-team/ionic-app-scripts/issues/1359) [#13763](https://github.com/ionic-team/ionic-app-scripts/issues/13763)
+* **serve:** use wss protocol for secure websocket when page is using https ([#1358](https://github.com/ionic-team/ionic-app-scripts/issues/1358)) ([29c3e23](https://github.com/ionic-team/ionic-app-scripts/commit/29c3e23))
+
+
+### Features
+
+* **environments:** configuration via process.env.VAR replacement ([#1471](https://github.com/ionic-team/ionic-app-scripts/issues/1471)) ([53fc341](https://github.com/ionic-team/ionic-app-scripts/commit/53fc341))
+
+
+
 <a name="3.1.11"></a>
 ## [3.1.11](https://github.com/ionic-team/ionic-app-scripts/compare/v3.1.10...v3.1.11) (2018-07-12)
 
