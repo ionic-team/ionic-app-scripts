@@ -66,6 +66,8 @@ In order to take advantage of this apps will need a `src/declarations.d.ts` file
 declare var process: { env: { [key: string]: string | undefined; } };
 ```
 
+*Note*: This declaration may conflict if `@types/node` is installed in your project. See [#3541](https://github.com/ionic-team/ionic-cli/issues/3541).
+
 ## Custom Configuration
 
 In many cases, the defaults which Ionic provides cover most of the scenarios required by developers; however, Ionic App Scripts does provide multiple ways to configure and override the defaults for each of the various tasks. Note that Ionic will always apply its defaults for any property that was not provided by custom configuration.
