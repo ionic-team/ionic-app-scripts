@@ -1,3 +1,8 @@
+<a name="3.2.1"></a>
+## [3.2.1](https://github.com/ionic-team/ionic-app-scripts/compare/v3.2.0...v3.2.1) (2018-11-26)
+
+* Security release for dependencies for `node-sass`
+
 <a name="3.2.0"></a>
 # [3.2.0](https://github.com/ionic-team/ionic-app-scripts/compare/v3.1.11...v3.2.0) (2018-08-24)
 
