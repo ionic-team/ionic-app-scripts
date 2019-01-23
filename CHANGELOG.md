@@ -1,7 +1,7 @@
 <a name="3.2.2"></a>
 ## [3.2.2](https://github.com/ionic-team/ionic-app-scripts/compare/v3.2.1...v3.2.2) (2019-01-22)
 
-- Added support for Node 10
+* Added support for Node 10
 
 <a name="3.2.1"></a>
 
