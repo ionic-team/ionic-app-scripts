@@ -1,4 +1,10 @@
+<a name="3.2.2"></a>
+## [3.2.2](https://github.com/ionic-team/ionic-app-scripts/compare/v3.2.1...v3.2.2) (2019-01-22)
+
+* Added support for Node 10
+
 <a name="3.2.1"></a>
+
 ## [3.2.1](https://github.com/ionic-team/ionic-app-scripts/compare/v3.2.0...v3.2.1) (2018-11-26)
 
 * Security release for dependencies for `node-sass`

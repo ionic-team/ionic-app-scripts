@@ -1,6 +1,6 @@
 {
   "name": "@ionic/app-scripts",
-  "version": "3.2.1",
+  "version": "3.2.2",
   "description": "Scripts for Ionic Projects",
   "homepage": "https://ionicframework.com/",
   "author": "Ionic Team <hi@ionic.io> (https://ionic.io)",
@@ -34,7 +34,7 @@
     "@angular-devkit/build-optimizer": "0.0.35",
     "autoprefixer": "^7.2.6",
     "chalk": "^2.4.0",
-    "chokidar": "^1.7.0",
+    "chokidar": "^2.0.4",
     "clean-css": "^4.1.11",
     "cross-spawn": "^5.1.0",
     "dotenv-webpack": "^1.5.7",
