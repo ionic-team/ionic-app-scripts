@@ -1,3 +1,13 @@
+<a name="3.2.3"></a>
+## [3.2.3](https://github.com/ionic-team/ionic-app-scripts/compare/v3.2.2...v3.2.3) (2019-03-01)
+
+
+### Bug Fixes
+
+* **livereload:** fix issue with files not reloading([8870a17](https://github.com/ionic-team/ionic-app-scripts/commit/8870a17))
+
+
+
 <a name="3.2.2"></a>
 ## [3.2.2](https://github.com/ionic-team/ionic-app-scripts/compare/v3.2.1...v3.2.2) (2019-01-22)
 
