@@ -1,3 +1,13 @@
+<a name="3.2.4"></a>
+## [3.2.4](https://github.com/ionic-team/ionic-app-scripts/compare/v3.2.3...v3.2.4) (2019-05-24)
+
+
+### Bug Fixes
+
+*  **livereload:** always serve latest file changes ([#1521](https://github.com/ionic-team/ionic-app-scripts/issues/1521)) ([266a871](https://github.com/ionic-team/ionic-app-scripts/commit/266a871))
+
+
+
 <a name="3.2.3"></a>
 ## [3.2.3](https://github.com/ionic-team/ionic-app-scripts/compare/v3.2.2...v3.2.3) (2019-03-01)
 
