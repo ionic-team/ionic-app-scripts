@@ -2,7 +2,7 @@
 [![Circle CI](https://circleci.com/gh/ionic-team/ionic-app-scripts.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/ionic-team/ionic-app-scripts)
 
 # DISCLAIMER: NO LONGER MAINTAINED
-Oh, [hello there](https://giphy.com/gifs/8JTFsZmnTR1Rs1JFVP)! Ionic App Scripts is a tool tied specifically to version 3.x of Ionic Framework. Since the release of version 4.0 of Ionic Framework, we are no longer using Ionic App Scripts for building in Ionic Framework. Version 3 of Ionic Framework is no longer actively maintained by us. For more information on which versions are active, see our [support policy](https://ionicframework.com/docs/reference/support#framework-maintenance-and-support-status).
+Oh, [hello there](https://media.giphy.com/media/8JTFsZmnTR1Rs1JFVP/giphy.gif)! Ionic App Scripts is a tool tied specifically to version 3.x of Ionic Framework. Since the release of version 4.0 of Ionic Framework, we are no longer using Ionic App Scripts for building in Ionic Framework. Version 3 of Ionic Framework is no longer actively maintained by us. For more information on which versions are active, see our [support policy](https://ionicframework.com/docs/reference/support#framework-maintenance-and-support-status).
 Due to this, we are no longer maintaining Ionic App Scripts and we recommend developers update their apps to the latest framework release. This provides several new features, bug fixes, performance improvements, as well as up to date tooling for Ionic apps. For more details on how to upgrade, check out our [migration guide](https://ionicframework.com/docs/reference/migration).
 
 # Ionic App Scripts
